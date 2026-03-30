@@ -21,6 +21,13 @@ object RTVariable {
     var REPLY_COMBINED_IMAGE_USERNAME: String = ""
     var REPLY_COMBINED_IMAGE_DELEMETER: String = "####@@@@####"
 
+    var INNER_COMMENT_POSITION: Int = 0
+
+    // Post Comment Remember
+    var P_POSITION: Int = 0
+    var P_PID: String = ""
+    var P_C_SHOW: Boolean = false
+
     fun formatCount(count: Int): String {
         return when {
             count >= 1_000_000 -> {

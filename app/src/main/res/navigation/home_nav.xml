@@ -24,7 +24,8 @@
     <fragment
         android:id="@+id/homeNewFragment"
         android:name="com.app.hihlo.ui.HomeNew.HomeNewFragment"
-        android:label="HomeFragment" >
+        android:label="HomeFragment"
+        app:restoreState="true">
         <action
             android:id="@+id/action_homeNewFragment_to_storyFragment"
             app:destination="@id/storyFragment" />

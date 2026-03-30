@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
@@ -26,6 +27,7 @@ import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.RTVariable
+import com.app.hihlo.utils.UserDataManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -87,11 +89,7 @@ class AdapterComments(
                     onReplySelected(comment_id.toInt())
                 },
                 onDeleteClick = { replyId ->
-                    removeItems(
-                        mode = 2,
-                        commentPosition = position,
-                        replyPosition = RTVariable.REPLY_POSITION
-                    )
+                    RTVariable.INNER_COMMENT_POSITION = position
                     onDeleteClick(true, commentItem.id, replyId)
                 },
                 onReplyProfileSelected = { user_id ->
@@ -110,12 +108,20 @@ class AdapterComments(
             val commentUser = commentItem.user?.username
             val commentOwnerUserName = commentItem.post_owner_username
 
-            delete.isVisible = when {
-                (commentOwner == 1 || user == commentUser) && user == commentOwnerUserName -> true
-                else -> false
-            }
+//            delete.isVisible = when {
+//                (commentOwner == 1 || user == commentUser) && user == commentOwnerUserName -> true
+//                else -> false
+//            }
 
             root.setOnLongClickListener {
+                val user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
+                val commentOwner = commentItem.comment_owner
+                val commentUser = commentItem.user?.username
+                val commentOwnerUserName = commentItem.post_owner_username
+                Log.e("DELETE", "DELETE>>> ${user}")
+                Log.e("DELETE", "DELETE>>> ${commentOwner}")
+                Log.e("DELETE", "DELETE>>> ${commentUser}")
+                Log.e("DELETE", "DELETE>>> ${commentOwnerUserName}")
                 val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
                 if (allowLongClick) {
                     commentItem.id?.let { id ->
@@ -124,7 +130,46 @@ class AdapterComments(
                     }
                     true
                 } else {
-                    false
+                    if(user == commentOwnerUserName){
+                        commentItem.id?.let { id ->
+                            RTVariable.COMMENT_POSITION = position
+                            onDeleteClick(false, commentItem.id, id)
+                        }
+                        true
+                    }else{
+                        false
+                    }
+                    //false
+                }
+            }
+
+            comment.setOnLongClickListener {
+                val user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
+                val commentOwner = commentItem.comment_owner
+                val commentUser = commentItem.user?.username
+                val commentOwnerUserName = commentItem.post_owner_username
+                Log.e("DELETE", "DELETE>>> ${user}")
+                Log.e("DELETE", "DELETE>>> ${commentOwner}")
+                Log.e("DELETE", "DELETE>>> ${commentUser}")
+                Log.e("DELETE", "DELETE>>> ${commentOwnerUserName}")
+                val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
+                if (allowLongClick) {
+                    commentItem.id?.let { id ->
+                        RTVariable.COMMENT_POSITION = position
+                        onDeleteClick(false, commentItem.id, id)
+                    }
+                    true
+                } else {
+                    if(user == commentOwnerUserName){
+                        commentItem.id?.let { id ->
+                            RTVariable.COMMENT_POSITION = position
+                            onDeleteClick(false, commentItem.id, id)
+                        }
+                        true
+                    }else{
+                        false
+                    }
+                    //false
                 }
             }
 
@@ -170,9 +215,19 @@ class AdapterComments(
             }
 
             userImage.setOnClickListener {
+//                NavOptions.Builder()
+//                    .setLaunchSingleTop(true)
+//                    .setRestoreState(true)
+//                    .build()
+                UserDataManager.postCommentIsShow(root.context, true)
                 onProfileSelected(commentItem.user?.id ?: -1)
             }
             name.setOnClickListener {
+//                NavOptions.Builder()
+//                    .setLaunchSingleTop(true)
+//                    .setRestoreState(true)
+//                    .build()
+                UserDataManager.postCommentIsShow(root.context, true)
                 onProfileSelected(commentItem.user?.id ?: -1)
             }
         }

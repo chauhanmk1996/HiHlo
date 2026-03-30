@@ -72,6 +72,7 @@ import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
@@ -115,6 +116,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private val viewModel4: ReelsViewModel by viewModels()
     var totalAvailableCoins: Int?=null
 
+    private var pendingScrollPostId: String? = null
+    private var pendingScrollPosition: Int = -1   // optional fallback
+
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -128,6 +132,41 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         setupRecyclerView()
         setObserver()
         onClick()
+        /*Log.i("TAG", "onViewCreated: RS " + UserDataManager.get_postCommentShow(requireContext()))
+        Log.i("TAG", "onViewCreated: RPID " + UserDataManager.get_postCommentPid(requireContext()))
+        Log.i("TAG", "onViewCreated: RP " + UserDataManager.get_postCommentPosition(requireContext()))
+        if(UserDataManager.get_postCommentShow(requireContext())){
+            Log.i("TAG", "onViewCreated: RIS " + UserDataManager.get_postCommentShow(requireContext()))
+            Log.i("TAG", "onViewCreated: RIPID " + UserDataManager.get_postCommentPid(requireContext()))
+            Log.i("TAG", "onViewCreated: RIP " + UserDataManager.get_postCommentPosition(requireContext()))
+            UserDataManager.postCommentIsShow(requireContext(), false)
+            pendingScrollPostId = UserDataManager.get_postCommentPid(requireContext())
+            pendingScrollPosition = UserDataManager.get_postCommentPosition(requireContext())
+            binding.swipeRefresh.isRefreshing = false
+            postId = pendingScrollPostId ?: ""
+            retainCommentBoxData(requireContext(), postId, "1", "10")
+        } */
+        Log.i("TAG", "onViewCreated: RS " + UserDataManager.get_postCommentShow(requireContext()))
+        Log.i("TAG", "onViewCreated: RPID " + UserDataManager.get_postCommentPid(requireContext()))
+        Log.i("TAG", "onViewCreated: RP " + UserDataManager.get_postCommentPosition(requireContext()))
+        if(UserDataManager.get_postCommentShow(requireContext())){
+            Log.i("TAG", "onViewCreated: RIS " + UserDataManager.get_postCommentShow(requireContext()))
+            Log.i("TAG", "onViewCreated: RIPID " + UserDataManager.get_postCommentPid(requireContext()))
+            Log.i("TAG", "onViewCreated: RIP " + UserDataManager.get_postCommentPosition(requireContext()))
+            UserDataManager.postCommentIsShow(requireContext(), false)
+            pendingScrollPostId = UserDataManager.get_postCommentPid(requireContext())
+            pendingScrollPosition = UserDataManager.get_postCommentPosition(requireContext())
+            binding.swipeRefresh.isRefreshing = false
+            postId = pendingScrollPostId ?: ""
+            //retainCommentBoxData(requireContext(), postId, "1", "10")
+            //viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                allStory?.toMutableList()?.clear()
+//                currentPage = 1
+//                hitServiceListApi(currentPage, 0)
+//                binding.swipeRefresh.isRefreshing = false
+//            }, 1000)
+        }
         binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
         binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
         binding.swipeRefresh.setOnRefreshListener {
@@ -166,6 +205,38 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         hitServiceListApi(currentPage, 0)
                     }
                 }
+            }
+        }
+    }
+
+    fun retainCommentBoxData(context: Context, postId: String, page: String, limit: String) {
+        Log.e("RETAIN", "RETAIN>>> "+postId+" "+page+" "+limit)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val token = Preferences
+                    .getCustomModelPreference<LoginResponse>(context, LOGIN_DATA)
+                    ?.payload?.authToken
+
+                Log.e("RETAIN", "TOKEN>>> $token")
+
+                val response = RetrofitBuilder.apiService.getPostComments(
+                    token = "Bearer $token",
+                    postId = postId,
+                    page = page,
+                    limit = limit
+                )
+
+                Log.e("RETAIN", "RESPONSE>>> ${Gson().toJson(response)}")
+
+                if (response.status == 1 && response.code == 200) {
+                    val payload = response.payload
+
+                    delay(200)
+                    openCommentsBottomSheet(payload)
+                }
+
+            } catch (e: Exception) {
+                Log.e("RETAIN_ERROR", "ERROR>>> ${e.message}", e)
             }
         }
     }
@@ -284,6 +355,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             PostsAdapter.PostClickAction.COMMENT -> {
                                 postId = post.id.toString()
                                 post_position = position
+                                UserDataManager.postCommentSP(requireContext(), post_position, postId.toString())
                                 //Toast.makeText(requireContext(), "Comment at position $position", Toast.LENGTH_SHORT).show()
                                 viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString(), "1", "10")
                             }
@@ -549,7 +621,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun setObserver() {
-        binding.progressBar.isVisible=true
+        if(!UserDataManager.get_postCommentShow(requireContext())){
+            binding.progressBar.isVisible=true
+        }
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -673,6 +747,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         } else {
                             openCommentsBottomSheet(payload)
                         }
+//                        binding.postListRecycler.post {
+//                            val viewHolder = binding.postListRecycler.findViewHolderForAdapterPosition(UserDataManager.get_postCommentPosition(requireContext()))
+//                            val itemView = viewHolder?.itemView
+//
+//                            if (itemView != null) {
+//                                val y = itemView.top
+//
+//                                binding.nestedScrollView.smoothScrollTo(0, y)
+//                            }
+//                        }
                     } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }

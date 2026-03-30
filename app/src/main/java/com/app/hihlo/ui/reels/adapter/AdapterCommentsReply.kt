@@ -2,7 +2,10 @@ package com.app.hihlo.ui.reels.adapter
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
@@ -14,6 +17,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
@@ -157,9 +161,9 @@ class AdapterCommentsReply(
     private fun setRichComment(context: Context, textView: TextView, reply: Replies) {
         val scaledDensity = context.resources.displayMetrics.scaledDensity
         val density = context.resources.displayMetrics.density
-
         val dpValue = 13.5f * (scaledDensity / density)
         val context = textView.context
+        val mentionTypeface: Typeface? = ResourcesCompat.getFont(context, R.font.manrope_semibold)
         val rawComment = reply.reply
         if (rawComment.isNullOrEmpty()) {
             textView.text = ""
@@ -185,28 +189,64 @@ class AdapterCommentsReply(
         builder.append(" ")
         builder.append(restText)
         textView.text = builder
-        val targetSize = textView.textSize.toInt()
+        val targetSize = (textView.textSize * 0.85f).toInt()
         Glide.with(context)
             .asBitmap()
             .load(imageUrl)
             .placeholder(R.drawable.profile_placeholder)
             .error(R.drawable.profile_placeholder)
             .circleCrop()
-            .into(object : CustomTarget<Bitmap>(targetSize - 16, targetSize) {
+            .into(object : CustomTarget<Bitmap>(targetSize, targetSize) {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     val drawable = BitmapDrawable(context.resources, resource)
-                    val fontMetrics = textView.paint.fontMetricsInt
-                    val lineHeight = fontMetrics.bottom - fontMetrics.top
-                    val verticalOffset = (lineHeight - targetSize) / 2
-                    drawable.setBounds(0, verticalOffset + 7, targetSize, verticalOffset + targetSize)
-                    val imageSpan = ImageSpan(drawable, ImageSpan.ALIGN_BASELINE)
+                    drawable.setBounds(0, 0, targetSize, targetSize)
+                    val imageTopMargin = -8
+                    val imageSpan = object : ImageSpan(drawable, ImageSpan.ALIGN_BASELINE) {
+                        override fun getSize(
+                            paint: Paint,
+                            text: CharSequence?,
+                            start: Int,
+                            end: Int,
+                            fm: Paint.FontMetricsInt?
+                        ): Int {
+                            val size = super.getSize(paint, text, start, end, fm)
+                            if (fm != null) {
+                                val imageHeight = drawable.bounds.height()
+                                val fontHeight = fm.bottom - fm.top
+                                val padding = (fontHeight - imageHeight) / 2
+                                fm.top = padding
+                                fm.ascent = padding
+                                fm.bottom = padding + imageHeight
+                                fm.descent = padding + imageHeight
+                            }
+                            return size
+                        }
+                        override fun draw(
+                            canvas: Canvas,
+                            text: CharSequence?,
+                            start: Int,
+                            end: Int,
+                            x: Float,
+                            top: Int,
+                            y: Int,
+                            bottom: Int,
+                            paint: Paint
+                        ) {
+                            val b = drawable.bounds
+                            var transY = (bottom - top - b.height()) / 2 + top
+                            transY += imageTopMargin
+                            canvas.save()
+                            canvas.translate(x, transY.toFloat())
+                            drawable.draw(canvas)
+                            canvas.restore()
+                        }
+                    }
                     val spannable = SpannableStringBuilder(textView.text)
                     spannable.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                     val mentionStart = 2
                     val mentionEnd = mentionStart + mention.length
                     val clickableStart = 0
                     val clickableEnd = mentionEnd
-                    val userIdToPass = reply.user.id ?: -1
                     val clickableSpan = object : android.text.style.ClickableSpan() {
                         override fun onClick(widget: View) {
                             onMentionClick(mention)
@@ -215,6 +255,9 @@ class AdapterCommentsReply(
                             super.updateDrawState(ds)
                             ds.isUnderlineText = false
                             ds.color = Color.parseColor("#B90A66")
+                            mentionTypeface?.let {
+                                ds.typeface = it
+                            }
                         }
                     }
                     spannable.setSpan(clickableSpan, clickableStart, clickableEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)

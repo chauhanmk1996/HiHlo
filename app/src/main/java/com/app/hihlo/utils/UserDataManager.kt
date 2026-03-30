@@ -3,11 +3,6 @@ package com.app.hihlo.utils
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import com.app.hihlo.model.get_reel_comments.response.Payload
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 object UserDataManager {
 
@@ -39,49 +34,40 @@ object UserDataManager {
         Log.e("REEL_POS", "SharedPref Read = $pos")
         return pos
     }
-
-    fun saveOrUpdatePayload(context: Context, newPayload: Payload) {
-        val sharedPref = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
-        val gson = Gson()
-
-        // 1. Get old data
-        val oldJson = sharedPref.getString("HHA_comment_post_list", null)
-        val oldPayload: Payload = if (oldJson != null) {
-            val type = object : TypeToken<Payload>() {}.type
-            gson.fromJson(oldJson, type)
-        } else {
-            Payload()
+    ///// POST COMMENT
+    fun postCommentSP(context: Context, position: Int, pid: String) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_POSITION", position)
+            apply()
         }
-
-        // 2. Convert old list to mutable map for fast update
-        val commentMap = oldPayload.comments.associateBy { it.id }.toMutableMap()
-
-        // 3. Merge new data
-        for (newComment in newPayload.comments) {
-            commentMap[newComment.id] = newComment
-            // 👉 This line handles BOTH:
-            // - Add (if id not exist)
-            // - Update (if id already exist)
+        with(prefs.edit()) {
+            putString("com.HHA_P_PID", pid)
+            apply()
         }
-
-        // 4. Convert back to list
-        val mergedPayload = Payload(commentMap.values.toList())
-
-        // 5. Save back
-        sharedPref.edit()
-            .putString("HHA_comment_post_list", gson.toJson(mergedPayload))
-            .apply()
     }
 
-    fun getPayload(context: Context): Payload {
-        val sharedPref = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
-        val json = sharedPref.getString("HHA_comment_post_list", null)
-        return if (json != null) {
-            val type = object : TypeToken<Payload>() {}.type
-            Gson().fromJson(json, type)
-        } else {
-            Payload() // default empty
+    fun postCommentIsShow(context: Context, show: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_P_C_SHOW", show)
+            apply()
         }
+    }
+
+    fun get_postCommentPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_POSITION", 0)
+    }
+
+    fun get_postCommentPid(context: Context): String {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getString("com.HHA_P_PID", "") ?: ""
+    }
+
+    fun get_postCommentShow(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_P_C_SHOW", false)
     }
 
 }

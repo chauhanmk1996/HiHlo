@@ -63,6 +63,7 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.ui.HomeNew.HomeNewFragmentDirections
+import com.app.hihlo.utils.UserDataManager
 
 class CommentReelBottomSheet : BottomSheetDialogFragment() {
     private var _binding: BottomSheetLayoutBinding? = null
@@ -224,6 +225,9 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         val payload = arguments?.getParcelable<Payload>("comments")
         Log.i("TAG", "onViewCreated: " + payload)
+        Log.i("TAG", "onViewCreated: BRS " + UserDataManager.get_postCommentShow(requireContext()))
+        Log.i("TAG", "onViewCreated: BRPID " + UserDataManager.get_postCommentPid(requireContext()))
+        Log.i("TAG", "onViewCreated: BRP " + UserDataManager.get_postCommentPosition(requireContext()))
         val initialComments = payload?.comments ?: listOf()
         adapter = AdapterComments(
             initialComments.toMutableList(),
@@ -239,6 +243,11 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                     .setMessage("Are you sure you want to delete this comment?")
                     .setPositiveButton("Delete") { d, _ ->
                         if (isReply) {
+                            adapter.removeItems(
+                                mode = 2,
+                                commentPosition = RTVariable.INNER_COMMENT_POSITION,
+                                replyPosition = RTVariable.REPLY_POSITION
+                            )
                             if (RTVariable.COMMENT_FROM) {
                                 getSendDeleteReelsComment(
                                     itemId.toString(),
