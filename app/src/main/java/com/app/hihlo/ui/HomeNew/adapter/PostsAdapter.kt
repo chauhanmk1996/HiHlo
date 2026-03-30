@@ -83,7 +83,7 @@ class PostsAdapter(
     }
 
     fun clearList(){
-        var size = postsList.size
+        //var size = postsList.size
         //postsList.clear()
         //notifyItemRangeRemoved(0, size)
     }
@@ -182,6 +182,9 @@ class PostsAdapter(
                         binding.likesCount.text = post.likesCount.toString()
                     }
                     Glide.with(binding.root.context).load(R.drawable.btn_heart_normal).into(binding.likeImage)
+                    binding.likeImage.scaleX = 1f
+                    binding.likeImage.scaleY = 1f
+                    binding.likeImage.alpha = 1f
                 } else {
                     post.isLiked = 1
                     if (post.likesCount != null) {
@@ -189,6 +192,24 @@ class PostsAdapter(
                         binding.likesCount.text = post.likesCount.toString()
                     }
                     Glide.with(binding.root.context).load(R.drawable.btn_heart_fill).into(binding.likeImage)
+                    binding.likeImage.apply {
+                        scaleX = 0.7f
+                        scaleY = 0.7f
+                        alpha = 0.5f
+                        animate()
+                            .scaleX(1.4f)
+                            .scaleY(1.4f)
+                            .alpha(1f)
+                            .setDuration(180)
+                            .withEndAction {
+                                animate()
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .setDuration(180)
+                                    .start()
+                            }
+                            .start()
+                    }
                 }
                 actionListener?.onPostAction(post, action, adapterPosition, binding.likeImage)
             }

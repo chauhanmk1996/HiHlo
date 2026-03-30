@@ -124,14 +124,14 @@ class AdapterUserPostList(
                                 homePosts[position].likesCount = homePosts[position].likesCount?.minus(1)
                                 likesCount.text = homePosts[position].likesCount.toString()
                             }
-                            Glide.with(root.context).load(R.drawable.unlike_heart).into(likeImage)
+                            Glide.with(root.context).load(R.drawable.btn_heart_normal).into(likeImage)
                         } else {
                             homePosts[position].isLiked = 1
                             if (homePosts[position].likesCount != null) {
                                 homePosts[position].likesCount = homePosts[position].likesCount?.plus(1)
                                 likesCount.text = homePosts[position].likesCount.toString()
                             }
-                            Glide.with(root.context).load(R.drawable.like_heart).into(likeImage)
+                            Glide.with(root.context).load(R.drawable.btn_heart_fill).into(likeImage)
                         }
                         getSelectedPost(homePosts[position], Data(), 2, position, sideOptions)
                     }
@@ -350,6 +350,9 @@ class AdapterUserPostList(
                                 likesCount.text = profilePosts.data[position].likesCount.toString()
                             }
                             Glide.with(root.context).load(R.drawable.btn_heart_normal).into(likeImage)
+                            likeImage.scaleX = 1f
+                            likeImage.scaleY = 1f
+                            likeImage.alpha = 1f
                         } else {
                             profilePosts.data[position].isLiked = 1
                             if (profilePosts.data[position].likesCount != null) {
@@ -357,6 +360,24 @@ class AdapterUserPostList(
                                 likesCount.text = profilePosts.data[position].likesCount.toString()
                             }
                             Glide.with(root.context).load(R.drawable.btn_heart_fill).into(likeImage)
+                            likeImage.apply {
+                                scaleX = 0.7f
+                                scaleY = 0.7f
+                                alpha = 0.5f
+                                animate()
+                                    .scaleX(1.4f)
+                                    .scaleY(1.4f)
+                                    .alpha(1f)
+                                    .setDuration(180)
+                                    .withEndAction {
+                                        animate()
+                                            .scaleX(1f)
+                                            .scaleY(1f)
+                                            .setDuration(180)
+                                            .start()
+                                    }
+                                    .start()
+                            }
                         }
                         getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions)
                     }

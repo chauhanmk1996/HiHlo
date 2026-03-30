@@ -47,6 +47,14 @@ object UserDataManager {
         }
     }
 
+    fun postUpdateMainSP(context: Context, page: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_MainPAGE", page)
+            apply()
+        }
+    }
+
     fun postMainIsSetShow(context: Context, show: Boolean) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         with(prefs.edit()) {
@@ -79,6 +87,14 @@ object UserDataManager {
         }
         with(prefs.edit()) {
             putString("com.HHA_P_PID", pid)
+            apply()
+        }
+    }
+
+    fun postCommentUpdateSP(context: Context, page: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_PAGE", page)
             apply()
         }
     }

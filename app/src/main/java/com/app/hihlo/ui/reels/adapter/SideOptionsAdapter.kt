@@ -31,8 +31,11 @@ class SideOptionsAdapter(
         return list.size
     }
 
+    private var lastAnimatedReelId: Int? = null
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.apply {
+
             if (position==0){
                 count.isVisible=true
                 count.text = RTVariable.formatCount(likeCount)
@@ -84,9 +87,32 @@ class SideOptionsAdapter(
             image.setImageResource(list[position])
             if (position==0){
                 if (isLiked==1){
-                    image.setImageResource(R.drawable.btn_heart_fill)}
-                else{
+                    image.setImageResource(R.drawable.btn_heart_fill)
+                    if (lastAnimatedReelId != reels_id) {
+                        lastAnimatedReelId = reels_id
+                        image.animate().cancel()
+                        image.scaleX = 0.7f
+                        image.scaleY = 0.7f
+                        image.alpha = 0.5f
+                        image.animate()
+                            .scaleX(1.4f)
+                            .scaleY(1.4f)
+                            .alpha(1f)
+                            .setDuration(180)
+                            .withEndAction {
+                                image.animate()
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .setDuration(180)
+                                    .start()
+                            }
+                            .start()
+                    }
+                } else{
                     image.setImageResource(R.drawable.btn_heart_normal)
+                    image.scaleX = 1f
+                    image.scaleY = 1f
+                    image.alpha = 1f
                 }
             }
         }

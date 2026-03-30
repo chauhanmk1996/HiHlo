@@ -135,9 +135,11 @@ class AdapterCommentsReply(
                 onReplySelect(comment_id)
             }
             holder.binding.userImage.setOnClickListener {
+                UserDataManager.postCommentIsShow(root.context, true)
                 user_id?.let { p1 -> onReplyProfileSelected(p1) }
             }
             holder.binding.name.setOnClickListener {
+                UserDataManager.postCommentIsShow(root.context, true)
                 user_id?.let { p1 -> onReplyProfileSelected(p1) }
             }
 //            holder.binding.delete.setOnClickListener {

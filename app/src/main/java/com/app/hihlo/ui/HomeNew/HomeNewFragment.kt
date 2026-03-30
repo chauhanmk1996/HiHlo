@@ -132,28 +132,38 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         setupRecyclerView()
         setObserver()
         onClick()
+        //Log.i("TAG", "onViewCreated: MBRS " + UserDataManager.get_postCommentShow(requireContext()))
+        //Log.i("TAG", "onViewCreated: MBRPID " + UserDataManager.get_postCommentPid(requireContext()))
+        //Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPosition(requireContext()))
+        //Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPage(requireContext()))
         if(UserDataManager.get_postCommentShow(requireContext())){
+            Log.i("TAG", "onViewCreated: MIBRMP " + UserDataManager.get_postMainPage(requireContext()))
+            Log.i("TAG", "onViewCreated: MIBRS " + UserDataManager.get_postCommentShow(requireContext()))
+            Log.i("TAG", "onViewCreated: MIBRPID " + UserDataManager.get_postCommentPid(requireContext()))
+            Log.i("TAG", "onViewCreated: MIBRP " + UserDataManager.get_postCommentPosition(requireContext()))
+            Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPage(requireContext()))
             UserDataManager.postCommentIsShow(requireContext(), false)
             pendingScrollPostId = UserDataManager.get_postCommentPid(requireContext())
             pendingScrollPosition = UserDataManager.get_postCommentPosition(requireContext())
             binding.swipeRefresh.isRefreshing = false
             postId = pendingScrollPostId ?: ""
-            currentPage = UserDataManager.get_postMainPage(requireContext())
+            currentPage = UserDataManager.get_postCommentPage(requireContext())
             //retainCommentBoxData(requireContext(), postId, "1", "10")
             viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
             viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
-                currentPage.toString(), "10", "0")
+                UserDataManager.get_postMainPage(requireContext()).toString(), "10", "0")
             Handler(Looper.getMainLooper()).postDelayed({
                 scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
-            }, 1000)
+            }, 500)
         }
         if(UserDataManager.get_postMainIsShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postMainIsSetShow(requireContext(), false)
             currentPage = UserDataManager.get_postMainPage(requireContext())
             viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
-                currentPage.toString(), "10", "0")
+                UserDataManager.get_postMainPage(requireContext()).toString(), "10", "0")
             Handler(Looper.getMainLooper()).postDelayed({
+                Log.e("PPP", "PPP>>> "+UserDataManager.get_postMainPosition(requireContext()))
                 scrollToRecyclerPosition(UserDataManager.get_postMainPosition(requireContext()))
             }, 1000)
         }
@@ -201,20 +211,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     fun scrollToRecyclerPosition(position: Int) {
         binding.postListRecycler.post {
-            val viewHolder = binding.postListRecycler
-                .findViewHolderForAdapterPosition(position)
-            if (viewHolder != null) {
-                val itemView = viewHolder.itemView
+            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager
+                ?: return@post
+            layoutManager.scrollToPositionWithOffset(position, 0)
+            binding.postListRecycler.post {
+                val viewHolder = binding.postListRecycler
+                    .findViewHolderForAdapterPosition(position)
+                val itemView = viewHolder?.itemView ?: return@post
+                val y = itemView.y + binding.postListRecycler.y
                 binding.nestedScrollView.post {
-                    binding.nestedScrollView.smoothScrollTo(
-                        0,
-                        itemView.top + binding.postListRecycler.top
-                    )
-                }
-            } else {
-                binding.postListRecycler.scrollToPosition(position)
-                binding.postListRecycler.post {
-                    scrollToRecyclerPosition(position)
+                    binding.nestedScrollView.smoothScrollTo(0, y.toInt())
                 }
             }
         }
@@ -284,6 +290,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             if (diff < 500 && diff > 0 && !isLoadingMore) {
                 isLoadingMore = true
                 currentPage++
+                UserDataManager.postUpdateMainSP(requireContext(), currentPage)
+                //UserDataManager.postUpdateMainSP(requireContext(), currentPage)
+                Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postMainPage(requireContext()).toString())
                 hitServiceListApi(currentPage, 0)
             }
         }
@@ -573,7 +582,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private fun hitServiceListApi(page: Int, genderId:Int?=null) {
         Log.e("TAG", "Home success: ${Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken}")
-        viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "10", if (genderId==null) "" else genderId.toString())
+        viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "10", "0")
         viewModel4.hitCoinDetailsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
     }
 
@@ -643,7 +652,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun setObserver() {
-        if(!UserDataManager.get_postCommentShow(requireContext()) || !UserDataManager.get_postMainIsShow(requireContext())){
+        if(UserDataManager.get_postCommentShow(requireContext()) || UserDataManager.get_postMainIsShow(requireContext())){
+            binding.progressBar.isVisible=false
+        }else{
             binding.progressBar.isVisible=true
         }
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
@@ -666,13 +677,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 if (currentPage == 1) {
                                     if (it.data.payload.posts.size > 0){
                                         postAdapter.clearList()
-                                        postAdapter.addPosts(it.data.payload.posts.toMutableList(),
+                                        postAdapter.setPosts(it.data.payload.posts,
                                             listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
+                                        //postAdapter.addPosts(it.data.payload.posts.toMutableList(),
+                                            //listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
                                     }else{
                                         postAdapter.clearList()
                                     }
                                 } else {
-                                    postAdapter.addPosts(it.data.payload.posts.toMutableList(),
+                                    postAdapter.clearList()
+                                    postAdapter.setPosts(it.data.payload.posts.toMutableList(),
                                         listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
                                 }
                             }
