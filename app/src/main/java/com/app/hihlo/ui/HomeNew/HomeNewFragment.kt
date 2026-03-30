@@ -132,40 +132,30 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         setupRecyclerView()
         setObserver()
         onClick()
-        /*Log.i("TAG", "onViewCreated: RS " + UserDataManager.get_postCommentShow(requireContext()))
-        Log.i("TAG", "onViewCreated: RPID " + UserDataManager.get_postCommentPid(requireContext()))
-        Log.i("TAG", "onViewCreated: RP " + UserDataManager.get_postCommentPosition(requireContext()))
         if(UserDataManager.get_postCommentShow(requireContext())){
-            Log.i("TAG", "onViewCreated: RIS " + UserDataManager.get_postCommentShow(requireContext()))
-            Log.i("TAG", "onViewCreated: RIPID " + UserDataManager.get_postCommentPid(requireContext()))
-            Log.i("TAG", "onViewCreated: RIP " + UserDataManager.get_postCommentPosition(requireContext()))
             UserDataManager.postCommentIsShow(requireContext(), false)
             pendingScrollPostId = UserDataManager.get_postCommentPid(requireContext())
             pendingScrollPosition = UserDataManager.get_postCommentPosition(requireContext())
             binding.swipeRefresh.isRefreshing = false
             postId = pendingScrollPostId ?: ""
-            retainCommentBoxData(requireContext(), postId, "1", "10")
-        } */
-        Log.i("TAG", "onViewCreated: RS " + UserDataManager.get_postCommentShow(requireContext()))
-        Log.i("TAG", "onViewCreated: RPID " + UserDataManager.get_postCommentPid(requireContext()))
-        Log.i("TAG", "onViewCreated: RP " + UserDataManager.get_postCommentPosition(requireContext()))
-        if(UserDataManager.get_postCommentShow(requireContext())){
-            Log.i("TAG", "onViewCreated: RIS " + UserDataManager.get_postCommentShow(requireContext()))
-            Log.i("TAG", "onViewCreated: RIPID " + UserDataManager.get_postCommentPid(requireContext()))
-            Log.i("TAG", "onViewCreated: RIP " + UserDataManager.get_postCommentPosition(requireContext()))
-            UserDataManager.postCommentIsShow(requireContext(), false)
-            pendingScrollPostId = UserDataManager.get_postCommentPid(requireContext())
-            pendingScrollPosition = UserDataManager.get_postCommentPosition(requireContext())
-            binding.swipeRefresh.isRefreshing = false
-            postId = pendingScrollPostId ?: ""
+            currentPage = UserDataManager.get_postMainPage(requireContext())
             //retainCommentBoxData(requireContext(), postId, "1", "10")
-            //viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                allStory?.toMutableList()?.clear()
-//                currentPage = 1
-//                hitServiceListApi(currentPage, 0)
-//                binding.swipeRefresh.isRefreshing = false
-//            }, 1000)
+            viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
+            viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                currentPage.toString(), "10", "0")
+            Handler(Looper.getMainLooper()).postDelayed({
+                scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
+            }, 1000)
+        }
+        if(UserDataManager.get_postMainIsShow(requireContext())){
+            binding.swipeRefresh.isRefreshing = false
+            UserDataManager.postMainIsSetShow(requireContext(), false)
+            currentPage = UserDataManager.get_postMainPage(requireContext())
+            viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                currentPage.toString(), "10", "0")
+            Handler(Looper.getMainLooper()).postDelayed({
+                scrollToRecyclerPosition(UserDataManager.get_postMainPosition(requireContext()))
+            }, 1000)
         }
         binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
         binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
@@ -204,6 +194,27 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         RTVariable.COMMENT_DELETED = false
                         hitServiceListApi(currentPage, 0)
                     }
+                }
+            }
+        }
+    }
+
+    fun scrollToRecyclerPosition(position: Int) {
+        binding.postListRecycler.post {
+            val viewHolder = binding.postListRecycler
+                .findViewHolderForAdapterPosition(position)
+            if (viewHolder != null) {
+                val itemView = viewHolder.itemView
+                binding.nestedScrollView.post {
+                    binding.nestedScrollView.smoothScrollTo(
+                        0,
+                        itemView.top + binding.postListRecycler.top
+                    )
+                }
+            } else {
+                binding.postListRecycler.scrollToPosition(position)
+                binding.postListRecycler.post {
+                    scrollToRecyclerPosition(position)
                 }
             }
         }
@@ -355,7 +366,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             PostsAdapter.PostClickAction.COMMENT -> {
                                 postId = post.id.toString()
                                 post_position = position
-                                UserDataManager.postCommentSP(requireContext(), post_position, postId.toString())
+                                UserDataManager.postCommentSP(requireContext(), currentPage, post_position, postId.toString())
                                 //Toast.makeText(requireContext(), "Comment at position $position", Toast.LENGTH_SHORT).show()
                                 viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString(), "1", "10")
                             }
@@ -363,10 +374,17 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 //Toast.makeText(requireContext(), "Open post at position $position", Toast.LENGTH_SHORT).show()
                             }
                             PostsAdapter.PostClickAction.POST_PROFILE -> {
+                                post_position = position
                                 //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
+                                UserDataManager.postMainSP(requireContext(), currentPage, post_position)
+                                UserDataManager.postMainIsSetShow(requireContext(), true)
                                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", post.user_id.toString()))
                             }
                             PostsAdapter.PostClickAction.POST_PROFILE_NAME -> {
+                                post_position = position
+                                //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
+                                UserDataManager.postMainSP(requireContext(), currentPage, post_position)
+                                UserDataManager.postMainIsSetShow(requireContext(), true)
                                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", post.user_id.toString()))
                             }
                             PostsAdapter.PostClickAction.POST_FOLLOW -> {
@@ -399,6 +417,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                     putInt("position", storyPosition)
                                 }
                                 try {
+                                    post_position = position
+                                    //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
+                                    UserDataManager.postMainSP(requireContext(), currentPage, post_position)
+                                    UserDataManager.postMainIsSetShow(requireContext(), true)
                                     findNavController().navigate(R.id.secondStoryFragment, bundle)
                                 } catch (e: Exception) {
                                     Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
@@ -621,7 +643,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun setObserver() {
-        if(!UserDataManager.get_postCommentShow(requireContext())){
+        if(!UserDataManager.get_postCommentShow(requireContext()) || !UserDataManager.get_postMainIsShow(requireContext())){
             binding.progressBar.isVisible=true
         }
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {

@@ -28,6 +28,7 @@ import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.utils.RTVariable
+import com.app.hihlo.utils.UserDataManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -249,6 +250,7 @@ class AdapterCommentsReply(
                     val clickableEnd = mentionEnd
                     val clickableSpan = object : android.text.style.ClickableSpan() {
                         override fun onClick(widget: View) {
+                            UserDataManager.postCommentIsShow(context, true)
                             onMentionClick(mention)
                         }
                         override fun updateDrawState(ds: android.text.TextPaint) {

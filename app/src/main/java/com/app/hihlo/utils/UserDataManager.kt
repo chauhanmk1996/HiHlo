@@ -34,9 +34,45 @@ object UserDataManager {
         Log.e("REEL_POS", "SharedPref Read = $pos")
         return pos
     }
-    ///// POST COMMENT
-    fun postCommentSP(context: Context, position: Int, pid: String) {
+    /// POST MAIN
+    fun postMainSP(context: Context, page: Int, position: Int) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_MainPAGE", page)
+            apply()
+        }
+        with(prefs.edit()) {
+            putInt("com.HHA_P_MainPOSITION", position)
+            apply()
+        }
+    }
+
+    fun postMainIsSetShow(context: Context, show: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_P_MainSHOW", show)
+            apply()
+        }
+    }
+    fun get_postMainPage(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_MainPAGE", 0)
+    }
+    fun get_postMainPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_MainPOSITION", 0)
+    }
+    fun get_postMainIsShow(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_P_MainSHOW", false)
+    }
+    ///// POST COMMENT
+    fun postCommentSP(context: Context, page: Int, position: Int, pid: String) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_PAGE", page)
+            apply()
+        }
         with(prefs.edit()) {
             putInt("com.HHA_P_POSITION", position)
             apply()
@@ -53,6 +89,11 @@ object UserDataManager {
             putBoolean("com.HHA_P_C_SHOW", show)
             apply()
         }
+    }
+
+    fun get_postCommentPage(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_PAGE", 0)
     }
 
     fun get_postCommentPosition(context: Context): Int {

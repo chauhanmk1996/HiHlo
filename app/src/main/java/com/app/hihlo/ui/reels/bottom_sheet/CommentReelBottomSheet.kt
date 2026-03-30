@@ -15,7 +15,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -26,10 +25,11 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
@@ -43,12 +43,13 @@ import com.app.hihlo.model.reply_to_comment.request.ReplyToCommentRequest
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.HomeNew.HomeNewFragmentDirections
 import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 import com.app.hihlo.ui.reels.adapter.AdapterComments
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
 import com.app.hihlo.utils.CommonUtils
-import com.app.hihlo.utils.CommonUtils.toPx
 import com.app.hihlo.utils.RTVariable
+import com.app.hihlo.utils.UserDataManager
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -57,13 +58,6 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import kotlinx.coroutines.launch
-import org.openjdk.tools.javac.util.Position
-import kotlin.getValue
-import androidx.core.graphics.toColorInt
-import androidx.core.view.isVisible
-import androidx.navigation.fragment.findNavController
-import com.app.hihlo.ui.HomeNew.HomeNewFragmentDirections
-import com.app.hihlo.utils.UserDataManager
 
 class CommentReelBottomSheet : BottomSheetDialogFragment() {
     private var _binding: BottomSheetLayoutBinding? = null
@@ -79,15 +73,12 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     private val limit = 10
     private var isLoading = false
     private var hasMore = true
-    private var lastScrollY = 1
 
     override fun getTheme(): Int = R.style.BottomSheetDialogTheme
-    private val viewModel3: ReelsViewModel by viewModels()
     private val viewModel2: UserPostListViewModel by viewModels()
     private var behavior: BottomSheetBehavior<FrameLayout>? = null
     private var isExpanding = false
     private var heightChangeRunnable: Runnable? = null
-    private var recyclerViewState: Parcelable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -105,19 +96,13 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
             val bottomSheet = dialog.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
             bottomSheet?.let {
                 val behavior = BottomSheetBehavior.from(it)
-
-                // 1. Start half height (peek)
                 val displayMetrics = resources.displayMetrics
                 val screenHeight = displayMetrics.heightPixels
                 val peekHeight = (screenHeight * 0.5).toInt()
                 behavior.peekHeight = requireContext().dpToPx(525)
-
-                // 2. Allow it to expand
                 behavior.isFitToContents = true
                 behavior.skipCollapsed = false
                 behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-
-                // 3. Optional: Set rounded corners
                 val cornerRadius = 25f.toPx(requireContext())
                 val shapeDrawable = MaterialShapeDrawable(
                     ShapeAppearanceModel.Builder()
@@ -127,12 +112,11 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 )
                 shapeDrawable.fillColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.bottom_sheet_color))
                 it.background = shapeDrawable
-
-                // 4. Bottom sheet callback for state changes
                 behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         when (newState) {
                             BottomSheetBehavior.STATE_COLLAPSED -> {
+                                it.layoutParams.height = requireContext().dpToPx(400)
                                 val params = binding.commentsRecycler.layoutParams
                                 params.height = requireContext().dpToPx(360)
                                 binding.commentsRecycler.layoutParams = params
@@ -146,24 +130,22 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                             }
                         }
                     }
-
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                        // No-op
                     }
                 })
-
                 binding.mainContain.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         isExpanding = false
+                        it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                         behavior.state = BottomSheetBehavior.STATE_EXPANDED
                         scheduleRecyclerViewHeightMatchParent()  // Delay setting height
                     }
                     true
                 }
-
                 binding.closeLine.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         isExpanding = false
+                        it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                         behavior.state = BottomSheetBehavior.STATE_EXPANDED
                         scheduleRecyclerViewHeightMatchParent()  // Delay setting height
                     }
@@ -173,8 +155,9 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 binding.titleTextView.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         isExpanding = false
+                        it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                         behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                        scheduleRecyclerViewHeightMatchParent()  // Delay setting height
+                        scheduleRecyclerViewHeightMatchParent()
                     }
                     true
                 }
@@ -182,19 +165,22 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 binding.mainContain.setOnClickListener {
                     behavior.state = BottomSheetBehavior.STATE_EXPANDED
                     isExpanding = false
-                    scheduleRecyclerViewHeightMatchParent()  // Delay setting height
+                    it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    scheduleRecyclerViewHeightMatchParent()
                 }
 
                 binding.closeLine.setOnClickListener {
                     behavior.state = BottomSheetBehavior.STATE_EXPANDED
                     isExpanding = false
-                    scheduleRecyclerViewHeightMatchParent()  // Delay setting height
+                    it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    scheduleRecyclerViewHeightMatchParent()
                 }
 
                 binding.titleTextView.setOnClickListener {
                     behavior.state = BottomSheetBehavior.STATE_EXPANDED
                     isExpanding = false
-                    scheduleRecyclerViewHeightMatchParent()  // Delay setting height
+                    it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    scheduleRecyclerViewHeightMatchParent()
                 }
             }
         }
@@ -209,18 +195,15 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun scheduleRecyclerViewHeightMatchParent() {
-        // Cancel any pending runnable
         heightChangeRunnable?.let { binding.commentsRecycler.removeCallbacks(it) }
-        // Create a new runnable
         heightChangeRunnable = Runnable {
             val params = binding.commentsRecycler.layoutParams
             params.height = ViewGroup.LayoutParams.MATCH_PARENT
             binding.commentsRecycler.layoutParams = params
         }
-        // Post with delay
         binding.commentsRecycler.postDelayed(heightChangeRunnable!!, 300)
     }
-    private val scrollThreshold = 40
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val payload = arguments?.getParcelable<Payload>("comments")
@@ -402,7 +385,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
 
     private fun hitPostCommentApi() {
         var request = PostCommentsRequest(comment = binding.commentReplyEdittext.text.toString())
-        onCommentAction?.invoke(request)  // Pass any data here
+        onCommentAction?.invoke(request)
     }
 
     fun updateComments(payload: Payload) {
@@ -419,7 +402,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    fun appendComments(newComments: List<Comment>) { // Replace 'Comments' with actual type
+    fun appendComments(newComments: List<Comment>) {
         if (newComments.size < limit) {
             hasMore = false
         }
