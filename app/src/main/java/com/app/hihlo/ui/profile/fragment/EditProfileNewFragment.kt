@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
+import android.text.Spanned
 import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
@@ -81,6 +82,7 @@ import com.app.hihlo.model.gender_list.Gender
 import com.app.hihlo.ui.profile.adapter.InterestAdapter
 import com.app.hihlo.utils.CommonUtils.touchHideKeyBoard
 import com.app.hihlo.utils.UsernameInputFilter
+import java.text.BreakIterator
 import kotlin.collections.isNotEmpty
 import kotlin.collections.toMutableList
 
@@ -128,6 +130,7 @@ class EditProfileNewFragment : Fragment() {
             if (from=="social"||from=="normal"){}
             else findNavController().popBackStack()
         }
+        binding.etAbout.filters = arrayOf(GraphemeLengthFilter(150))
         return binding.root
     }
     private fun setBottomMargin() {
@@ -152,13 +155,62 @@ class EditProfileNewFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val currentLength = s?.length ?: 0
-                binding.tvCount.text = "$currentLength/100"
+                //val currentLength = s?.length ?: 0
+                val currentLength = getGraphemeCount(s.toString())
+                Log.e("LENGTH", "LENGTH>>> "+currentLength+" | full text: ${s}")
+                binding.tvCount.text = "$currentLength/150"
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
     }
+
+    class GraphemeLengthFilter(private val max: Int) : InputFilter {
+        override fun filter(
+            source: CharSequence?,
+            start: Int,
+            end: Int,
+            dest: Spanned?,
+            dstart: Int,
+            dend: Int
+        ): CharSequence? {
+            val newText = StringBuilder(dest)
+                .replace(dstart, dend, source?.subSequence(start, end).toString())
+                .toString()
+            val count = getGraphemeCount(newText)
+            if (count <= max) return null
+            var allowedText = dest.toString()
+            for (i in start until end) {
+                val temp = StringBuilder(dest)
+                    .replace(dstart, dend, source?.subSequence(start, i + 1).toString())
+                    .toString()
+                if (getGraphemeCount(temp) > max) break
+                allowedText = source?.subSequence(start, i + 1).toString()
+            }
+            return allowedText
+        }
+        private fun getGraphemeCount(text: String): Int {
+            val it = BreakIterator.getCharacterInstance()
+            it.setText(text)
+            var count = 0
+            while (it.next() != BreakIterator.DONE) {
+                count++
+            }
+            return count
+        }
+    }
+
+    fun getGraphemeCount(text: String): Int {
+        val it = BreakIterator.getCharacterInstance()
+        it.setText(text)
+        var count = 0
+        var start = it.first()
+        while (it.next() != BreakIterator.DONE) {
+            count++
+        }
+        return count
+    }
+
     private fun usernameTextWatcher() {
         binding.etUserName.apply {
             doAfterTextChanged {
@@ -330,6 +382,7 @@ class EditProfileNewFragment : Fragment() {
                         if (it.data.code == 200){
                             val list = it.data.payload
                             Log.e("TAG", "apiOberserver: $list")
+                            Log.e("TAG", "PRO IMG: $imageUrl | $newImageUrl")
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                             val loginData = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)
                             loginData?.payload?.apply {
@@ -350,7 +403,8 @@ class EditProfileNewFragment : Fragment() {
                                 startActivity(intent)
                                 requireActivity().finish()
                             }else{
-                                if(requireActivity() is HomeActivity) (requireActivity() as HomeActivity).updateProfileImage(newImageUrl)
+                                val imageURL = if (newImageUrl!="") newImageUrl else imageUrl
+                                if(requireActivity() is HomeActivity) (requireActivity() as HomeActivity).updateProfileImage(imageURL)
                                 findNavController().popBackStack()
                             }
 
@@ -429,7 +483,8 @@ class EditProfileNewFragment : Fragment() {
                 etCountry.isEnabled = false
                 spinCity.isEnabled = false
             }
-            tvCount.text = "${userDetailsMain?.about?.length}/150"
+            var char_length = getGraphemeCount(userDetailsMain?.about.toString())
+            tvCount.text = "${char_length}/150"
             etName.setText(userDetailsMain?.name)
             setUsername(etUserName, userDetailsMain?.username ?: "")
 //            etUserName.setText(userDetailsMain?.username)
@@ -536,14 +591,20 @@ class EditProfileNewFragment : Fragment() {
         // Listen to upload events
         uploadObserver.setTransferListener(object : TransferListener {
             override fun onStateChanged(id: Int, state: TransferState) {
+                val safeContext = context ?: return
                 if (state == TransferState.COMPLETED) {
                     // Upload completed successfully
 //                    val imageUrl = "https://$bucketName.s3.amazonaws.com/$objectKey"
-                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.AWS_CDN_URL
+                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA)?.payload?.AWS_CDN_URL
                     val slash = "/"
                     val imageUrl = "$urlCdn$slash$objectKey"
                     newImageUrl = imageUrl
                     println("Image URL: $imageUrl")
+                    val loginData = Preferences.getCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA)
+                    loginData?.payload?.apply {
+                        profileImage = newImageUrl
+                    }
+                    Preferences.setCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA, loginData)
 
                 } else if (state == TransferState.FAILED) {
                     // Handle failure
@@ -584,8 +645,6 @@ class EditProfileNewFragment : Fragment() {
 
         return file
     }
-
-
 
     private fun openDateCalender() {
         val calendar = Calendar.getInstance()

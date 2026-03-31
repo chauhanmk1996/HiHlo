@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.reels.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -32,6 +33,7 @@ import com.app.hihlo.utils.UserDataManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import androidx.core.graphics.toColorInt
 
 class AdapterCommentsReply(
     var comment_id: String,
@@ -41,6 +43,9 @@ class AdapterCommentsReply(
     val onReplyProfileSelected: (user_id: Int) -> Unit,// ← new
     val onMentionClick: (user_id: String) -> Unit
 ) : RecyclerView.Adapter<AdapterCommentsReply.ViewHolder>() {
+
+    private var selectedPosition: Int = -1
+
     inner class ViewHolder(val binding: AdapterCommentsReplyBinding): RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -51,8 +56,13 @@ class AdapterCommentsReply(
         return replies.size
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, @SuppressLint("RecyclerView") position: Int) {
         holder.binding.apply {
+            if (position == selectedPosition) {
+                holder.binding.parentLayout.setBackgroundColor("#1AFFFFFF".toColorInt()) // light highlight
+            } else {
+                holder.binding.parentLayout.setBackgroundColor(Color.TRANSPARENT)
+            }
             Glide.with(root.context)
                 .load(replies[position].user.profile_image)
                 .placeholder(R.drawable.profile_placeholder)
@@ -61,6 +71,11 @@ class AdapterCommentsReply(
 //            userId.text = replies[position].user.username
             userId.isVisible=false
             var user_id = replies?.get(position)?.user?.id
+            if(replies?.get(position)?.user?.isCreator?.toInt() == 1){
+                verifiedNameTick.isVisible = true
+            }else{
+                verifiedNameTick.isVisible = false
+            }
 //            userLocation.text = replies[position]?.user?.city+", "+replies[position]?.user?.country
             //comment.text = replies[position].reply
             //var data = "https://d38vqutibeq2uv.cloudfront.net/1757159096618####@@@@####@hihlo####@@@@####hloo you"
@@ -85,6 +100,8 @@ class AdapterCommentsReply(
             holder.binding.root.setOnLongClickListener {
                 val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
                 if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
                     RTVariable.COMMENT_POSITION = position
                     RTVariable.REPLY_POSITION = position
                     replies[position].id?.let { replyId ->
@@ -95,6 +112,8 @@ class AdapterCommentsReply(
                     val replyText = replies[position].reply ?: ""
                     val isUserMentioned = replyText.contains(user.toString())
                     if(isUserMentioned){
+                        selectedPosition = position
+                        notifyDataSetChanged()
                         RTVariable.COMMENT_POSITION = position
                         RTVariable.REPLY_POSITION = position
                         replies[position].id?.let { replyId ->
@@ -109,6 +128,8 @@ class AdapterCommentsReply(
             holder.binding.comment.setOnLongClickListener {
                 val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
                 if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
                     RTVariable.COMMENT_POSITION = position
                     RTVariable.REPLY_POSITION = position
                     replies[position].id?.let { replyId ->
@@ -119,6 +140,64 @@ class AdapterCommentsReply(
                     val replyText = replies[position].reply ?: ""
                     val isUserMentioned = replyText.contains(user.toString())
                     if(isUserMentioned){
+                        selectedPosition = position
+                        notifyDataSetChanged()
+                        RTVariable.COMMENT_POSITION = position
+                        RTVariable.REPLY_POSITION = position
+                        replies[position].id?.let { replyId ->
+                            onDeleteClick(replyId)
+                        }
+                        true
+                    }else{
+                        false
+                    }
+                }
+            }
+            holder.binding.userImage.setOnLongClickListener {
+                val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
+                if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
+                    RTVariable.COMMENT_POSITION = position
+                    RTVariable.REPLY_POSITION = position
+                    replies[position].id?.let { replyId ->
+                        onDeleteClick(replyId)
+                    }
+                    true
+                } else {
+                    val replyText = replies[position].reply ?: ""
+                    val isUserMentioned = replyText.contains(user.toString())
+                    if(isUserMentioned){
+                        selectedPosition = position
+                        notifyDataSetChanged()
+                        RTVariable.COMMENT_POSITION = position
+                        RTVariable.REPLY_POSITION = position
+                        replies[position].id?.let { replyId ->
+                            onDeleteClick(replyId)
+                        }
+                        true
+                    }else{
+                        false
+                    }
+                }
+            }
+            holder.binding.name.setOnLongClickListener {
+                val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
+                if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
+                    RTVariable.COMMENT_POSITION = position
+                    RTVariable.REPLY_POSITION = position
+                    replies[position].id?.let { replyId ->
+                        onDeleteClick(replyId)
+                    }
+                    true
+                } else {
+                    val replyText = replies[position].reply ?: ""
+                    val isUserMentioned = replyText.contains(user.toString())
+                    if(isUserMentioned){
+                        selectedPosition = position
+                        notifyDataSetChanged()
                         RTVariable.COMMENT_POSITION = position
                         RTVariable.REPLY_POSITION = position
                         replies[position].id?.let { replyId ->
@@ -159,6 +238,11 @@ class AdapterCommentsReply(
         Log.e("REPLYLOG", "REPLYLOG>>> REPLY "+position)
         replies.removeAt(position)
         notifyItemRemoved(position)
+    }
+
+    fun cancelSection(){
+        selectedPosition = -1
+        notifyDataSetChanged()
     }
 
     private fun setRichComment(context: Context, textView: TextView, reply: Replies) {

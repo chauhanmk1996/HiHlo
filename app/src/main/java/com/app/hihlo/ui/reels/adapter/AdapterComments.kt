@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.reels.adapter
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
@@ -31,6 +32,7 @@ import com.app.hihlo.utils.UserDataManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import androidx.core.graphics.toColorInt
 
 class AdapterComments(
     var comments: MutableList<Comment>,
@@ -41,6 +43,8 @@ class AdapterComments(
     val onMentionClick: (user_id: String) -> Unit,
     val commentsRecycler: RecyclerView
 ) : RecyclerView.Adapter<AdapterComments.ViewHolder>() {
+
+    private var selectedPosition: Int = -1
 
     lateinit var adapter: AdapterCommentsReply
 
@@ -55,11 +59,15 @@ class AdapterComments(
 
     override fun getItemCount(): Int = comments.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, @SuppressLint("RecyclerView") position: Int) {
         holder.binding.apply {
             val commentItem = comments[position]
             val commentId = commentItem.id ?: -1
-
+            if (position == selectedPosition) {
+                holder.binding.parentLayout.setBackgroundColor("#1AFFFFFF".toColorInt()) // light highlight
+            } else {
+                holder.binding.parentLayout.setBackgroundColor(Color.TRANSPARENT)
+            }
             Glide.with(root.context).load(commentItem.user?.profile_image)
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder)
@@ -68,6 +76,11 @@ class AdapterComments(
             name.text = commentItem.user?.username
             userId.isVisible = false
             comment.text = commentItem.comment
+            if(commentItem.user?.isCreator?.toInt() == 1){
+                verifiedNameTick.isVisible = true
+            }else{
+                verifiedNameTick.isVisible = false
+            }
 
             // ----- Reply Visibility Logic -----
             val totalReplies = commentItem.replies?.size ?: 0
@@ -112,7 +125,6 @@ class AdapterComments(
 //                (commentOwner == 1 || user == commentUser) && user == commentOwnerUserName -> true
 //                else -> false
 //            }
-
             root.setOnLongClickListener {
                 val user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
                 val commentOwner = commentItem.comment_owner
@@ -124,6 +136,8 @@ class AdapterComments(
                 Log.e("DELETE", "DELETE>>> ${commentOwnerUserName}")
                 val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
                 if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
                     commentItem.id?.let { id ->
                         RTVariable.COMMENT_POSITION = position
                         onDeleteClick(false, commentItem.id, id)
@@ -131,6 +145,8 @@ class AdapterComments(
                     true
                 } else {
                     if(user == commentOwnerUserName){
+                        selectedPosition = position
+                        notifyDataSetChanged()
                         commentItem.id?.let { id ->
                             RTVariable.COMMENT_POSITION = position
                             onDeleteClick(false, commentItem.id, id)
@@ -142,7 +158,6 @@ class AdapterComments(
                     //false
                 }
             }
-
             comment.setOnLongClickListener {
                 val user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
                 val commentOwner = commentItem.comment_owner
@@ -154,6 +169,8 @@ class AdapterComments(
                 Log.e("DELETE", "DELETE>>> ${commentOwnerUserName}")
                 val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
                 if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
                     commentItem.id?.let { id ->
                         RTVariable.COMMENT_POSITION = position
                         onDeleteClick(false, commentItem.id, id)
@@ -161,6 +178,8 @@ class AdapterComments(
                     true
                 } else {
                     if(user == commentOwnerUserName){
+                        selectedPosition = position
+                        notifyDataSetChanged()
                         commentItem.id?.let { id ->
                             RTVariable.COMMENT_POSITION = position
                             onDeleteClick(false, commentItem.id, id)
@@ -172,17 +191,80 @@ class AdapterComments(
                     //false
                 }
             }
-
+            userImage.setOnLongClickListener {
+                val user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
+                val commentOwner = commentItem.comment_owner
+                val commentUser = commentItem.user?.username
+                val commentOwnerUserName = commentItem.post_owner_username
+                Log.e("DELETE", "DELETE>>> ${user}")
+                Log.e("DELETE", "DELETE>>> ${commentOwner}")
+                Log.e("DELETE", "DELETE>>> ${commentUser}")
+                Log.e("DELETE", "DELETE>>> ${commentOwnerUserName}")
+                val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
+                if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
+                    commentItem.id?.let { id ->
+                        RTVariable.COMMENT_POSITION = position
+                        onDeleteClick(false, commentItem.id, id)
+                    }
+                    true
+                } else {
+                    if(user == commentOwnerUserName){
+                        selectedPosition = position
+                        notifyDataSetChanged()
+                        commentItem.id?.let { id ->
+                            RTVariable.COMMENT_POSITION = position
+                            onDeleteClick(false, commentItem.id, id)
+                        }
+                        true
+                    }else{
+                        false
+                    }
+                    //false
+                }
+            }
+            name.setOnLongClickListener {
+                val user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
+                val commentOwner = commentItem.comment_owner
+                val commentUser = commentItem.user?.username
+                val commentOwnerUserName = commentItem.post_owner_username
+                Log.e("DELETE", "DELETE>>> ${user}")
+                Log.e("DELETE", "DELETE>>> ${commentOwner}")
+                Log.e("DELETE", "DELETE>>> ${commentUser}")
+                Log.e("DELETE", "DELETE>>> ${commentOwnerUserName}")
+                val allowLongClick = (commentOwner == 1 || user == commentUser) || user == commentOwnerUserName
+                if (allowLongClick) {
+                    selectedPosition = position
+                    notifyDataSetChanged()
+                    commentItem.id?.let { id ->
+                        RTVariable.COMMENT_POSITION = position
+                        onDeleteClick(false, commentItem.id, id)
+                    }
+                    true
+                } else {
+                    if(user == commentOwnerUserName){
+                        selectedPosition = position
+                        notifyDataSetChanged()
+                        commentItem.id?.let { id ->
+                            RTVariable.COMMENT_POSITION = position
+                            onDeleteClick(false, commentItem.id, id)
+                        }
+                        true
+                    }else{
+                        false
+                    }
+                    //false
+                }
+            }
             reply.setOnClickListener {
                 RTVariable.REPLY_COMBINED_IMAGE_USERNAME = commentItem.user?.profile_image + RTVariable.REPLY_COMBINED_IMAGE_DELEMETER +
                         commentItem.user?.username + RTVariable.REPLY_COMBINED_IMAGE_DELEMETER
                 onReplySelected(commentItem.id ?: -1)
             }
-
             // ----- "View more / Hide" Button Logic -----
             // Only show button if there are more than 1 reply
             viewMoreLayout.isVisible = totalReplies > 1
-
             if (totalReplies > 1) {
                 val remaining = totalReplies - visibleCount
                 val text = if (visibleCount >= totalReplies) {
@@ -192,9 +274,7 @@ class AdapterComments(
                 }
                 viewReplies.text = text
             }
-
             commentReplyRecycler.isVisible = visibleCount > 0
-
             viewReplies.setOnClickListener {
                 val currentComment = comments.getOrNull(position) ?: return@setOnClickListener
                 val currentId = currentComment.id ?: return@setOnClickListener
@@ -230,6 +310,7 @@ class AdapterComments(
                 UserDataManager.postCommentIsShow(root.context, true)
                 onProfileSelected(commentItem.user?.id ?: -1)
             }
+
         }
     }
 
@@ -238,6 +319,12 @@ class AdapterComments(
         this.comments.addAll(comments)
         // Reset visible counts – new list, start fresh
         visibleReplyCounts.clear()
+        notifyDataSetChanged()
+    }
+
+    fun cancelSection(){
+        selectedPosition = -1
+        adapter.cancelSection()
         notifyDataSetChanged()
     }
 

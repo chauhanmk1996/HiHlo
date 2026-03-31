@@ -121,7 +121,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }
         requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
-
             isRefreshedFromMenu = true
             creatorsList.clear()
             currentPage = 1
@@ -139,7 +138,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     }
                 )
             }
-
         }
         keyboardListener()
         setObserver()

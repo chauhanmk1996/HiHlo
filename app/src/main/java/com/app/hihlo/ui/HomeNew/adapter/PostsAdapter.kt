@@ -1,12 +1,15 @@
 package com.app.hihlo.ui.HomeNew.adapter
 
 import android.content.Context
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.TextUtils
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.text.style.MetricAffectingSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -213,11 +217,63 @@ class PostsAdapter(
                 }
                 actionListener?.onPostAction(post, action, adapterPosition, binding.likeImage)
             }
+            binding.btnLike.setOnClickListener {
+                val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
+                val action = if (post.isLiked == 1) PostClickAction.UNLIKE else PostClickAction.LIKE
+                if (post.isLiked  == 1) {
+                    post.isLiked  = 2
+                    if (post.likesCount != null) {
+                        post.likesCount = post.likesCount?.minus(1)
+                        binding.likesCount.text = post.likesCount.toString()
+                    }
+                    Glide.with(binding.root.context).load(R.drawable.btn_heart_normal).into(binding.likeImage)
+                    binding.likeImage.scaleX = 1f
+                    binding.likeImage.scaleY = 1f
+                    binding.likeImage.alpha = 1f
+                } else {
+                    post.isLiked = 1
+                    if (post.likesCount != null) {
+                        post.likesCount = post.likesCount?.plus(1)
+                        binding.likesCount.text = post.likesCount.toString()
+                    }
+                    Glide.with(binding.root.context).load(R.drawable.btn_heart_fill).into(binding.likeImage)
+                    binding.likeImage.apply {
+                        scaleX = 0.7f
+                        scaleY = 0.7f
+                        alpha = 0.5f
+                        animate()
+                            .scaleX(1.4f)
+                            .scaleY(1.4f)
+                            .alpha(1f)
+                            .setDuration(180)
+                            .withEndAction {
+                                animate()
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .setDuration(180)
+                                    .start()
+                            }
+                            .start()
+                    }
+                }
+                actionListener?.onPostAction(post, action, adapterPosition, binding.likeImage)
+            }
             binding.commentImage.setOnClickListener {   // ← add this if not already clickable
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
                 RTVariable.POST_ID = post.id.toString()
                 RTVariable.COMMENT_FROM = false
                     actionListener?.onPostAction(
+                    post,
+                    PostClickAction.COMMENT,
+                    adapterPosition,
+                    binding.commentImage
+                )
+            }
+            binding.btnComment.setOnClickListener {   // ← add this if not already clickable
+                val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
+                RTVariable.POST_ID = post.id.toString()
+                RTVariable.COMMENT_FROM = false
+                actionListener?.onPostAction(
                     post,
                     PostClickAction.COMMENT,
                     adapterPosition,
@@ -292,7 +348,7 @@ class PostsAdapter(
                 //Glide.with(root.context).clear(postImage)
                 Glide.with(root.context).load(post.asset_url).into(postImage)
                 val story = storiesList?.find { story -> story.user_id == post.user_id }
-                Log.e("TTTTT", "SSSSS>>> "+story)
+                //Log.e("TTTTT", "SSSSS>>> "+story)
                 userImageCardView.background =
                     if(post.creatorDetail?.isStoryUploaded == 1){
                         /*val padding = 6.toPx(root.context)
@@ -356,6 +412,18 @@ class PostsAdapter(
                         val spannable = SpannableStringBuilder(fullText)
                         val lessText = " Less"
                         spannable.append(lessText)
+                        val typeface = ResourcesCompat.getFont(
+                            binding.root.context,
+                            R.font.manrope_bold
+                        )
+                        typeface?.let {
+                            spannable.setSpan(
+                                CustomTypefaceSpan(it),
+                                fullText.length,
+                                spannable.length,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
                         val clickableSpan = object : ClickableSpan() {
                             override fun onClick(widget: View) {
                                 binding.captionExpanded.visibility = View.GONE
@@ -384,6 +452,22 @@ class PostsAdapter(
                     binding.moreLessText.visibility = View.GONE
                 }
             }
+        }
+    }
+
+    class CustomTypefaceSpan(private val typeface: Typeface) : MetricAffectingSpan() {
+
+        override fun updateDrawState(tp: TextPaint) {
+            apply(tp)
+        }
+
+        override fun updateMeasureState(tp: TextPaint) {
+            apply(tp)
+        }
+
+        private fun apply(paint: TextPaint) {
+            paint.typeface = typeface
+            paint.flags = paint.flags or Paint.SUBPIXEL_TEXT_FLAG
         }
     }
 

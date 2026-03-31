@@ -28,6 +28,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amazonaws.auth.BasicAWSCredentials
@@ -90,7 +91,7 @@ import kotlin.getValue
 class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private var myStoryData: MyStory = MyStory()
-    private var currentPage=1
+    //private var currentPage=1
     private var isMediaUploaded: Int = -1
     private val viewModel: HomeViewModel by viewModels()
     private val viewModel2: UserPostListViewModel by viewModels()
@@ -118,13 +119,31 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private var pendingScrollPostId: String? = null
     private var pendingScrollPosition: Int = -1   // optional fallback
+    var scrollY = 0
 
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
 
     override fun initView(savedInstanceState: Bundle?) {
-        viewModel.hitGenderListApi()
-        currentPage=1
-        hitServiceListApi(currentPage, 0)
+        //viewModel.hitGenderListApi()
+        if (!viewModel.isHomeDataLoaded) {
+            binding.progressBar.isVisible=true
+            viewModel.currentPage = 1
+            hitServiceListApi(viewModel.currentPage, 0)
+        }
+//        if (!viewModel.isHomeDataLoaded) {
+//            viewModel.currentPage = 1
+//            hitServiceListApi(viewModel.currentPage, 0)
+//        } else {
+//            // 🔥 restore UI from cache
+//            allStory?.let { postAdapter.setPosts(viewModel.postsCache, listOf(myStoryData), it) }
+//            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
+//                viewModel.isStoryUploaded,
+//                viewModel.myStory ?: MyStory(),
+//                viewModel.stories,
+//                ::getSelectedStory,
+//                viewModel.profileImage
+//            )
+//        }
         setupScrollListener()  // ← Replaced setPagination with this
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -136,7 +155,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         //Log.i("TAG", "onViewCreated: MBRPID " + UserDataManager.get_postCommentPid(requireContext()))
         //Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPosition(requireContext()))
         //Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPage(requireContext()))
-        if(UserDataManager.get_postCommentShow(requireContext())){
+        /*if(UserDataManager.get_postCommentShow(requireContext())){
             Log.i("TAG", "onViewCreated: MIBRMP " + UserDataManager.get_postMainPage(requireContext()))
             Log.i("TAG", "onViewCreated: MIBRS " + UserDataManager.get_postCommentShow(requireContext()))
             Log.i("TAG", "onViewCreated: MIBRPID " + UserDataManager.get_postCommentPid(requireContext()))
@@ -155,8 +174,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             Handler(Looper.getMainLooper()).postDelayed({
                 scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
             }, 500)
-        }
-        if(UserDataManager.get_postMainIsShow(requireContext())){
+        } */
+        /*if(UserDataManager.get_postMainIsShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postMainIsSetShow(requireContext(), false)
             currentPage = UserDataManager.get_postMainPage(requireContext())
@@ -166,6 +185,23 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 Log.e("PPP", "PPP>>> "+UserDataManager.get_postMainPosition(requireContext()))
                 scrollToRecyclerPosition(UserDataManager.get_postMainPosition(requireContext()))
             }, 1000)
+        } */
+        if (viewModel.isHomeDataLoaded) {
+            postAdapter.setPosts(
+                viewModel.postsCache,
+                listOf(viewModel.myStory ?: MyStory()),
+                viewModel.stories
+            )
+            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
+                viewModel.isStoryUploaded,
+                viewModel.myStory ?: MyStory(),
+                viewModel.stories,
+                ::getSelectedStory,
+                viewModel.profileImage
+            )
+            binding.nestedScrollView.post {
+                binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
+            }
         }
         binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
         binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
@@ -178,17 +214,17 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             Log.i("TAG", "onViewCreated: homeIconTap")
             isRefreshedFromMenu = true
             allStory?.toMutableList()?.clear()
-            currentPage = 1
+            viewModel.currentPage = 1
             binding.progressBar.isVisible=true
             if (binding.nestedScrollView.scrollY == 0) {
-                hitServiceListApi(currentPage, selectedGender)
+                hitServiceListApi(viewModel.currentPage, selectedGender)
             } else {
                 binding.nestedScrollView.smoothScrollTo(0, 0)
                 binding.nestedScrollView.setOnScrollChangeListener(
                     NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
                         if (scrollY == 0) {
                             binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-                            hitServiceListApi(currentPage, selectedGender)
+                            hitServiceListApi(viewModel.currentPage, selectedGender)
                         }
                     }
                 )
@@ -202,7 +238,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     delay(1000)
                     if(RTVariable.COMMENT_DELETED){
                         RTVariable.COMMENT_DELETED = false
-                        hitServiceListApi(currentPage, 0)
+                        hitServiceListApi(viewModel.currentPage, 0)
                     }
                 }
             }
@@ -220,7 +256,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 val itemView = viewHolder?.itemView ?: return@post
                 val y = itemView.y + binding.postListRecycler.y
                 binding.nestedScrollView.post {
-                    binding.nestedScrollView.smoothScrollTo(0, y.toInt())
+                    binding.nestedScrollView.smoothScrollTo(0, viewModel.scrollY)
                 }
             }
         }
@@ -253,7 +289,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
 
             } catch (e: Exception) {
-                Log.e("RETAIN_ERROR", "ERROR>>> ${e.message}", e)
+                //Log.e("RETAIN_ERROR", "ERROR>>> ${e.message}", e)
             }
         }
     }
@@ -261,8 +297,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private fun refreshData() {
         Handler(Looper.getMainLooper()).postDelayed({
             allStory?.toMutableList()?.clear()
-            currentPage = 1
-            hitServiceListApi(currentPage, 0)
+            viewModel.currentPage = 1
+            hitServiceListApi(viewModel.currentPage, 0)
             binding.swipeRefresh.isRefreshing = false
         }, 1000)
     }
@@ -289,11 +325,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             val diff = (contentView.bottom - (v.height + scrollY))
             if (diff < 500 && diff > 0 && !isLoadingMore) {
                 isLoadingMore = true
-                currentPage++
-                UserDataManager.postUpdateMainSP(requireContext(), currentPage)
-                //UserDataManager.postUpdateMainSP(requireContext(), currentPage)
-                Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postMainPage(requireContext()).toString())
-                hitServiceListApi(currentPage, 0)
+                viewModel.currentPage++
+                hitServiceListApi(viewModel.currentPage, 0)
             }
         }
     }
@@ -375,7 +408,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             PostsAdapter.PostClickAction.COMMENT -> {
                                 postId = post.id.toString()
                                 post_position = position
-                                UserDataManager.postCommentSP(requireContext(), currentPage, post_position, postId.toString())
+                                viewModel.posr_id = post.id.toString()
+                                viewModel.scroll_position = position
+                                UserDataManager.postCommentSP(requireContext(), viewModel.currentPage, post_position, postId.toString())
                                 //Toast.makeText(requireContext(), "Comment at position $position", Toast.LENGTH_SHORT).show()
                                 viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString(), "1", "10")
                             }
@@ -385,14 +420,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             PostsAdapter.PostClickAction.POST_PROFILE -> {
                                 post_position = position
                                 //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
-                                UserDataManager.postMainSP(requireContext(), currentPage, post_position)
+                                //UserDataManager.postMainSP(requireContext(), currentPage, post_position)
                                 UserDataManager.postMainIsSetShow(requireContext(), true)
+                                viewModel.scroll_position = position
                                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", post.user_id.toString()))
                             }
                             PostsAdapter.PostClickAction.POST_PROFILE_NAME -> {
                                 post_position = position
+                                viewModel.scroll_position = position
                                 //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
-                                UserDataManager.postMainSP(requireContext(), currentPage, post_position)
+                                //UserDataManager.postMainSP(requireContext(), currentPage, post_position)
                                 UserDataManager.postMainIsSetShow(requireContext(), true)
                                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", post.user_id.toString()))
                             }
@@ -427,8 +464,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 }
                                 try {
                                     post_position = position
+                                    viewModel.scroll_position = position
                                     //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
-                                    UserDataManager.postMainSP(requireContext(), currentPage, post_position)
+                                    //UserDataManager.postMainSP(requireContext(), currentPage, post_position)
                                     UserDataManager.postMainIsSetShow(requireContext(), true)
                                     findNavController().navigate(R.id.secondStoryFragment, bundle)
                                 } catch (e: Exception) {
@@ -652,11 +690,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun setObserver() {
-        if(UserDataManager.get_postCommentShow(requireContext()) || UserDataManager.get_postMainIsShow(requireContext())){
-            binding.progressBar.isVisible=false
-        }else{
-            binding.progressBar.isVisible=true
-        }
+//        if(UserDataManager.get_postCommentShow(requireContext()) || UserDataManager.get_postMainIsShow(requireContext())){
+//            binding.progressBar.isVisible=false
+//        }else{
+//            binding.progressBar.isVisible=true
+//        }
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -664,40 +702,44 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            isRefreshedFromMenu=false
-                            isHomeDataLoaded=true
-                            isMediaUploaded = it.data.payload.is_story_uploaded
-                            myStoryData = it.data.payload.my_story ?: MyStory()
-                            allStory = it.data.payload.stories
-                            binding.storiesRecycler.adapter = AdapterStoriesRecycler( it.data.payload.is_story_uploaded, it.data.payload.my_story ?: MyStory(), it.data.payload.stories,  ::getSelectedStory, it.data.payload.myProfile.profileImage)
-                            if (it.data.payload.posts.isNotEmpty()){
-                                postAdapter.setPosts(it.data.payload.posts,
-                                    listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
-                                if (currentPage == 1) {
-                                    if (it.data.payload.posts.size > 0){
-                                        postAdapter.clearList()
-                                        postAdapter.setPosts(it.data.payload.posts,
-                                            listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
-                                        //postAdapter.addPosts(it.data.payload.posts.toMutableList(),
-                                            //listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
-                                    }else{
-                                        postAdapter.clearList()
-                                    }
-                                } else {
-                                    postAdapter.clearList()
-                                    postAdapter.setPosts(it.data.payload.posts.toMutableList(),
-                                        listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
-                                }
+                        if (it.data.code == 200) {
+
+                            // ✅ SAVE EVERYTHING IN VIEWMODEL
+                            viewModel.myStory = it.data.payload.my_story ?: MyStory()
+                            viewModel.stories = it.data.payload.stories
+                            viewModel.isStoryUploaded = it.data.payload.is_story_uploaded
+                            viewModel.profileImage = it.data.payload.myProfile.profileImage
+
+                            if (viewModel.currentPage == 1) {
+                                viewModel.postsCache.clear()
+                                viewModel.postsCache.addAll(it.data.payload.posts)
+
+                                postAdapter.clearList()
+                                postAdapter.setPosts(
+                                    it.data.payload.posts,
+                                    listOf(viewModel.myStory ?: MyStory()),
+                                    viewModel.stories
+                                )
+                            } else {
+                                viewModel.postsCache.addAll(it.data.payload.posts)
+
+                                postAdapter.addPosts(
+                                    it.data.payload.posts.toMutableList(),
+                                    listOf(viewModel.myStory ?: MyStory()),
+                                    viewModel.stories
+                                )
                             }
-                            if(it.data.payload.unreadNotificationCount==0){
-//                                binding.notificationButton.setImageResource(R.drawable.notification_bell)
-                                binding.notificationDot.isVisible=false
-                            }else{
-//                                binding.notificationButton.setImageResource(R.drawable.notification_bell_with_dot)
-                                binding.notificationDot.isVisible=true
-                            }
-                            isLoadingMore = false  // ← Reset after success
+
+                            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
+                                viewModel.isStoryUploaded,
+                                viewModel.myStory ?: MyStory(),
+                                viewModel.stories,
+                                ::getSelectedStory,
+                                viewModel.profileImage
+                            )
+
+                            viewModel.isHomeDataLoaded = true
+                            isLoadingMore = false
                         }else{
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                             isLoadingMore = false  // ← Reset on error too
@@ -722,7 +764,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     Log.e("TAG", "Add story success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         if (it.data.code == 200){
-                            hitServiceListApi(currentPage, selectedGender)
+                            hitServiceListApi(viewModel.currentPage, selectedGender)
                         }else{
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
@@ -751,7 +793,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
                     }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
 //                    ProcessDialog.dismissDialog(true)
                 }
@@ -816,7 +858,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             isCommentPosted = true
                             adapter?.updateCommentCount(positionToComment)
                             viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
-                            hitServiceListApi(currentPage, 0)
+                            hitServiceListApi(viewModel.currentPage, 0)
                         }else{
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
@@ -976,17 +1018,27 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         scrollListener = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        // Delay to ensure keyboard has fully closed
-        view?.postDelayed({
-            (requireActivity() as HomeActivity).fullyResetFloatingButton()
-        }, 100)
-    }
-
     override fun onPause() {
         super.onPause()
+        viewModel.scrollY = binding.nestedScrollView.scrollY
+    }
+
+    override fun onResume() {
+        super.onResume()
+        scrollToRecyclerPosition(viewModel.scroll_position)
+        if(UserDataManager.get_postCommentShow(requireContext())){
+            binding.swipeRefresh.isRefreshing = false
+            UserDataManager.postCommentIsShow(requireContext(), false)
+            retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+        }
+        if(UserDataManager.get_postMainIsShow(requireContext())){
+            binding.swipeRefresh.isRefreshing = false
+            UserDataManager.postMainIsSetShow(requireContext(), false)
+        }
+
+//        binding.nestedScrollView.post {
+//            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
+//        }
     }
 
     private fun openCommentsBottomSheet(payload: Payload) {

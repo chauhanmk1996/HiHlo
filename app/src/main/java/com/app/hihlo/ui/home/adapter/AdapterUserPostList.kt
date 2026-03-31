@@ -2,18 +2,22 @@ package com.app.hihlo.ui.home.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.TextUtils
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.text.style.MetricAffectingSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
@@ -26,6 +30,7 @@ import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter.CustomTypefaceSpan
 import com.app.hihlo.utils.RTVariable
 import com.bumptech.glide.Glide
 
@@ -253,7 +258,20 @@ class AdapterUserPostList(
                             val spannable = SpannableStringBuilder(fullText)
                             val lessText = " Less"
                             spannable.append(lessText)
-
+                            val typeface = ResourcesCompat.getFont(
+                                root.context,
+                                R.font.manrope_bold
+                            )
+                            typeface?.let {
+                                fullText?.let { it1 ->
+                                    spannable.setSpan(
+                                        CustomTypefaceSpan(it),
+                                        it1.length,
+                                        spannable.length,
+                                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                                    )
+                                }
+                            }
                             val clickableSpan = object : ClickableSpan() {
                                 override fun onClick(widget: View) {
                                     // "Less" clicked → collapse
@@ -287,7 +305,7 @@ class AdapterUserPostList(
                         moreLessText.visibility = View.GONE
                     }
                     val story = storiesList?.find { story -> story.user_id == profilePosts.data[position].user_id }
-                    Log.e("TTTTT", "SSSSS>>> "+story)
+                    //Log.e("TTTTT", "SSSSS>>> "+story)
                     userImageCardView.background =
                         if(profilePosts.data[position].is_story_uploaded==1){
                             /*val padding = 6.toPx(root.context)
@@ -381,7 +399,53 @@ class AdapterUserPostList(
                         }
                         getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions)
                     }
+                    btnLike.setOnClickListener {
+                        if (profilePosts.data[position].isLiked == 1) {
+                            profilePosts.data[position].isLiked = 2
+                            if (profilePosts.data[position].likesCount != null) {
+                                profilePosts.data[position].likesCount = profilePosts.data[position].likesCount?.minus(1)
+                                likesCount.text = profilePosts.data[position].likesCount.toString()
+                            }
+                            Glide.with(root.context).load(R.drawable.btn_heart_normal).into(likeImage)
+                            likeImage.scaleX = 1f
+                            likeImage.scaleY = 1f
+                            likeImage.alpha = 1f
+                        } else {
+                            profilePosts.data[position].isLiked = 1
+                            if (profilePosts.data[position].likesCount != null) {
+                                profilePosts.data[position].likesCount = profilePosts.data[position].likesCount?.plus(1)
+                                likesCount.text = profilePosts.data[position].likesCount.toString()
+                            }
+                            Glide.with(root.context).load(R.drawable.btn_heart_fill).into(likeImage)
+                            likeImage.apply {
+                                scaleX = 0.7f
+                                scaleY = 0.7f
+                                alpha = 0.5f
+                                animate()
+                                    .scaleX(1.4f)
+                                    .scaleY(1.4f)
+                                    .alpha(1f)
+                                    .setDuration(180)
+                                    .withEndAction {
+                                        animate()
+                                            .scaleX(1f)
+                                            .scaleY(1f)
+                                            .setDuration(180)
+                                            .start()
+                                    }
+                                    .start()
+                            }
+                        }
+                        getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions)
+                    }
                     commentImage.setOnClickListener {
+                        RTVariable.POST_POSITION = position
+                        RTVariable.POST_ID = profilePosts.data[position].id.toString()
+                        RTVariable.COMMENT_FROM = false
+                        //Toast.makeText(root.context, "P ${profilePosts.data[position].id}", Toast.LENGTH_SHORT).show()
+                        getSelectedPost(Post(), profilePosts.data[position], 3, position, sideOptions)
+                    }
+                    btnComment.setOnClickListener {
                         RTVariable.POST_POSITION = position
                         RTVariable.POST_ID = profilePosts.data[position].id.toString()
                         RTVariable.COMMENT_FROM = false
@@ -405,6 +469,22 @@ class AdapterUserPostList(
                     }
                 }
             }
+        }
+    }
+
+    class CustomTypefaceSpan(private val typeface: Typeface) : MetricAffectingSpan() {
+
+        override fun updateDrawState(tp: TextPaint) {
+            apply(tp)
+        }
+
+        override fun updateMeasureState(tp: TextPaint) {
+            apply(tp)
+        }
+
+        private fun apply(paint: TextPaint) {
+            paint.typeface = typeface
+            paint.flags = paint.flags or Paint.SUBPIXEL_TEXT_FLAG
         }
     }
 

@@ -13,11 +13,28 @@ import javax.inject.Inject
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
 import com.app.hihlo.model.home.response.HomeResponse
+import com.app.hihlo.model.home.response.MyStory
+import com.app.hihlo.model.home.response.Post
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.network_call.repository.ApiRepository
 
 @HiltViewModel
 class HomeViewModel @Inject constructor():ViewModel() {
 
+    var isHomeDataLoaded = false
+
+    var postsCache: MutableList<Post> = mutableListOf()
+
+    var myStory: MyStory? = null
+    var stories: List<Story> = emptyList()
+    var isStoryUploaded: Int = 0
+    var profileImage: String = ""
+
+    var currentPage = 1
+    var scroll_position: Int = 0
+    var posr_id: String = ""
+
+    var scrollY = 0
     private val homeLiveDate = SingleLiveEvent<Resources<HomeResponse>>()
     private val genderListLiveData = SingleLiveEvent<Resources<GenderListResponse>>()
     fun getGenderLiveData(): LiveData<Resources<GenderListResponse>> {

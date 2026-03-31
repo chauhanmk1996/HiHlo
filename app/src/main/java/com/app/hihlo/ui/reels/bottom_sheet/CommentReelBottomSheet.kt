@@ -266,6 +266,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                         d.dismiss()
                     }
                     .setNegativeButton("Cancel") { d, _ ->
+                        adapter.cancelSection()
                         d.dismiss()
                     }
                     .create()
