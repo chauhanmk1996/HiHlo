@@ -33,6 +33,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import androidx.core.graphics.toColorInt
+import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 
 class AdapterComments(
     var comments: MutableList<Comment>,
@@ -41,7 +42,8 @@ class AdapterComments(
     val onReplySelected: (commentId: Int) -> Unit,
     val onProfileSelected: (commentId: Int) -> Unit,
     val onMentionClick: (user_id: String) -> Unit,
-    val commentsRecycler: RecyclerView
+    val commentsRecycler: RecyclerView,
+    private val viewModel: UserPostListViewModel
 ) : RecyclerView.Adapter<AdapterComments.ViewHolder>() {
 
     private var selectedPosition: Int = -1
@@ -76,11 +78,12 @@ class AdapterComments(
             name.text = commentItem.user?.username
             userId.isVisible = false
             comment.text = commentItem.comment
-            if(commentItem.user?.isCreator?.toInt() == 1){
-                verifiedNameTick.isVisible = true
-            }else{
-                verifiedNameTick.isVisible = false
-            }
+            verifiedNameTick.isVisible = commentItem.user?.isCreator?.toInt() == 2
+//            if(commentItem.user?.isCreator?.toInt() == 1){
+//                verifiedNameTick.isVisible = true
+//            }else{
+//                verifiedNameTick.isVisible = false
+//            }
 
             // ----- Reply Visibility Logic -----
             val totalReplies = commentItem.replies?.size ?: 0
@@ -106,9 +109,13 @@ class AdapterComments(
                     onDeleteClick(true, commentItem.id, replyId)
                 },
                 onReplyProfileSelected = { user_id ->
+                    UserDataManager.postCommentPosition(root.context, position)
+                    UserDataManager.setCommentToScroll(root.context, true)
                     onProfileSelected(user_id)
                 },
                 onMentionClick = { user_name ->
+                    UserDataManager.postCommentPosition(root.context, position)
+                    UserDataManager.setCommentToScroll(root.context, true)
                     onMentionClick(user_name)
                 }
             )
@@ -299,6 +306,8 @@ class AdapterComments(
 //                    .setLaunchSingleTop(true)
 //                    .setRestoreState(true)
 //                    .build()
+                UserDataManager.postCommentPosition(root.context, position)
+                UserDataManager.setCommentToScroll(root.context, true)
                 UserDataManager.postCommentIsShow(root.context, true)
                 onProfileSelected(commentItem.user?.id ?: -1)
             }
@@ -307,6 +316,8 @@ class AdapterComments(
 //                    .setLaunchSingleTop(true)
 //                    .setRestoreState(true)
 //                    .build()
+                UserDataManager.postCommentPosition(root.context, position)
+                UserDataManager.setCommentToScroll(root.context, true)
                 UserDataManager.postCommentIsShow(root.context, true)
                 onProfileSelected(commentItem.user?.id ?: -1)
             }

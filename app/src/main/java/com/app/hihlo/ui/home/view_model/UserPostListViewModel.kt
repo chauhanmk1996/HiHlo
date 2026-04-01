@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.common_response.CommonResponse
+import com.app.hihlo.model.get_reel_comments.response.Payload
 import com.app.hihlo.model.get_reel_comments.response.ReelCommentsResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.post_comments.response.PostCommentsResponse
@@ -18,6 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserPostListViewModel @Inject constructor() : ViewModel(){
+
+    var commentPayloadCache: Payload? = null
+    var scroll_position: Int = 0
     private val getReelCommentsLiveDate = SingleLiveEvent<Resources<ReelCommentsResponse>>()
 
     fun getReelCommentsLiveData(): LiveData<Resources<ReelCommentsResponse>> {

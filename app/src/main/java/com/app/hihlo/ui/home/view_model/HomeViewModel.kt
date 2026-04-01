@@ -16,6 +16,7 @@ import com.app.hihlo.model.home.response.HomeResponse
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Post
 import com.app.hihlo.model.home.response.Story
+import com.app.hihlo.model.get_reel_comments.response.Payload
 import com.app.hihlo.network_call.repository.ApiRepository
 
 @HiltViewModel

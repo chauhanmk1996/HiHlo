@@ -71,11 +71,12 @@ class AdapterCommentsReply(
 //            userId.text = replies[position].user.username
             userId.isVisible=false
             var user_id = replies?.get(position)?.user?.id
-            if(replies?.get(position)?.user?.isCreator?.toInt() == 1){
-                verifiedNameTick.isVisible = true
-            }else{
-                verifiedNameTick.isVisible = false
-            }
+            verifiedNameTick.isVisible = replies?.get(position)?.user?.isCreator?.toInt() == 2
+//            if(replies?.get(position)?.user?.isCreator?.toInt() == 1){
+//                verifiedNameTick.isVisible = true
+//            }else{
+//                verifiedNameTick.isVisible = false
+//            }
 //            userLocation.text = replies[position]?.user?.city+", "+replies[position]?.user?.country
             //comment.text = replies[position].reply
             //var data = "https://d38vqutibeq2uv.cloudfront.net/1757159096618####@@@@####@hihlo####@@@@####hloo you"

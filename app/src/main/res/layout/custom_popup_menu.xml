@@ -11,7 +11,7 @@
         android:layout_width="130dp"
         android:layout_marginTop="1dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="40dp"
+        android:layout_marginEnd="0dp"
         android:background="@drawable/background_black_with_stroke_with_border">
 
         <LinearLayout

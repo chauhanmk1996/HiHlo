@@ -23,6 +23,8 @@ object RTVariable {
 
     var INNER_COMMENT_POSITION: Int = 0
 
+    var ISHOMECLICKED: Boolean = false
+
     // Post Comment Remember
     var P_POSITION: Int = 0
     var P_PID: String = ""

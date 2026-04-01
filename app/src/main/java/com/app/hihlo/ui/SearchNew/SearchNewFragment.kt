@@ -154,13 +154,13 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         Log.e("KEYBOARD", "Keyboard is CLOSED")
                         val query = binding.searchEdittext?.text?.toString()?.trim() ?: ""
                         if (query.isEmpty()) {
-                            binding.searchEdittext.setText("")
-                            search_adapter.clearList()
+                            //binding.searchEdittext.setText("")
+                            //search_adapter.clearList()
                             isSearchStarted = false
-                            binding.searchRecycler.visibility = View.GONE
-                            binding.creatorsRecycler.visibility = View.VISIBLE
-                            binding.allButtonContainer.isVisible = true
-                            binding.homeFilterGenderRecycler.isVisible=false
+                            //binding.searchRecycler.visibility = View.GONE
+                            //binding.creatorsRecycler.visibility = View.VISIBLE
+                            //binding.allButtonContainer.isVisible = true
+                            //binding.homeFilterGenderRecycler.isVisible=false
                             //val text = binding.searchEdittext.text.toString().trim()
                         }
                     }
@@ -270,16 +270,16 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             val query = it?.toString()?.trim() ?: ""
             if (query.isEmpty()) {
                 isSearchStarted = false
-                binding.crossButton.visibility = View.GONE
-                binding.searchRecycler.visibility = View.GONE
+                //binding.crossButton.visibility = View.GONE
+                //binding.searchRecycler.visibility = View.GONE
                 binding.creatorsRecycler.visibility = View.VISIBLE
-                binding.allButtonContainer.isVisible = true
+                //binding.allButtonContainer.isVisible = true
                 binding.homeFilterGenderRecycler.isVisible=false
-                val text = binding.searchEdittext.text.toString().trim()
-                if (text.isEmpty()) {
-                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(binding.searchEdittext.windowToken, 0)
-                }
+                //val text = binding.searchEdittext.text.toString().trim()
+//                if (text.isEmpty()) {
+//                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//                    imm.hideSoftInputFromWindow(binding.searchEdittext.windowToken, 0)
+//                }
             }else{
                 isSearchStarted = true
                 binding.crossButton.visibility = View.VISIBLE
@@ -386,6 +386,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 binding.allButtonContainer.isVisible = false
                 binding.homeFilterGenderRecycler.isVisible=false
                 binding.crossButton.isVisible = true
+                binding.backBtn.isVisible = true
                 binding.searchEdittext.apply {
                     isFocusable = true
                     isFocusableInTouchMode = true
@@ -399,6 +400,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             binding.allButtonContainer.isVisible = false
             binding.homeFilterGenderRecycler.isVisible=false
             binding.crossButton.isVisible = true
+            binding.backBtn.isVisible = true
             binding.searchEdittext.apply {
                 isFocusable = true
                 isFocusableInTouchMode = true
@@ -408,12 +410,23 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }
         binding.crossButton.setOnClickListener {
             binding.searchEdittext.setText("")
+            //search_adapter.clearList()
+            isSearchStarted = false
+            //binding.searchRecycler.visibility = View.GONE
+            //binding.creatorsRecycler.visibility = View.VISIBLE
+            //binding.allButtonContainer.isVisible = true
+            binding.homeFilterGenderRecycler.isVisible=false
+        }
+        binding.backBtn.setOnClickListener {
+            binding.searchEdittext.setText("")
             search_adapter.clearList()
             isSearchStarted = false
             binding.searchRecycler.visibility = View.GONE
             binding.creatorsRecycler.visibility = View.VISIBLE
             binding.allButtonContainer.isVisible = true
             binding.homeFilterGenderRecycler.isVisible=false
+            binding.crossButton.isVisible = false
+            binding.backBtn.isVisible = false
             val text = binding.searchEdittext.text.toString().trim()
             if (text.isEmpty()) {
                 val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -427,7 +440,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         val popupView = inflater.inflate(R.layout.custom_popup_menu, null)
         val popupWindow = PopupWindow(
             popupView,
-            (140 * activity.resources.displayMetrics.density).toInt() + 40,
+            (140 * activity.resources.displayMetrics.density).toInt() + 8,
             LinearLayout.LayoutParams.WRAP_CONTENT,
             true
         )

@@ -59,6 +59,7 @@ import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.ui.HomeNew.HomeNewFragment
 import com.app.hihlo.ui.calling.CallStateHolder
 import com.app.hihlo.ui.calling.view_model.CallStateViewModel
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -357,12 +358,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
 
 
 
-    fun setUserProfileImageWithStroke(
-        context: Context,
-        bottomNavView: BottomNavigationView,
-        imageUrl: String,
-        isSelected: Boolean = false
-    ) {
+    fun setUserProfileImageWithStroke(context: Context, bottomNavView: BottomNavigationView, imageUrl: String, isSelected: Boolean = false) {
         if (imageUrl.isBlank()) {
             val drawable = AppCompatResources.getDrawable(context, R.drawable.profile_icon)
             drawable?.setTint(ContextCompat.getColor(context, if (isSelected) R.color.theme else R.color.white)) // Apply your theme color here
@@ -416,9 +412,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
 
         return BitmapDrawable(context.resources, output)
     }
-
-
-
 
     private fun navigationMenuClickListener() {
         binding.bottomNavigationView.itemIconTintList = null

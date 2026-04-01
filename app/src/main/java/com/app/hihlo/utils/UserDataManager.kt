@@ -127,4 +127,30 @@ object UserDataManager {
         return prefs.getBoolean("com.HHA_P_C_SHOW", false)
     }
 
+    fun postCommentPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_COMMENT_POSITION", position)
+            apply()
+        }
+    }
+
+    fun get_CommentPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_COMMENT_POSITION", 0)
+    }
+
+    fun setCommentToScroll(context: Context, show: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_P_C_CommentIsScroll", show)
+            apply()
+        }
+    }
+
+    fun isCommentToScroll(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_P_C_CommentIsScroll", false)
+    }
+
 }

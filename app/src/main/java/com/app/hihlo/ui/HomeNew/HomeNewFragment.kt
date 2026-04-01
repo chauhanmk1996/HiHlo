@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Parcelable
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
@@ -31,6 +32,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
@@ -124,10 +126,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
 
     override fun initView(savedInstanceState: Bundle?) {
-        //viewModel.hitGenderListApi()
+        viewModel.hitGenderListApi()
+        binding.swipeRefresh.setColorSchemeColors(
+            ContextCompat.getColor(requireContext(), R.color.white)
+        )
+        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
+            ContextCompat.getColor(requireContext(), R.color.white_10)
+        )
+        binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
         if (!viewModel.isHomeDataLoaded) {
-            binding.progressBar.isVisible=true
+            binding.progressBar.isVisible = false
             viewModel.currentPage = 1
+            binding.swipeRefresh.isRefreshing = true
             hitServiceListApi(viewModel.currentPage, 0)
         }
 //        if (!viewModel.isHomeDataLoaded) {
@@ -203,11 +213,20 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
             }
         }
-        binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
-        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
+        //binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
+        //binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
+//        binding.swipeRefresh.post {
+//            val toolbarHeight = binding.headerLayout.height
+//
+//            binding.swipeRefresh.setProgressViewOffset(
+//                false,
+//                toolbarHeight,
+//                toolbarHeight + dpToPx(60)
+//            )
+//        }
         binding.swipeRefresh.setOnRefreshListener {
-            binding.swipeRefresh.isRefreshing = false
-            binding.progressBar.isVisible = true
+            binding.swipeRefresh.isRefreshing = true
+            binding.progressBar.isVisible = false
             refreshData()
         }
         requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
@@ -215,7 +234,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             isRefreshedFromMenu = true
             allStory?.toMutableList()?.clear()
             viewModel.currentPage = 1
-            binding.progressBar.isVisible=true
+            binding.progressBar.isVisible=false
+            binding.swipeRefresh.isRefreshing = true
             if (binding.nestedScrollView.scrollY == 0) {
                 hitServiceListApi(viewModel.currentPage, selectedGender)
             } else {
@@ -245,6 +265,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
+    fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
     fun scrollToRecyclerPosition(position: Int) {
         binding.postListRecycler.post {
             val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager
@@ -269,25 +293,19 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 val token = Preferences
                     .getCustomModelPreference<LoginResponse>(context, LOGIN_DATA)
                     ?.payload?.authToken
-
                 Log.e("RETAIN", "TOKEN>>> $token")
-
                 val response = RetrofitBuilder.apiService.getPostComments(
                     token = "Bearer $token",
                     postId = postId,
                     page = page,
                     limit = limit
                 )
-
                 Log.e("RETAIN", "RESPONSE>>> ${Gson().toJson(response)}")
-
                 if (response.status == 1 && response.code == 200) {
                     val payload = response.payload
-
                     delay(200)
                     openCommentsBottomSheet(payload)
                 }
-
             } catch (e: Exception) {
                 //Log.e("RETAIN_ERROR", "ERROR>>> ${e.message}", e)
             }
@@ -299,7 +317,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             allStory?.toMutableList()?.clear()
             viewModel.currentPage = 1
             hitServiceListApi(viewModel.currentPage, 0)
-            binding.swipeRefresh.isRefreshing = false
         }, 1000)
     }
 
@@ -699,21 +716,19 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     binding.progressBar.isVisible = false
+                    binding.swipeRefresh.isRefreshing = false
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         if (it.data.code == 200) {
-
                             // ✅ SAVE EVERYTHING IN VIEWMODEL
                             viewModel.myStory = it.data.payload.my_story ?: MyStory()
                             viewModel.stories = it.data.payload.stories
                             viewModel.isStoryUploaded = it.data.payload.is_story_uploaded
                             viewModel.profileImage = it.data.payload.myProfile.profileImage
-
                             if (viewModel.currentPage == 1) {
                                 viewModel.postsCache.clear()
                                 viewModel.postsCache.addAll(it.data.payload.posts)
-
                                 postAdapter.clearList()
                                 postAdapter.setPosts(
                                     it.data.payload.posts,
@@ -722,14 +737,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 )
                             } else {
                                 viewModel.postsCache.addAll(it.data.payload.posts)
-
                                 postAdapter.addPosts(
                                     it.data.payload.posts.toMutableList(),
                                     listOf(viewModel.myStory ?: MyStory()),
                                     viewModel.stories
                                 )
                             }
-
                             binding.storiesRecycler.adapter = AdapterStoriesRecycler(
                                 viewModel.isStoryUploaded,
                                 viewModel.myStory ?: MyStory(),
@@ -737,7 +750,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 ::getSelectedStory,
                                 viewModel.profileImage
                             )
-
                             viewModel.isHomeDataLoaded = true
                             isLoadingMore = false
                         }else{
@@ -811,18 +823,31 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
                     if (it.data?.code == 200) {
-                        val payload = it.data.payload ?: Payload()
+                        val payload = it.data.payload ?: return@observe
                         if (isCommentPosted) {
                             isCommentPosted = false
+                            viewModel2.commentPayloadCache = payload
                             if (::commentsBottomSheetFragment.isInitialized) {
                                 commentsBottomSheetFragment.updateComments(payload)
                             }
                         } else if (isLoadMore) {
                             isLoadMore = false
-                            if (::commentsBottomSheetFragment.isInitialized) {
-                                commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+                            val oldPayload = viewModel2.commentPayloadCache
+                            if (oldPayload != null) {
+                                val mergedComments =
+                                    (oldPayload.comments ?: emptyList()) + (payload.comments ?: emptyList())
+                                val updatedPayload = oldPayload.copy(
+                                    comments = mergedComments
+                                )
+                                viewModel2.commentPayloadCache = updatedPayload
+                                if (::commentsBottomSheetFragment.isInitialized) {
+                                    commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+                                }
+                            } else {
+                                viewModel2.commentPayloadCache = payload
                             }
                         } else {
+                            viewModel2.commentPayloadCache = payload
                             openCommentsBottomSheet(payload)
                         }
 //                        binding.postListRecycler.post {
@@ -1029,7 +1054,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         if(UserDataManager.get_postCommentShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postCommentIsShow(requireContext(), false)
-            retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+            openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+            //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
         }
         if(UserDataManager.get_postMainIsShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
@@ -1045,6 +1071,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         commentsBottomSheetFragment = CommentReelBottomSheet().apply {
             arguments = Bundle().apply {
                 putParcelable("comments", payload)
+                putParcelableArrayList("stories", ArrayList(viewModel.stories))
             }
             onCommentAction = { result ->
                 isCommentPosted = true // Set flag before post

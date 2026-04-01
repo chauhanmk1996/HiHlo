@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.databinding.BottomSheetLayoutBinding
@@ -26,6 +27,7 @@ import com.app.hihlo.model.reply_to_comment.request.ReplyToCommentRequest
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.HomeNewFragmentDirections
+import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 import com.app.hihlo.ui.reels.adapter.AdapterComments
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.toPx
@@ -36,6 +38,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
+import kotlin.getValue
 
 class RoundedBottomSheet : BottomSheetDialogFragment() {
     private var _binding: BottomSheetLayoutBinding? = null
@@ -45,6 +48,7 @@ class RoundedBottomSheet : BottomSheetDialogFragment() {
     lateinit var adapter:AdapterComments
     var isReplySelected = false
     var commentId = ""
+    private val viewModel2: UserPostListViewModel by viewModels()
 
     override fun getTheme(): Int = R.style.BottomSheetDialogTheme
 
@@ -166,7 +170,8 @@ class RoundedBottomSheet : BottomSheetDialogFragment() {
             onMentionClick = { user_name ->
                 //Log.e("onMentionClick", "onMentionClick>>> "+user_name)
             },
-            binding.commentsRecycler
+            binding.commentsRecycler,
+            viewModel2
         )
         Glide.with(requireContext()).load(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.profileImage).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(binding.userImage)
         binding.commentsRecycler.adapter = adapter

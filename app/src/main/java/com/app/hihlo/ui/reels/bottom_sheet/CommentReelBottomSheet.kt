@@ -37,6 +37,7 @@ import com.app.hihlo.databinding.BottomSheetLayoutBinding
 import com.app.hihlo.model.delete_comment.DeleteToCommentRequest
 import com.app.hihlo.model.get_reel_comments.response.Comment
 import com.app.hihlo.model.get_reel_comments.response.Payload
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.reply_to_comment.request.ReplyToCommentRequest
@@ -207,6 +208,8 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val payload = arguments?.getParcelable<Payload>("comments")
+        val stories = arguments?.getParcelableArrayList<Story>("stories")
+        Log.i("TAG", "onViewCreated: " + stories)
         Log.i("TAG", "onViewCreated: " + payload)
         Log.i("TAG", "onViewCreated: BRS " + UserDataManager.get_postCommentShow(requireContext()))
         Log.i("TAG", "onViewCreated: BRPID " + UserDataManager.get_postCommentPid(requireContext()))
@@ -293,7 +296,8 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 Log.e("onMentionClick", "onMentionClick>>> "+user_name)
                 getUserId(user_name)
             },
-            binding.commentsRecycler
+            binding.commentsRecycler,
+            viewModel2
         )
         hasMore = initialComments.size >= limit
         Glide.with(requireContext()).load(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.profileImage).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(binding.userImage)
@@ -326,12 +330,18 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 if (isReplySelected) {
                     isReplySelected = false
                     var full_comment = RTVariable.REPLY_COMBINED_IMAGE_USERNAME+binding.commentReplyEdittext.text.toString()
+                    binding.commentReplyEdittext.setText("")
                     var request = ReplyToCommentRequest(reply = full_comment, commentId)
                     onReplyAction?.invoke(request)
                 } else {
+                    binding.commentReplyEdittext.setText("")
                     hitPostCommentApi()
                 }
             }
+        }
+        if(UserDataManager.isCommentToScroll(requireContext())){
+            UserDataManager.setCommentToScroll(requireContext(), false)
+            binding.commentsRecycler.scrollToPosition(UserDataManager.get_CommentPosition(requireContext()))
         }
         //binding.commentReplyEdittext.requestFocus()
     }
