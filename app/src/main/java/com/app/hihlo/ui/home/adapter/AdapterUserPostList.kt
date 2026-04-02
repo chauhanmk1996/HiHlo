@@ -95,7 +95,7 @@ class AdapterUserPostList(
                     } else {
                         Glide.with(root.context).load(R.drawable.btn_heart_normal).into(likeImage)
                     }
-                    if (homePosts[position].creatorDetail?.is_creator == 1) {
+                    if (homePosts[position].creatorDetail?.is_creator == 2) {
                         verifiedNameTick.isVisible = true
                     } else {
                         verifiedNameTick.isVisible = false
@@ -298,6 +298,11 @@ class AdapterUserPostList(
                             }
                             captionExpanded.text = spannable
                             captionExpanded.movementMethod = LinkMovementMethod.getInstance()
+                        }
+                        captionExpanded.setOnClickListener {
+                            captionExpanded.visibility = View.GONE
+                            captionCollapsed.visibility = View.VISIBLE
+                            moreLessText.visibility = View.VISIBLE
                         }
                     } else {
                         captionCollapsed.text = ""

@@ -37,6 +37,7 @@ import com.app.hihlo.databinding.BottomSheetLayoutBinding
 import com.app.hihlo.model.delete_comment.DeleteToCommentRequest
 import com.app.hihlo.model.get_reel_comments.response.Comment
 import com.app.hihlo.model.get_reel_comments.response.Payload
+import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
@@ -208,6 +209,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val payload = arguments?.getParcelable<Payload>("comments")
+        val myStory = arguments?.getParcelable<MyStory>("myStory")
         val stories = arguments?.getParcelableArrayList<Story>("stories")
         Log.i("TAG", "onViewCreated: " + stories)
         Log.i("TAG", "onViewCreated: " + payload)
@@ -217,6 +219,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         val initialComments = payload?.comments ?: listOf()
         adapter = AdapterComments(
             initialComments.toMutableList(),
+            stories,
             onReplyClick = { replyText, parentCommentId ->
                 val request = ReplyToCommentRequest(
                     reply = replyText,
@@ -292,6 +295,23 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 dismiss()
                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
             },
+            onProfileImageSelected = { user_id ->
+                val storyPosition = stories?.indexOfFirst { it.user_id == user_id }
+                val bundle = Bundle().apply {
+                    putParcelableArrayList("storyList", ArrayList(stories ?: emptyList()))
+                    putParcelable("myStoryData", myStory)
+                    putInt("position", storyPosition!!)
+                }
+                try {
+                    dismiss()
+                    findNavController().navigate(R.id.secondStoryFragment, bundle)
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                }
+                //dismiss()
+                //findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
+            },
             onMentionClick = { user_name ->
                 Log.e("onMentionClick", "onMentionClick>>> "+user_name)
                 getUserId(user_name)
@@ -324,18 +344,19 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
 
         setupPagination()
         binding.sendButton.setOnClickListener {
-            if (binding.commentReplyEdittext.text.isEmpty()) {
+            val message = binding.commentReplyEdittext.text.toString()
+            if (message.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
             } else {
                 if (isReplySelected) {
                     isReplySelected = false
-                    var full_comment = RTVariable.REPLY_COMBINED_IMAGE_USERNAME+binding.commentReplyEdittext.text.toString()
+                    var full_comment = RTVariable.REPLY_COMBINED_IMAGE_USERNAME+message
                     binding.commentReplyEdittext.setText("")
                     var request = ReplyToCommentRequest(reply = full_comment, commentId)
                     onReplyAction?.invoke(request)
                 } else {
                     binding.commentReplyEdittext.setText("")
-                    hitPostCommentApi()
+                    hitPostCommentApi(message)
                 }
             }
         }
@@ -394,8 +415,8 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    private fun hitPostCommentApi() {
-        var request = PostCommentsRequest(comment = binding.commentReplyEdittext.text.toString())
+    private fun hitPostCommentApi(message: String) {
+        var request = PostCommentsRequest(comment = message)
         onCommentAction?.invoke(request)
     }
 

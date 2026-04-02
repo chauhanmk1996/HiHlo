@@ -389,7 +389,6 @@ class PostsAdapter(
                     Glide.with(root.context).load(R.drawable.btn_heart_normal).into(likeImage)
                 }
                 if (!post.caption.isNullOrEmpty()) {
-                    //val fullText = "Effective post captions for English content should be concise, engaging, and directly related to the visual, often using a \"hook\" to grab attention within the first sentence. Popular styles include short, punchy phrases, or more detailed, storytelling paragraphs that provide context and value.".trim()
                     val fullText = post.caption
                     binding.captionCollapsed.text = fullText
                     binding.captionCollapsed.maxLines = 1
@@ -445,6 +444,11 @@ class PostsAdapter(
                         )
                         binding.captionExpanded.text = spannable
                         binding.captionExpanded.movementMethod = LinkMovementMethod.getInstance()
+                    }
+                    binding.captionExpanded.setOnClickListener {
+                        binding.captionExpanded.visibility = View.GONE
+                        binding.captionCollapsed.visibility = View.VISIBLE
+                        binding.moreLessText.visibility = View.VISIBLE
                     }
                 } else {
                     binding.captionCollapsed.text = ""

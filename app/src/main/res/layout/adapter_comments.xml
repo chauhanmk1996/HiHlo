@@ -19,25 +19,37 @@
             android:paddingTop="10dp"
             android:paddingStart="20dp">
 
-            <com.google.android.material.card.MaterialCardView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/userImageCardView"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="30dp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:strokeColor="@color/theme"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/gredient_circle"
+                app:cardCornerRadius="80dp"
+                android:padding="3dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:background="@color/transparent"
-                android:backgroundTint="@color/transparent">
+                app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
-                    android:id="@+id/userImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/sample_profile"
-                    android:scaleType="centerCrop" />
-            </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView
+
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center"
+                    app:cardCornerRadius="50dp"
+                    android:id="@+id/inner_card"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <ImageView
+                        android:id="@+id/userImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/sample_profile" />
+                </com.google.android.material.card.MaterialCardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:id="@+id/name_lay"

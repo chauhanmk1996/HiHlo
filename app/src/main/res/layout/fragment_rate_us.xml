@@ -41,10 +41,8 @@
                 android:fontFamily="@font/manrope_semibold"/>
         </LinearLayout>
 
-
         <ScrollView
             app:layout_constraintTop_toBottomOf="@id/llBack"
-            app:layout_constraintBottom_toTopOf="@id/submitLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:fillViewport="true">
@@ -166,7 +164,7 @@
                             <EditText
                                 android:id="@+id/etCharCount"
                                 android:layout_width="match_parent"
-                                android:layout_height="300dp"
+                                android:layout_height="130dp"
                                 android:gravity="start"
                                 android:imeOptions="actionDone"
                                 android:padding="15dp"
@@ -192,39 +190,32 @@
                                 android:layout_margin="10dp"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintEnd_toEndOf="parent"/>
+
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
                     </com.google.android.material.card.MaterialCardView>
 
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/updateButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Submit"
+                    android:fontFamily="@font/manrope_medium"
+                    android:textSize="18sp"
+                    android:paddingVertical="12dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="15dp"
+                    android:backgroundTint="@color/theme"
+                    style="@style/MyButtonStyle"
+                    app:layout_constraintTop_toBottomOf="@id/clReview"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </ScrollView>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/submitLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginBottom="15dp"
-            android:layout_marginHorizontal="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-            <com.google.android.material.button.MaterialButton
-                android:backgroundTint="@color/theme"
-                style="@style/MyButtonStyle"
-                android:fontFamily="@font/manrope_medium"
-                android:textSize="18sp"
-                android:id="@+id/updateButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Submit"
-                android:layout_marginTop="15dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:paddingVertical="12dp"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

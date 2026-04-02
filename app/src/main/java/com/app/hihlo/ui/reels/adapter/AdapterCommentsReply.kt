@@ -34,13 +34,16 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import androidx.core.graphics.toColorInt
+import com.app.hihlo.model.home.response.Story
 
 class AdapterCommentsReply(
     var comment_id: String,
     var replies: MutableList<Replies>,
+    val stories: ArrayList<Story>?,
     val onReplySelect: (String) -> Unit,               // optional — if you still want inline reply
     val onDeleteClick: (replyId: Int) -> Unit,
     val onReplyProfileSelected: (user_id: Int) -> Unit,// ← new
+    val onReplyProfileImageSelected: (user_id: Int) -> Unit,// ← new
     val onMentionClick: (user_id: String) -> Unit
 ) : RecyclerView.Adapter<AdapterCommentsReply.ViewHolder>() {
 
@@ -67,6 +70,18 @@ class AdapterCommentsReply(
                 .load(replies[position].user.profile_image)
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder).into(userImage)
+
+            val story = stories?.find { story -> story.user_id == replies[position].user.id }
+            userImageCardView.background =
+                if(replies[position].user.isStoryUploaded==1){
+                    if (story != null && story.is_seen == 0) {
+                        root.context.resources.getDrawable(R.drawable.gredient_circle, null)
+                    } else {
+                        root.context.resources.getDrawable(R.drawable.gredient_circle_black, null)
+                    }
+                }else{
+                    root.context.resources.getDrawable(R.drawable.gredient_circle_transparent, null)
+                }
             name.text = replies[position].user.username
 //            userId.text = replies[position].user.username
             userId.isVisible=false
@@ -215,8 +230,35 @@ class AdapterCommentsReply(
                 onReplySelect(comment_id)
             }
             holder.binding.userImage.setOnClickListener {
-                UserDataManager.postCommentIsShow(root.context, true)
-                user_id?.let { p1 -> onReplyProfileSelected(p1) }
+                var user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
+                if (replies?.get(position)?.user?.username==user){
+                    UserDataManager.postCommentPosition(root.context, position)
+                    UserDataManager.setCommentToScroll(root.context, true)
+                    UserDataManager.postCommentIsShow(root.context, true)
+                    onReplyProfileSelected(replies?.get(position)?.user?.id ?: -1)
+                }else{
+                    if(replies?.get(position)?.user?.isStoryUploaded==1){
+                        if (story != null && story.is_seen == 0) {
+                            UserDataManager.postCommentPosition(root.context, position)
+                            UserDataManager.setCommentToScroll(root.context, true)
+                            UserDataManager.postCommentIsShow(root.context, true)
+                            onReplyProfileImageSelected(replies?.get(position)?.user?.id ?: -1)
+                        } else {
+                            UserDataManager.postCommentPosition(root.context, position)
+                            UserDataManager.setCommentToScroll(root.context, true)
+                            UserDataManager.postCommentIsShow(root.context, true)
+                            onReplyProfileImageSelected(replies?.get(position)?.user?.id ?: -1)
+                        }
+                    }else{
+                        UserDataManager.postCommentPosition(root.context, position)
+                        UserDataManager.setCommentToScroll(root.context, true)
+                        UserDataManager.postCommentIsShow(root.context, true)
+                        onReplyProfileSelected(replies?.get(position)?.user?.id ?: -1)
+                    }
+                }
+
+                //UserDataManager.postCommentIsShow(root.context, true)
+                //user_id?.let { p1 -> onReplyProfileSelected(p1) }
             }
             holder.binding.name.setOnClickListener {
                 UserDataManager.postCommentIsShow(root.context, true)

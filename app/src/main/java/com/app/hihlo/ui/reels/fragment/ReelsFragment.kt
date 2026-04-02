@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +34,7 @@ import com.app.hihlo.databinding.FragmentReelsBinding
 import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.get_reel_comments.response.Comment
 import com.app.hihlo.model.get_reel_comments.response.Payload
+import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.model.reel.response.Reel
@@ -53,7 +55,9 @@ import com.app.hihlo.preferences.UserPreference.U_ID
 import com.app.hihlo.ui.calling.activity.OldOutgoingCallActivity
 import com.app.hihlo.ui.calling.activity.OutgoingVideoCallActivity
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
+import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
+import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.REQUEST_CODE_CROP_VIDEO
 import com.app.hihlo.ui.reels.adapter.ReelAdapter
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
@@ -84,6 +88,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
+import kotlin.collections.plus
 import kotlin.getValue
 import kotlin.toString
 
@@ -93,9 +98,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private lateinit var bottomSheetFragment: UploadMediaBottomSheet
     private lateinit var exoPlayer: ExoPlayer
     private lateinit var adapter: ReelAdapter
-    private var reelsList:MutableList<Reel> = mutableListOf()
+    private var reelsList: MutableList<Reel> = mutableListOf()
     private val viewModel: ReelsViewModel by viewModels()
-    private val viewModel2: ReelsViewModel by viewModels()
     private var reelId = ""
     private var userId = ""
     var isCommentPosted = false
@@ -105,20 +109,23 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private var callerName = ""
     private var callerImage = ""
     private var isLoading = false
-    private var currentPage=1
+    private var currentPage = 1
 
-    var totalAvailableCoins: Int?=null
+    var totalAvailableCoins: Int? = null
     private var isLoadMore = false
 
+    private val viewModel2: HomeViewModel by viewModels()
+
     //    private val args: ReelsFragmentArgs by navArgs()
-private val args by lazy {
-    try {
-        ReelsFragmentArgs.fromBundle(requireArguments())
-    } catch (e: Exception) {
-        null
+    private val args by lazy {
+        try {
+            ReelsFragmentArgs.fromBundle(requireArguments())
+        } catch (e: Exception) {
+            null
+        }
     }
-}
-//    private var profileReels: com.app.hihlo.model.reel.response.Payload = com.app.hihlo.model.reel.response.Payload()
+
+    //    private var profileReels: com.app.hihlo.model.reel.response.Payload = com.app.hihlo.model.reel.response.Payload()
     private var from = ""
     private var reelPosition = ""
     private var commentOnReelPosition = 0
@@ -182,85 +189,103 @@ private val args by lazy {
 
     override fun initView(savedInstanceState: Bundle?) {
         from = args?.from ?: "home"
-        Log.i("TAG", "initView: reelPosition "+reelPosition)
+        Log.i("TAG", "initView: reelPosition " + reelPosition)
 
         reelPosition = if (reelPosition.isNotEmpty()) reelPosition else args?.reelPosition ?: "0"
-        if (from=="profile"){
+        if (from == "profile") {
             reelsList = args?.reels?.reels ?: mutableListOf()
         }
+        viewModel2.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
         exoPlayer = ExoPlayer.Builder(requireContext()).build()
-        currentPage=1
+        currentPage = 1
         RTVariable.REELS_CURRENT_PAGE = 1
-        Log.i("TAG", "initView: "+reelsList)
-        Log.i("TAG", "initView: "+from)
-        if (from=="profile"){
+        Log.i("TAG", "initView: " + reelsList)
+        Log.i("TAG", "initView: " + from)
+        if (from == "profile") {
             viewPagerAdapter(mutableListOf())
             adapter.updateList(reelsList)
             lifecycleScope.launch {
                 delay(300) // delay in milliseconds
                 binding.viewPager.currentItem = reelPosition.toInt()
             }
-        }else if (reelsList.isNotEmpty()){
+        } else if (reelsList.isNotEmpty()) {
             viewPagerAdapter(mutableListOf())
             adapter.updateList(reelsList)
             lifecycleScope.launch {
                 delay(300) // delay in milliseconds
                 binding.viewPager.currentItem = reelPosition.toInt()
             }
-        } else{
+        } else {
             viewPagerAdapter(mutableListOf())
             hitGetReelsApi(currentPage)
             setReelsAdapterPagination()
         }
-        viewModel.hitCoinDetailsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
+        viewModel.hitCoinDetailsApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken
+        )
 
     }
 
     private fun hitGetReelsApi(currentPage: Int) {
         RTVariable.REELS_CURRENT_PAGE = currentPage
-        Log.e("PAGE", "PAGE>>> "+currentPage.toString())
-        viewModel.hitGetReelsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, currentPage.toString(), "6")
+        Log.e("PAGE", "PAGE>>> " + currentPage.toString())
+        viewModel.hitGetReelsApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, currentPage.toString(), "6"
+        )
     }
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_reels
     }
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-            setObserver()
-            viewPagerCallback()
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    while (true) {
-                        delay(1000)
-                        if(RTVariable.COMMENT_DELETED){
-                            RTVariable.COMMENT_DELETED = false
-                            hitGetReelsApi(currentPage)
-                            adapter.updateCommentCount(RTVariable.POST_POSITION, RTVariable.COMMENT_COUNT)
-                        }else{
-                            Log.e("RRRRR", "RRRRR>>>"+RTVariable.REELS_ID)
-                            getReels(currentPage, 6)
-                        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        setObserver()
+        viewPagerCallback()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(1000)
+                    if (RTVariable.COMMENT_DELETED) {
+                        RTVariable.COMMENT_DELETED = false
+                        hitGetReelsApi(currentPage)
+                        adapter.updateCommentCount(
+                            RTVariable.POST_POSITION,
+                            RTVariable.COMMENT_COUNT
+                        )
+                    } else {
+                        Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_ID)
+                        getReels(currentPage, 6)
                     }
                 }
             }
         }
+    }
 
-    private fun getReels(current_page: Int, limit: Int){
+    private fun getReels(current_page: Int, limit: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getReels(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     page = current_page.toString(),
                     limit = limit.toString()
                 )
                 if (response.status == 1 && response.code == 200) {
-                    if (response.payload.reels?.isNotEmpty() == true){
-                        val commentsCount = response.payload.reels?.find { reel -> reel.id == RTVariable.REELS_ID.toInt() }
-                            ?.commentsCount ?: 0
-                        Log.e("TTTTT", "TTTTT>>>"+commentsCount)
+                    if (response.payload.reels?.isNotEmpty() == true) {
+                        val commentsCount =
+                            response.payload.reels?.find { reel -> reel.id == RTVariable.REELS_ID.toInt() }
+                                ?.commentsCount ?: 0
+                        Log.e("TTTTT", "TTTTT>>>" + commentsCount)
                         adapter.updateCommentCount(RTVariable.POST_POSITION, commentsCount)
-                    }else{
+                    } else {
 
                     }
                 }
@@ -270,87 +295,144 @@ private val args by lazy {
         }
     }
 
-        private fun viewPagerAdapter(reels: MutableList<Reel>) {
-            adapter = ReelAdapter(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString() , reels, exoPlayer, ::followSelected, ::openUploadBottomSheet, ::openSideOptions, ::openProfile, ::shareReelSelected, from){ position, reelId, reelPosition, isLikedStatus ->
-                commentOnReelPosition=reelPosition
-                when(position){
-                    0->{
+    private fun viewPagerAdapter(reels: MutableList<Reel>) {
+        adapter = ReelAdapter(
+            Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.userId.toString(),
+            reels,
+            exoPlayer,
+            ::followSelected,
+            ::openUploadBottomSheet,
+            ::openSideOptions,
+            ::openProfile,
+            ::shareReelSelected,
+            from
+        ) { position, reelId, reelPosition, isLikedStatus ->
+            commentOnReelPosition = reelPosition
+            when (position) {
+                0 -> {
 //                        locally change the value of liked key and later hit this api only if internet is available
-                        reelsList[reelPosition].isLiked = if (isLikedStatus==1) 2 else 1
-                        adapter.updateLike(reelPosition, if (isLikedStatus==1) 2 else 1)
-                        viewModel.hitLikeReelApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString())
-                    }
-                    1->{
-    //                    openCommentsSection()
-                        this.reelId = reelId.toString()
-                        viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString(), "1", "10") // Initial call with page 1, limit 10
+                    reelsList[reelPosition].isLiked = if (isLikedStatus == 1) 2 else 1
+                    adapter.updateLike(reelPosition, if (isLikedStatus == 1) 2 else 1)
+                    viewModel.hitLikeReelApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken, reelId.toString()
+                    )
+                }
+
+                1 -> {
+                    //                    openCommentsSection()
+                    this.reelId = reelId.toString()
+                    viewModel.hitGetReelCommentsApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken, reelId.toString(), "1", "10"
+                    ) // Initial call with page 1, limit 10
 //                        viewModel.hitGetReelCommentsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString())
-                    }
-                    2->{
-                        openCoinsBottomSheet(reelId, reels[reelPosition].creatorId, reels[position].creator.name)
-                    }
-                    /*3->{
+                }
+
+                2 -> {
+                    openCoinsBottomSheet(
+                        reelId,
+                        reels[reelPosition].creatorId,
+                        reels[position].creator.name
+                    )
+                }
+                /*3->{
 //                        triggerPushNotification(reels[position].creatorId, reels[position].creator)
-                        if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId!=reels[reelPosition].creatorId){
-                            openCallTypeBottomSheet(reels[reelPosition].creatorId.toString(), reels[reelPosition].creator.name, reels[position].creator.profileImage)
-                        }else{
-                            Toast.makeText(requireContext(), "You cannot call yourself.", Toast.LENGTH_SHORT).show()
-                        }
-                    }*/
-                    3->{
-                        shareReel(reels[reelPosition].assetUrl)
+                    if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId!=reels[reelPosition].creatorId){
+                        openCallTypeBottomSheet(reels[reelPosition].creatorId.toString(), reels[reelPosition].creator.name, reels[position].creator.profileImage)
+                    }else{
+                        Toast.makeText(requireContext(), "You cannot call yourself.", Toast.LENGTH_SHORT).show()
                     }
-                    4->{
-                        if (userId==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){
+                }*/
+                3 -> {
+                    shareReel(reels[reelPosition].assetUrl)
+                }
+
+                4 -> {
+                    if (userId == Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.userId.toString()
+                    ) {
 //                            openDeletePostConfirmationDialog(reelId.toString(), view)
 
-                        }else{
+                    } else {
 //                            showOptionsPopup()
-                        }
                     }
                 }
             }
-            binding.viewPager.adapter = adapter
-            binding.viewPager.offscreenPageLimit = 3
-
-            exoPlayer.addListener(object : Player.Listener {
-                override fun onPlaybackStateChanged(state: Int) {
-                    val holder = adapter.currentViewHolder ?: return
-
-                    when (state) {
-                        Player.STATE_BUFFERING -> adapter?.currentViewHolder?.loader?.visibility = View.VISIBLE
-                        Player.STATE_READY -> adapter?.currentViewHolder?.loader?.visibility = View.GONE
-                        Player.STATE_ENDED -> {
-                            exoPlayer.seekTo(0)
-                            exoPlayer.playWhenReady = true
-                        }
-                        else -> {}
-                    }
-                }
-            })
         }
-    fun openSideOptions(reelId: Int, position: Int, view:View){
-        if (userId==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){
+        binding.viewPager.adapter = adapter
+        binding.viewPager.offscreenPageLimit = 3
+
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                adapter.currentViewHolder ?: return
+
+                when (state) {
+                    Player.STATE_BUFFERING -> adapter?.currentViewHolder?.loader?.visibility =
+                        View.VISIBLE
+
+                    Player.STATE_READY -> adapter?.currentViewHolder?.loader?.visibility = View.GONE
+                    Player.STATE_ENDED -> {
+                        exoPlayer.seekTo(0)
+                        exoPlayer.playWhenReady = true
+                    }
+
+                    else -> {}
+                }
+            }
+        })
+    }
+
+    fun openSideOptions(reelId: Int, position: Int, view: View) {
+        if (userId == Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.userId.toString()
+        ) {
             openDeletePostConfirmationDialog(reelId.toString(), view)
-        }else{
+        } else {
             showOptionsPopup(view)
         }
     }
-    fun openProfile(){
+
+    fun openProfile() {
         reelPosition = binding.viewPager.currentItem.toString()
-        findNavController().navigate(ReelsFragmentDirections.actionReelsFragmentToProfileFragment("0", reelsList[binding.viewPager.currentItem].creatorId.toString(), "reels"))
+        findNavController().navigate(
+            ReelsFragmentDirections.actionReelsFragmentToProfileFragment(
+                "0",
+                reelsList[binding.viewPager.currentItem].creatorId.toString(),
+                "reels"
+            )
+        )
     }
-    fun shareReelSelected(assetUrl: String){
+
+    fun shareReelSelected(assetUrl: String) {
         shareReel(assetUrl)
     }
+
     fun openDeletePostConfirmationDialog(reelId: String, view: View) {
         val popup = ReusablePopup(
             context = requireContext(),
             anchorView = view,
             onOption1Click = {
-                showCustomDialogWithBinding(requireContext(), "Are you sure you want to delete this reel?",
+                showCustomDialogWithBinding(
+                    requireContext(), "Are you sure you want to delete this reel?",
                     onYes = {
-                        viewModel.hitDeleteReelDataApi(token = "Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken.toString(),  reelId.toString())
+                        viewModel.hitDeleteReelDataApi(
+                            token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.authToken.toString(), reelId.toString()
+                        )
                     },
                     onNo = {
                         //dismiss()
@@ -365,6 +447,7 @@ private val args by lazy {
         )
         popup.show()
     }
+
     private fun openCoinsBottomSheet(reelId: Int, creatorId: Int, name: String) {
         val bottomSheetFragment = SendCoinsBottomSheetFragment(totalAvailableCoins).apply {
             onCoinsSelected = { data ->
@@ -374,19 +457,21 @@ private val args by lazy {
         }
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "")
     }
-    fun openSendCoinsDialog(
-        data: RechargePackageListResponse.Payload,
-        reelId: Int,
-        creatorId: Int,
-        name: String
-    ) {
-        showCustomDialogWithBinding(requireContext(), "Do you want to send ${data.coins} coins to ${name}",
+
+    fun openSendCoinsDialog(data: RechargePackageListResponse.Payload, reelId: Int, creatorId: Int, name: String) {
+        showCustomDialogWithBinding(
+            requireContext(), "Do you want to send ${data.coins} coins to ${name}",
             onYes = {
                 viewModel.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                         MyApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
-                    SendGiftRequest(coins = data.coins.toString(), recipientId = creatorId.toString(), type = "reel", reelId = reelId.toString())
+                    SendGiftRequest(
+                        coins = data.coins.toString(),
+                        recipientId = creatorId.toString(),
+                        type = "reel",
+                        reelId = reelId.toString()
+                    )
                 )
             },
             onNo = {
@@ -394,6 +479,7 @@ private val args by lazy {
             }
         )
     }
+
     private fun setReelsAdapterPagination() {
 
     }
@@ -423,7 +509,8 @@ private val args by lazy {
                     imageFile
                 )
 
-                val appLink = "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
+                val appLink =
+                    "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
 
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
@@ -436,7 +523,8 @@ private val args by lazy {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(requireContext(), "Thumbnail sharing failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Thumbnail sharing failed", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -447,19 +535,60 @@ private val args by lazy {
             callerImage = profileImage
             onCallTypeSelected = {
                 dismiss()
-                when(it){
-                    0->{
-                        if ((totalAvailableCoins ?: 0) > MIN_COINS_FOR_AUDIO){
-                            viewModel.hitGenerateAgoraTokenDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, channelName = UUID.randomUUID().toString(), calleeId = createrId, uid = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString(), "audio", sender_id = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString())
-                        }else{
-                            Toast.makeText(requireContext(), "You need atleast $MIN_COINS_FOR_AUDIO coins to make an Audio Call.", Toast.LENGTH_SHORT).show()
+                when (it) {
+                    0 -> {
+                        if ((totalAvailableCoins ?: 0) > MIN_COINS_FOR_AUDIO) {
+                            viewModel.hitGenerateAgoraTokenDataApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken,
+                                channelName = UUID.randomUUID().toString(),
+                                calleeId = createrId,
+                                uid = Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.userId.toString(),
+                                "audio",
+                                sender_id = Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.userId.toString()
+                            )
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "You need atleast $MIN_COINS_FOR_AUDIO coins to make an Audio Call.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
-                    1->{
-                        if ((totalAvailableCoins ?: 0) > MIN_COINS_FOR_VIDEO){
-                            viewModel.hitGenerateAgoraTokenDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, channelName = UUID.randomUUID().toString(), calleeId = createrId, uid = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString(), "video", sender_id = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString())
-                        }else{
-                            Toast.makeText(requireContext(), "You need atleast $MIN_COINS_FOR_VIDEO coins to make a Video Call.", Toast.LENGTH_SHORT).show()
+
+                    1 -> {
+                        if ((totalAvailableCoins ?: 0) > MIN_COINS_FOR_VIDEO) {
+                            viewModel.hitGenerateAgoraTokenDataApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken,
+                                channelName = UUID.randomUUID().toString(),
+                                calleeId = createrId,
+                                uid = Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.userId.toString(),
+                                "video",
+                                sender_id = Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.userId.toString()
+                            )
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "You need atleast $MIN_COINS_FOR_VIDEO coins to make a Video Call.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                     /*0->{
@@ -482,7 +611,7 @@ private val args by lazy {
                 super.onPageSelected(position)
                 val totalItems = reelsList.size
                 Log.i("TAG", "onPageSelected: $totalItems   $position")
-                if (position==totalItems-2 && isLoading) {
+                if (position == totalItems - 2 && isLoading) {
                     currentPage++
                     RTVariable.REELS_CURRENT_PAGE = currentPage
                     hitGetReelsApi(currentPage)
@@ -510,9 +639,10 @@ private val args by lazy {
                 playVideo(reel.assetUrl, reel.lastPlaybackPosition)
             }
 
-            })
-        }
-    fun openUploadBottomSheet(check: String){
+        })
+    }
+
+    fun openUploadBottomSheet(check: String) {
         /*if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
             selectedBottomSheetType = "reel"
             openUploadBottomSheet("reel")
@@ -559,12 +689,21 @@ private val args by lazy {
                         selectedBottomSheetType = "post"
                         openUploadBottomSheet("post")
                     }
+
                     1 -> {
-                        if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
+                        if (Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.isCreator == 1
+                        ) {
                             selectedBottomSheetType = "reel"
                             openUploadBottomSheet("reel")
                         } else {
-                            Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "You are not a creator",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -575,6 +714,7 @@ private val args by lazy {
                     0 -> {
                         checkGalleryPermissionAndPick("I")
                     }
+
                     1 -> {
                         checkGalleryPermissionAndPick("V")
                     }
@@ -583,6 +723,7 @@ private val args by lazy {
         }
         popup.show()
     }
+
     private fun checkGalleryPermissionAndPick(mediaType: String) {
         selectedMediaType = mediaType
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -595,13 +736,18 @@ private val args by lazy {
 
         } else {
             val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 launchMediaPicker()
             } else {
                 requestSinglePermissionLauncher.launch(permission)
             }
         }
     }
+
     private fun launchMediaPicker() {
         val mediaType = when (selectedMediaType) {
             "I" -> ActivityResultContracts.PickVisualMedia.ImageOnly
@@ -611,61 +757,71 @@ private val args by lazy {
 
         mediaPickerLauncher.launch(PickVisualMediaRequest(mediaType))
     }
+
     private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            val mimeType = requireContext().contentResolver.getType(uri)
-            UserPreference.selectedMediaType = selectedMediaType
-            if (::bottomSheetFragment.isInitialized){
-                bottomSheetFragment.dismiss()
-            }
-            if (mimeType?.startsWith("video") == true) {
+            if (uri != null) {
+                val mimeType = requireContext().contentResolver.getType(uri)
+                UserPreference.selectedMediaType = selectedMediaType
+                if (::bottomSheetFragment.isInitialized) {
+                    bottomSheetFragment.dismiss()
+                }
+                if (mimeType?.startsWith("video") == true) {
 //                UserPreference.seletedUri = uri
-                if (uri != null) {
-                    val mimeType = requireContext().contentResolver.getType(uri)
-                    Log.e("TAG", "mimmeType $mimeType")
-                    if (mimeType?.startsWith("video") == true) {
-                        UserPreference.seletedUri = Uri.EMPTY
-                        val intent = Intent(requireActivity(),TrimVideoActivity::class.java)
-                        intent.putExtra("videoUrl",uri.toString())
-                        startActivityForResult(intent,REQUEST_CODE_CROP_VIDEO)
+                    if (uri != null) {
+                        val mimeType = requireContext().contentResolver.getType(uri)
+                        Log.e("TAG", "mimmeType $mimeType")
+                        if (mimeType?.startsWith("video") == true) {
+                            UserPreference.seletedUri = Uri.EMPTY
+                            val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+                            intent.putExtra("videoUrl", uri.toString())
+                            startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+                    openCropActivity(uri)
                 }
             } else {
-                openCropActivity(uri)
+                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }
-    }
+
     private fun openCropActivity(imageUri: Uri) {
         val options = UCrop.Options().apply {
             setFreeStyleCropEnabled(true)
         }
-        val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        val destinationUri = Uri.fromFile(
+            File(
+                requireActivity().cacheDir,
+                "cropped_${System.currentTimeMillis()}.jpg"
+            )
+        )
         UCrop.of(imageUri, destinationUri)
             .withOptions(options)
             .start(requireContext(), this)
     }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data) // Always call super
 
-        if (resultCode==RESULT_OK){
+        if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CODE_CROP_VIDEO) { // Check if it's the result for our request
                 UserPreference.selectedMediaToUpload = selectedBottomSheetType
                 findNavController().navigate(R.id.action_reelsFragment_to_addReelFragment)
-            }else if (requestCode==UCrop.REQUEST_CROP){
+            } else if (requestCode == UCrop.REQUEST_CROP) {
                 val resultUri = UCrop.getOutput(data!!)
                 UserPreference.seletedUri = resultUri ?: Uri.EMPTY
                 UserPreference.selectedMediaToUpload = selectedBottomSheetType
                 findNavController().navigate(R.id.action_reelsFragment_to_addReelFragment)
             }
-        }else {
+        } else {
             Log.w("ReelFragment", " cropping was cancelled or failed with code: $resultCode")
         }
     }
+
     private val requestSinglePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -698,14 +854,25 @@ private val args by lazy {
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }*/
 
-    fun followSelected(id: Int, reelPosition: Int, isAlreadyFollowed:Int){
+    fun followSelected(id: Int, reelPosition: Int, isAlreadyFollowed: Int) {
         adapter.updateFollow(reelPosition, isAlreadyFollowed)
-        if (isAlreadyFollowed==2){
-            viewModel.hitFollowUserDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, FollowRequest(following_id = id.toString()))
-        }else{
-            viewModel.hitUnfollowUserDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, FollowRequest(unfollowId = id.toString()))
+        if (isAlreadyFollowed == 2) {
+            viewModel.hitFollowUserDataApi(
+                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken, FollowRequest(following_id = id.toString())
+            )
+        } else {
+            viewModel.hitUnfollowUserDataApi(
+                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken, FollowRequest(unfollowId = id.toString())
+            )
         }
     }
+
     fun showOptionsPopup(view: View) {
         val popup = ReusablePopup(
             context = requireContext(),
@@ -717,7 +884,10 @@ private val args by lazy {
                     putString("userId", userId)  // Add your arguments here
                 }
                 bottomSheetFragment.arguments = bundle
-                bottomSheetFragment.show(requireActivity().supportFragmentManager, "BlockBottomSheet")
+                bottomSheetFragment.show(
+                    requireActivity().supportFragmentManager,
+                    "BlockBottomSheet"
+                )
 
             },
             onOption2Click = {
@@ -727,7 +897,10 @@ private val args by lazy {
                     putString("userId", userId)  // Add your arguments here
                 }
                 bottomSheetFragment.arguments = bundle
-                bottomSheetFragment.show(requireActivity().supportFragmentManager, "FlagBottomSheet")
+                bottomSheetFragment.show(
+                    requireActivity().supportFragmentManager,
+                    "FlagBottomSheet"
+                )
 
             },
             option1Text = "Block",
@@ -786,7 +959,7 @@ private val args by lazy {
         exoPlayer.setMediaSource(mediaSource)
         exoPlayer.prepare()
         exoPlayer.seekTo(resumePosition)
-        if(UserDataManager.isPaused(requireActivity())){
+        if (UserDataManager.isPaused(requireActivity())) {
             val savedPos = UserDataManager.getPosition(requireContext())
             Log.e("REEL_POS", "REEL_POS>>>> $savedPos  $RTVariable.REELS_POSITION")
             if (savedPos == RTVariable.REELS_POSITION) {
@@ -795,32 +968,58 @@ private val args by lazy {
                 UserDataManager.setPause(requireContext(), false)
                 exoPlayer.playWhenReady = true
             }
-        }else{
+        } else {
             exoPlayer.playWhenReady = true
         }
     }
 
     private fun setObserver() {
+        viewModel2.getHomeLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Home success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            // ✅ SAVE EVERYTHING IN VIEWMODEL
+                            viewModel2.myStory = it.data.payload.my_story ?: MyStory()
+                            viewModel2.stories = it.data.payload.stories
+                            viewModel2.isStoryUploaded = it.data.payload.is_story_uploaded
+                            viewModel2.profileImage = it.data.payload.myProfile.profileImage
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
+                }
+            }
+        }
         viewModel.getSendGiftLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "sent coins user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        showCustomDialogWithBinding(requireContext(), "Send Successfully!",
+                    if (it.data?.status == 1) {
+                        showCustomDialogWithBinding(
+                            requireContext(), "Send Successfully!",
                             onYes = {},
                             onNo = {},
                             showButtons = false,
                             autoDismissInMillis = 1000
                         )
 //                        Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -831,18 +1030,21 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "delete reel success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         reelsList.removeAt(binding.viewPager.currentItem)
                         viewPagerAdapter(mutableListOf())
                         adapter.updateList(reelsList)
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -853,16 +1055,19 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "coins details success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         totalAvailableCoins = it.data.payload.coins
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -874,40 +1079,56 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            if (it.data.payload.reels?.isNotEmpty() == true){
-                                isLoading=true
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            if (it.data.payload.reels?.isNotEmpty() == true) {
+                                isLoading = true
                                 reelsList.addAll(it.data.payload.reels ?: mutableListOf())
-                                Log.i("TAG", "updatedreelsize: "+reelsList.size)
+                                Log.i("TAG", "updatedreelsize: " + reelsList.size)
                                 if (currentPage == 1) {
-                                    if (reelsList.isNotEmpty()){
+                                    if (reelsList.isNotEmpty()) {
 //                                        adapter.clearList()
-                                        adapter.updateList(it.data.payload.reels?.toMutableList() ?: mutableListOf())
+                                        adapter.updateList(
+                                            it.data.payload.reels?.toMutableList()
+                                                ?: mutableListOf()
+                                        )
                                         binding.viewPager.post {
                                             adapter.currentPlayingPosition = 0
                                             adapter.notifyDataSetChanged()
-                                            playVideo(it.data.payload.reels?.get(0)?.assetUrl ?: "", it.data.payload.reels?.get(0)?.lastPlaybackPosition ?: 0)
+                                            playVideo(
+                                                it.data.payload.reels?.get(0)?.assetUrl ?: "",
+                                                it.data.payload.reels?.get(0)?.lastPlaybackPosition
+                                                    ?: 0
+                                            )
                                         }
-                                    }else{
+                                    } else {
 //                                        adapter.clearList()
-                                        adapter.updateList(it.data.payload.reels?.toMutableList() ?: mutableListOf())
+                                        adapter.updateList(
+                                            it.data.payload.reels?.toMutableList()
+                                                ?: mutableListOf()
+                                        )
                                     }
                                 } else {
-                                    adapter.updateList(it.data.payload.reels?.toMutableList() ?: mutableListOf())
+                                    adapter.updateList(
+                                        it.data.payload.reels?.toMutableList() ?: mutableListOf()
+                                    )
                                 }
                             }
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -920,28 +1141,44 @@ private val args by lazy {
                     Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
                     Log.e("TTTTTTTTTT", "TTTTTTTTT")
                     if (it.data?.code == 200) {
-                        val payload = it.data.payload ?: Payload()
+                        val payload = it.data.payload ?: return@observe
                         if (isCommentPosted) {
                             isCommentPosted = false
+                            viewModel.commentPayloadCache = payload
                             if (::commentsBottomSheetFragment.isInitialized) {
                                 commentsBottomSheetFragment.updateComments(payload)
                             }
                         } else if (isLoadMore) {
                             isLoadMore = false
-                            if (::commentsBottomSheetFragment.isInitialized) {
-                                commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+                            val oldPayload = viewModel.commentPayloadCache
+                            if (oldPayload != null) {
+                                val mergedComments =
+                                    (oldPayload.comments ?: emptyList()) + (payload.comments ?: emptyList())
+                                val updatedPayload = oldPayload.copy(
+                                    comments = mergedComments
+                                )
+                                viewModel.commentPayloadCache = updatedPayload
+                                if (::commentsBottomSheetFragment.isInitialized) {
+                                    commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+                                }
+                            } else {
+                                viewModel.commentPayloadCache = payload
                             }
                         } else {
+                            viewModel.commentPayloadCache = payload
                             openCommentsBottomSheet(payload)
                         }
                     } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -983,22 +1220,31 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel post comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             isCommentPosted = true
-                            viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString(), "1", "10") // Initial call with page 1, limit 10
+                            viewModel.hitGetReelCommentsApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, reelId.toString(), "1", "10"
+                            ) // Initial call with page 1, limit 10
                             adapter.updateComment(commentOnReelPosition)
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -1009,21 +1255,30 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel reply to comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            isCommentPosted=true
-                            viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString(), "1", "10") // Initial call with page 1, limit 10
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            isCommentPosted = true
+                            viewModel.hitGetReelCommentsApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, reelId.toString(), "1", "10"
+                            ) // Initial call with page 1, limit 10
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -1034,20 +1289,23 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel reply to comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }else{
+                        } else {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
 //                    ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
 //                    ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
 //                    ProcessDialog.dismissDialog(true)
@@ -1058,10 +1316,11 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Agora token success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            Log.i("TAG", "setObserver: "+it.data.payload.calleeId)
-                            val intent = Intent(requireContext(), OutgoingVideoCallActivity::class.java)
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            Log.i("TAG", "setObserver: " + it.data.payload.calleeId)
+                            val intent =
+                                Intent(requireContext(), OutgoingVideoCallActivity::class.java)
                             intent.putExtra(OTHER_USER_ID, it.data.payload.calleeId)
                             intent.putExtra(AGORA_TOKEN, it.data.payload.agoraToken)
                             intent.putExtra(CHANNEL_NAME, it.data.payload.channelName)
@@ -1070,17 +1329,21 @@ private val args by lazy {
                             intent.putExtra(CALL_USER_NAME, callerName)
                             intent.putExtra(CALLER_USER_IMAGE, callerImage)
                             startActivity(intent)
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -1091,20 +1354,23 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }else{
+                        } else {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
 //                    ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -1115,20 +1381,23 @@ private val args by lazy {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }else{
+                        } else {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
 //                    ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -1147,29 +1416,50 @@ private val args by lazy {
 
         return total
     }
+
     private fun openCommentsBottomSheet(payload: Payload) {
         commentsBottomSheetFragment = CommentReelBottomSheet().apply {
             arguments = Bundle().apply {
                 putParcelable("comments", payload)
+                putParcelableArrayList("stories", ArrayList(viewModel2.stories))
+                putParcelable("myStory", viewModel2.myStory)
             }
             onCommentAction = { result ->
                 isCommentPosted = true // Set flag before post
                 currentPage = 1
                 Log.e("CCCCCCC", "CCCCCCC")
-                viewModel.hitPostCommentApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, reelId)
+                viewModel.hitPostCommentApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, result, reelId
+                )
             }
             onReplyAction = { result ->
                 isCommentPosted = true // Assuming same flag for reply, adjust if separate
                 currentPage = 1
-                viewModel.hitReplyToCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, reelId)
+                viewModel.hitReplyToCommentsApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, result, reelId
+                )
             }
             onLoadMore = { page, limit ->
                 isLoadMore = true // Set flag before load more API call
-                viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString(), page.toString(), limit.toString())
+                viewModel.hitGetReelCommentsApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, reelId.toString(), page.toString(), limit.toString()
+                )
             }
         }
 
-        commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
+        commentsBottomSheetFragment.show(
+            requireActivity().supportFragmentManager,
+            "RoundedBottomSheet"
+        )
     }
     /*private fun openCommentsBottomSheet(payload: Payload) {
         commentsBottomSheetFragment = RoundedBottomSheet().apply {
@@ -1186,7 +1476,6 @@ private val args by lazy {
 
         commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }*/
-
 
 
     override fun onPause() {

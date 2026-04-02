@@ -22,6 +22,7 @@ import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.rating_review.RatingReviewRequest
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.profile.view_model.ContactUsViewModel
 import com.app.hihlo.ui.profile.view_model.RateUsViewModel
 import com.app.hihlo.utils.CommonUtils
@@ -47,6 +48,7 @@ class RateUsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (requireContext() as HomeActivity).setOnlineStatusVisibility(true)
         CommonUtils.touchHideKeyBoard(view,requireActivity())
         setObserver()
 
@@ -103,6 +105,7 @@ class RateUsFragment : Fragment() {
             CommonUtils.hideKeyboard(requireActivity())
         }
         binding.ivBack.setOnClickListener {
+            (requireContext() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
         binding.updateButton.setOnClickListener { 

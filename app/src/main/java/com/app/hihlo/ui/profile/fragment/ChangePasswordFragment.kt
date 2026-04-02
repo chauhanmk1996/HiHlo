@@ -16,6 +16,7 @@ import com.app.hihlo.databinding.FragmentChangePasswordBinding
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.signup.model.ChangePasswordRequest
 import com.app.hihlo.ui.signup.view_model.ResetPasswordViewModel
 import com.app.hihlo.utils.CommonUtils
@@ -41,9 +42,10 @@ class ChangePasswordFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-       binding = FragmentChangePasswordBinding.inflate(layoutInflater)
+    ): View {
+        binding = FragmentChangePasswordBinding.inflate(layoutInflater)
         initViews()
+        (requireContext() as HomeActivity).setOnlineStatusVisibility(true)
         return binding.root
     }
 
@@ -51,26 +53,37 @@ class ChangePasswordFragment : Fragment() {
         setPasswordToggle()
         setupUIToHideKeyboard(binding.root, requireActivity())
         binding.llBack.setOnClickListener {
+            (requireContext() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
-        binding.btnChangePassword.setOnClickListener { 
+        binding.btnChangePassword.setOnClickListener {
             checkValidation()
         }
     }
 
-    private fun checkValidation(){
+    private fun checkValidation() {
         val oldPassword = binding.oldPassword.text.trim().toString()
         val newPassword = binding.password.text.trim().toString()
         val cnfNewPassword = binding.etCnfpassword.text.trim().toString()
-        if(oldPassword.isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter old password", Toast.LENGTH_SHORT).show()
-        }else if(newPassword.isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter new password", Toast.LENGTH_SHORT).show()
-        }else if(cnfNewPassword.isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter confirm new password", Toast.LENGTH_SHORT).show()
-        }else if(newPassword!=cnfNewPassword){
-            Toast.makeText(requireActivity(), "New password and confirm password not matched", Toast.LENGTH_SHORT).show()
-        }else{
+        if (oldPassword.isEmpty()) {
+            Toast.makeText(requireActivity(), "Please enter old password", Toast.LENGTH_SHORT)
+                .show()
+        } else if (newPassword.isEmpty()) {
+            Toast.makeText(requireActivity(), "Please enter new password", Toast.LENGTH_SHORT)
+                .show()
+        } else if (cnfNewPassword.isEmpty()) {
+            Toast.makeText(
+                requireActivity(),
+                "Please enter confirm new password",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else if (newPassword != cnfNewPassword) {
+            Toast.makeText(
+                requireActivity(),
+                "New password and confirm password not matched",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
             val model = ChangePasswordRequest(
                 oldPassword = oldPassword,
                 newPassword = newPassword,
@@ -81,26 +94,36 @@ class ChangePasswordFragment : Fragment() {
     }
 
     private fun hitChangePasswordApi(model: ChangePasswordRequest) {
-        resetPasswordViewModel.hitChangePassword("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,model)
+        resetPasswordViewModel.hitChangePassword(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, model
+        )
         resetPasswordViewModel.getChangePasswordLiveDataLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "change pass success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                             findNavController().popBackStack()
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -116,11 +139,13 @@ class ChangePasswordFragment : Fragment() {
         binding.oldPasswordToggle.setOnClickListener {
             isOldPassHidden = if (isOldPassHidden) {
                 binding.oldPasswordToggle.setImageResource(R.drawable.open_eye_2)
-                binding.oldPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                binding.oldPassword.transformationMethod =
+                    HideReturnsTransformationMethod.getInstance()
                 false
             } else {
                 binding.oldPasswordToggle.setImageResource(R.drawable.close_eye_2)
-                binding.oldPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+                binding.oldPassword.transformationMethod =
+                    CommonUtils.DotPasswordTransformationMethod
                 true
             }
             binding.oldPassword.setSelection(binding.oldPassword.text.toString().length)
@@ -131,7 +156,8 @@ class ChangePasswordFragment : Fragment() {
         binding.passwordToggle.setOnClickListener {
             isPassHidden = if (isPassHidden) {
                 binding.passwordToggle.setImageResource(R.drawable.open_eye_2)
-                binding.password.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                binding.password.transformationMethod =
+                    HideReturnsTransformationMethod.getInstance()
                 false
             } else {
                 binding.passwordToggle.setImageResource(R.drawable.close_eye_2)
@@ -147,11 +173,13 @@ class ChangePasswordFragment : Fragment() {
         binding.cnfPwdToggle.setOnClickListener {
             isCnfPassHidden = if (isCnfPassHidden) {
                 binding.cnfPwdToggle.setImageResource(R.drawable.open_eye_2)
-                binding.etCnfpassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                binding.etCnfpassword.transformationMethod =
+                    HideReturnsTransformationMethod.getInstance()
                 false
             } else {
                 binding.cnfPwdToggle.setImageResource(R.drawable.close_eye_2)
-                binding.etCnfpassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+                binding.etCnfpassword.transformationMethod =
+                    CommonUtils.DotPasswordTransformationMethod
                 true
             }
             binding.etCnfpassword.setSelection(binding.etCnfpassword.text.toString().length)

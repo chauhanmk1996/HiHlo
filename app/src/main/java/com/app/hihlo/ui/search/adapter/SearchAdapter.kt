@@ -117,14 +117,21 @@ class SearchAdapter(val users: MutableList<SearchUserListResponse.Payload.User>,
                 if (users[position].username==user){
                     getSelectedChat(position, 1)
                 }else{
-                    val story = storiesList.find { it.user_id == users[position].id }
-                    Log.e("YYYY", "YYYY>>>"+story)
-                    if (story != null) {
-                        val storyPosition = storiesList.indexOfFirst { it.user_id == users[position].id }
-                        RTVariable.USER_ID = users[position].id.toString()
-                        RTVariable.STORY_POSITION = storyPosition
-                        getSelectedChat(position, 4)
-                    } else {
+                    if(users[position].isStoryUploaded == 1){
+                        val story = storiesList.find { it.user_id == users[position].id }
+                        Log.e("YYYY", "YYYY>>>"+story)
+                        if (story != null && story.is_seen == 0) {
+                            val storyPosition = storiesList.indexOfFirst { it.user_id == users[position].id }
+                            RTVariable.USER_ID = users[position].id.toString()
+                            RTVariable.STORY_POSITION = storyPosition
+                            getSelectedChat(position, 4)
+                        } else {
+                            val storyPosition = storiesList.indexOfFirst { it.user_id == users[position].id }
+                            RTVariable.USER_ID = users[position].id.toString()
+                            RTVariable.STORY_POSITION = storyPosition
+                            getSelectedChat(position, 4)
+                        }
+                    }else{
                         getSelectedChat(position, 1)
                     }
                 }

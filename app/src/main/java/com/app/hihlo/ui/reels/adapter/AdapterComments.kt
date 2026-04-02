@@ -33,14 +33,17 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import androidx.core.graphics.toColorInt
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 
 class AdapterComments(
     var comments: MutableList<Comment>,
+    val stories: ArrayList<Story>?,
     val onReplyClick: (replyText: String, parentCommentId: Int) -> Unit,
     val onDeleteClick: (isReply: Boolean, parentCommentId: Int?, itemId: Int) -> Unit,
     val onReplySelected: (commentId: Int) -> Unit,
     val onProfileSelected: (commentId: Int) -> Unit,
+    val onProfileImageSelected: (commentId: Int) -> Unit,
     val onMentionClick: (user_id: String) -> Unit,
     val commentsRecycler: RecyclerView,
     private val viewModel: UserPostListViewModel
@@ -74,7 +77,18 @@ class AdapterComments(
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder)
                 .into(userImage)
-
+            val story = stories?.find { story -> story.user_id == commentItem.user.id }
+            Log.e("TTTTT", "SSSSS>>> 1 "+story)
+            userImageCardView.background =
+                if(commentItem.user.isStoryUploaded==1){
+                    if (story != null && story.is_seen == 0) {
+                        root.context.resources.getDrawable(R.drawable.gredient_circle, null)
+                    } else {
+                        root.context.resources.getDrawable(R.drawable.gredient_circle_black, null)
+                    }
+                }else{
+                    root.context.resources.getDrawable(R.drawable.gredient_circle_transparent, null)
+                }
             name.text = commentItem.user?.username
             userId.isVisible = false
             comment.text = commentItem.comment
@@ -101,6 +115,7 @@ class AdapterComments(
             adapter = AdapterCommentsReply(
                 comment_id = commentItem.id.toString(),
                 replies = displayReplies.toMutableList(),
+                stories,
                 onReplySelect = { comment_id ->
                     onReplySelected(comment_id.toInt())
                 },
@@ -112,6 +127,11 @@ class AdapterComments(
                     UserDataManager.postCommentPosition(root.context, position)
                     UserDataManager.setCommentToScroll(root.context, true)
                     onProfileSelected(user_id)
+                },
+                onReplyProfileImageSelected = { user_id ->
+                    UserDataManager.postCommentPosition(root.context, position)
+                    UserDataManager.setCommentToScroll(root.context, true)
+                    onProfileImageSelected(user_id)
                 },
                 onMentionClick = { user_name ->
                     UserDataManager.postCommentPosition(root.context, position)
@@ -306,10 +326,32 @@ class AdapterComments(
 //                    .setLaunchSingleTop(true)
 //                    .setRestoreState(true)
 //                    .build()
-                UserDataManager.postCommentPosition(root.context, position)
-                UserDataManager.setCommentToScroll(root.context, true)
-                UserDataManager.postCommentIsShow(root.context, true)
-                onProfileSelected(commentItem.user?.id ?: -1)
+                var user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
+                if (commentItem.user?.username==user){
+                    UserDataManager.postCommentPosition(root.context, position)
+                    UserDataManager.setCommentToScroll(root.context, true)
+                    UserDataManager.postCommentIsShow(root.context, true)
+                    onProfileSelected(commentItem.user?.id ?: -1)
+                }else{
+                    if(commentItem.user.isStoryUploaded==1){
+                        if (story != null && story.is_seen == 0) {
+                            UserDataManager.postCommentPosition(root.context, position)
+                            UserDataManager.setCommentToScroll(root.context, true)
+                            UserDataManager.postCommentIsShow(root.context, true)
+                            onProfileImageSelected(commentItem.user?.id ?: -1)
+                        } else {
+                            UserDataManager.postCommentPosition(root.context, position)
+                            UserDataManager.setCommentToScroll(root.context, true)
+                            UserDataManager.postCommentIsShow(root.context, true)
+                            onProfileImageSelected(commentItem.user?.id ?: -1)
+                        }
+                    }else{
+                        UserDataManager.postCommentPosition(root.context, position)
+                        UserDataManager.setCommentToScroll(root.context, true)
+                        UserDataManager.postCommentIsShow(root.context, true)
+                        onProfileSelected(commentItem.user?.id ?: -1)
+                    }
+                }
             }
             name.setOnClickListener {
 //                NavOptions.Builder()

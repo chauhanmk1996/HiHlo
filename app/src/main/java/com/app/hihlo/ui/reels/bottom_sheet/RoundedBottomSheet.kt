@@ -21,6 +21,8 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.BottomSheetLayoutBinding
 import com.app.hihlo.model.get_reel_comments.response.Comment
 import com.app.hihlo.model.get_reel_comments.response.Payload
+import com.app.hihlo.model.home.response.MyStory
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.reply_to_comment.request.ReplyToCommentRequest
@@ -128,11 +130,13 @@ class RoundedBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val comments = arguments?.getParcelable<Payload>("comments")
+        val myStory = arguments?.getParcelable<MyStory>("myStory")
+        val stories = arguments?.getParcelableArrayList<Story>("stories")
         Log.i("TAG", "onViewCreated: "+comments)
         val initialComments = comments?.comments ?: emptyList<Comment>()
         adapter = AdapterComments(
             initialComments.toMutableList(),
-
+            stories,
             onReplyClick = { replyText, parentCommentId ->
                 val request = ReplyToCommentRequest(
                     reply = replyText,
@@ -166,6 +170,23 @@ class RoundedBottomSheet : BottomSheetDialogFragment() {
             },
             onProfileSelected = { user_id ->
                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
+            },
+            onProfileImageSelected = { user_id ->
+                val storyPosition = stories?.indexOfFirst { it.user_id == user_id }
+                val bundle = Bundle().apply {
+                    putParcelableArrayList("storyList", ArrayList(stories ?: emptyList()))
+                    putParcelable("myStoryData", myStory)
+                    putInt("position", storyPosition!!)
+                }
+                try {
+                    dismiss()
+                    findNavController().navigate(R.id.secondStoryFragment, bundle)
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                }
+                //dismiss()
+                //findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
             },
             onMentionClick = { user_name ->
                 //Log.e("onMentionClick", "onMentionClick>>> "+user_name)

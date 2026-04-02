@@ -51,7 +51,6 @@
                 android:id="@+id/clMain"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="10dp"
                 android:layout_marginHorizontal="20dp">
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clRateUs"
@@ -90,7 +89,7 @@
                             <EditText
                                 android:id="@+id/etMessage"
                                 android:layout_width="match_parent"
-                                android:layout_height="170dp"
+                                android:layout_height="130dp"
                                 android:gravity="start"
                                 android:padding="15dp"
                                 android:inputType="textMultiLine"
@@ -169,7 +168,7 @@
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardAttach"
                         android:layout_width="match_parent"
-                        android:layout_height="170dp"
+                        android:layout_height="130dp"
                         android:layout_marginTop="10dp"
                         app:cardCornerRadius="16dp"
                         android:background="@color/black"
@@ -203,27 +202,21 @@
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="10dp"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/submitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Submit"
+                    android:fontFamily="@font/manrope_medium"
+                    android:textSize="18sp"
+                    android:paddingVertical="12dp"
+                    android:layout_marginTop="20dp"
                     android:layout_marginBottom="15dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent">
-                    <com.google.android.material.button.MaterialButton
-                        android:backgroundTint="@color/theme"
-                        style="@style/MyButtonStyle"
-                        android:fontFamily="@font/manrope_medium"
-                        android:textSize="18sp"
-                        android:id="@+id/submitButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Submit"
-                        android:layout_marginTop="15dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:paddingVertical="12dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:backgroundTint="@color/theme"
+                    style="@style/MyButtonStyle"
+                    app:layout_constraintTop_toBottomOf="@id/clRateUs"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

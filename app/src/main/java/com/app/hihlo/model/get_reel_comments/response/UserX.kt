@@ -8,6 +8,7 @@ data class UserX(
     val city: String,
     val country: String,
     val isCreator: String,
+    val isStoryUploaded: Int,
     val id: Int,
     val name: String,
     val profile_image: String,

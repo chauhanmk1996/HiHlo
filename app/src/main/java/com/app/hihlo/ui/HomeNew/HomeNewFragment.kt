@@ -1072,6 +1072,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             arguments = Bundle().apply {
                 putParcelable("comments", payload)
                 putParcelableArrayList("stories", ArrayList(viewModel.stories))
+                putParcelable("myStory", viewModel.myStory)
             }
             onCommentAction = { result ->
                 isCommentPosted = true // Set flag before post

@@ -1,17 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- res/drawable/bg_rounded_stroke.xml -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent"/>
 
-    <!-- Transparent background -->
-    <solid android:color="@android:color/transparent" />
-
-    <!-- Rounded corners -->
-    <corners android:radius="6dp" />
-
-    <!-- Border (stroke) -->
     <stroke
         android:width="0.5dp"
-        android:color="@color/white" />
+        android:color="#FFFFFF" /> <!-- use same border color as before -->
 
+    <corners android:radius="5dp"/>
 </shape>

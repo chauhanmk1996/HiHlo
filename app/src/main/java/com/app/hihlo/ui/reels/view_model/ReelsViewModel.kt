@@ -7,6 +7,7 @@ import com.app.hihlo.model.coin_details.CoinDetailsResponse
 import com.app.hihlo.model.common_response.CommonResponse
 import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.generate_agora_token.response.AgoraTokenResponse
+import com.app.hihlo.model.get_reel_comments.response.Payload
 import com.app.hihlo.model.get_reel_comments.response.ReelCommentsResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.post_comments.response.PostCommentsResponse
@@ -24,6 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReelsViewModel @Inject constructor():ViewModel() {
+
+    var commentPayloadCache: Payload? = null
     private val deletePostLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getDeleteReelLiveData(): LiveData<Resources<CommonResponse>> {
