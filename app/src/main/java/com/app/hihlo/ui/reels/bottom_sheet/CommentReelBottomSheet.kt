@@ -346,20 +346,21 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         setupPagination()
         binding.sendButton.setOnClickListener {
             val message = binding.commentReplyEdittext.text.toString()
-            if (message.isEmpty()) {
-                //Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
+            if (message.isEmpty()) return@setOnClickListener
+            binding.sendButton.isEnabled = false
+            if (isReplySelected) {
+                isReplySelected = false
+                val fullComment = RTVariable.REPLY_COMBINED_IMAGE_USERNAME + message
+                binding.commentReplyEdittext.setText("")
+                val request = ReplyToCommentRequest(reply = fullComment, commentId)
+                onReplyAction?.invoke(request)
             } else {
-                if (isReplySelected) {
-                    isReplySelected = false
-                    var full_comment = RTVariable.REPLY_COMBINED_IMAGE_USERNAME+message
-                    binding.commentReplyEdittext.setText("")
-                    var request = ReplyToCommentRequest(reply = full_comment, commentId)
-                    onReplyAction?.invoke(request)
-                } else {
-                    binding.commentReplyEdittext.setText("")
-                    hitPostCommentApi(message)
-                }
+                binding.commentReplyEdittext.setText("")
+                hitPostCommentApi(message)
             }
+            binding.sendButton.postDelayed({
+                binding.sendButton.isEnabled = true
+            }, 1000)
         }
         if(UserDataManager.isCommentToScroll(requireContext())){
             UserDataManager.setCommentToScroll(requireContext(), false)
