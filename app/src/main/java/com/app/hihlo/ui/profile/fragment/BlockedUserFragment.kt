@@ -106,8 +106,8 @@ class BlockedUserFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setObserver()
         onClick()
-        viewModel.hitBlockedUsersDataApi("Bearer "+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTQzLCJlbWFpbCI6ImFqYXlyYXk3OThAZ21haWwuY29tIiwiaWF0IjoxNzc1MDUwMTQyLCJleHAiOjE3NzU2NTQ5NDJ9.VElXwMH0VJTSZRBhiPHz5OMtzJ3xyC81-ITozT08PBk")
-        //viewModel.hitBlockedUsersDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
+        //viewModel.hitBlockedUsersDataApi("Bearer "+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTQzLCJlbWFpbCI6ImFqYXlyYXk3OThAZ21haWwuY29tIiwiaWF0IjoxNzc1MDUwMTQyLCJleHAiOjE3NzU2NTQ5NDJ9.VElXwMH0VJTSZRBhiPHz5OMtzJ3xyC81-ITozT08PBk")
+        viewModel.hitBlockedUsersDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
         viewModel2.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
     }
 

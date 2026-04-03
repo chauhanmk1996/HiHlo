@@ -199,9 +199,10 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     private fun scheduleRecyclerViewHeightMatchParent() {
         heightChangeRunnable?.let { binding.commentsRecycler.removeCallbacks(it) }
         heightChangeRunnable = Runnable {
-            val params = binding.commentsRecycler.layoutParams
+            val b = _binding ?: return@Runnable   // ✅ SAFE CHECK
+            val params = b.commentsRecycler.layoutParams
             params.height = ViewGroup.LayoutParams.MATCH_PARENT
-            binding.commentsRecycler.layoutParams = params
+            b.commentsRecycler.layoutParams = params
         }
         binding.commentsRecycler.postDelayed(heightChangeRunnable!!, 300)
     }
@@ -346,7 +347,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         binding.sendButton.setOnClickListener {
             val message = binding.commentReplyEdittext.text.toString()
             if (message.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
             } else {
                 if (isReplySelected) {
                     isReplySelected = false
@@ -444,6 +445,11 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        heightChangeRunnable?.let {
+            binding.commentsRecycler.removeCallbacks(it)
+        }
+
         _binding = null
     }
 

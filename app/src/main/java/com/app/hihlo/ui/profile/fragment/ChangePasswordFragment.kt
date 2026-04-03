@@ -52,7 +52,7 @@ class ChangePasswordFragment : Fragment() {
     private fun initViews() {
         setPasswordToggle()
         setupUIToHideKeyboard(binding.root, requireActivity())
-        binding.llBack.setOnClickListener {
+        binding.backButton.setOnClickListener {
             (requireContext() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
