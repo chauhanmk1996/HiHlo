@@ -153,4 +153,50 @@ object UserDataManager {
         return prefs.getBoolean("com.HHA_P_C_CommentIsScroll", false)
     }
 
+    /////////Navigation
+    fun setHomeLoaded(context: Context, show: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_HomeLoaded", show)
+            apply()
+        }
+    }
+    fun isHomeLoaded(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_HomeLoaded", false)
+    }
+    fun setGetBackToHome(context: Context, show: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_GetBackToHome", show)
+            apply()
+        }
+    }
+    fun isGetBackToHome(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_GetBackToHome", false)
+    }
+    fun setHomeScrollPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_HomeScrollPosition", position)
+            apply()
+        }
+    }
+    fun getHomeScrollPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_HomeScrollPosition", 0)
+    }
+    fun setHomeScrollYPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        with(prefs.edit()) {
+            putInt("com.HHA_HomeScrollYPosition", position)
+            apply()
+        }
+    }
+    fun getHomeScrollYPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_HomeScrollYPosition", 0)
+    }
+
 }

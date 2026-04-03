@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -95,7 +96,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private var myStoryData: MyStory = MyStory()
     //private var currentPage=1
     private var isMediaUploaded: Int = -1
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by activityViewModels()
     private val viewModel2: UserPostListViewModel by viewModels()
     //private val viewModel3: GetProfileViewModel by viewModels()
     private lateinit var postAdapter: PostsAdapter
@@ -118,6 +119,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private val viewModel3: ReelsViewModel by viewModels()
     private val viewModel4: ReelsViewModel by viewModels()
     var totalAvailableCoins: Int?=null
+    var FIRSTVisiblePosition = -1
+    var offsetY = 0
+    var isRestoringScroll = false
 
     private var pendingScrollPostId: String? = null
     private var pendingScrollPosition: Int = -1   // optional fallback
@@ -135,10 +139,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
         binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
         if (!viewModel.isHomeDataLoaded) {
-            binding.progressBar.isVisible = false
-            viewModel.currentPage = 1
-            binding.swipeRefresh.isRefreshing = true
-            hitServiceListApi(viewModel.currentPage, 0)
+            if(!UserDataManager.isGetBackToHome(requireContext())){
+                Log.e("HIT", "HIT>>> IH")
+                binding.progressBar.isVisible = false
+                viewModel.currentPage = 1
+                binding.swipeRefresh.isRefreshing = true
+                viewModel.isRefreshing = false
+                hitServiceListApi(viewModel.currentPage, 0)
+            }
         }
 //        if (!viewModel.isHomeDataLoaded) {
 //            viewModel.currentPage = 1
@@ -154,7 +162,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                viewModel.profileImage
 //            )
 //        }
-        setupScrollListener()  // ← Replaced setPagination with this
+        //setupScrollListener()  // ← Replaced setPagination with this
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -209,8 +217,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 ::getSelectedStory,
                 viewModel.profileImage
             )
-            binding.nestedScrollView.post {
-                binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
+            if(!UserDataManager.isGetBackToHome(requireContext())){
+                val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
+                binding.nestedScrollView.post {
+                    binding.nestedScrollView.scrollTo(0, scrollYp)
+                }
+            }else{
+                val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
+                binding.nestedScrollView.post {
+                    binding.nestedScrollView.scrollTo(0, scrollYp)
+                }
             }
         }
         //binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
@@ -231,13 +247,40 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
         requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
-            isRefreshedFromMenu = true
-            allStory?.toMutableList()?.clear()
-            viewModel.currentPage = 1
-            binding.progressBar.isVisible=false
-            binding.swipeRefresh.isRefreshing = true
+//            isRefreshedFromMenu = true
+//            allStory?.toMutableList()?.clear()
+//            viewModel.currentPage = 1
+//            binding.progressBar.isVisible=false
+//            binding.swipeRefresh.setColorSchemeColors(
+//                ContextCompat.getColor(requireContext(), R.color.white)
+//            )
+//            binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
+//                ContextCompat.getColor(requireContext(), R.color.white_10)
+//            )
+//            binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
+//
+//            if(!UserDataManager.isGetBackToHome(requireContext())){
+//                binding.swipeRefresh.isRefreshing = true
+//                viewModel.isRefreshing = false
+//            }
             if (binding.nestedScrollView.scrollY == 0) {
-                hitServiceListApi(viewModel.currentPage, selectedGender)
+                binding.swipeRefresh.setColorSchemeColors(
+                    ContextCompat.getColor(requireContext(), R.color.white)
+                )
+                binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
+                    ContextCompat.getColor(requireContext(), R.color.white_10)
+                )
+                binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
+                if (!viewModel.isHomeDataLoaded) {
+                    if(!UserDataManager.isGetBackToHome(requireContext())){
+                        Log.e("HIT", "HIT>>> IH")
+                        binding.progressBar.isVisible = false
+                        viewModel.currentPage = 1
+                        binding.swipeRefresh.isRefreshing = true
+                        viewModel.isRefreshing = false
+                        hitServiceListApi(viewModel.currentPage, 0)
+                    }
+                }
             } else {
                 binding.nestedScrollView.smoothScrollTo(0, 0)
                 binding.nestedScrollView.setOnScrollChangeListener(
@@ -249,7 +292,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     }
                 )
             }
-
         }
         setupScrollListener()  // ← Call here too if needed, but initView is fine
         viewLifecycleOwner.lifecycleScope.launch {
@@ -281,11 +323,56 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 val y = itemView.y + binding.postListRecycler.y
                 binding.nestedScrollView.post {
                     binding.nestedScrollView.smoothScrollTo(0, viewModel.scrollY)
+                    UserDataManager.setGetBackToHome(requireContext(), false)
                 }
             }
         }
     }
 
+    fun scrollToRecyclerMPosition(position: Int, offset: Int) {
+
+        if (position == -1) return
+
+        isRestoringScroll = true
+
+        val recycler = binding.postListRecycler
+        val layoutManager = recycler.layoutManager as? LinearLayoutManager ?: return
+
+        recycler.post {
+
+            // Step 1: Jump to position first (no offset yet)
+            layoutManager.scrollToPosition(position)
+
+            recycler.viewTreeObserver.addOnGlobalLayoutListener(
+                object : ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+
+                        recycler.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                        // Step 2: Apply exact offset AFTER layout
+                        layoutManager.scrollToPositionWithOffset(position, offset)
+
+                        // Step 3: Wait one more frame (VERY IMPORTANT)
+                        recycler.post {
+
+                            // Step 4: Final micro-adjustment (pixel perfect)
+                            val view = layoutManager.findViewByPosition(position)
+                            view?.let {
+                                val currentTop = it.top
+                                val diff = currentTop - offset
+                                recycler.scrollBy(0, diff)
+                            }
+
+                            // Step 5: release lock
+                            recycler.postDelayed({
+                                isRestoringScroll = false
+                            }, 50)
+                        }
+                    }
+                }
+            )
+        }
+    }
     fun retainCommentBoxData(context: Context, postId: String, page: String, limit: String) {
         Log.e("RETAIN", "RETAIN>>> "+postId+" "+page+" "+limit)
         viewLifecycleOwner.lifecycleScope.launch {
@@ -316,6 +403,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         Handler(Looper.getMainLooper()).postDelayed({
             allStory?.toMutableList()?.clear()
             viewModel.currentPage = 1
+            viewModel.isRefreshing = true
             hitServiceListApi(viewModel.currentPage, 0)
         }, 1000)
     }
@@ -324,21 +412,57 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private var scrollListener: ScrollDirectionListener? = null
     private fun setupScrollListener() {
+
         binding.nestedScrollView.setOnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
+
+            // 🔥 VERY IMPORTANT: block during restore
+            if (isRestoringScroll) return@setOnScrollChangeListener
+
             val dy = scrollY - oldScrollY
+
+            // 👉 Your header logic (unchanged)
             if (dy > 10) {
                 if (isHeaderVisible) {
-                    //hideHeaderAndStories()
+                    // hideHeaderAndStories()
                 }
             } else if (dy < -10) {
                 if (!isHeaderVisible) {
-                    //showHeaderAndStories()
+                    // showHeaderAndStories()
                 }
             }
+
             if (scrollY < 100 && !isHeaderVisible) {
-                //showHeaderAndStories()
+                // showHeaderAndStories()
             }
-            val contentView = binding.nestedScrollView.getChildAt(0) ?: return@setOnScrollChangeListener
+
+            // 👉 Get RecyclerView position + offset
+            val layoutManager =
+                binding.postListRecycler.layoutManager as? LinearLayoutManager
+                    ?: return@setOnScrollChangeListener
+
+            val firstCompletelyVisible = layoutManager.findFirstCompletelyVisibleItemPosition()
+            val firstVisible = if (firstCompletelyVisible != -1) {
+                firstCompletelyVisible
+            } else {
+                layoutManager.findFirstVisibleItemPosition()
+            }
+
+            if (firstVisible != -1) {
+                val child = layoutManager.findViewByPosition(firstVisible)
+                val offset = child?.top ?: 0
+
+                FIRSTVisiblePosition = firstVisible
+                offsetY = offset
+
+                UserDataManager.setHomeScrollPosition(requireContext(), FIRSTVisiblePosition)
+                UserDataManager.setHomeScrollYPosition(requireContext(), offsetY)
+            }
+            Log.e(
+                "SCROLL GOING",
+                "Position=$FIRSTVisiblePosition | Offset=$offsetY | ScrollY=$scrollY"
+            )
+            val contentView = binding.nestedScrollView.getChildAt(0)
+                ?: return@setOnScrollChangeListener
             val diff = (contentView.bottom - (v.height + scrollY))
             if (diff < 500 && diff > 0 && !isLoadingMore) {
                 isLoadingMore = true
@@ -721,17 +845,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         if (it.data.code == 200) {
-                            // ✅ SAVE EVERYTHING IN VIEWMODEL
                             viewModel.myStory = it.data.payload.my_story ?: MyStory()
                             viewModel.stories = it.data.payload.stories
                             viewModel.isStoryUploaded = it.data.payload.is_story_uploaded
                             viewModel.profileImage = it.data.payload.myProfile.profileImage
                             if (viewModel.currentPage == 1) {
-                                viewModel.postsCache.clear()
+                                if (viewModel.isRefreshing) {
+                                    viewModel.postsCache.clear()
+                                    viewModel.isRefreshing = false
+                                }
                                 viewModel.postsCache.addAll(it.data.payload.posts)
-                                postAdapter.clearList()
                                 postAdapter.setPosts(
-                                    it.data.payload.posts,
+                                    viewModel.postsCache,
                                     listOf(viewModel.myStory ?: MyStory()),
                                     viewModel.stories
                                 )
@@ -1046,11 +1171,52 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     override fun onPause() {
         super.onPause()
         viewModel.scrollY = binding.nestedScrollView.scrollY
+        viewModel.isHomeDataLoaded = true
+        //UserDataManager.setHomeScrollPosition(requireContext(), FIRSTVisiblePosition)
+        //UserDataManager.setHomeScrollYPosition(requireContext(), binding.nestedScrollView.scrollY)
     }
 
     override fun onResume() {
         super.onResume()
-        scrollToRecyclerPosition(viewModel.scroll_position)
+//        val position = UserDataManager.getHomeScrollPosition(requireContext())
+//        val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
+//        Log.e("SCROLL GOING", "SCROLL GOING>>> S "+position+" | "+scrollYp)
+//        if(UserDataManager.isGetBackToHome(requireContext())){
+//            UserDataManager.setGetBackToHome(requireContext(), false)
+//            postAdapter.setPosts(
+//                viewModel.postsCache,
+//                listOf(viewModel.myStory ?: MyStory()),
+//                viewModel.stories
+//            )
+//            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
+//                viewModel.isStoryUploaded,
+//                viewModel.myStory ?: MyStory(),
+//                viewModel.stories,
+//                ::getSelectedStory,
+//                viewModel.profileImage
+//            )
+//            binding.nestedScrollView.post {
+//                binding.nestedScrollView.scrollTo(0, scrollYp)
+//            }
+//        }else{
+//            scrollToRecyclerPosition(viewModel.scroll_position)
+//            if(UserDataManager.get_postCommentShow(requireContext())){
+//                binding.swipeRefresh.isRefreshing = false
+//                UserDataManager.postCommentIsShow(requireContext(), false)
+//                openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+//                //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+//            }
+//            if(UserDataManager.get_postMainIsShow(requireContext())){
+//                binding.swipeRefresh.isRefreshing = false
+//                UserDataManager.postMainIsSetShow(requireContext(), false)
+//            }
+//        }
+        if(UserDataManager.isGetBackToHome(requireContext())){
+            val position = UserDataManager.getHomeScrollPosition(requireContext())
+            scrollToRecyclerPosition(position)
+        }else{
+            scrollToRecyclerPosition(viewModel.scroll_position)
+        }
         if(UserDataManager.get_postCommentShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postCommentIsShow(requireContext(), false)

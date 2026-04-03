@@ -60,6 +60,7 @@ import com.app.hihlo.ui.HomeNew.HomeNewFragment
 import com.app.hihlo.ui.calling.CallStateHolder
 import com.app.hihlo.ui.calling.view_model.CallStateViewModel
 import com.app.hihlo.utils.RTVariable
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -112,6 +113,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         navController = navHostFragment.navController
         userImageUrl = Preferences.getCustomModelPreference<LoginResponse>(this, LOGIN_DATA)?.payload?.profileImage.toString()
         floatingButtonClick()
+        UserDataManager.setHomeLoaded(this, false)
         navigationMenuClickListener()
 //        setBottomBarPadding()
         setBottomNavigation()
@@ -427,6 +429,8 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
 
             when (item.itemId) {
                 R.id.home -> {
+                    UserDataManager.setHomeLoaded(this, false)
+                    UserDataManager.setGetBackToHome(this, false)
                     showNavigationView()
                     if (currentDestId != R.id.homeNewFragment) {
                         navController.navigate(R.id.homeNewFragment)
@@ -439,6 +443,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.chat -> {
+                    UserDataManager.setGetBackToHome(this, true)
                     showNavigationView()
 //                    if (currentDestId != R.id.chatListFragment) {
                         navController.navigate(R.id.chatListFragment)
@@ -449,6 +454,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.reel -> {
+                    UserDataManager.setGetBackToHome(this, true)
                     showNavigationView()
 //                    if (currentDestId != R.id.reelsFragment) {
                         navController.navigate(R.id.reelsFragment)
@@ -458,6 +464,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.search -> {
+                    UserDataManager.setGetBackToHome(this, true)
                     showNavigationView()
                     if (currentDestId != R.id.searchFragment) {
                         navController.navigate(R.id.searchNewFragment)
@@ -468,6 +475,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.profile -> {
+                    UserDataManager.setGetBackToHome(this, true)
                     showNavigationView()
                     navigateToProfile(currentDestId, userImageUrl)
                     true

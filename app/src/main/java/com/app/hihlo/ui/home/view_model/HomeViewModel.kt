@@ -30,6 +30,7 @@ class HomeViewModel @Inject constructor():ViewModel() {
     var stories: List<Story> = emptyList()
     var isStoryUploaded: Int = 0
     var profileImage: String = ""
+    var isRefreshing = false
 
     var currentPage = 1
     var scroll_position: Int = 0
