@@ -25,15 +25,19 @@ class BecomeCreatorStatusFragment : Fragment() {
     ): View {
         binding = FragmentBecomeCreatorStatusBinding.inflate(layoutInflater)
         status = navArgs.status
-        (requireContext() as HomeActivity).setOnlineStatusVisibility(true)
+        //(requireContext() as HomeActivity).setOnlineStatusVisibility(true)
         initViews()
         onClick()
         return binding.root
     }
 
     private fun onClick() {
+        binding.backButton.setOnClickListener {
+            //(requireContext() as HomeActivity).setOnlineStatusVisibility(false)
+            findNavController().popBackStack()
+        }
         binding.exitButton.setOnClickListener {
-            (requireContext() as HomeActivity).setOnlineStatusVisibility(false)
+            //(requireContext() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
     }

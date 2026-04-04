@@ -45,7 +45,7 @@ class ChangePasswordFragment : Fragment() {
     ): View {
         binding = FragmentChangePasswordBinding.inflate(layoutInflater)
         initViews()
-        (requireContext() as HomeActivity).setOnlineStatusVisibility(true)
+        //(requireContext() as HomeActivity).setOnlineStatusVisibility(true)
         return binding.root
     }
 
@@ -53,7 +53,7 @@ class ChangePasswordFragment : Fragment() {
         setPasswordToggle()
         setupUIToHideKeyboard(binding.root, requireActivity())
         binding.backButton.setOnClickListener {
-            (requireContext() as HomeActivity).setOnlineStatusVisibility(false)
+            //(requireContext() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
         binding.btnChangePassword.setOnClickListener {

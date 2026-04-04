@@ -75,7 +75,7 @@ class CaptureVideoFragment : Fragment() {
             .load(R.drawable.image_capture) // your GIF drawable
             .into(binding.ivCaptureVideo)
 
-        binding.llBack.setOnClickListener {
+        binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
         binding.captureButton.setOnClickListener {

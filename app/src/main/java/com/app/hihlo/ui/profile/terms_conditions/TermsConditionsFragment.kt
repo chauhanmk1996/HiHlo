@@ -3,6 +3,7 @@ package com.app.hihlo.ui.profile.terms_conditions
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -49,12 +50,15 @@ class TermsConditionsFragment : Fragment() {
     private fun setTittle() {
         Log.i("TAG", "setTittle: "+screenFrom)
         if(screenFrom=="about"){
+            binding.webView.setBackgroundColor(Color.BLACK)
             binding.tvTittle.text = "About Us"
             loadUrlInWebView("https://hihlo.com/about-us")
         }else if(screenFrom=="termsCondition"){
+            binding.webView.setBackgroundColor(Color.BLACK)
             binding.tvTittle.text = "Terms and Conditions"
             loadUrlInWebView("https://hihlo.com/terms-condition")
         }else{
+            binding.webView.setBackgroundColor(Color.BLACK)
             binding.tvTittle.text = "Privacy Policy"
             loadUrlInWebView("https://hihlo.com/privacy-policy")
         }

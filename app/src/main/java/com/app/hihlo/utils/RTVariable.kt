@@ -26,9 +26,9 @@ object RTVariable {
     var ISHOMECLICKED: Boolean = false
 
     // Post Comment Remember
-    var P_POSITION: Int = 0
+    var FRAG_POSITION: Int = 0
     var P_PID: String = ""
-    var P_C_SHOW: Boolean = false
+    var P_H_SHOW: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {

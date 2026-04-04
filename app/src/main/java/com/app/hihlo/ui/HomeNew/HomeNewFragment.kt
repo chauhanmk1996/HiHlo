@@ -205,11 +205,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }, 1000)
         } */
         if (viewModel.isHomeDataLoaded) {
+
             postAdapter.setPosts(
                 viewModel.postsCache,
                 listOf(viewModel.myStory ?: MyStory()),
                 viewModel.stories
             )
+
             binding.storiesRecycler.adapter = AdapterStoriesRecycler(
                 viewModel.isStoryUploaded,
                 viewModel.myStory ?: MyStory(),
@@ -217,15 +219,31 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 ::getSelectedStory,
                 viewModel.profileImage
             )
-            if(!UserDataManager.isGetBackToHome(requireContext())){
+
+            //val scrollYp = UserDataManager.getHomeScrollYPosition(binding.root.context)
+
+            if(UserDataManager.isGetBackToHome(requireContext())){
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
                 binding.nestedScrollView.post {
                     binding.nestedScrollView.scrollTo(0, scrollYp)
                 }
             }else{
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
-                binding.nestedScrollView.post {
-                    binding.nestedScrollView.scrollTo(0, scrollYp)
+                if(scrollYp!=null){
+                    binding.nestedScrollView.post {
+                        binding.nestedScrollView.scrollTo(0, scrollYp)
+                    }
+                }else{
+                    if(RTVariable.ISHOMECLICKED){
+                        val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
+                        binding.nestedScrollView.post {
+                            binding.nestedScrollView.scrollTo(0, scrollYp)
+                        }
+                    }else{
+                        binding.nestedScrollView.post {
+                            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
+                        }
+                    }
                 }
             }
         }
@@ -247,6 +265,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
         requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
+            UserDataManager.setGetBackToHome(binding.root.context, false)
 //            isRefreshedFromMenu = true
 //            allStory?.toMutableList()?.clear()
 //            viewModel.currentPage = 1
@@ -279,6 +298,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.swipeRefresh.isRefreshing = true
                         viewModel.isRefreshing = false
                         hitServiceListApi(viewModel.currentPage, 0)
+                        binding.nestedScrollView.post {
+                            binding.nestedScrollView.scrollTo(0, 0)
+                        }
                     }
                 }
             } else {
@@ -313,15 +335,19 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     fun scrollToRecyclerPosition(position: Int) {
         binding.postListRecycler.post {
-            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager
-                ?: return@post
-            layoutManager.scrollToPositionWithOffset(position, 0)
+//            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager?: return@post
+//            layoutManager.scrollToPositionWithOffset(position, 0)
+            val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
+            val lm = binding.postListRecycler.layoutManager as LinearLayoutManager
+            lm.scrollToPositionWithOffset(position,scrollYp)
             binding.postListRecycler.post {
                 val viewHolder = binding.postListRecycler
                     .findViewHolderForAdapterPosition(position)
                 val itemView = viewHolder?.itemView ?: return@post
                 val y = itemView.y + binding.postListRecycler.y
                 binding.nestedScrollView.post {
+                    binding.nestedScrollView.isSmoothScrollingEnabled = false
+                    binding.nestedScrollView.fling(8000)
                     binding.nestedScrollView.smoothScrollTo(0, viewModel.scrollY)
                     UserDataManager.setGetBackToHome(requireContext(), false)
                 }
@@ -453,7 +479,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                 FIRSTVisiblePosition = firstVisible
                 offsetY = offset
-
+                viewModel.scroll_position = FIRSTVisiblePosition
                 UserDataManager.setHomeScrollPosition(requireContext(), FIRSTVisiblePosition)
                 UserDataManager.setHomeScrollYPosition(requireContext(), offsetY)
             }
@@ -877,6 +903,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             )
                             viewModel.isHomeDataLoaded = true
                             isLoadingMore = false
+                            if(!UserDataManager.isGetBackToHome(requireContext())){
+                                Log.e("TTTTT","APP IN BACKGROUND O "+RTVariable.ISHOMECLICKED)
+                                binding.nestedScrollView.post {
+                                    binding.nestedScrollView.scrollTo(0, 0)
+                                }
+                            }
                         }else{
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                             isLoadingMore = false  // ← Reset on error too
@@ -1172,12 +1204,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         super.onPause()
         viewModel.scrollY = binding.nestedScrollView.scrollY
         viewModel.isHomeDataLoaded = true
-        //UserDataManager.setHomeScrollPosition(requireContext(), FIRSTVisiblePosition)
-        //UserDataManager.setHomeScrollYPosition(requireContext(), binding.nestedScrollView.scrollY)
+        viewModel.scroll_position = FIRSTVisiblePosition
+        viewModel.isPaused = true
+        UserDataManager.setHomeScrollPosition(binding.root.context, FIRSTVisiblePosition)
+        UserDataManager.setHomeScrollYPosition(binding.root.context, binding.nestedScrollView.scrollY)
     }
 
     override fun onResume() {
         super.onResume()
+        RTVariable.FRAG_POSITION = 0
+        Log.e("TTTTTT", "TTTTTT HHHH")
+        Log.e("TTTTT","APP IN BACKGROUND  "+RTVariable.ISHOMECLICKED)
+        Log.e("RESUME", "RESUME>>> "+RTVariable.ISHOMECLICKED)
 //        val position = UserDataManager.getHomeScrollPosition(requireContext())
 //        val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
 //        Log.e("SCROLL GOING", "SCROLL GOING>>> S "+position+" | "+scrollYp)
@@ -1211,12 +1249,44 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                UserDataManager.postMainIsSetShow(requireContext(), false)
 //            }
 //        }
+//        if(UserDataManager.isGetBackToHome(requireContext())){
+//            val position = UserDataManager.getHomeScrollPosition(requireContext())
+//            scrollToRecyclerPosition(position)
+//        }else{
+//            scrollToRecyclerPosition(viewModel.scroll_position)
+//        }
         if(UserDataManager.isGetBackToHome(requireContext())){
+            Log.e("TTTTT","APP IN BACKGROUND 1 "+RTVariable.ISHOMECLICKED)
             val position = UserDataManager.getHomeScrollPosition(requireContext())
             scrollToRecyclerPosition(position)
         }else{
-            scrollToRecyclerPosition(viewModel.scroll_position)
+            if(UserDataManager.get_postMainIsShow(requireContext())){
+                Log.e("TTTTT","APP IN BACKGROUND 2 "+RTVariable.ISHOMECLICKED)
+                scrollToRecyclerPosition(viewModel.scroll_position)
+            }else{
+                if(UserDataManager.get_postCommentShow(requireContext())){
+                    Log.e("TTTTT","APP IN BACKGROUND 3 "+RTVariable.ISHOMECLICKED)
+                    scrollToRecyclerPosition(viewModel.scroll_position)
+                }else{
+                    if(!UserDataManager.isGetBackToHome(requireContext())){
+                        if(RTVariable.ISHOMECLICKED){
+                            Log.e("TTTTT","APP IN BACKGROUND 4 "+RTVariable.ISHOMECLICKED)
+                            RTVariable.ISHOMECLICKED = false
+                            val position = UserDataManager.getHomeScrollPosition(requireContext())
+                            scrollToRecyclerPosition(position)
+                        }else{
+                            Log.e("TTTTT","APP IN BACKGROUND 5 "+RTVariable.ISHOMECLICKED)
+                            binding.nestedScrollView.post {
+                                binding.nestedScrollView.scrollTo(0, 0)
+                            }
+                        }
+                    }
+                }
+            }
+            //val position = UserDataManager.getHomeScrollPosition(requireContext())
         }
+        //val position = UserDataManager.getHomeScrollPosition(requireContext())
+        //scrollToRecyclerPosition(position)
         if(UserDataManager.get_postCommentShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postCommentIsShow(requireContext(), false)

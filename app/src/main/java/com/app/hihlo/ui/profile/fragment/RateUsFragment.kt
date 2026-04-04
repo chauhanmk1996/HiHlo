@@ -48,7 +48,7 @@ class RateUsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireContext() as HomeActivity).setOnlineStatusVisibility(true)
+        //(requireContext() as HomeActivity).setOnlineStatusVisibility(true)
         CommonUtils.touchHideKeyBoard(view,requireActivity())
         setObserver()
 
@@ -105,7 +105,7 @@ class RateUsFragment : Fragment() {
             CommonUtils.hideKeyboard(requireActivity())
         }
         binding.ivBack.setOnClickListener {
-            (requireContext() as HomeActivity).setOnlineStatusVisibility(false)
+            //(requireContext() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
         binding.updateButton.setOnClickListener { 

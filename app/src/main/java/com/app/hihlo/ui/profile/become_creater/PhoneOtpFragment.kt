@@ -83,7 +83,7 @@ class PhoneOtpFragment : Fragment() {
             btnConfirm.setOnClickListener {
                 checkValidation()
             }
-            llBack.setOnClickListener {
+            backButton.setOnClickListener {
                 findNavController().popBackStack()
             }
             clMain.setOnClickListener {

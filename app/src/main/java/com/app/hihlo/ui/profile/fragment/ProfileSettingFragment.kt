@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
@@ -31,6 +32,7 @@ import com.app.hihlo.preferences.ONLINE_STATUS
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.profile.activity.RechargeCoinsActivity
+import com.app.hihlo.ui.profile.model.ScrollViewModel
 import com.app.hihlo.ui.profile.view_model.GetProfileViewModel
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.utils.CommonUtils.dpToPx
@@ -46,9 +48,11 @@ class ProfileSettingFragment : Fragment() {
     private var userDetailsMain: UserDetailsX?=null
     private lateinit var binding:FragmentProfileSettingBinding
     private val viewModel: GetProfileViewModel by viewModels()
+    private val viewModel2: ScrollViewModel by activityViewModels()
     var isAudioEnable: Boolean?=null
     var isVideoEnable: Boolean?=null
     var selectedLiveStatusId: String?=null
+    var scrollYPosition = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userDetails = arguments?.getParcelable<UserDetailsX>("userDetail")
@@ -62,6 +66,12 @@ class ProfileSettingFragment : Fragment() {
     ): View {
         binding = FragmentProfileSettingBinding.inflate(layoutInflater)
         initViews()
+        binding.scrollView.viewTreeObserver.addOnScrollChangedListener {
+            viewModel2.scrollPosition = binding.scrollView.scrollY
+        }
+        binding.scrollView.post {
+            binding.scrollView.scrollTo(0, viewModel2.scrollPosition)
+        }
         return binding.root
     }
 
@@ -71,8 +81,6 @@ class ProfileSettingFragment : Fragment() {
         setUserDetail()
         setObserver()
         setOnlineStatusToggle()
-
-
         binding.apply {
             clFaq.setOnClickListener {
                 findNavController().navigate(R.id.faqFragment)
@@ -83,7 +91,6 @@ class ProfileSettingFragment : Fragment() {
             tvUpdate.setOnClickListener {
 //                showCustomCoinDialog()
             }
-
             clCallChargeMain.setOnClickListener {
                 showCustomCoinDialog()
                 /*if(audioClicked){
@@ -103,11 +110,9 @@ class ProfileSettingFragment : Fragment() {
 
                 }*/
             }
-
             clLogoutMain.setOnClickListener {
                 findNavController().navigate(R.id.logoutDialogFragment)
             }
-
             clBlockedUserMain.setOnClickListener {
                 findNavController().navigate(R.id.blockedUserFragment)
             }
@@ -140,6 +145,18 @@ class ProfileSettingFragment : Fragment() {
                 shareApp()
             }
 
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel2.scrollPosition = binding.scrollView.scrollY
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.scrollView.post {
+            binding.scrollView.scrollTo(0, viewModel2.scrollPosition)
         }
     }
 
@@ -348,8 +365,6 @@ class ProfileSettingFragment : Fragment() {
                 }
             }
         }
-
-
     }
     private fun setOnlineStatus(onlineStatus: String) {
         when(onlineStatus){
@@ -398,24 +413,17 @@ class ProfileSettingFragment : Fragment() {
     private fun showCustomCoinDialog() {
         var selectedAudioCoinValue = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.audio_call_charges
         var selectedVideoCoinValue = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.video_call_charges
-
-        // Inflate custom layout
         val dialogView = layoutInflater.inflate(R.layout.dialog_custom_alert, null)
-
-        // Create AlertDialog
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setCancelable(true)
             .create()
-
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
         val btnYes = dialogView.findViewById<Button>(R.id.btnYes)
         val audioCoinsPicker = dialogView.findViewById<ScrollPicker>(R.id.audioCoinsPicker)
         val videoCoinsPicker = dialogView.findViewById<ScrollPicker>(R.id.videoCoinsPicker)
         val switchAudioCall = dialogView.findViewById<SwitchCompat>(R.id.switchAudioCall)
         val switchVideo = dialogView.findViewById<SwitchCompat>(R.id.switchVideo)
-
         audioCoinsPicker.setShownItemCount(3)
         audioCoinsPicker.setItems(audioCallCoinsList)
         audioCoinsPicker.setSelectedTextSize(20f)
@@ -433,8 +441,6 @@ class ProfileSettingFragment : Fragment() {
         audioCoinsPicker.addOnValueChangedListener {
             selectedAudioCoinValue = audioCoinsPicker.selectedItemText.substringBefore(" ").toIntOrNull() ?: 0
         }
-
-
         videoCoinsPicker.setShownItemCount(3)
         videoCoinsPicker.setItems(videoCallCoinsList)
         videoCoinsPicker.setSelectedTextSize(20f)
@@ -455,15 +461,11 @@ class ProfileSettingFragment : Fragment() {
                 val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                     requireContext(), LOGIN_DATA
                 )?.payload?.authToken
-
                 viewModel.hitUpdateCoinsApi(token, selectedAudioCoinValue.toString(), selectedVideoCoinValue.toString())
-
                 dialog.dismiss()
             }
-
         switchVideo.isChecked = isVideoEnable == true
         switchAudioCall.isChecked = isAudioEnable == true
-
         switchVideo.setOnCheckedChangeListener { _, isChecked ->
             isVideoEnable = isChecked
             hitSetPushNotificationsApi(SetNotificationRequest(videoCall = isChecked.toInt()))

@@ -55,7 +55,7 @@ class AddPhoneNumberFragment : Fragment() {
 
     private fun initViews() {
         touchHideKeyBoard(binding.root, requireActivity())
-        binding.llBack.setOnClickListener {
+        binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
         binding.btnSubmit.setOnClickListener {

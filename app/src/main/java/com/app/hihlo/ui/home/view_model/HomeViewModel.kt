@@ -37,6 +37,7 @@ class HomeViewModel @Inject constructor():ViewModel() {
     var posr_id: String = ""
 
     var scrollY = 0
+    var isPaused = false
     private val homeLiveDate = SingleLiveEvent<Resources<HomeResponse>>()
     private val genderListLiveData = SingleLiveEvent<Resources<GenderListResponse>>()
     fun getGenderLiveData(): LiveData<Resources<GenderListResponse>> {

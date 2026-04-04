@@ -37,6 +37,7 @@ import com.app.hihlo.databinding.BottomSheetLayoutBinding
 import com.app.hihlo.model.delete_comment.DeleteToCommentRequest
 import com.app.hihlo.model.get_reel_comments.response.Comment
 import com.app.hihlo.model.get_reel_comments.response.Payload
+import com.app.hihlo.model.get_reel_comments.response.User
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
@@ -97,14 +98,14 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         dialog.setOnShowListener {
             val bottomSheet = dialog.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
             bottomSheet?.let {
-                val behavior = BottomSheetBehavior.from(it)
+                behavior = BottomSheetBehavior.from(it)
                 val displayMetrics = resources.displayMetrics
                 val screenHeight = displayMetrics.heightPixels
                 val peekHeight = (screenHeight * 0.5).toInt()
-                behavior.peekHeight = requireContext().dpToPx(525)
-                behavior.isFitToContents = true
-                behavior.skipCollapsed = false
-                behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                behavior?.peekHeight = requireContext().dpToPx(525)
+                behavior?.isFitToContents = true
+                behavior?.skipCollapsed = false
+                behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
                 val cornerRadius = 25f.toPx(requireContext())
                 val shapeDrawable = MaterialShapeDrawable(
                     ShapeAppearanceModel.Builder()
@@ -114,10 +115,38 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 )
                 shapeDrawable.fillColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.bottom_sheet_color))
                 it.background = shapeDrawable
-                behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                Log.e("TTTTT", "TTTTT>>> "+UserDataManager.get_CommentExpandState(requireContext()))
+                val isExpanded = UserDataManager.get_CommentExpandState(binding.root.context)
+
+                if (isExpanded) {
+                    UserDataManager.postCommentExpandState(binding.root.context, true)
+                    isExpanding = false
+                    it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                    scheduleRecyclerViewHeightMatchParent()  // Delay setting height
+                } else {
+                    isExpanding = true
+                    UserDataManager.postCommentExpandState(binding.root.context, false)
+                    Log.e("TTTTT", "TTTTT>>> "+UserDataManager.get_CommentExpandState(binding.root.context))
+                    it.layoutParams.height = requireContext().dpToPx(400)
+                    val params = binding.commentsRecycler.layoutParams
+                    params.height = requireContext().dpToPx(360)
+                    binding.commentsRecycler.layoutParams = params
+                }
+                behavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         when (newState) {
+                            BottomSheetBehavior.STATE_HIDDEN -> {
+                                isExpanding = true
+
+                                context?.let {
+                                    UserDataManager.postCommentExpandState(it, false)
+                                    Log.e("TTTTT", "TTTTT>>> " + UserDataManager.get_CommentExpandState(it))
+                                }
+                            }
                             BottomSheetBehavior.STATE_COLLAPSED -> {
+                                UserDataManager.postCommentExpandState(binding.root.context, false)
+                                Log.e("TTTTT", "TTTTT>>> "+UserDataManager.get_CommentExpandState(binding.root.context))
                                 it.layoutParams.height = requireContext().dpToPx(400)
                                 val params = binding.commentsRecycler.layoutParams
                                 params.height = requireContext().dpToPx(360)
@@ -126,6 +155,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                             }
                             BottomSheetBehavior.STATE_EXPANDED -> {
                                 isExpanding = false
+                                Log.e("TTTTT", "TTTTT>>> "+UserDataManager.get_CommentExpandState(binding.root.context))
                             }
                             BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
                                 isExpanding = false
@@ -137,18 +167,20 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 })
                 binding.mainContain.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
+                        UserDataManager.postCommentExpandState(binding.root.context, true)
                         isExpanding = false
                         it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                         scheduleRecyclerViewHeightMatchParent()  // Delay setting height
                     }
                     true
                 }
                 binding.closeLine.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
+                        UserDataManager.postCommentExpandState(binding.root.context, true)
                         isExpanding = false
                         it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                         scheduleRecyclerViewHeightMatchParent()  // Delay setting height
                     }
                     true
@@ -156,30 +188,34 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
 
                 binding.titleTextView.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
+                        UserDataManager.postCommentExpandState(binding.root.context, true)
                         isExpanding = false
                         it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                         scheduleRecyclerViewHeightMatchParent()
                     }
                     true
                 }
 
                 binding.mainContain.setOnClickListener {
-                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    UserDataManager.postCommentExpandState(binding.root.context, true)
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                     isExpanding = false
                     it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                     scheduleRecyclerViewHeightMatchParent()
                 }
 
                 binding.closeLine.setOnClickListener {
-                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    UserDataManager.postCommentExpandState(binding.root.context, true)
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                     isExpanding = false
                     it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                     scheduleRecyclerViewHeightMatchParent()
                 }
 
                 binding.titleTextView.setOnClickListener {
-                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    UserDataManager.postCommentExpandState(binding.root.context, true)
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                     isExpanding = false
                     it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                     scheduleRecyclerViewHeightMatchParent()
@@ -192,19 +228,45 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
             behavior = BottomSheetBehavior.from(it)
             behavior?.peekHeight = requireContext().dpToPx(525)
             behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            UserDataManager.postCommentExpandState(binding.root.context, false)
         }
         return dialog
     }
 
     private fun scheduleRecyclerViewHeightMatchParent() {
-        heightChangeRunnable?.let { binding.commentsRecycler.removeCallbacks(it) }
+        heightChangeRunnable?.let {
+            binding.commentsRecycler.removeCallbacks(it)
+        }
+
         heightChangeRunnable = Runnable {
-            val b = _binding ?: return@Runnable   // ✅ SAFE CHECK
+            val b = _binding ?: return@Runnable
+
             val params = b.commentsRecycler.layoutParams
             params.height = ViewGroup.LayoutParams.MATCH_PARENT
             b.commentsRecycler.layoutParams = params
+
+            // ✅ IMPORTANT FIX: Force pagination check after layout update
+            b.commentsRecycler.post {
+                checkPaginationAfterExpand()
+            }
+
         }
         binding.commentsRecycler.postDelayed(heightChangeRunnable!!, 300)
+    }
+
+    private fun checkPaginationAfterExpand() {
+        val recyclerView = binding.commentsRecycler
+        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+        val visibleItemCount = layoutManager.childCount
+        val totalItemCount = layoutManager.itemCount
+        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+        if (!isLoading && hasMore &&
+            (firstVisibleItemPosition + visibleItemCount) >= totalItemCount
+        ) {
+            loadMore()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -331,6 +393,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
             requireContext().dpToPx(70)
         )
         binding.commentsRecycler.clipToPadding = false
+        binding.commentsRecycler.setHasFixedSize(true)
         binding.commentsRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy < 0 && isRecyclerViewAtTop(recyclerView) && isExpanding && behavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
@@ -338,11 +401,15 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                     behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                 }else{
                     isExpanding = true
-                    behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                 }
+//                else if (dy > 0 && behavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
+//                    // ✅ ONLY collapse when scrolling down AND not already collapsed
+//                    isExpanding = true
+//                    behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+//                }
             }
         })
-
         setupPagination()
         binding.sendButton.setOnClickListener {
             val message = binding.commentReplyEdittext.text.toString()
@@ -364,7 +431,9 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         }
         if(UserDataManager.isCommentToScroll(requireContext())){
             UserDataManager.setCommentToScroll(requireContext(), false)
-            binding.commentsRecycler.scrollToPosition(UserDataManager.get_CommentPosition(requireContext()))
+            val lm = binding.commentsRecycler.layoutManager as LinearLayoutManager
+            lm.scrollToPositionWithOffset(UserDataManager.get_CommentPosition(requireContext()),
+                UserDataManager.get_CommentYPosition(requireContext()))
         }
         //binding.commentReplyEdittext.requestFocus()
     }
@@ -379,20 +448,32 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     private fun setupPagination() {
         binding.commentsRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy <= 0) return // Only load when scrolling down
-                val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+                // Expand logic
                 val visibleItemCount = layoutManager.childCount
                 val totalItemCount = layoutManager.itemCount
                 val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-                if (!isLoading && hasMore && (firstVisibleItemPosition + visibleItemCount) >= totalItemCount && firstVisibleItemPosition >= 0) {
+
+                if (!isLoading && hasMore &&
+                    (firstVisibleItemPosition + visibleItemCount) >= totalItemCount) {
+
                     loadMore()
                 }
             }
         })
     }
 
+    fun saveScroll() {
+        val lm = binding.commentsRecycler.layoutManager as LinearLayoutManager
+        var scrollPosition = lm.findFirstVisibleItemPosition()
+        var scrollOffset = lm.findViewByPosition(scrollPosition)?.top ?: 0
+        UserDataManager.postCommentYPosition(requireContext(), scrollOffset)
+    }
+
     private fun loadMore() {
+        if (isLoading) return  // ✅ prevent duplicate calls
         isLoading = true
         currentPage++
         onLoadMore?.invoke(currentPage, limit)
@@ -440,13 +521,20 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         if (newComments.size < limit) {
             hasMore = false
         }
+
         adapter.addItems(newComments)
+
+        // ✅ IMPORTANT FIX
         isLoading = false
+
+        // ✅ Also trigger next load if still not filled screen
+        binding.commentsRecycler.post {
+            checkPaginationAfterExpand()
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         heightChangeRunnable?.let {
             binding.commentsRecycler.removeCallbacks(it)
         }

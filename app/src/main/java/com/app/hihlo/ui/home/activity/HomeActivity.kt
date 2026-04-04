@@ -114,6 +114,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         userImageUrl = Preferences.getCustomModelPreference<LoginResponse>(this, LOGIN_DATA)?.payload?.profileImage.toString()
         floatingButtonClick()
         UserDataManager.setHomeLoaded(this, false)
+        UserDataManager.postCommentExpandState(this, false)
         navigationMenuClickListener()
 //        setBottomBarPadding()
         setBottomNavigation()
@@ -437,6 +438,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     }else{
                         supportFragmentManager.setFragmentResult("home_click", Bundle())
                     }
+                    navController.navigate(R.id.homeNewFragment)
                     binding.imgBtn.setImageResource(R.drawable.reel_icon_unselected)
                     binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_selected)
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
@@ -502,7 +504,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
     }
 
-
     private fun fragmentChangeCallback() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
@@ -525,7 +526,19 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                         setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = true)
                     }
                 }
-                R.id.chatFragment, R.id.newStoryFragment, R.id.predefinedChatFragment, R.id.addReelFragment, R.id.editProfileNewFragment, R.id.storyFragment, R.id.secondStoryFragment, R.id.becomeCreatorStatusFragment, R.id.benifitsOfCreatersFragment, R.id.rateUsFragment, R.id.openImageFragment, R.id.changePasswordFragment  -> {
+                R.id.chatFragment,
+                R.id.newStoryFragment,
+                R.id.predefinedChatFragment,
+                R.id.addReelFragment,
+                R.id.editProfileNewFragment,
+                R.id.storyFragment,
+                R.id.secondStoryFragment,
+                //R.id.becomeCreatorStatusFragment,
+                //R.id.benifitsOfCreatersFragment,
+                //R.id.rateUsFragment,
+                R.id.openImageFragment,
+                //R.id.changePasswordFragment
+                    -> {
                     clearBottomBarPadding()
                     hideNavigationView()
 
@@ -666,6 +679,12 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         }
     }
 
-
+    override fun onStop() {
+        super.onStop()
+        Log.e("TTTTT","APP IN BACKGROUND")
+        if(RTVariable.FRAG_POSITION==0){
+            RTVariable.ISHOMECLICKED = true
+        }
+    }
 
 }

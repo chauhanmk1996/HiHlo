@@ -51,7 +51,7 @@ class BenifitsOfCreatersFragment : Fragment() {
         binding.cancelButton.setOnClickListener {
             findNavController().popBackStack()
         }
-        binding.llBack.setOnClickListener {
+        binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
         hitCreatorBenefitsApi()
