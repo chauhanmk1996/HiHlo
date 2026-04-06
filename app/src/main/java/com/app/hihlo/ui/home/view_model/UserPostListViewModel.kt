@@ -21,6 +21,7 @@ import javax.inject.Inject
 class UserPostListViewModel @Inject constructor() : ViewModel(){
 
     var commentPayloadCache: Payload? = null
+    var is_comment_loaded: Boolean = false
     var scroll_position: Int = 0
     private val getReelCommentsLiveDate = SingleLiveEvent<Resources<ReelCommentsResponse>>()
 

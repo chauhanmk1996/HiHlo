@@ -24,11 +24,15 @@ object RTVariable {
     var INNER_COMMENT_POSITION: Int = 0
 
     var ISHOMECLICKED: Boolean = false
+    var ISOTHERCLICKED: Boolean = false
 
     // Post Comment Remember
     var FRAG_POSITION: Int = 0
     var P_PID: String = ""
     var P_H_SHOW: Boolean = false
+
+    var SCROLL_POS: Int = 0
+    var OFF_SET: Int = 0
 
     fun formatCount(count: Int): String {
         return when {

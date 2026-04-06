@@ -7,7 +7,7 @@ import android.util.Log
 object UserDataManager {
 
     fun setPause(context: Context, isPaused: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_IsPaused", isPaused)
             apply()
@@ -15,7 +15,7 @@ object UserDataManager {
     }
 
     fun isPaused(context: Context): Boolean {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         val value = prefs.getBoolean("com.HHA_IsPaused", false)
         return value
     }
@@ -36,30 +36,31 @@ object UserDataManager {
     }
     /// POST MAIN
     fun postMainSP(context: Context, page: Int, position: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_P_MainPAGE", page)
-            apply()
-        }
-        with(prefs.edit()) {
             putInt("com.HHA_P_MainPOSITION", position)
-            apply()
+            commit()
         }
+//        with(prefs.edit()) {
+//            putInt("com.HHA_P_MainPOSITION", position)
+//            commit()
+//        }
     }
 
     fun postUpdateMainSP(context: Context, page: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_P_MainPAGE", page)
-            apply()
+            commit()
         }
     }
 
     fun postMainIsSetShow(context: Context, show: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_P_MainSHOW", show)
-            apply()
+            commit()
         }
     }
     fun get_postMainPage(context: Context): Int {
@@ -76,34 +77,36 @@ object UserDataManager {
     }
     ///// POST COMMENT
     fun postCommentSP(context: Context, page: Int, position: Int, pid: String) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_P_PAGE", page)
-            apply()
-        }
-        with(prefs.edit()) {
             putInt("com.HHA_P_POSITION", position)
-            apply()
-        }
-        with(prefs.edit()) {
             putString("com.HHA_P_PID", pid)
-            apply()
+            commit()
         }
+//        with(prefs.edit()) {
+//            putInt("com.HHA_P_POSITION", position)
+//            commit()
+//        }
+//        with(prefs.edit()) {
+//            putString("com.HHA_P_PID", pid)
+//            commit()
+//        }
     }
 
     fun postCommentUpdateSP(context: Context, page: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_P_PAGE", page)
-            apply()
+            commit()
         }
     }
 
     fun postCommentIsShow(context: Context, show: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_P_C_SHOW", show)
-            apply()
+            commit()
         }
     }
 
@@ -128,26 +131,26 @@ object UserDataManager {
     }
 
     fun postCommentPosition(context: Context, position: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_P_COMMENT_POSITION", position)
-            apply()
+            commit()
         }
     }
 
     fun postCommentYPosition(context: Context, position: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_P_COMMENT_YPOSITION", position)
-            apply()
+            commit()
         }
     }
 
     fun postCommentExpandState(context: Context, state: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_P_COMMENT_CommentExpandState", state)
-            apply()
+            commit()
         }
     }
 
@@ -167,10 +170,10 @@ object UserDataManager {
     }
 
     fun setCommentToScroll(context: Context, show: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_P_C_CommentIsScroll", show)
-            apply()
+            commit()
         }
     }
 
@@ -181,10 +184,10 @@ object UserDataManager {
 
     /////////Navigation
     fun setHomeLoaded(context: Context, show: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_HomeLoaded", show)
-            apply()
+            commit()
         }
     }
     fun isHomeLoaded(context: Context): Boolean {
@@ -192,10 +195,10 @@ object UserDataManager {
         return prefs.getBoolean("com.HHA_HomeLoaded", false)
     }
     fun setGetBackToHome(context: Context, show: Boolean) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putBoolean("com.HHA_GetBackToHome", show)
-            apply()
+            commit()
         }
     }
     fun isGetBackToHome(context: Context): Boolean {
@@ -203,10 +206,10 @@ object UserDataManager {
         return prefs.getBoolean("com.HHA_GetBackToHome", false)
     }
     fun setHomeScrollPosition(context: Context, position: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_HomeScrollPosition", position)
-            apply()
+            commit()
         }
     }
     fun getHomeScrollPosition(context: Context): Int {
@@ -214,10 +217,10 @@ object UserDataManager {
         return prefs.getInt("com.HHA_HomeScrollPosition", 0)
     }
     fun setHomeScrollYPosition(context: Context, position: Int) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
             putInt("com.HHA_HomeScrollYPosition", position)
-            apply()
+            commit()
         }
     }
     fun getHomeScrollYPosition(context: Context): Int {

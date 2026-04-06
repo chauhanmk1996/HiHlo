@@ -11,6 +11,7 @@ package com.app.hihlo.ui.reels.bottom_sheet
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -280,6 +281,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         Log.i("TAG", "onViewCreated: BRPID " + UserDataManager.get_postCommentPid(requireContext()))
         Log.i("TAG", "onViewCreated: BRP " + UserDataManager.get_postCommentPosition(requireContext()))
         val initialComments = payload?.comments ?: listOf()
+        Log.i("TAG", "onViewCreated: Z " + initialComments.size)
         adapter = AdapterComments(
             initialComments.toMutableList(),
             stories,
@@ -393,7 +395,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
             requireContext().dpToPx(70)
         )
         binding.commentsRecycler.clipToPadding = false
-        binding.commentsRecycler.setHasFixedSize(true)
+        //binding.commentsRecycler.setHasFixedSize(true)
         binding.commentsRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy < 0 && isRecyclerViewAtTop(recyclerView) && isExpanding && behavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
@@ -429,11 +431,14 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 binding.sendButton.isEnabled = true
             }, 1000)
         }
-        if(UserDataManager.isCommentToScroll(requireContext())){
-            UserDataManager.setCommentToScroll(requireContext(), false)
-            val lm = binding.commentsRecycler.layoutManager as LinearLayoutManager
-            lm.scrollToPositionWithOffset(UserDataManager.get_CommentPosition(requireContext()),
-                UserDataManager.get_CommentYPosition(requireContext()))
+        Log.i("TAG", "onViewCreated: PBS " + UserDataManager.get_CommentPosition(binding.root.context))
+        if (UserDataManager.isCommentToScroll(binding.root.context)) {
+            val position = UserDataManager.get_CommentPosition(binding.root.context)
+            UserDataManager.setCommentToScroll(binding.root.context, false)
+            binding.commentsRecycler.post {
+                val lm = binding.commentsRecycler.layoutManager as LinearLayoutManager
+                lm.scrollToPositionWithOffset(position, 0)
+            }
         }
         //binding.commentReplyEdittext.requestFocus()
     }
@@ -455,7 +460,6 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 val visibleItemCount = layoutManager.childCount
                 val totalItemCount = layoutManager.itemCount
                 val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
                 if (!isLoading && hasMore &&
                     (firstVisibleItemPosition + visibleItemCount) >= totalItemCount) {
 

@@ -432,20 +432,26 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                 R.id.home -> {
                     UserDataManager.setHomeLoaded(this, false)
                     UserDataManager.setGetBackToHome(this, false)
+                    RTVariable.ISOTHERCLICKED = false
+                    RTVariable.ISHOMECLICKED = true
                     showNavigationView()
                     if (currentDestId != R.id.homeNewFragment) {
                         navController.navigate(R.id.homeNewFragment)
                     }else{
                         supportFragmentManager.setFragmentResult("home_click", Bundle())
                     }
-                    navController.navigate(R.id.homeNewFragment)
+                    //navController.navigate(R.id.homeNewFragment)
                     binding.imgBtn.setImageResource(R.drawable.reel_icon_unselected)
                     binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_selected)
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     true
                 }
                 R.id.chat -> {
-                    UserDataManager.setGetBackToHome(this, true)
+                    UserDataManager.setGetBackToHome(binding.root.context, true)
+                    UserDataManager.setHomeLoaded(this, false)
+                    RTVariable.ISOTHERCLICKED = true
+                    RTVariable.ISHOMECLICKED = false
+                    Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
 //                    if (currentDestId != R.id.chatListFragment) {
                         navController.navigate(R.id.chatListFragment)
@@ -456,7 +462,11 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.reel -> {
-                    UserDataManager.setGetBackToHome(this, true)
+                    UserDataManager.setGetBackToHome(binding.root.context, true)
+                    UserDataManager.setHomeLoaded(this, false)
+                    RTVariable.ISOTHERCLICKED = true
+                    RTVariable.ISHOMECLICKED = false
+                    Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
 //                    if (currentDestId != R.id.reelsFragment) {
                         navController.navigate(R.id.reelsFragment)
@@ -466,7 +476,11 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.search -> {
-                    UserDataManager.setGetBackToHome(this, true)
+                    UserDataManager.setGetBackToHome(binding.root.context, true)
+                    UserDataManager.setHomeLoaded(this, false)
+                    RTVariable.ISOTHERCLICKED = true
+                    RTVariable.ISHOMECLICKED = false
+                    Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
                     if (currentDestId != R.id.searchFragment) {
                         navController.navigate(R.id.searchNewFragment)
@@ -477,7 +491,11 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.profile -> {
-                    UserDataManager.setGetBackToHome(this, true)
+                    UserDataManager.setGetBackToHome(binding.root.context, true)
+                    UserDataManager.setHomeLoaded(this, false)
+                    RTVariable.ISOTHERCLICKED = true
+                    RTVariable.ISHOMECLICKED = false
+                    Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
                     navigateToProfile(currentDestId, userImageUrl)
                     true
@@ -677,6 +695,11 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                 requestOverlayPermission()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        RTVariable.ISHOMECLICKED = false
     }
 
     override fun onStop() {

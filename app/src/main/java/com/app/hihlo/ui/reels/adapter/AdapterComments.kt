@@ -326,6 +326,8 @@ class AdapterComments(
 //                    .setLaunchSingleTop(true)
 //                    .setRestoreState(true)
 //                    .build()
+                Log.e("PO", "PO>>> "+position)
+                Log.i("TAG", "onViewCreated: PZ " + position)
                 var user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
                 if (commentItem.user?.username==user){
                     UserDataManager.postCommentPosition(root.context, position)

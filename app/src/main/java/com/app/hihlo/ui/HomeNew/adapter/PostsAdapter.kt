@@ -262,7 +262,7 @@ class PostsAdapter(
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
                 RTVariable.POST_ID = post.id.toString()
                 RTVariable.COMMENT_FROM = false
-                    actionListener?.onPostAction(
+                actionListener?.onPostAction(
                     post,
                     PostClickAction.COMMENT,
                     adapterPosition,

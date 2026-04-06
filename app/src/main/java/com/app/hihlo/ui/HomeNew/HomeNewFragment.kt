@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.HomeNew
 
+import CommentPrefs.mergeComments
 import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Context
@@ -14,7 +15,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
+import android.os.SystemClock
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.ImageView
@@ -131,19 +134,19 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     override fun initView(savedInstanceState: Bundle?) {
         viewModel.hitGenderListApi()
-        binding.swipeRefresh.setColorSchemeColors(
-            ContextCompat.getColor(requireContext(), R.color.white)
-        )
-        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
-            ContextCompat.getColor(requireContext(), R.color.white_10)
-        )
-        binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
+//        binding.swipeRefresh.setColorSchemeColors(
+//            ContextCompat.getColor(requireContext(), R.color.white)
+//        )
+//        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
+//            ContextCompat.getColor(requireContext(), R.color.white_10)
+//        )
+        //binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
         if (!viewModel.isHomeDataLoaded) {
             if(!UserDataManager.isGetBackToHome(requireContext())){
                 Log.e("HIT", "HIT>>> IH")
                 binding.progressBar.isVisible = false
                 viewModel.currentPage = 1
-                binding.swipeRefresh.isRefreshing = true
+                triggerPullToRefreshAnimation()
                 viewModel.isRefreshing = false
                 hitServiceListApi(viewModel.currentPage, 0)
             }
@@ -205,13 +208,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }, 1000)
         } */
         if (viewModel.isHomeDataLoaded) {
-
+            UserDataManager.setGetBackToHome(requireContext(), false)
             postAdapter.setPosts(
                 viewModel.postsCache,
                 listOf(viewModel.myStory ?: MyStory()),
                 viewModel.stories
             )
-
             binding.storiesRecycler.adapter = AdapterStoriesRecycler(
                 viewModel.isStoryUploaded,
                 viewModel.myStory ?: MyStory(),
@@ -219,31 +221,15 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 ::getSelectedStory,
                 viewModel.profileImage
             )
-
-            //val scrollYp = UserDataManager.getHomeScrollYPosition(binding.root.context)
-
-            if(UserDataManager.isGetBackToHome(requireContext())){
+            if(!UserDataManager.isGetBackToHome(requireContext())){
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
                 binding.nestedScrollView.post {
                     binding.nestedScrollView.scrollTo(0, scrollYp)
                 }
             }else{
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
-                if(scrollYp!=null){
-                    binding.nestedScrollView.post {
-                        binding.nestedScrollView.scrollTo(0, scrollYp)
-                    }
-                }else{
-                    if(RTVariable.ISHOMECLICKED){
-                        val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
-                        binding.nestedScrollView.post {
-                            binding.nestedScrollView.scrollTo(0, scrollYp)
-                        }
-                    }else{
-                        binding.nestedScrollView.post {
-                            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
-                        }
-                    }
+                binding.nestedScrollView.post {
+                    binding.nestedScrollView.scrollTo(0, scrollYp)
                 }
             }
         }
@@ -259,13 +245,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //            )
 //        }
         binding.swipeRefresh.setOnRefreshListener {
-            binding.swipeRefresh.isRefreshing = true
+            binding.swipeRefresh.post {
+                binding.swipeRefresh.isRefreshing = true
+            }
             binding.progressBar.isVisible = false
             refreshData()
         }
         requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
-            UserDataManager.setGetBackToHome(binding.root.context, false)
 //            isRefreshedFromMenu = true
 //            allStory?.toMutableList()?.clear()
 //            viewModel.currentPage = 1
@@ -282,37 +269,54 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                binding.swipeRefresh.isRefreshing = true
 //                viewModel.isRefreshing = false
 //            }
+
+            //binding.swipeRefresh.isRefreshing = true
             if (binding.nestedScrollView.scrollY == 0) {
-                binding.swipeRefresh.setColorSchemeColors(
-                    ContextCompat.getColor(requireContext(), R.color.white)
-                )
-                binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
-                    ContextCompat.getColor(requireContext(), R.color.white_10)
-                )
-                binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
                 if (!viewModel.isHomeDataLoaded) {
-                    if(!UserDataManager.isGetBackToHome(requireContext())){
+                    if (!UserDataManager.isGetBackToHome(requireContext())) {
                         Log.e("HIT", "HIT>>> IH")
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
-                        binding.swipeRefresh.isRefreshing = true
                         viewModel.isRefreshing = false
+
+                        triggerPullToRefreshAnimation()
+
                         hitServiceListApi(viewModel.currentPage, 0)
-                        binding.nestedScrollView.post {
-                            binding.nestedScrollView.scrollTo(0, 0)
-                        }
                     }
+                } else if (RTVariable.ISHOMECLICKED) {
+                    RTVariable.ISHOMECLICKED = false
+                    Log.e("HIT", "HIT>>> IHE")
+                    binding.progressBar.isVisible = false
+                    viewModel.currentPage = 1
+                    viewModel.isRefreshing = false
+
+                    triggerPullToRefreshAnimation()
+
+                    hitServiceListApi(viewModel.currentPage, 0)
                 }
             } else {
-                binding.nestedScrollView.smoothScrollTo(0, 0)
-                binding.nestedScrollView.setOnScrollChangeListener(
-                    NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
-                        if (scrollY == 0) {
-                            binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-                            hitServiceListApi(viewModel.currentPage, selectedGender)
-                        }
+                if (binding.nestedScrollView.scrollY > 0) {
+                    if (RTVariable.ISHOMECLICKED) {
+                        Log.e("HIT", "HIT>>> IHE")
+                        binding.progressBar.isVisible = false
+                        viewModel.currentPage = 1
+                        viewModel.isRefreshing = false
+
+                        triggerPullToRefreshAnimation()
+
+                        hitServiceListApi(viewModel.currentPage, 0)
                     }
-                )
+                }else{
+                    binding.nestedScrollView.smoothScrollTo(0, 0)
+                    binding.nestedScrollView.setOnScrollChangeListener(
+                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+                            if (scrollY == 0) {
+                                binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
+                                hitServiceListApi(viewModel.currentPage, selectedGender)
+                            }
+                        }
+                    )
+                }
             }
         }
         setupScrollListener()  // ← Call here too if needed, but initView is fine
@@ -329,25 +333,77 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
+    private fun triggerPullToRefreshAnimation() {
+        binding.swipeRefresh.post {
+            try {
+                val now = SystemClock.uptimeMillis()
+                val centerX = binding.swipeRefresh.width / 2f
+
+                // ACTION_DOWN → finger touch
+                val downEvent = MotionEvent.obtain(
+                    now, now, MotionEvent.ACTION_DOWN, centerX, 80f, 0
+                )
+
+                // ACTION_MOVE → tez pull down (sirf 25ms mein)
+                val moveEvent = MotionEvent.obtain(
+                    now, now + 25, MotionEvent.ACTION_MOVE, centerX, 520f, 0
+                )
+
+                // ACTION_UP → finger release (natural feel ke liye)
+                val upEvent = MotionEvent.obtain(
+                    now, now + 80, MotionEvent.ACTION_UP, centerX, 520f, 0
+                )
+
+                // Events bhejo
+                binding.swipeRefresh.dispatchTouchEvent(downEvent)
+                binding.swipeRefresh.dispatchTouchEvent(moveEvent)
+                binding.swipeRefresh.dispatchTouchEvent(upEvent)
+
+                // Clean up
+                downEvent.recycle()
+                moveEvent.recycle()
+                upEvent.recycle()
+
+                // Actual refreshing on kar do
+                binding.swipeRefresh.isRefreshing = true
+
+            } catch (e: Exception) {
+                Log.e("PullRefresh", "Animation failed: ${e.message}")
+                binding.swipeRefresh.isRefreshing = true  // fallback
+            }
+        }
+    }
+
     fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
+//    fun scrollToRecyclerPosition(position: Int) {
+//
+//        val lm = binding.postListRecycler.layoutManager as LinearLayoutManager
+//
+//        // ✅ Step 1: jump RecyclerView instantly
+//        lm.scrollToPositionWithOffset(position, 0)
+//
+//        // ✅ Step 2: scroll parent instantly (NO smooth scroll)
+//        binding.nestedScrollView.post {
+//            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
+//            UserDataManager.setGetBackToHome(requireContext(), false)
+//        }
+//    }
+
     fun scrollToRecyclerPosition(position: Int) {
         binding.postListRecycler.post {
-//            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager?: return@post
-//            layoutManager.scrollToPositionWithOffset(position, 0)
-            val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
-            val lm = binding.postListRecycler.layoutManager as LinearLayoutManager
-            lm.scrollToPositionWithOffset(position,scrollYp)
+            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager
+                ?: return@post
+            layoutManager.scrollToPositionWithOffset(position, 0)
             binding.postListRecycler.post {
-                val viewHolder = binding.postListRecycler
-                    .findViewHolderForAdapterPosition(position)
+                val viewHolder = binding.postListRecycler.findViewHolderForAdapterPosition(position)
                 val itemView = viewHolder?.itemView ?: return@post
                 val y = itemView.y + binding.postListRecycler.y
+                binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
+                UserDataManager.setGetBackToHome(requireContext(), false)
                 binding.nestedScrollView.post {
-                    binding.nestedScrollView.isSmoothScrollingEnabled = false
-                    binding.nestedScrollView.fling(8000)
                     binding.nestedScrollView.smoothScrollTo(0, viewModel.scrollY)
                     UserDataManager.setGetBackToHome(requireContext(), false)
                 }
@@ -479,7 +535,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                 FIRSTVisiblePosition = firstVisible
                 offsetY = offset
-                viewModel.scroll_position = FIRSTVisiblePosition
+                RTVariable.SCROLL_POS = FIRSTVisiblePosition
+                RTVariable.OFF_SET = offsetY
                 UserDataManager.setHomeScrollPosition(requireContext(), FIRSTVisiblePosition)
                 UserDataManager.setHomeScrollYPosition(requireContext(), offsetY)
             }
@@ -577,6 +634,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 post_position = position
                                 viewModel.posr_id = post.id.toString()
                                 viewModel.scroll_position = position
+                                RTVariable.P_PID = post.id.toString()
+                                UserDataManager.postCommentExpandState(requireContext(), false)
                                 UserDataManager.postCommentSP(requireContext(), viewModel.currentPage, post_position, postId.toString())
                                 //Toast.makeText(requireContext(), "Comment at position $position", Toast.LENGTH_SHORT).show()
                                 viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString(), "1", "10")
@@ -903,11 +962,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             )
                             viewModel.isHomeDataLoaded = true
                             isLoadingMore = false
-                            if(!UserDataManager.isGetBackToHome(requireContext())){
-                                Log.e("TTTTT","APP IN BACKGROUND O "+RTVariable.ISHOMECLICKED)
-                                binding.nestedScrollView.post {
-                                    binding.nestedScrollView.scrollTo(0, 0)
-                                }
+                            if (RTVariable.ISHOMECLICKED) {
+                                RTVariable.ISHOMECLICKED = false
+                                binding.nestedScrollView.smoothScrollTo(0, 0)
                             }
                         }else{
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
@@ -976,58 +1033,110 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }
         }
         viewModel2.getReelCommentsLiveData().observe(viewLifecycleOwner) {
+
             when (it.status) {
+
                 Status.SUCCESS -> {
-                    Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
+
                     if (it.data?.code == 200) {
-                        val payload = it.data.payload ?: return@observe
-                        if (isCommentPosted) {
-                            isCommentPosted = false
-                            viewModel2.commentPayloadCache = payload
-                            if (::commentsBottomSheetFragment.isInitialized) {
-                                commentsBottomSheetFragment.updateComments(payload)
-                            }
-                        } else if (isLoadMore) {
-                            isLoadMore = false
-                            val oldPayload = viewModel2.commentPayloadCache
-                            if (oldPayload != null) {
-                                val mergedComments =
-                                    (oldPayload.comments ?: emptyList()) + (payload.comments ?: emptyList())
-                                val updatedPayload = oldPayload.copy(
-                                    comments = mergedComments
+
+                        val newPayload = it.data.payload ?: return@observe
+
+                        when {
+
+                            // ✅ COMMENT POSTED
+                            isCommentPosted -> {
+
+                                isCommentPosted = false
+
+                                viewModel2.commentPayloadCache = newPayload
+
+                                CommentPrefs.savePayload(
+                                    requireContext(),
+                                    postId.toInt(),
+                                    newPayload
                                 )
-                                viewModel2.commentPayloadCache = updatedPayload
-                                if (::commentsBottomSheetFragment.isInitialized) {
-                                    commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+
+                                if (::commentsBottomSheetFragment.isInitialized &&
+                                    commentsBottomSheetFragment.isAdded
+                                ) {
+                                    commentsBottomSheetFragment.updateComments(newPayload)
                                 }
-                            } else {
-                                viewModel2.commentPayloadCache = payload
                             }
-                        } else {
-                            viewModel2.commentPayloadCache = payload
-                            openCommentsBottomSheet(payload)
+
+                            // ✅ LOAD MORE (FIXED 🔥)
+                            isLoadMore -> {
+
+                                isLoadMore = false
+
+                                val oldPayload =
+                                    viewModel2.commentPayloadCache
+                                        ?: CommentPrefs.getPayload(requireContext(), postId.toInt())
+
+                                if (oldPayload != null) {
+
+                                    val (mergedList, newItemsOnly) =
+                                        CommentPrefs.mergeComments(
+                                            oldPayload.comments ?: emptyList(),
+                                            newPayload.comments ?: emptyList()
+                                        )
+
+                                    val updatedPayload = oldPayload.copy(
+                                        comments = mergedList
+                                    )
+
+                                    viewModel2.commentPayloadCache = updatedPayload
+
+                                    // ✅ Save correct list
+                                    CommentPrefs.savePayload(
+                                        requireContext(),
+                                        postId.toInt(),
+                                        updatedPayload
+                                    )
+
+                                    if (::commentsBottomSheetFragment.isInitialized &&
+                                        commentsBottomSheetFragment.isAdded
+                                    ) {
+
+                                        // 🔥 IMPORTANT: append ONLY new items (no duplicate)
+                                        if (newItemsOnly.isNotEmpty()) {
+                                            commentsBottomSheetFragment.appendComments(newItemsOnly)
+                                        } else {
+                                            Log.e("PAGINATION", "No new items to append")
+                                        }
+                                    }
+
+                                } else {
+                                    viewModel2.commentPayloadCache = newPayload
+                                    CommentPrefs.savePayload(
+                                        requireContext(),
+                                        postId.toInt(),
+                                        newPayload
+                                    )
+                                }
+                            }
+
+                            // ✅ FIRST LOAD
+                            else -> {
+
+                                viewModel2.commentPayloadCache = newPayload
+                                CommentPrefs.clear(requireContext())
+                                CommentPrefs.savePayload(
+                                    requireContext(),
+                                    postId.toInt(),
+                                    newPayload
+                                )
+
+                                openCommentsBottomSheet(newPayload)
+                            }
                         }
-//                        binding.postListRecycler.post {
-//                            val viewHolder = binding.postListRecycler.findViewHolderForAdapterPosition(UserDataManager.get_postCommentPosition(requireContext()))
-//                            val itemView = viewHolder?.itemView
-//
-//                            if (itemView != null) {
-//                                val y = itemView.top
-//
-//                                binding.nestedScrollView.smoothScrollTo(0, y)
-//                            }
-//                        }
-                    } else {
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    //ProcessDialog.dismissDialog(true)
                 }
-                Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
-                }
+
+                Status.LOADING -> {}
+
                 Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
+                    Log.e("TAG", "Error: ${it.message}")
                 }
             }
         }
@@ -1204,18 +1313,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         super.onPause()
         viewModel.scrollY = binding.nestedScrollView.scrollY
         viewModel.isHomeDataLoaded = true
-        viewModel.scroll_position = FIRSTVisiblePosition
-        viewModel.isPaused = true
-        UserDataManager.setHomeScrollPosition(binding.root.context, FIRSTVisiblePosition)
-        UserDataManager.setHomeScrollYPosition(binding.root.context, binding.nestedScrollView.scrollY)
+        UserDataManager.setHomeScrollPosition(requireContext(), RTVariable.SCROLL_POS)
+        UserDataManager.setHomeScrollYPosition(requireContext(), RTVariable.OFF_SET)
     }
 
     override fun onResume() {
         super.onResume()
-        RTVariable.FRAG_POSITION = 0
-        Log.e("TTTTTT", "TTTTTT HHHH")
-        Log.e("TTTTT","APP IN BACKGROUND  "+RTVariable.ISHOMECLICKED)
-        Log.e("RESUME", "RESUME>>> "+RTVariable.ISHOMECLICKED)
 //        val position = UserDataManager.getHomeScrollPosition(requireContext())
 //        val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
 //        Log.e("SCROLL GOING", "SCROLL GOING>>> S "+position+" | "+scrollYp)
@@ -1249,49 +1352,23 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                UserDataManager.postMainIsSetShow(requireContext(), false)
 //            }
 //        }
-//        if(UserDataManager.isGetBackToHome(requireContext())){
-//            val position = UserDataManager.getHomeScrollPosition(requireContext())
-//            scrollToRecyclerPosition(position)
-//        }else{
-//            scrollToRecyclerPosition(viewModel.scroll_position)
-//        }
         if(UserDataManager.isGetBackToHome(requireContext())){
-            Log.e("TTTTT","APP IN BACKGROUND 1 "+RTVariable.ISHOMECLICKED)
             val position = UserDataManager.getHomeScrollPosition(requireContext())
             scrollToRecyclerPosition(position)
         }else{
-            if(UserDataManager.get_postMainIsShow(requireContext())){
-                Log.e("TTTTT","APP IN BACKGROUND 2 "+RTVariable.ISHOMECLICKED)
-                scrollToRecyclerPosition(viewModel.scroll_position)
-            }else{
-                if(UserDataManager.get_postCommentShow(requireContext())){
-                    Log.e("TTTTT","APP IN BACKGROUND 3 "+RTVariable.ISHOMECLICKED)
-                    scrollToRecyclerPosition(viewModel.scroll_position)
-                }else{
-                    if(!UserDataManager.isGetBackToHome(requireContext())){
-                        if(RTVariable.ISHOMECLICKED){
-                            Log.e("TTTTT","APP IN BACKGROUND 4 "+RTVariable.ISHOMECLICKED)
-                            RTVariable.ISHOMECLICKED = false
-                            val position = UserDataManager.getHomeScrollPosition(requireContext())
-                            scrollToRecyclerPosition(position)
-                        }else{
-                            Log.e("TTTTT","APP IN BACKGROUND 5 "+RTVariable.ISHOMECLICKED)
-                            binding.nestedScrollView.post {
-                                binding.nestedScrollView.scrollTo(0, 0)
-                            }
-                        }
-                    }
-                }
-            }
-            //val position = UserDataManager.getHomeScrollPosition(requireContext())
+            scrollToRecyclerPosition(viewModel.scroll_position)
         }
-        //val position = UserDataManager.getHomeScrollPosition(requireContext())
-        //scrollToRecyclerPosition(position)
         if(UserDataManager.get_postCommentShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postCommentIsShow(requireContext(), false)
-            openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+            //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
             //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+            val cached = CommentPrefs.get2Payload(requireContext())
+
+            if (cached != null) {
+                viewModel2.commentPayloadCache = cached
+                openCommentsBottomSheet(cached)
+            }
         }
         if(UserDataManager.get_postMainIsShow(requireContext())){
             binding.swipeRefresh.isRefreshing = false
