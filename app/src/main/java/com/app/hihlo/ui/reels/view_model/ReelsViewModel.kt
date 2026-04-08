@@ -22,10 +22,15 @@ import com.app.hihlo.utils.network_utils.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.app.hihlo.model.reel.response.Reel
 
 @HiltViewModel
 class ReelsViewModel @Inject constructor():ViewModel() {
 
+    var isreelsDataLoaded = false
+
+    var reelsCache: MutableList<Reel> = mutableListOf()
+    var current_page: Int = 0
     var commentPayloadCache: Payload? = null
     private val deletePostLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 

@@ -141,16 +141,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //            ContextCompat.getColor(requireContext(), R.color.white_10)
 //        )
         //binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
-        if (!viewModel.isHomeDataLoaded) {
-            if(!UserDataManager.isGetBackToHome(requireContext())){
-                Log.e("HIT", "HIT>>> IH")
-                binding.progressBar.isVisible = false
-                viewModel.currentPage = 1
-                triggerPullToRefreshAnimation()
-                viewModel.isRefreshing = false
-                hitServiceListApi(viewModel.currentPage, 0)
-            }
-        }
+//        if (!viewModel.isHomeDataLoaded) {
+//            if(!UserDataManager.isGetBackToHome(requireContext())){
+//                Log.e("HIT", "HIT>>> IH")
+//                binding.progressBar.isVisible = false
+//                viewModel.currentPage = 1
+//                binding.swipeRefresh.isRefreshing = true
+//                viewModel.isRefreshing = false
+//                hitServiceListApi(viewModel.currentPage, 0)
+//            }
+//        }
 //        if (!viewModel.isHomeDataLoaded) {
 //            viewModel.currentPage = 1
 //            hitServiceListApi(viewModel.currentPage, 0)
@@ -168,6 +168,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         //setupScrollListener()  // ← Replaced setPagination with this
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        RTVariable.bottom_page = 0
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setObserver()
@@ -279,32 +280,35 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
 
-                        triggerPullToRefreshAnimation()
+                        binding.swipeRefresh.isRefreshing = true
 
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                 } else if (RTVariable.ISHOMECLICKED) {
+                    UserDataManager.setGetBackToHome(requireContext(), false)
                     RTVariable.ISHOMECLICKED = false
                     Log.e("HIT", "HIT>>> IHE")
                     binding.progressBar.isVisible = false
                     viewModel.currentPage = 1
                     viewModel.isRefreshing = false
 
-                    triggerPullToRefreshAnimation()
-
+                    binding.swipeRefresh.isRefreshing = true
                     hitServiceListApi(viewModel.currentPage, 0)
                 }
             } else {
                 if (binding.nestedScrollView.scrollY > 0) {
                     if (RTVariable.ISHOMECLICKED) {
+                        UserDataManager.setGetBackToHome(requireContext(), false)
                         Log.e("HIT", "HIT>>> IHE")
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
 
-                        triggerPullToRefreshAnimation()
-
-                        hitServiceListApi(viewModel.currentPage, 0)
+                        binding.swipeRefresh.isRefreshing = true
+                        binding.nestedScrollView.post {
+                            binding.nestedScrollView.scrollTo(0, 0)
+                            hitServiceListApi(viewModel.currentPage, 0)
+                        }
                     }
                 }else{
                     binding.nestedScrollView.smoothScrollTo(0, 0)
@@ -312,7 +316,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
                             if (scrollY == 0) {
                                 binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-                                hitServiceListApi(viewModel.currentPage, selectedGender)
+                                //hitServiceListApi(viewModel.currentPage, selectedGender)
                             }
                         }
                     )

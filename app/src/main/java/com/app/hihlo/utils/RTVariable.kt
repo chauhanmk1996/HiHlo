@@ -33,6 +33,11 @@ object RTVariable {
 
     var SCROLL_POS: Int = 0
     var OFF_SET: Int = 0
+    var isStable: Boolean = false
+    var BOTTOM_REELS_ICON_CLICKED: Boolean = false
+    var bottom_page: Int =0
+
+    //var SEARCH_CLICKED: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {

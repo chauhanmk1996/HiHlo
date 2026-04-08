@@ -108,6 +108,8 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         CallStateHolder.viewModel = vm
+        UserDataManager.setGetBackToHome(this, false)
+        UserDataManager.saveChatScrollPosition(binding.root.context, "inbox", 0)
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -187,7 +189,8 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                         showNavigationView()
                     }
                     R.id.searchNewFragment, R.id.chatListFragment -> {
-                        popBackToHome()
+                        //popBackToHome()
+                        navController.popBackStack()
                         showNavigationView()
                     }
                     R.id.reelsFragment -> {
@@ -430,8 +433,8 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
 
             when (item.itemId) {
                 R.id.home -> {
-                    UserDataManager.setHomeLoaded(this, false)
-                    UserDataManager.setGetBackToHome(this, false)
+                    UserDataManager.setHomeLoaded(this, true)
+                    //UserDataManager.setGetBackToHome(this, false)
                     RTVariable.ISOTHERCLICKED = false
                     RTVariable.ISHOMECLICKED = true
                     showNavigationView()
@@ -466,6 +469,13 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     UserDataManager.setHomeLoaded(this, false)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
+                    UserDataManager.setReelsPosition(binding.root.context, 0)
+                    if(!RTVariable.BOTTOM_REELS_ICON_CLICKED){
+                        RTVariable.BOTTOM_REELS_ICON_CLICKED = true
+                    }else{
+                        RTVariable.BOTTOM_REELS_ICON_CLICKED = false
+                    }
+                    RTVariable.BOTTOM_REELS_ICON_CLICKED = true
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
 //                    if (currentDestId != R.id.reelsFragment) {
@@ -480,6 +490,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     UserDataManager.setHomeLoaded(this, false)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
+                    //RTVariable.SEARCH_CLICKED = true
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
                     if (currentDestId != R.id.searchFragment) {
@@ -708,6 +719,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         if(RTVariable.FRAG_POSITION==0){
             RTVariable.ISHOMECLICKED = true
         }
+        UserDataManager.postCommentIsShow(binding.root.context, false)
     }
 
 }

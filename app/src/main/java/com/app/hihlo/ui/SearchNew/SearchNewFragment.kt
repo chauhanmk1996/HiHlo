@@ -303,7 +303,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 val response = RetrofitBuilder.apiService.followUser(
                     token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
                     FollowRequest(following_id = user_id)
-
                 )
                 if (response.status == 1 && response.code == 200) {
                     Toast.makeText(
@@ -327,7 +326,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 val response = RetrofitBuilder.apiService.unfollowUser(
                     token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
                     FollowRequest(unfollowId = user_id)
-
                 )
                 if (response.status == 1 && response.code == 200) {
                     Toast.makeText(
@@ -490,8 +488,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private fun onGenderSelected(gender: Gender) {
         binding.allButton.text = gender.gender_name
         selectedGender = gender.id
-
-        // 🔥 FIXED: Reset list and page
         creatorsList.clear()
         currentPage = 1
 
@@ -505,15 +501,11 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         scrollChangedListener = ViewTreeObserver.OnScrollChangedListener {
             val scrollView = binding?.nestedScrollView ?: return@OnScrollChangedListener
             val contentView = scrollView.getChildAt(scrollView.childCount - 1)
-
             val scrollY = scrollView.scrollY
             val scrollViewHeight = scrollView.height
             val contentBottom = contentView.bottom
-
             val diff = contentBottom - (scrollY + scrollViewHeight)
-
             Log.d("SCROLL_MANUAL", "scrollY: $scrollY, contentBottom: $contentBottom, diff: $diff")
-
             if (diff <= 300 && diff  != 0) { // `300` is a buffer to pre-load before actual bottom
                 if (isLoading){
                     currentPage++
@@ -551,16 +543,13 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private val scrollThreshold = 5
     private fun setupScrollListener() {
         binding.nestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
-
             val delta = scrollY - lastScrollY
-
             when {
                 // Scrolling DOWN
                 delta > scrollThreshold -> {
                     //hideSearchBar()
                     binding.homeFilterGenderRecycler.isVisible=false
                 }
-                // Scrolling UP
                 delta < -scrollThreshold -> {
                     //showSearchBar()
                     binding.homeFilterGenderRecycler.isVisible=false
@@ -574,7 +563,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private var isSearchBarVisible = true
     private val SEARCH_BAR_HIDE_THRESHOLD = 10     // px — sensitivity
     private val ANIMATION_DURATION_MS = 180L
-
     // optional — remember last scroll direction to avoid jitter
     private var scrollingDown = false
     private val animationDuration = 180L
@@ -610,7 +598,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        // Safe cast – only HomeActivity implements it
         scrollListener = context as? ScrollDirectionListener
     }
 
@@ -621,21 +608,15 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     override fun onResume() {
         super.onResume()
-
-        // Ensure listener is created BEFORE adding
         if (scrollChangedListener == null) {
             scrollChangedListener = ViewTreeObserver.OnScrollChangedListener {
                 val scrollView = binding.nestedScrollView
                 val contentView = scrollView.getChildAt(scrollView.childCount - 1)
-
                 val scrollY = scrollView.scrollY
                 val scrollViewHeight = scrollView.height
                 val contentBottom = contentView.bottom
-
                 val diff = contentBottom - (scrollY + scrollViewHeight)
-
                 Log.d("SCROLL_MANUAL", "scrollY: $scrollY, contentBottom: $contentBottom, diff: $diff")
-
                 if (diff <= 300 && isLoading) {
                     isLoading = false
                     currentPage++
@@ -643,16 +624,13 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 }
             }
         }
-
         scrollChangedListener?.let {
             binding.nestedScrollView.viewTreeObserver.addOnScrollChangedListener(it)
         }
-
-        // Delay to ensure keyboard has fully closed
         view?.postDelayed({
             (requireActivity() as HomeActivity).fullyResetFloatingButton()
         }, 100)
-        showSearchBar()           // usually good UX to show bar when returning
+        showSearchBar()
         lastScrollY = 0
     }
 
@@ -674,7 +652,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     }
     private fun setObserver() {
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
-
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
@@ -738,7 +715,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             }
         }
         viewModel.addStoryLiveData().observe(viewLifecycleOwner) {
-
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Add story success: ${Gson().toJson(it)}")

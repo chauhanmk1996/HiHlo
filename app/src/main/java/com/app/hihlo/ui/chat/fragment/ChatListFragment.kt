@@ -145,7 +145,6 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
         binding.viewPager.offscreenPageLimit = 2
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.reduceDragSensitivity(4)
-
         binding.viewPager.registerOnPageChangeCallback(pageChangeCallback)
     }
 
@@ -463,9 +462,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
         val gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
             private val SWIPE_THRESHOLD = 100
             private val SWIPE_VELOCITY_THRESHOLD = 100
-
             override fun onDown(e: MotionEvent): Boolean = true
-
             override fun onFling(
                 e1: MotionEvent?,
                 e2: MotionEvent,
@@ -474,7 +471,6 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
             ): Boolean {
                 val diffX = e2.x - (e1?.x ?: 0f)
                 val diffY = e2.y - (e1?.y ?: 0f)
-
                 if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY) &&
                     kotlin.math.abs(diffX) > SWIPE_THRESHOLD &&
                     kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD

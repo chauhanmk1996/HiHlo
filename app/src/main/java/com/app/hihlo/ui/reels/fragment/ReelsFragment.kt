@@ -129,7 +129,9 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private var from = ""
     private var reelPosition = ""
     private var commentOnReelPosition = 0
-
+    var currentPosition = 0
+    private var targetPosition = 0
+    private var isRestored = false
     /*override fun initView(savedInstanceState: Bundle?) {
         if (!isFirstTime) return
         isFirstTime = false
@@ -188,10 +190,20 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
 
     override fun initView(savedInstanceState: Bundle?) {
+        targetPosition = UserDataManager.getReelsPosition(requireContext())
+        Log.e("TAG", "initView: reelPosition " + targetPosition)
         from = args?.from ?: "home"
         Log.i("TAG", "initView: reelPosition " + reelPosition)
 
-        reelPosition = if (reelPosition.isNotEmpty()) reelPosition else args?.reelPosition ?: "0"
+        //val savedPosition = UserDataManager.getReelsPosition(requireContext())
+
+        reelPosition = when {
+            targetPosition >= 0 -> targetPosition.toString()   // ✅ highest priority
+            !reelPosition.isNullOrEmpty() -> reelPosition    // existing value
+            !args?.reelPosition.isNullOrEmpty() -> args?.reelPosition ?: "0"
+            else -> "0"
+        }
+        //reelPosition = targetPosition.toString()
         if (from == "profile") {
             reelsList = args?.reels?.reels ?: mutableListOf()
         }
@@ -245,8 +257,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        RTVariable.bottom_page = 2
         setObserver()
         viewPagerCallback()
+        binding.swipeRefresh.setOnRefreshListener {
+            refreshReels()
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -265,6 +281,11 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+    }
+
+    private fun refreshReels() {
+        binding.swipeRefresh.isRefreshing = true
+        hitGetReelsApi(1)
     }
 
     private fun getReels(current_page: Int, limit: Int) {
@@ -602,13 +623,13 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }
-
     private fun viewPagerCallback() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             var currentPosition = 0
 
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+                UserDataManager.setReelsPosition(requireContext(), position)
                 val totalItems = reelsList.size
                 Log.i("TAG", "onPageSelected: $totalItems   $position")
                 if (position == totalItems - 2 && isLoading) {
@@ -638,7 +659,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 //UserDataManager.setPosition(requireContext(), -1)
                 playVideo(reel.assetUrl, reel.lastPlaybackPosition)
             }
-
         })
     }
 
@@ -759,34 +779,34 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     }
 
     private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            if (uri != null) {
-                val mimeType = requireContext().contentResolver.getType(uri)
-                UserPreference.selectedMediaType = selectedMediaType
-                if (::bottomSheetFragment.isInitialized) {
-                    bottomSheetFragment.dismiss()
-                }
-                if (mimeType?.startsWith("video") == true) {
+        if (uri != null) {
+            val mimeType = requireContext().contentResolver.getType(uri)
+            UserPreference.selectedMediaType = selectedMediaType
+            if (::bottomSheetFragment.isInitialized) {
+                bottomSheetFragment.dismiss()
+            }
+            if (mimeType?.startsWith("video") == true) {
 //                UserPreference.seletedUri = uri
-                    if (uri != null) {
-                        val mimeType = requireContext().contentResolver.getType(uri)
-                        Log.e("TAG", "mimmeType $mimeType")
-                        if (mimeType?.startsWith("video") == true) {
-                            UserPreference.seletedUri = Uri.EMPTY
-                            val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
-                            intent.putExtra("videoUrl", uri.toString())
-                            startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
-                            .show()
+                if (uri != null) {
+                    val mimeType = requireContext().contentResolver.getType(uri)
+                    Log.e("TAG", "mimmeType $mimeType")
+                    if (mimeType?.startsWith("video") == true) {
+                        UserPreference.seletedUri = Uri.EMPTY
+                        val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+                        intent.putExtra("videoUrl", uri.toString())
+                        startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
                     }
                 } else {
-                    openCropActivity(uri)
+                    Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } else {
-                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+                openCropActivity(uri)
             }
+        } else {
+            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }
+    }
 
     private fun openCropActivity(imageUri: Uri) {
         val options = UCrop.Options().apply {
@@ -1135,38 +1155,56 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
-        viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
+        viewModel.getReelsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
-                    Log.e("TTTTTTTTTT", "TTTTTTTTT")
-                    if (it.data?.code == 200) {
-                        val payload = it.data.payload ?: return@observe
-                        if (isCommentPosted) {
-                            isCommentPosted = false
-                            viewModel.commentPayloadCache = payload
-                            if (::commentsBottomSheetFragment.isInitialized) {
-                                commentsBottomSheetFragment.updateComments(payload)
-                            }
-                        } else if (isLoadMore) {
-                            isLoadMore = false
-                            val oldPayload = viewModel.commentPayloadCache
-                            if (oldPayload != null) {
-                                val mergedComments =
-                                    (oldPayload.comments ?: emptyList()) + (payload.comments ?: emptyList())
-                                val updatedPayload = oldPayload.copy(
-                                    comments = mergedComments
-                                )
-                                viewModel.commentPayloadCache = updatedPayload
-                                if (::commentsBottomSheetFragment.isInitialized) {
-                                    commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+                    Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            binding.swipeRefresh.isRefreshing = false
+                            if (it.data.payload.reels?.isNotEmpty() == true) {
+
+                                reelsList.addAll(it.data.payload.reels)
+                                adapter.updateList(it.data.payload.reels.toMutableList())
+
+                                val currentSize = it.data.payload.reels.size
+
+                                // ✅ CASE 1: Target position is already loaded
+                                if (!isRestored && targetPosition < currentSize) {
+
+                                    binding.viewPager.post {
+                                        binding.viewPager.setCurrentItem(targetPosition, false)
+
+                                        adapter.currentPlayingPosition = targetPosition
+
+                                        playVideo(
+                                            it.data.payload.reels[targetPosition].assetUrl,
+                                            it.data.payload.reels[targetPosition].lastPlaybackPosition
+                                        )
+                                    }
+
+                                    isRestored = true
                                 }
-                            } else {
-                                viewModel.commentPayloadCache = payload
+
+                                // ✅ CASE 2: Target position NOT loaded yet → load more
+                                else if (!isRestored && targetPosition >= currentSize) {
+
+                                    currentPage++
+                                    hitGetReelsApi(currentPage)
+                                }
+
+                                // ✅ Normal flow after restore
+                                else if (currentPage == 1 && isRestored.not()) {
+                                    binding.viewPager.setCurrentItem(0, false)
+                                } else {
+                                    adapter.updateList(
+                                        it.data.payload.reels?.toMutableList() ?: mutableListOf()
+                                    )
+                                }
                             }
                         } else {
-                            viewModel.commentPayloadCache = payload
-                            openCommentsBottomSheet(payload)
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
                     } else {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
@@ -1182,6 +1220,113 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
+                }
+            }
+        }
+        viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+
+                Status.SUCCESS -> {
+
+                    if (it.data?.code == 200) {
+
+                        val newPayload = it.data.payload ?: return@observe
+
+                        when {
+
+                            // ✅ COMMENT POSTED
+                            isCommentPosted -> {
+
+                                isCommentPosted = false
+
+                                viewModel.commentPayloadCache = newPayload
+
+                                CommentPrefs.savePayload(
+                                    requireContext(),
+                                    reelId.toInt(),
+                                    newPayload
+                                )
+
+                                if (::commentsBottomSheetFragment.isInitialized &&
+                                    commentsBottomSheetFragment.isAdded
+                                ) {
+                                    commentsBottomSheetFragment.updateComments(newPayload)
+                                }
+                            }
+
+                            // ✅ LOAD MORE (FIXED 🔥)
+                            isLoadMore -> {
+
+                                isLoadMore = false
+
+                                val oldPayload =
+                                    viewModel.commentPayloadCache
+                                        ?: CommentPrefs.getPayload(requireContext(), reelId.toInt())
+
+                                if (oldPayload != null) {
+
+                                    val (mergedList, newItemsOnly) =
+                                        CommentPrefs.mergeComments(
+                                            oldPayload.comments ?: emptyList(),
+                                            newPayload.comments ?: emptyList()
+                                        )
+
+                                    val updatedPayload = oldPayload.copy(
+                                        comments = mergedList
+                                    )
+
+                                    viewModel.commentPayloadCache = updatedPayload
+
+                                    // ✅ Save correct list
+                                    CommentPrefs.savePayload(
+                                        requireContext(),
+                                        reelId.toInt(),
+                                        updatedPayload
+                                    )
+
+                                    if (::commentsBottomSheetFragment.isInitialized &&
+                                        commentsBottomSheetFragment.isAdded
+                                    ) {
+
+                                        // 🔥 IMPORTANT: append ONLY new items (no duplicate)
+                                        if (newItemsOnly.isNotEmpty()) {
+                                            commentsBottomSheetFragment.appendComments(newItemsOnly)
+                                        } else {
+                                            Log.e("PAGINATION", "No new items to append")
+                                        }
+                                    }
+
+                                } else {
+                                    viewModel.commentPayloadCache = newPayload
+                                    CommentPrefs.savePayload(
+                                        requireContext(),
+                                        reelId.toInt(),
+                                        newPayload
+                                    )
+                                }
+                            }
+
+                            // ✅ FIRST LOAD
+                            else -> {
+
+                                viewModel.commentPayloadCache = newPayload
+                                CommentPrefs.clear(requireContext())
+                                CommentPrefs.savePayload(
+                                    requireContext(),
+                                    reelId.toInt(),
+                                    newPayload
+                                )
+
+                                openCommentsBottomSheet(newPayload)
+                            }
+                        }
+                    }
+                }
+
+                Status.LOADING -> {}
+
+                Status.ERROR -> {
+                    Log.e("TAG", "Error: ${it.message}")
                 }
             }
         }
@@ -1489,6 +1634,22 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         super.onDestroyView()
         if (::exoPlayer.isInitialized) {
             exoPlayer.release()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(UserDataManager.get_postCommentShow(requireContext())){
+            binding.swipeRefresh.isRefreshing = false
+            UserDataManager.postCommentIsShow(requireContext(), false)
+            //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+            //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+            val cached = CommentPrefs.get2Payload(requireContext())
+
+            if (cached != null) {
+                viewModel.commentPayloadCache = cached
+                openCommentsBottomSheet(cached)
+            }
         }
     }
 

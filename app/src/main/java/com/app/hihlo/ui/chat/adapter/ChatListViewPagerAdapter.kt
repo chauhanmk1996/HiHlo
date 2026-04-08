@@ -5,9 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.databinding.ChatListViewPagerAdapterBinding
 import com.app.hihlo.model.get_recent_chat.response.RecentChat
+import com.app.hihlo.ui.chat.fragment.ChatListFragment
+import com.app.hihlo.utils.UserDataManager
 
 class ChatListViewPagerAdapter(
     private var items: List<RecentChat>,
@@ -55,6 +58,32 @@ class ChatListViewPagerAdapter(
         val adapter = AdapterChatList(list, selectedLambda, longTapLambda, binding.root, isInbox)
         if (isInbox) inboxAdapter = adapter else requestAdapter = adapter
         binding.chatListRecycler.adapter = adapter
+        binding.chatListRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val firstCompletelyVisible =
+                        layoutManager.findFirstCompletelyVisibleItemPosition()
+                    val fallback = layoutManager.findFirstVisibleItemPosition()
+                    var currentVisiblePosition =
+                        if (firstCompletelyVisible != RecyclerView.NO_POSITION)
+                            firstCompletelyVisible
+                        else
+                            fallback
+                    val type = if (isInbox) ChatListFragment.TYPE_INBOX else ChatListFragment.TYPE_REQUEST
+                    UserDataManager.saveChatScrollPosition(binding.root.context, type, currentVisiblePosition)
+                    Log.d("SCROLL", "Saved Position = $currentVisiblePosition")
+                }
+            }
+        })
+        binding.chatListRecycler.post {
+            val type = if (isInbox) ChatListFragment.TYPE_INBOX else ChatListFragment.TYPE_REQUEST
+            val savedPosition = UserDataManager.getChatScrollPosition(binding.root.context, type)
+            val layoutManager = binding.chatListRecycler.layoutManager as LinearLayoutManager
+            layoutManager.scrollToPositionWithOffset(savedPosition, 0)
+            Log.d("SCROLL", "Restored Position = $savedPosition")
+        }
     }
 
     fun updateList(newList: List<RecentChat>, position: Int) {

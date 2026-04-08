@@ -61,6 +61,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.ui.trim_video.TrimVideoActivity
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -242,6 +243,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setProfileMediaViewPager(Posts(), Posts())
+        UserDataManager.setUserInnerPostIsResume(requireContext(), false)
         if (isMyProfile=="0"){
 //            (requireActivity() as HomeActivity).hideNavigationView()
             if (userId==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){

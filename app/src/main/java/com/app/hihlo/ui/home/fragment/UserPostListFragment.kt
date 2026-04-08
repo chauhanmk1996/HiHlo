@@ -20,6 +20,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentUserPostListBinding
@@ -49,6 +51,7 @@ import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -81,6 +84,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     private var isLoadMore = false
     private var myStoryData: MyStory = MyStory()
     private var allStory: List<Story>? = null
+    private var currentVisiblePosition = 0
     override fun initView(savedInstanceState: Bundle?) {
         homePosts = args.homePosts.toMutableList()
         from = args.from
@@ -111,17 +115,20 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         adapter = AdapterUserPostList(homePosts, profilePosts, from, ::getSelectedPost)
         binding.postListRecycler.adapter = adapter
         lifecycleScope.launch {
-            binding.postListRecycler.scrollToPosition(position)
-            ProcessDialog.showDialog(requireContext(), true)
-            delay(1300)
-            binding.postListRecycler.scrollToPosition(position)
-            delay(700)
-            ProcessDialog.dismissDialog(true)
-            binding.postListRecycler.scrollToPosition(position)
+            if(!UserDataManager.isUserInnerPostIsResume(requireContext())){
+                binding.postListRecycler.scrollToPosition(position)
+                //ProcessDialog.showDialog(requireContext(), true)
+                delay(1300)
+                binding.postListRecycler.scrollToPosition(position)
+                delay(700)
+                //ProcessDialog.dismissDialog(true)
+                binding.postListRecycler.scrollToPosition(position)
+            }
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        RTVariable.bottom_page = 3
         super.onViewCreated(view, savedInstanceState)
         setObserver()
         onClick()
@@ -136,6 +143,73 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                         //viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
                     }
                 }
+            }
+        }
+        binding.postListRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+                    val firstCompletelyVisible =
+                        layoutManager.findFirstCompletelyVisibleItemPosition()
+
+                    val fallback = layoutManager.findFirstVisibleItemPosition()
+
+                    currentVisiblePosition =
+                        if (firstCompletelyVisible != RecyclerView.NO_POSITION)
+                            firstCompletelyVisible
+                        else
+                            fallback
+                    UserDataManager.postCommentSPR(requireContext(), currentVisiblePosition)
+                    Log.d("SCROLL", "Saved Position = $currentVisiblePosition")
+                }
+            }
+        })
+    }
+
+    override fun onPause() {
+        val layoutManager = binding.postListRecycler.layoutManager as LinearLayoutManager
+        val firstVisible = layoutManager.findFirstVisibleItemPosition()
+        val lastVisible = layoutManager.findLastVisibleItemPosition()
+        Log.d("SCROLL", "First: $firstVisible  Last: $lastVisible")
+        UserDataManager.setUserInnerPostIsResume(requireContext(), true)
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.e("DATAPOS", "DATAPOS>>> "+UserDataManager.get_postCommentPosition(requireContext()))
+        if(UserDataManager.isUserInnerPostIsResume(requireContext())){
+            UserDataManager.setUserInnerPostIsResume(requireContext(), false)
+            scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
+        }
+        if(UserDataManager.get_postCommentShow(requireContext())){
+            UserDataManager.postCommentIsShow(requireContext(), false)
+            //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+            //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+            val cached = CommentPrefs.get2Payload(requireContext())
+
+            if (cached != null) {
+                viewModel2.commentPayloadCache = cached
+                openCommentsBottomSheet(cached)
+            }
+        }
+    }
+
+    fun scrollToRecyclerPosition(position: Int) {
+        binding.postListRecycler.post {
+            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager
+                ?: return@post
+            layoutManager.scrollToPositionWithOffset(position, 0)
+            binding.postListRecycler.post {
+                val viewHolder = binding.postListRecycler.findViewHolderForAdapterPosition(position)
+                val itemView = viewHolder?.itemView ?: return@post
+                val y = itemView.y + binding.postListRecycler.y
+                UserDataManager.setGetBackToHome(requireContext(), false)
             }
         }
     }
@@ -161,6 +235,10 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                         if (it.data.code == 200){
                             myStoryData = it.data.payload.my_story ?: MyStory()
                             allStory = it.data.payload.stories
+                            viewModel5.myStory = it.data.payload.my_story ?: MyStory()
+                            viewModel5.stories = it.data.payload.stories
+                            viewModel5.isStoryUploaded = it.data.payload.is_story_uploaded
+                            viewModel5.profileImage = it.data.payload.myProfile.profileImage
                             Log.e("TAG", "Home success: ${myStoryData}")
                             Log.e("TAG", "Home success: ${allStory}")
                             adapter?.addStory(listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
@@ -254,34 +332,108 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         }
         viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
+
                 Status.SUCCESS -> {
-                    Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
+
                     if (it.data?.code == 200) {
-                        val payload = it.data.payload ?: Payload()
-                        if (isCommentPosted) {
-                            isCommentPosted = false
-                            if (::commentsBottomSheetFragment.isInitialized) {
-                                commentsBottomSheetFragment.updateComments(payload)
+
+                        val newPayload = it.data.payload ?: return@observe
+
+                        when {
+
+                            // ✅ COMMENT POSTED
+                            isCommentPosted -> {
+
+                                isCommentPosted = false
+
+                                viewModel2.commentPayloadCache = newPayload
+
+                                CommentPrefs.savePayload(
+                                    requireContext(),
+                                    postId.toInt(),
+                                    newPayload
+                                )
+
+                                if (::commentsBottomSheetFragment.isInitialized &&
+                                    commentsBottomSheetFragment.isAdded
+                                ) {
+                                    commentsBottomSheetFragment.updateComments(newPayload)
+                                }
                             }
-                        } else if (isLoadMore) {
-                            isLoadMore = false
-                            if (::commentsBottomSheetFragment.isInitialized) {
-                                commentsBottomSheetFragment.appendComments(payload.comments ?: emptyList())
+
+                            // ✅ LOAD MORE (FIXED 🔥)
+                            isLoadMore -> {
+
+                                isLoadMore = false
+
+                                val oldPayload =
+                                    viewModel2.commentPayloadCache
+                                        ?: CommentPrefs.getPayload(requireContext(), postId.toInt())
+
+                                if (oldPayload != null) {
+
+                                    val (mergedList, newItemsOnly) =
+                                        CommentPrefs.mergeComments(
+                                            oldPayload.comments ?: emptyList(),
+                                            newPayload.comments ?: emptyList()
+                                        )
+
+                                    val updatedPayload = oldPayload.copy(
+                                        comments = mergedList
+                                    )
+
+                                    viewModel2.commentPayloadCache = updatedPayload
+
+                                    // ✅ Save correct list
+                                    CommentPrefs.savePayload(
+                                        requireContext(),
+                                        postId.toInt(),
+                                        updatedPayload
+                                    )
+
+                                    if (::commentsBottomSheetFragment.isInitialized &&
+                                        commentsBottomSheetFragment.isAdded
+                                    ) {
+
+                                        // 🔥 IMPORTANT: append ONLY new items (no duplicate)
+                                        if (newItemsOnly.isNotEmpty()) {
+                                            commentsBottomSheetFragment.appendComments(newItemsOnly)
+                                        } else {
+                                            Log.e("PAGINATION", "No new items to append")
+                                        }
+                                    }
+
+                                } else {
+                                    viewModel2.commentPayloadCache = newPayload
+                                    CommentPrefs.savePayload(
+                                        requireContext(),
+                                        postId.toInt(),
+                                        newPayload
+                                    )
+                                }
                             }
-                        } else {
-                            openCommentsBottomSheet(payload)
+
+                            // ✅ FIRST LOAD
+                            else -> {
+
+                                viewModel2.commentPayloadCache = newPayload
+                                CommentPrefs.clear(requireContext())
+                                CommentPrefs.savePayload(
+                                    requireContext(),
+                                    postId.toInt(),
+                                    newPayload
+                                )
+
+                                openCommentsBottomSheet(newPayload)
+                            }
                         }
-                    } else {
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    //ProcessDialog.dismissDialog(true)
                 }
-                Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
-                }
+
+                Status.LOADING -> {}
+
                 Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
+                    Log.e("TAG", "Error: ${it.message}")
                 }
             }
         }
@@ -391,6 +543,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         commentsBottomSheetFragment = CommentReelBottomSheet().apply {
             arguments = Bundle().apply {
                 putParcelable("comments", payload)
+                putParcelableArrayList("stories", ArrayList(viewModel5.stories))
+                putParcelable("myStory", viewModel5.myStory)
             }
             onCommentAction = { result ->
                 isCommentPosted = true // Set flag before post
@@ -452,6 +606,11 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     }
                     else -> {
                         this.postId = data.id.toString()
+                        viewModel5.posr_id = post.id.toString()
+                        viewModel5.scroll_position = position
+                        RTVariable.P_PID = post.id.toString()
+                        UserDataManager.postCommentExpandState(requireContext(), false)
+                        UserDataManager.postCommentSP(requireContext(), viewModel5.currentPage, position, postId.toString())
                         viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
 //                        viewModel.hitGetReelCommentsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, data.id.toString())
                     }

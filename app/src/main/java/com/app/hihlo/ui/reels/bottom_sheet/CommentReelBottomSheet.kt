@@ -48,8 +48,11 @@ import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.HomeNewFragmentDirections
+import com.app.hihlo.ui.home.fragment.UserPostListFragmentDirections
 import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 import com.app.hihlo.ui.reels.adapter.AdapterComments
+import com.app.hihlo.ui.reels.fragment.ReelsFragment
+import com.app.hihlo.ui.reels.fragment.ReelsFragmentDirections
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.RTVariable
@@ -95,6 +98,7 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+        dialog.window?.setWindowAnimations(0)
         dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         dialog.setOnShowListener {
             val bottomSheet = dialog.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
@@ -118,7 +122,6 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 it.background = shapeDrawable
                 Log.e("TTTTT", "TTTTT>>> "+UserDataManager.get_CommentExpandState(requireContext()))
                 val isExpanded = UserDataManager.get_CommentExpandState(binding.root.context)
-
                 if (isExpanded) {
                     UserDataManager.postCommentExpandState(binding.root.context, true)
                     isExpanding = false
@@ -358,7 +361,13 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
             },
             onProfileSelected = { user_id ->
                 dismiss()
-                findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
+                if(RTVariable.bottom_page==0){
+                    findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
+                }else if(RTVariable.bottom_page==2){
+                    findNavController().navigate(ReelsFragmentDirections.actionReelsFragmentToProfileFragment("0", user_id.toString()))
+                }else{
+                    findNavController().navigate(UserPostListFragmentDirections.actionUserPostListFragmentToProfileFragment("0", user_id.toString()))
+                }
             },
             onProfileImageSelected = { user_id ->
                 val storyPosition = stories?.indexOfFirst { it.user_id == user_id }

@@ -11,8 +11,10 @@ import androidx.annotation.OptIn
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
@@ -84,19 +86,20 @@ class ReelAdapter(
 
                 when (state) {
                     Player.STATE_BUFFERING -> {
-                        loader.visibility = View.VISIBLE
+                        loader.isVisible = true
                     }
                     Player.STATE_READY -> {
-                        loader.visibility = View.GONE
+                        loader.isVisible = false
                     }
                     Player.STATE_ENDED -> {
                         // Restart from beginning
                         exoPlayer.seekTo(0)
                         exoPlayer.playWhenReady = true
+                        loader.isVisible = false
                     }
 
                     Player.STATE_IDLE -> {
-                        loader.visibility = View.VISIBLE
+                        loader.isVisible = false
                     }
                 }
             }
@@ -158,6 +161,20 @@ class ReelAdapter(
 //            playerView.setControllerHideOnTouch(false)
             playerView.showController()
             playerView.controllerAutoShow = true
+            exoPlayer?.addListener(object : Player.Listener {
+                override fun onVideoSizeChanged(videoSize: VideoSize) {
+                    val width = videoSize.width
+                    val height = videoSize.height
+
+                    if (width > height) {
+                        // Landscape video
+                        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    } else {
+                        // Portrait video
+                        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    }
+                }
+            })
             playerView.setControllerShowTimeoutMs(0)
 //            playerView.hideController()
 
@@ -180,14 +197,14 @@ class ReelAdapter(
                     )
 
 
-                    loader.visibility = View.VISIBLE
+                    //loader.visibility = View.VISIBLE
 //                    setLongPressBehavior()
                     playerView.setOnClickListener {
                         setPlayerViewClick(muteUnmuteIcon, false, adapter_position)
                     }
                 } else {
                     playerView.player = null
-                    loader.visibility = View.GONE
+                    loader.isVisible = false
                     userDetailsLayout.isVisible = true
                     sideOptionsRecycler.isVisible = true
                     playerView.setOnTouchListener(null)
@@ -222,6 +239,8 @@ class ReelAdapter(
                 }else{
                     muteUnmuteIcon.setImageResource(R.drawable.play_icon)
                     if(exoPlayer.isPlaying){
+                        muteUnmuteIcon.isVisible = false
+                    }else{
                         muteUnmuteIcon.isVisible = false
                     }
                 }
@@ -280,20 +299,20 @@ class ReelAdapter(
                         muteUnmuteIcon.isVisible = true
                     }else{
                         muteUnmuteIcon.setImageResource(R.drawable.play_icon)
-                        muteUnmuteIcon.isVisible = true
+                        muteUnmuteIcon.isVisible = false
                     }
                 }
             }
-            muteIconJob = scope.launch {
-                delay(1000)
-                if(UserDataManager.isPaused(itemView.context)){
-                    muteUnmuteIcon.setImageResource(R.drawable.pause_icon)
-                    muteUnmuteIcon.isVisible = true
-                }else{
-                    muteUnmuteIcon.setImageResource(R.drawable.play_icon)
-                    muteUnmuteIcon.isVisible = false
-                }
-            }
+//            muteIconJob = scope.launch {
+//                delay(500)
+//                if(UserDataManager.isPaused(itemView.context)){
+//                    muteUnmuteIcon.setImageResource(R.drawable.pause_icon)
+//                    muteUnmuteIcon.isVisible = true
+//                }else{
+//                    muteUnmuteIcon.setImageResource(R.drawable.play_icon)
+//                    muteUnmuteIcon.isVisible = false
+//                }
+//            }
         }
         fun release() {
             scope.cancel()

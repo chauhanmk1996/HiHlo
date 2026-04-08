@@ -94,6 +94,14 @@ object UserDataManager {
 //        }
     }
 
+    fun postCommentSPR(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_POSITION", position)
+            commit()
+        }
+    }
+
     fun postCommentUpdateSP(context: Context, page: Int) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(prefs.edit()) {
@@ -226,6 +234,42 @@ object UserDataManager {
     fun getHomeScrollYPosition(context: Context): Int {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         return prefs.getInt("com.HHA_HomeScrollYPosition", 0)
+    }
+
+    fun setReelsPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_ReelsScrollPosition", position)
+            commit()
+        }
+    }
+
+    fun getReelsPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_ReelsScrollPosition", 0)
+    }
+
+    fun isUserInnerPostIsResume(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_P_UserInnerPostIsResume", false)
+    }
+
+    fun setUserInnerPostIsResume(context: Context, show: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_P_UserInnerPostIsResume", show)
+            commit()
+        }
+    }
+
+    fun saveChatScrollPosition(context: Context, type: String, position: Int) {
+        val pref = context.getSharedPreferences("chat_pref", Context.MODE_PRIVATE)
+        pref.edit().putInt("scroll_$type", position).apply()
+    }
+
+    fun getChatScrollPosition(context: Context, type: String): Int {
+        val pref = context.getSharedPreferences("chat_pref", Context.MODE_PRIVATE)
+        return pref.getInt("scroll_$type", 0)
     }
 
 }
