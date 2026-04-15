@@ -110,6 +110,8 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         CallStateHolder.viewModel = vm
         UserDataManager.setGetBackToHome(this, false)
         UserDataManager.saveChatScrollPosition(binding.root.context, "inbox", 0)
+        UserDataManager.setReelsPosition(binding.root.context, 0)
+        UserDataManager.setReelMute(this, false)
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -437,6 +439,10 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     //UserDataManager.setGetBackToHome(this, false)
                     RTVariable.ISOTHERCLICKED = false
                     RTVariable.ISHOMECLICKED = true
+                    RTVariable.IS_CHAT_OTHER = true
+                    RTVariable.CHAT_INSTANCE_KEY_ID = 1
+                    RTVariable.REELS_INSTANCE_KEY_ID = 1
+                    RTVariable.SEARCH_SELF_CLICKED = 1
                     showNavigationView()
                     if (currentDestId != R.id.homeNewFragment) {
                         navController.navigate(R.id.homeNewFragment)
@@ -452,13 +458,28 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                 R.id.chat -> {
                     UserDataManager.setGetBackToHome(binding.root.context, true)
                     UserDataManager.setHomeLoaded(this, false)
+                    //UserDataManager.saveChatScrollPosition(binding.root.context, "inbox", 0)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
+                    RTVariable.IS_CHAT_CLICKED = true
+                    RTVariable.IS_CHAT_OTHER = false
+                    RTVariable.IS_CHAT_SELF_OTHER = true
+                    RTVariable.CHAT_INSTANCE_KEY_ID = 0
+                    RTVariable.REELS_INSTANCE_KEY_ID = 1
+                    RTVariable.SEARCH_SELF_CLICKED = 1
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
-//                    if (currentDestId != R.id.chatListFragment) {
+                    if (currentDestId != R.id.chatListFragment) {
                         navController.navigate(R.id.chatListFragment)
-//                    }
+                    }else{
+                        var key = ""
+                        if(RTVariable.CHAT_INSTANCE_KEY_ID == 0){
+                            key = "self"
+                        }else if(RTVariable.CHAT_INSTANCE_KEY_ID == 1){
+                            key = "other"
+                        }
+                        supportFragmentManager.setFragmentResult(key, Bundle())
+                    }
                     binding.imgBtn.setImageResource(R.drawable.reel_icon_unselected)
                     binding.bottomNavigationView.menu.findItem(R.id.chat).icon = ContextCompat.getDrawable(this, R.drawable.chat_selected)
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
@@ -469,18 +490,30 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     UserDataManager.setHomeLoaded(this, false)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
-                    UserDataManager.setReelsPosition(binding.root.context, 0)
-                    if(!RTVariable.BOTTOM_REELS_ICON_CLICKED){
-                        RTVariable.BOTTOM_REELS_ICON_CLICKED = true
-                    }else{
-                        RTVariable.BOTTOM_REELS_ICON_CLICKED = false
-                    }
+                    RTVariable.IS_CHAT_OTHER = true
+                    RTVariable.CHAT_INSTANCE_KEY_ID = 1
+                    RTVariable.REELS_INSTANCE_KEY_ID = 0
+                    RTVariable.SEARCH_SELF_CLICKED = 1
+                    UserDataManager.setReelsPosition(binding.root.context, UserDataManager.getReelsPosition(binding.root.context))
+//                    if(!RTVariable.BOTTOM_REELS_ICON_CLICKED){
+//                        RTVariable.BOTTOM_REELS_ICON_CLICKED = true
+//                    }else{
+//                        RTVariable.BOTTOM_REELS_ICON_CLICKED = false
+//                    }
                     RTVariable.BOTTOM_REELS_ICON_CLICKED = true
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
-//                    if (currentDestId != R.id.reelsFragment) {
+                    if (currentDestId != R.id.reelsFragment) {
                         navController.navigate(R.id.reelsFragment)
-//                    }
+                    }else{
+                        var key = ""
+                        if(RTVariable.REELS_INSTANCE_KEY_ID == 0){
+                            key = "self"
+                        }else if(RTVariable.REELS_INSTANCE_KEY_ID == 1){
+                            key = "other"
+                        }
+                        supportFragmentManager.setFragmentResult(key, Bundle())
+                    }
                     binding.imgBtn.setImageResource(R.drawable.reel_icon_selected)
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     true
@@ -491,10 +524,22 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
                     //RTVariable.SEARCH_CLICKED = true
+                    RTVariable.IS_CHAT_OTHER = true
+                    RTVariable.CHAT_INSTANCE_KEY_ID = 1
+                    RTVariable.REELS_INSTANCE_KEY_ID = 1
+                    RTVariable.SEARCH_SELF_CLICKED = 0
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
-                    if (currentDestId != R.id.searchFragment) {
+                    if (currentDestId != R.id.searchNewFragment) {
                         navController.navigate(R.id.searchNewFragment)
+                    }else{
+                        var key = ""
+                        if(RTVariable.SEARCH_SELF_CLICKED == 0){
+                            key = "self"
+                        }else if(RTVariable.SEARCH_SELF_CLICKED == 1){
+                            key = "other"
+                        }
+                        supportFragmentManager.setFragmentResult(key, Bundle())
                     }
                     binding.imgBtn.setImageResource(R.drawable.reel_icon_unselected)
                     binding.bottomNavigationView.menu.findItem(R.id.search).icon = ContextCompat.getDrawable(this, R.drawable.search_selected)
@@ -506,6 +551,10 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     UserDataManager.setHomeLoaded(this, false)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
+                    RTVariable.IS_CHAT_OTHER = true
+                    RTVariable.CHAT_INSTANCE_KEY_ID = 1
+                    RTVariable.REELS_INSTANCE_KEY_ID = 1
+                    RTVariable.SEARCH_SELF_CLICKED = 1
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
                     navigateToProfile(currentDestId, userImageUrl)
@@ -536,7 +585,13 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     private fun fragmentChangeCallback() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.profileFragment, R.id.chatListFragment, R.id.searchNewFragment -> {
+                R.id.profileFragment, R.id.chatListFragment -> {
+                    showNavigationView()
+                    setBottomBarPadding()
+                }
+                R.id.searchNewFragment -> {
+                    binding.bottomNavigationView.menu.findItem(R.id.search).icon = ContextCompat.getDrawable(this, R.drawable.search_selected)
+                    setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     showNavigationView()
                     setBottomBarPadding()
                 }
@@ -547,12 +602,16 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     setBottomBarPadding()
                 }
                 R.id.reelsFragment -> {
-//                    binding.imgBtn.setImageResource(R.drawable.reel_icon_selected)
+                    //binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_icon)
+                    binding.bottomNavigationView.menu.findItem(R.id.chat).icon = ContextCompat.getDrawable(this, R.drawable.chat_icon)
+                    //binding.bottomNavigationView.menu.findItem(R.id.search).icon = ContextCompat.getDrawable(this, R.drawable.search_icon)
                     showNavigationView()
                     setBottomBarPadding()
                     if (UserPreference.navigatedToMyProfile){
                         binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_icon)
                         setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = true)
+                    }else{
+                        binding.imgBtn.setImageResource(R.drawable.reel_icon_selected)
                     }
                 }
                 R.id.chatFragment,

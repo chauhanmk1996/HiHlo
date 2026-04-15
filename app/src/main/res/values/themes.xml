@@ -53,6 +53,16 @@
         <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
     </style>
 
+    <style name="StableBottomSheetDialogTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="android:windowAnimationStyle">@style/Animation.NoAnimation</item>
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+    </style>
+
+    <style name="Animation.NoAnimation" parent="Animation.AppCompat.Dialog">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+    </style>
+
     <style name="NoAnimBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowAnimationStyle">@style/NoWindowAnimation</item>
         <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>

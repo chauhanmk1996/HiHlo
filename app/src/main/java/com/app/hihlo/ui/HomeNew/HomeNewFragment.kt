@@ -312,11 +312,82 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     }
                 }else{
                     binding.nestedScrollView.smoothScrollTo(0, 0)
+//                    binding.nestedScrollView.setOnScrollChangeListener(
+//                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+//                            if (scrollY == 0) {
+//                                //binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
+//                                //hitServiceListApi(viewModel.currentPage, selectedGender)
+//                            }
+//                        }
+//                    )
+                }
+            }
+        }
+        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
+            Log.i("TAG", "onViewCreated: homeIconTap")
+//            isRefreshedFromMenu = true
+//            allStory?.toMutableList()?.clear()
+//            viewModel.currentPage = 1
+//            binding.progressBar.isVisible=false
+//            binding.swipeRefresh.setColorSchemeColors(
+//                ContextCompat.getColor(requireContext(), R.color.white)
+//            )
+//            binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
+//                ContextCompat.getColor(requireContext(), R.color.white_10)
+//            )
+//            binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
+//
+//            if(!UserDataManager.isGetBackToHome(requireContext())){
+//                binding.swipeRefresh.isRefreshing = true
+//                viewModel.isRefreshing = false
+//            }
+
+            //binding.swipeRefresh.isRefreshing = true
+            if (binding.nestedScrollView.scrollY == 0) {
+                if (!viewModel.isHomeDataLoaded) {
+                    if (!UserDataManager.isGetBackToHome(requireContext())) {
+                        Log.e("HIT", "HIT>>> IH")
+                        binding.progressBar.isVisible = false
+                        viewModel.currentPage = 1
+                        viewModel.isRefreshing = false
+
+                        binding.swipeRefresh.isRefreshing = true
+
+                        hitServiceListApi(viewModel.currentPage, 0)
+                    }
+                } else if (RTVariable.ISHOMECLICKED) {
+                    UserDataManager.setGetBackToHome(requireContext(), false)
+                    RTVariable.ISHOMECLICKED = false
+                    Log.e("HIT", "HIT>>> IHE")
+                    binding.progressBar.isVisible = false
+                    viewModel.currentPage = 1
+                    viewModel.isRefreshing = false
+
+                    binding.swipeRefresh.isRefreshing = true
+                    hitServiceListApi(viewModel.currentPage, 0)
+                }
+            } else {
+                if (binding.nestedScrollView.scrollY > 0) {
+                    if (RTVariable.ISHOMECLICKED) {
+                        UserDataManager.setGetBackToHome(requireContext(), false)
+                        Log.e("HIT", "HIT>>> IHE")
+                        binding.progressBar.isVisible = false
+                        viewModel.currentPage = 1
+                        viewModel.isRefreshing = false
+
+                        binding.swipeRefresh.isRefreshing = true
+                        binding.nestedScrollView.post {
+                            binding.nestedScrollView.scrollTo(0, 0)
+                            hitServiceListApi(viewModel.currentPage, 0)
+                        }
+                    }
+                }else{
+                    binding.nestedScrollView.smoothScrollTo(0, 0)
                     binding.nestedScrollView.setOnScrollChangeListener(
                         NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
                             if (scrollY == 0) {
                                 binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-                                //hitServiceListApi(viewModel.currentPage, selectedGender)
+                                hitServiceListApi(viewModel.currentPage, selectedGender)
                             }
                         }
                     )
@@ -513,7 +584,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             } else if (dy < -10) {
                 if (!isHeaderVisible) {
-                    // showHeaderAndStories()
+                    // showHeaderAndStories()  ///
                 }
             }
 
@@ -1371,6 +1442,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
             if (cached != null) {
                 viewModel2.commentPayloadCache = cached
+                RTVariable.IS_FROM_RESUME = true
                 openCommentsBottomSheet(cached)
             }
         }
@@ -1404,7 +1476,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, page.toString(), limit.toString())
             }
         }
-
         commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }
 

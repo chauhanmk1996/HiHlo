@@ -16,7 +16,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -43,7 +45,9 @@ import com.app.hihlo.ui.chat.adapter.ChatListViewPagerAdapter
 import com.app.hihlo.ui.chat.view_model.RecentChatListViewModel
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -74,6 +78,8 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
         const val TYPE_REQUEST = "request"
     }
 
+    var tabPos: Int = 0
+
     private val searchTextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
             binding.crossButton.isVisible = binding.searchEdittext.text.isNotEmpty()
@@ -98,7 +104,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
             isInboxSelected = position == 0
             // Clear search and reset list
             binding.searchEdittext.setText("")
-            val listToShow = if (position == 0) recentList else requestUsersList
+            val listToShow = if (position == 0) viewModel.chat_recentList else viewModel.chat_requestUsersList
             viewPagerAdapter.updateList(listToShow, position)
             if (position == 0) {
                 moveSelectorToLeft()
@@ -111,7 +117,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 
     override fun initView(savedInstanceState: Bundle?) {
         binding.searchEdittext.addTextChangedListener(searchTextWatcher)
-        viewPagerAdapter = ChatListViewPagerAdapter(recentList, requestUsersList, ::onLongTap) { click, position, data, view ->
+        viewPagerAdapter = ChatListViewPagerAdapter(viewModel.chat_recentList, viewModel.chat_requestUsersList, ::onLongTap) { click, position, data, view ->
             Log.i("TAG", "initView: click=$click, position=$position, data=$data")
             when (click) {
                 0 -> {
@@ -204,33 +210,30 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
     }
 
     fun searchChats(query: String): List<RecentChat> {
-        return recentList.filter { chat ->
+        return viewModel.chat_recentList.filter { chat ->
             val username = chat.userDetails?.username
             val name = chat.userDetails?.name
             Log.i("TAG", "Checking chat: id=${chat.chatId}, username=$username, name=$name, query=$query")
             (username?.contains(query, ignoreCase = true) == true) ||
                     (name?.contains(query, ignoreCase = true) == true)
         }.also {
-            Log.i("TAG", "searchChats: Input list size=${recentList.size}, Filtered size=${it.size}")
+            Log.i("TAG", "searchChats: Input list size=${viewModel.chat_recentList.size}, Filtered size=${it.size}")
         }
     }
 
     fun searchRequestChats(query: String): List<RecentChat> {
-        return requestUsersList.filter { chat ->
+        return viewModel.chat_requestUsersList.filter { chat ->
             val username = chat.userDetails?.username
             Log.i("TAG", "Checking request chat: id=${chat.chatId}, username=$username, query=$query")
             username?.contains(query, ignoreCase = true) == true
         }.also {
-            Log.i("TAG", "searchRequestChats: Input list size=${requestUsersList.size}, Filtered size=${it.size}")
+            Log.i("TAG", "searchRequestChats: Input list size=${viewModel.chat_requestUsersList.size}, Filtered size=${it.size}")
         }
     }
 
     override fun onResume() {
         super.onResume()
-        isInboxSelected = true
-        setSelectedTab(true)
-        viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
-        viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
+
     }
 
     private fun setObserver() {
@@ -239,16 +242,17 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "get recent success: ${Gson().toJson(it)}")
                     if (it.data?.status == 1 && it.data.code == 200) {
-                        recentList = it.data.payload.recentChats
+                        viewModel.chat_recentList = it.data.payload.recentChats
                         Log.i("TAG", "Recent chats updated: size=${recentList.size}")
-                        recentList.forEach { chat ->
+                        viewModel.chat_recentList.forEach { chat ->
                             Log.i("TAG", "Recent chat: id=${chat.chatId}, username=${chat.userDetails?.username}")
                         }
-                        viewPagerAdapter.updateList(recentList, 0)
+                        viewPagerAdapter.updateList(viewModel.chat_recentList, 0)
+                        viewModel.isLoaded = true
                         if (UserPreference.CHAT_PUSH_NOTIFICATION_ID?.isNotEmpty() == true) {
                             val targetChatId = UserPreference.CHAT_PUSH_NOTIFICATION_ID?.toInt()
                             Log.i("TAG", "setObserver: $targetChatId")
-                            val matchedChat = recentList.firstOrNull { it.chatId == targetChatId }
+                            val matchedChat = viewModel.chat_recentList.firstOrNull { it.chatId == targetChatId }
                             matchedChat?.let { chat ->
                                 UserPreference.CHAT_PUSH_NOTIFICATION_ID = null
                                 Log.d("Match", "Chat matched: ${chat.message}")
@@ -261,12 +265,14 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                     } else {
                         Toast.makeText(requireContext(), it.data?.message ?: "", Toast.LENGTH_SHORT).show()
                     }
-                    ProcessDialog.dismissDialog(true)
+                    //ProcessDialog.dismissDialog(true)
                 }
-                Status.LOADING -> ProcessDialog.showDialog(requireContext(), true)
+                Status.LOADING -> {
+                    //ProcessDialog.showDialog(requireContext(), true)
+                }
                 Status.ERROR -> {
                     Log.e("TAG", "get recent Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
+                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
@@ -275,22 +281,25 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "get request success: ${Gson().toJson(it)}")
                     if (it.data?.status == 1 && it.data.code == 200) {
-                        requestUsersList = it.data.payload.recentChats
-                        Log.i("TAG", "Request chats updated: size=${requestUsersList.size}")
-                        requestUsersList.forEach { chat ->
+                        viewModel.chat_requestUsersList = it.data.payload.recentChats
+                        Log.i("TAG", "Request chats updated: size=${viewModel.chat_requestUsersList.size}")
+                        viewModel.chat_requestUsersList.forEach { chat ->
                             Log.i("TAG", "Request chat: id=${chat.chatId}, username=${chat.userDetails?.username}")
                         }
-                        viewPagerAdapter.updateList(requestUsersList, 1)
-                        binding.requestButton.text = "Request(${requestUsersList.size})"
+                        viewPagerAdapter.updateList(viewModel.chat_requestUsersList, 1)
+                        viewModel.isLoaded = true
+                        binding.requestButton.text = "Request(${viewModel.chat_requestUsersList.size})"
                     } else {
                         Toast.makeText(requireContext(), it.data?.message ?: "", Toast.LENGTH_SHORT).show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
-                Status.LOADING -> ProcessDialog.showDialog(requireContext(), true)
+                Status.LOADING -> {
+                    //ProcessDialog.showDialog(requireContext(), true)
+                }
                 Status.ERROR -> {
-                    Log.e("TAG", "get request Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
+                    Log.e("TAG", "get recent Failed: ${it.message}")
+                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
@@ -395,6 +404,66 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 
             onClick()
             setupSwipeGesture()
+        }
+        requireActivity().supportFragmentManager.setFragmentResultListener("self", viewLifecycleOwner) { _, _ ->
+            Log.i("TAG", "onViewCreated: chatIconTap")
+            if(::viewPagerAdapter.isInitialized){
+                var tapOption = ""
+                if(tabPos == 0){
+                    tapOption = "inbox"
+                }else{
+                    tapOption = "request"
+                }
+                UserDataManager.saveChatFromOtherScrollPosition(binding.root.context, tapOption, 1)
+                val rv = binding.viewPager.getChildAt(tabPos) as RecyclerView
+                viewPagerAdapter.scrollToTop(rv, tabPos, true)
+            }
+        }
+        requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
+            Log.i("TAG", "onViewCreated: chatIconTap")
+            RTVariable.CHAT_INSTANCE_KEY_ID = 0
+//            if(::viewPagerAdapter.isInitialized){
+//                val rv = binding.viewPager.getChildAt(tabPos) as RecyclerView
+//                viewPagerAdapter.scrollToTop(rv, tabPos, true)
+//            }
+        }
+        isInboxSelected = true
+        setSelectedTab(true)
+        if(!viewModel.isLoaded){
+            viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
+            viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
+//            RTVariable.IS_CHAT_CLICKED = true
+//            RTVariable.IS_CHAT_OTHER = false
+        }
+        if(viewModel.isLoaded){
+//            var tabSel = ""
+//            if(tabPos==0){
+//                tabSel = "inbox"
+//            }else{
+//                tabSel = "request"
+//            }
+//            UserDataManager.saveChatScrollPosition(
+//                binding.root.context,
+//                tabSel,
+//                0 // store as int
+//            )
+            viewPagerAdapter.updateList(viewModel.chat_recentList, 0)
+            viewPagerAdapter.updateList(viewModel.chat_requestUsersList, 1)
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(300)
+//                    if(RTVariable.IS_CHAT_CLICKED && !RTVariable.IS_CHAT_OTHER){
+//                        RTVariable.IS_CHAT_CLICKED = false
+//                        RTVariable.IS_CHAT_OTHER = false
+//                        if(::viewPagerAdapter.isInitialized){
+//                            val rv = binding.viewPager.getChildAt(tabPos) as RecyclerView
+//                            viewPagerAdapter.scrollToTop(rv, tabPos, true)
+//                        }
+//                    }
+                }
+            }
         }
     }
 
@@ -514,12 +583,14 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
     private fun setSelectedTab(isInboxSelected: Boolean) {
         binding.apply {
             Log.i("TAG", "setSelectedTab: $isInboxSelected")
-            Log.i("TAG", "setSelectedTab: recentList size=${recentList.size}")
+            Log.i("TAG", "setSelectedTab: recentList size=${viewModel.chat_recentList.size}")
             if (isInboxSelected) {
+                tabPos = 0
 //                if (recentList.isEmpty()) viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
                 inboxButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.theme)
                 requestButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.black_303030)
             } else {
+                tabPos = 1
 //                if (requestUsersList.isEmpty()) viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
                 requestButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.theme)
                 inboxButton.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.black_303030)

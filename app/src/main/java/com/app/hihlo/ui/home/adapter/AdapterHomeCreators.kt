@@ -75,6 +75,12 @@ class AdapterHomeCreators(private val posts: MutableList<Post>, val getSelectedP
         return (this * context.resources.displayMetrics.density).toInt()
     }
 
+    fun addList(posts: MutableList<Post>) {
+        Log.i("TAG", "updateList: $posts")
+        this.posts.addAll(posts)
+        notifyDataSetChanged()
+    }
+
     fun updateList(posts: MutableList<Post>) {
         Log.i("TAG", "updateList: $posts")
 

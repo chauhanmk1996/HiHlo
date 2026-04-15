@@ -1,7 +1,10 @@
 package com.app.hihlo.utils
 
 import com.app.hihlo.model.home.response.MyStory
+import com.app.hihlo.model.home.response.Post
 import com.app.hihlo.model.home.response.Story
+import com.app.hihlo.model.reel.response.Reel
+import com.app.hihlo.model.search_user_list.response.SearchUserListResponse
 
 object RTVariable {
     var MY_USER_ID: String = ""
@@ -37,7 +40,36 @@ object RTVariable {
     var BOTTOM_REELS_ICON_CLICKED: Boolean = false
     var bottom_page: Int =0
 
+    var REELS_PLAYING_POSITION: Long = 0
+
+    var COMMENT_SCROLL_Y: Int =0
+
     //var SEARCH_CLICKED: Boolean = false
+    var IS_FROM_RESUME: Boolean = false
+    var IS_CHAT_CLICKED: Boolean = false
+    var IS_CHAT_OTHER: Boolean = false
+    var IS_CHAT_SELF_OTHER: Boolean = false
+
+    var CHAT_INSTANCE_KEY_ID: Int =0
+    var REELS_INSTANCE_KEY_ID: Int =0
+
+    var IS_REELS_LOADED: Boolean = false
+
+    var reelsCache: MutableList<Reel> = mutableListOf()
+
+    var postsCache: MutableList<Post> = mutableListOf()
+
+    var users_List: MutableList<SearchUserListResponse.Payload.User> = mutableListOf()
+
+    var IS_SEARCH_MAIN_LOADED: Boolean = false
+
+    var SEARCH_SELF_CLICKED: Int =0
+
+    var IS_USER_SEARCH_STARTED: Boolean = false
+    var SEARCH_TEXT: String = ""
+    var SEARCH_MAIN_CURRENT_PAGE: Int = 0
+
+    var HOME_INSTANCE_KEY_ID: Int =0
 
     fun formatCount(count: Int): String {
         return when {

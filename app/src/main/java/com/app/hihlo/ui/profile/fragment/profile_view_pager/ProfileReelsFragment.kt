@@ -27,6 +27,7 @@ import com.app.hihlo.ui.profile.adapter.AdapterProfileMedia
 import com.app.hihlo.ui.profile.fragment.PaginatingFragment
 import com.app.hihlo.ui.profile.fragment.ProfileFragmentDirections
 import com.app.hihlo.ui.profile.view_model.ProfilePostViewModel
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -74,6 +75,7 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
             binding.noPostsFoundPlaceholder.isVisible=false
         }
         adapter = AdapterProfileMedia(reels) { position ->
+            UserDataManager.setReelsPosition(binding.root.context, position)
             getSelectedPost(position)
         }
         binding.showMediaRecycler.adapter = adapter

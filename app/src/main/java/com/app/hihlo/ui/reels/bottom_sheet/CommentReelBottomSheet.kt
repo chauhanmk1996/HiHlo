@@ -97,8 +97,10 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        if(RTVariable.IS_FROM_RESUME){
+            isLoading = false
+        }
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
-        dialog.window?.setWindowAnimations(0)
         dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         dialog.setOnShowListener {
             val bottomSheet = dialog.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
@@ -139,6 +141,9 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 }
                 behavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
+                        if (RTVariable.IS_FROM_RESUME && behavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+                            return
+                        }
                         when (newState) {
                             BottomSheetBehavior.STATE_HIDDEN -> {
                                 isExpanding = true
@@ -266,9 +271,12 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         val totalItemCount = layoutManager.itemCount
         val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-        if (!isLoading && hasMore &&
-            (firstVisibleItemPosition + visibleItemCount) >= totalItemCount
-        ) {
+        val isAtBottom = (firstVisibleItemPosition + visibleItemCount) >= totalItemCount
+        val isListShort = totalItemCount <= visibleItemCount
+
+        if (!isLoading && hasMore && (isAtBottom || isListShort)) {
+            loadMore()
+        }else{
             loadMore()
         }
     }
@@ -405,22 +413,6 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         )
         binding.commentsRecycler.clipToPadding = false
         //binding.commentsRecycler.setHasFixedSize(true)
-        binding.commentsRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy < 0 && isRecyclerViewAtTop(recyclerView) && isExpanding && behavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
-                    isExpanding = false
-                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
-                }else{
-                    isExpanding = true
-                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
-                }
-//                else if (dy > 0 && behavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
-//                    // ✅ ONLY collapse when scrolling down AND not already collapsed
-//                    isExpanding = true
-//                    behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-//                }
-            }
-        })
         setupPagination()
         binding.sendButton.setOnClickListener {
             val message = binding.commentReplyEdittext.text.toString()
@@ -444,11 +436,36 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
         if (UserDataManager.isCommentToScroll(binding.root.context)) {
             val position = UserDataManager.get_CommentPosition(binding.root.context)
             UserDataManager.setCommentToScroll(binding.root.context, false)
+            val pos = UserDataManager.get_CommentNewPosition(binding.root.context)
+            val offSet = UserDataManager.get_CommentNewOffSetPosition(binding.root.context)
             binding.commentsRecycler.post {
                 val lm = binding.commentsRecycler.layoutManager as LinearLayoutManager
-                lm.scrollToPositionWithOffset(position, 0)
+                lm.scrollToPositionWithOffset(pos, offSet)
+                UserDataManager.postCommentNewPosition(binding.root.context, -1)
+                UserDataManager.postCommentNewOffSetPosition(binding.root.context, 0)
             }
         }
+        binding.commentsRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy < 0 && isRecyclerViewAtTop(recyclerView) && isExpanding && behavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
+                    isExpanding = false
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                }else{
+                    isExpanding = true
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                }
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val position = layoutManager.findFirstVisibleItemPosition()
+                val offset = layoutManager.findViewByPosition(position)?.top ?: 0
+                UserDataManager.postCommentNewPosition(binding.root.context, position)
+                UserDataManager.postCommentNewOffSetPosition(binding.root.context, offset)
+//                else if (dy > 0 && behavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
+//                    // ✅ ONLY collapse when scrolling down AND not already collapsed
+//                    isExpanding = true
+//                    behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+//                }
+            }
+        })
         //binding.commentReplyEdittext.requestFocus()
     }
 
@@ -472,6 +489,8 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                 if (!isLoading && hasMore &&
                     (firstVisibleItemPosition + visibleItemCount) >= totalItemCount) {
 
+                    loadMore()
+                }else{
                     loadMore()
                 }
             }

@@ -171,7 +171,7 @@ class ReelAdapter(
                         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     } else {
                         // Portrait video
-                        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     }
                 }
             })
@@ -257,9 +257,11 @@ class ReelAdapter(
             val isCurrentlyMuted = exoPlayer.volume == 0f
 
             if (isCurrentlyMuted) {
+                UserDataManager.setReelMute(itemView.context, false)
                 exoPlayer.volume = 1f
                 muteVolumeButton.setImageResource(R.drawable.volume_mute)
             } else {
+                UserDataManager.setReelMute(itemView.context, true)
                 exoPlayer.volume = 0f
                 muteVolumeButton.setImageResource(R.drawable.volume_unmute)
             }
@@ -434,6 +436,18 @@ class ReelAdapter(
             this.reels.size else 0
         this.reels.addAll(list)
         notifyItemRangeInserted(start, this.reels.size)
+    }
+
+    fun appendReels(newReels: MutableList<Reel>) {
+        val startIndex = reels.size                    // your internal list name (whatever you use)
+        this.reels.addAll(newReels)
+        notifyItemRangeInserted(startIndex, newReels.size)
+    }
+
+    fun addItems(newItems: List<Reel>) {
+        val start = this.reels.size
+        this.reels.addAll(newItems)
+        notifyItemRangeInserted(start, newItems.size)
     }
     fun updateLike(position: Int, updatedLikeStatus:Int){
         reels[position].isLiked=updatedLikeStatus

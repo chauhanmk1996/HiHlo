@@ -38,6 +38,8 @@ class HomeViewModel @Inject constructor():ViewModel() {
 
     var scrollY = 0
     var isPaused = false
+    var filterById: Int = 0
+    var filterByName: String = ""
     private val homeLiveDate = SingleLiveEvent<Resources<HomeResponse>>()
     private val genderListLiveData = SingleLiveEvent<Resources<GenderListResponse>>()
     fun getGenderLiveData(): LiveData<Resources<GenderListResponse>> {

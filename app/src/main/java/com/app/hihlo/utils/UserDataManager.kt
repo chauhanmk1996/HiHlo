@@ -262,14 +262,137 @@ object UserDataManager {
         }
     }
 
-    fun saveChatScrollPosition(context: Context, type: String, position: Int) {
-        val pref = context.getSharedPreferences("chat_pref", Context.MODE_PRIVATE)
-        pref.edit().putInt("scroll_$type", position).apply()
+    private const val PREF_NAME = "chat_scroll_pref"
+
+    fun saveChatScrollPosition(context: Context, key: String, scrollY: Int) {
+
+        // ❌ NEVER SAVE 0
+//        if (scrollY <= 0) {
+//            Log.d("SCROLL_PREF", "SKIP SAVE (0) -> key=$key")
+//            return
+//        }
+
+        val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        pref.edit().putInt(key, scrollY).apply()
+
+        Log.d("SCROLL_PREF", "SAVE -> key=$key value=$scrollY")
     }
 
-    fun getChatScrollPosition(context: Context, type: String): Int {
-        val pref = context.getSharedPreferences("chat_pref", Context.MODE_PRIVATE)
-        return pref.getInt("scroll_$type", 0)
+    fun saveChatFromOtherScrollPosition(context: Context, key: String, scrollY: Int) {
+        val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        pref.edit().putInt(key, scrollY).apply()
+
+        Log.d("SCROLL_PREF", "SAVE -> key=$key value=$scrollY")
+    }
+
+    fun getChatScrollPosition(context: Context, key: String): Int {
+        val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val value = pref.getInt(key, -1)
+
+        Log.d("SCROLL_PREF", "GET -> key=$key value=$value")
+
+        return value
+    }
+
+    fun isReelMute(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getBoolean("com.HHA_P_ReelMute", false)
+    }
+
+    fun setReelMute(context: Context, mute: Boolean) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putBoolean("com.HHA_P_ReelMute", mute)
+            commit()
+        }
+    }
+
+    fun postCommentNewPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_NEW_COMMENT_POSITION", position)
+            commit()
+        }
+    }
+
+    fun get_CommentNewPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_NEW_COMMENT_POSITION", 0)
+    }
+
+    fun postCommentNewOffSetPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_NEW_COMMENT_OffSetPOSITION", position)
+            commit()
+        }
+    }
+
+    fun get_CommentNewOffSetPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_NEW_COMMENT_OffSetPOSITION", 0)
+    }
+
+    fun postReelsID(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_ReelsID", position)
+            commit()
+        }
+    }
+
+    fun get_ReelsID(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_ReelsID", 0)
+    }
+
+    fun postSearchCreatorScrollY(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_SearchCreatorScrollY", position)
+            commit()
+        }
+    }
+
+    fun get_SearchCreatorScrollY(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_SearchCreatorScrollY", 0)
+    }
+
+    fun setChatScrollPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_ChatScrollPosition", position)
+            commit()
+        }
+    }
+    fun getChatScrollPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_ChatScrollPosition", 0)
+    }
+    fun setChatScrollYPosition(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_ChatScrollYPosition", position)
+            commit()
+        }
+    }
+    fun getChatScrollYPosition(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_ChatScrollYPosition", 0)
+    }
+
+    fun postSearchUserScrollY(context: Context, position: Int) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(prefs.edit()) {
+            putInt("com.HHA_P_SearchUserScrollY", position)
+            commit()
+        }
+    }
+
+    fun get_SearchUserScrollY(context: Context): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return prefs.getInt("com.HHA_P_SearchUserScrollY", 0)
     }
 
 }

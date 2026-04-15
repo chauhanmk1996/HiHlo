@@ -195,6 +195,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
 
             if (cached != null) {
                 viewModel2.commentPayloadCache = cached
+                RTVariable.IS_FROM_RESUME = true
                 openCommentsBottomSheet(cached)
             }
         }

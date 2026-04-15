@@ -27,8 +27,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.app.hihlo.R
+import com.app.hihlo.ReelsDatabase.ReelsDatabaseManager
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentReelsBinding
 import com.app.hihlo.model.follow.request.FollowRequest
@@ -90,6 +92,7 @@ import java.io.FileOutputStream
 import java.util.UUID
 import kotlin.collections.plus
 import kotlin.getValue
+import kotlin.isInitialized
 import kotlin.toString
 
 
@@ -129,7 +132,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private var from = ""
     private var reelPosition = ""
     private var commentOnReelPosition = 0
-    var currentPosition = 0
+    //var currentPosition = 0
     private var targetPosition = 0
     private var isRestored = false
     /*override fun initView(savedInstanceState: Bundle?) {
@@ -190,59 +193,14 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
 
     override fun initView(savedInstanceState: Bundle?) {
-        targetPosition = UserDataManager.getReelsPosition(requireContext())
-        Log.e("TAG", "initView: reelPosition " + targetPosition)
-        from = args?.from ?: "home"
-        Log.i("TAG", "initView: reelPosition " + reelPosition)
 
-        //val savedPosition = UserDataManager.getReelsPosition(requireContext())
-
-        reelPosition = when {
-            targetPosition >= 0 -> targetPosition.toString()   // ✅ highest priority
-            !reelPosition.isNullOrEmpty() -> reelPosition    // existing value
-            !args?.reelPosition.isNullOrEmpty() -> args?.reelPosition ?: "0"
-            else -> "0"
-        }
-        //reelPosition = targetPosition.toString()
-        if (from == "profile") {
-            reelsList = args?.reels?.reels ?: mutableListOf()
-        }
-        viewModel2.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
-        exoPlayer = ExoPlayer.Builder(requireContext()).build()
-        currentPage = 1
-        RTVariable.REELS_CURRENT_PAGE = 1
-        Log.i("TAG", "initView: " + reelsList)
-        Log.i("TAG", "initView: " + from)
-        if (from == "profile") {
-            viewPagerAdapter(mutableListOf())
-            adapter.updateList(reelsList)
-            lifecycleScope.launch {
-                delay(300) // delay in milliseconds
-                binding.viewPager.currentItem = reelPosition.toInt()
-            }
-        } else if (reelsList.isNotEmpty()) {
-            viewPagerAdapter(mutableListOf())
-            adapter.updateList(reelsList)
-            lifecycleScope.launch {
-                delay(300) // delay in milliseconds
-                binding.viewPager.currentItem = reelPosition.toInt()
-            }
-        } else {
-            viewPagerAdapter(mutableListOf())
-            hitGetReelsApi(currentPage)
-            setReelsAdapterPagination()
-        }
-        viewModel.hitCoinDetailsApi(
-            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                requireContext(),
-                LOGIN_DATA
-            )?.payload?.authToken
-        )
 
     }
 
     private fun hitGetReelsApi(currentPage: Int) {
         RTVariable.REELS_CURRENT_PAGE = currentPage
+        viewModel.commentPayloadCache = null
+        UserDataManager.setReelsPosition(requireContext(), 0)
         Log.e("PAGE", "PAGE>>> " + currentPage.toString())
         viewModel.hitGetReelsApi(
             "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
@@ -261,6 +219,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         setObserver()
         viewPagerCallback()
         binding.swipeRefresh.setOnRefreshListener {
+            binding.swipeRefresh.isRefreshing = true
             refreshReels()
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -269,22 +228,104 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     delay(1000)
                     if (RTVariable.COMMENT_DELETED) {
                         RTVariable.COMMENT_DELETED = false
-                        hitGetReelsApi(currentPage)
+                        //hitGetReelsApi(currentPage)
                         adapter.updateCommentCount(
                             RTVariable.POST_POSITION,
                             RTVariable.COMMENT_COUNT
                         )
                     } else {
-                        Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_ID)
-                        getReels(currentPage, 6)
+                        //Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_ID)
+                        getReels(currentPage, 1)
                     }
                 }
             }
         }
+        targetPosition = UserDataManager.getReelsPosition(requireContext())
+        Log.e("TAG", "initView: reelPosition " + targetPosition)
+        from = args?.from ?: "home"
+        Log.i("TAG", "initView: reelPosition " + reelPosition)
+        Log.i("TAG", "updatedreelsize: " + targetPosition)
+
+        //val savedPosition = UserDataManager.getReelsPosition(requireContext())
+
+        reelPosition = when {
+            targetPosition >= 0 -> targetPosition.toString()   // ✅ highest priority
+            !reelPosition.isNullOrEmpty() -> reelPosition    // existing value
+            !args?.reelPosition.isNullOrEmpty() -> args?.reelPosition ?: "0"
+            else -> "0"
+        }
+        //reelPosition = targetPosition.toString()
+        Log.i("TAG", "initView: reelPosition A " + reelPosition)
+        if (from == "profile") {
+            RTVariable.reelsCache = args?.reels?.reels ?: mutableListOf()
+        }
+        viewModel2.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
+        exoPlayer = ExoPlayer.Builder(requireContext()).build()
+        Log.i("TAG", "initView: " + RTVariable.reelsCache)
+        Log.i("TAG", "initView: " + from)
+        if (from == "profile") {
+            binding.swipeRefresh.isEnabled = false
+            viewPagerAdapter(mutableListOf())
+            adapter.updateList(RTVariable.reelsCache)
+            lifecycleScope.launch {
+                delay(300) // delay in milliseconds
+                binding.viewPager.currentItem = reelPosition.toInt()
+            }
+            viewPagerAdapter(mutableListOf())
+            adapter.updateList(RTVariable.reelsCache)
+            lifecycleScope.launch {
+                delay(300) // delay in milliseconds
+                binding.viewPager.currentItem = reelPosition.toInt()
+            }
+        } else {
+            if(!RTVariable.IS_REELS_LOADED){
+                currentPage = 1
+                RTVariable.reelsCache.clear()
+                RTVariable.REELS_CURRENT_PAGE = 1
+                binding.swipeRefresh.isEnabled = true
+                viewPagerAdapter(mutableListOf())
+                hitGetReelsApi(currentPage)
+                setReelsAdapterPagination()
+            }
+        }
+        Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
+        if(RTVariable.IS_REELS_LOADED){
+            Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
+            Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
+            viewPagerAdapter(mutableListOf())
+            adapter.updateList(RTVariable.reelsCache)
+            isLoading = true
+            currentPage = reelPosition.toInt()
+            //adapter.notifyDataSetChanged()
+            binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
+            //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
+            //recyclerView?.scrollToPosition(reelPosition.toInt())
+            //binding.viewPager.currentItem = reelPosition.toInt()
+        }
+        viewModel.hitCoinDetailsApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken
+        )
+        requireActivity().supportFragmentManager.setFragmentResultListener("self", viewLifecycleOwner) { _, _ ->
+            Log.i("TAG", "onViewCreated: chatIconTap")
+            val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
+            recyclerView?.scrollToPosition(0)
+            refreshReels()
+        }
+        requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
+            Log.i("TAG", "onViewCreated: chatIconTap")
+            RTVariable.REELS_INSTANCE_KEY_ID = 0
+        }
     }
 
     private fun refreshReels() {
-        binding.swipeRefresh.isRefreshing = true
+        currentPage = 1
+        RTVariable.reelsCache.clear()
+        RTVariable.REELS_CURRENT_PAGE = 1
+        binding.swipeRefresh.isEnabled = true
+        UserDataManager.setReelsPosition(requireContext(), 0)
         hitGetReelsApi(1)
     }
 
@@ -335,7 +376,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             when (position) {
                 0 -> {
 //                        locally change the value of liked key and later hit this api only if internet is available
-                    reelsList[reelPosition].isLiked = if (isLikedStatus == 1) 2 else 1
+                    RTVariable.reelsCache[reelPosition].isLiked = if (isLikedStatus == 1) 2 else 1
                     adapter.updateLike(reelPosition, if (isLikedStatus == 1) 2 else 1)
                     viewModel.hitLikeReelApi(
                         "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
@@ -430,7 +471,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         findNavController().navigate(
             ReelsFragmentDirections.actionReelsFragmentToProfileFragment(
                 "0",
-                reelsList[binding.viewPager.currentItem].creatorId.toString(),
+                RTVariable.reelsCache[binding.viewPager.currentItem].creatorId.toString(),
                 "reels"
             )
         )
@@ -626,11 +667,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private fun viewPagerCallback() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             var currentPosition = 0
-
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                UserDataManager.setReelsPosition(requireContext(), position)
-                val totalItems = reelsList.size
+                //UserDataManager.setReelsPosition(requireContext(), position)
+                val totalItems = RTVariable.reelsCache.size
                 Log.i("TAG", "onPageSelected: $totalItems   $position")
                 if (position == totalItems - 2 && isLoading) {
                     currentPage++
@@ -638,25 +678,30 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     hitGetReelsApi(currentPage)
                     isLoading = false
                 }
-
-                // Save playback position
-
-                if (currentPosition < reelsList.size) {
-                    reelsList[currentPosition].lastPlaybackPosition = exoPlayer.currentPosition
+                if (currentPosition < RTVariable.reelsCache.size) {
+                    RTVariable.reelsCache[currentPosition].lastPlaybackPosition = exoPlayer.currentPosition
                 }
-                userId = reelsList[position].creatorId.toString()
-
+                if (RTVariable.reelsCache.isNullOrEmpty() || position >= RTVariable.reelsCache.size) {
+                    return
+                }
+                userId = RTVariable.reelsCache[position].creatorId.toString()
                 val previousPosition = currentPosition
                 currentPosition = position
-
                 adapter.currentPlayingPosition = position
                 adapter.notifyItemChanged(previousPosition)
                 adapter.notifyItemChanged(currentPosition)
-
-                val reel = reelsList[position]
+                adapter.currentPlayingPosition = currentPosition
+//                binding.viewPager.post {
+//                    if (previousPosition < adapter.itemCount) {
+//                        adapter.notifyItemChanged(previousPosition)
+//                    }
+//                    if (currentPosition < adapter.itemCount) {
+//                        adapter.notifyItemChanged(currentPosition)
+//                    }
+//                }
+                val reel = RTVariable.reelsCache[position]
                 RTVariable.REELS_POSITION = position
                 RTVariable.REELS_ID = reel.id.toString()
-                //UserDataManager.setPosition(requireContext(), -1)
                 playVideo(reel.assetUrl, reel.lastPlaybackPosition)
             }
         })
@@ -978,7 +1023,13 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
         exoPlayer.setMediaSource(mediaSource)
         exoPlayer.prepare()
-        exoPlayer.seekTo(resumePosition)
+        if (RTVariable.REELS_PLAYING_POSITION == 0L) {
+            RTVariable.REELS_PLAYING_POSITION = 0L
+            exoPlayer.seekTo(resumePosition)
+        }else{
+            exoPlayer.seekTo(RTVariable.REELS_PLAYING_POSITION)
+            RTVariable.REELS_PLAYING_POSITION = 0L
+        }
         if (UserDataManager.isPaused(requireActivity())) {
             val savedPos = UserDataManager.getPosition(requireContext())
             Log.e("REEL_POS", "REEL_POS>>>> $savedPos  $RTVariable.REELS_POSITION")
@@ -990,6 +1041,18 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             }
         } else {
             exoPlayer.playWhenReady = true
+        }
+        if(UserDataManager.isReelMute(requireContext())){
+            val savedPos = UserDataManager.getPosition(requireContext())
+//            if (savedPos == RTVariable.REELS_POSITION) {
+//                exoPlayer.volume = 0f
+//            }else{
+//                exoPlayer.volume = 1f
+//            }
+            exoPlayer.volume = 0f
+            //exoPlayer.volume = 0f
+        }else{
+            exoPlayer.volume = 1f
         }
     }
 
@@ -1094,135 +1157,142 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
-        viewModel.getReelsLiveData().observe(viewLifecycleOwner) {
+        viewModel.getReelsLiveData().observe(viewLifecycleOwner) { response ->
 
-            when (it.status) {
-                Status.SUCCESS -> {
-                    Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-                            if (it.data.payload.reels?.isNotEmpty() == true) {
-                                isLoading = true
-                                reelsList.addAll(it.data.payload.reels ?: mutableListOf())
-                                Log.i("TAG", "updatedreelsize: " + reelsList.size)
-                                if (currentPage == 1) {
-                                    if (reelsList.isNotEmpty()) {
-//                                        adapter.clearList()
-                                        adapter.updateList(
-                                            it.data.payload.reels?.toMutableList()
-                                                ?: mutableListOf()
-                                        )
-                                        binding.viewPager.post {
-                                            adapter.currentPlayingPosition = 0
-                                            adapter.notifyDataSetChanged()
-                                            playVideo(
-                                                it.data.payload.reels?.get(0)?.assetUrl ?: "",
-                                                it.data.payload.reels?.get(0)?.lastPlaybackPosition
-                                                    ?: 0
-                                            )
-                                        }
-                                    } else {
-//                                        adapter.clearList()
-                                        adapter.updateList(
-                                            it.data.payload.reels?.toMutableList()
-                                                ?: mutableListOf()
-                                        )
-                                    }
-                                } else {
-                                    adapter.updateList(
-                                        it.data.payload.reels?.toMutableList() ?: mutableListOf()
-                                    )
-                                }
-                            }
-                        } else {
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                    ProcessDialog.dismissDialog(true)
-                }
+            when (response.status) {
 
                 Status.LOADING -> {
+                    isLoading = true
                     ProcessDialog.showDialog(requireContext(), true)
                 }
 
-                Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
-                }
-            }
-        }
-        viewModel.getReelsLiveData().observe(viewLifecycleOwner) {
-            when (it.status) {
                 Status.SUCCESS -> {
-                    Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-                            binding.swipeRefresh.isRefreshing = false
-                            if (it.data.payload.reels?.isNotEmpty() == true) {
+                    isLoading = true
+                    binding.swipeRefresh.isRefreshing = false
+                    ProcessDialog.dismissDialog(true)
 
-                                reelsList.addAll(it.data.payload.reels)
-                                adapter.updateList(it.data.payload.reels.toMutableList())
+                    val data = response.data
 
-                                val currentSize = it.data.payload.reels.size
+                    if (data?.status == 1 && data.code == 200) {
+                        val newReels = data.payload.reels ?: mutableListOf()
 
-                                // ✅ CASE 1: Target position is already loaded
-                                if (!isRestored && targetPosition < currentSize) {
+                        if (newReels.isNotEmpty()) {
 
-                                    binding.viewPager.post {
-                                        binding.viewPager.setCurrentItem(targetPosition, false)
+                            if (currentPage == 1) {
+                                // First page → full reset
+                                RTVariable.reelsCache.clear()
+                                RTVariable.reelsCache.addAll(newReels)
 
-                                        adapter.currentPlayingPosition = targetPosition
+                                adapter.updateList(RTVariable.reelsCache.toMutableList())
 
-                                        playVideo(
-                                            it.data.payload.reels[targetPosition].assetUrl,
-                                            it.data.payload.reels[targetPosition].lastPlaybackPosition
-                                        )
-                                    }
-
-                                    isRestored = true
-                                }
-
-                                // ✅ CASE 2: Target position NOT loaded yet → load more
-                                else if (!isRestored && targetPosition >= currentSize) {
-
-                                    currentPage++
-                                    hitGetReelsApi(currentPage)
-                                }
-
-                                // ✅ Normal flow after restore
-                                else if (currentPage == 1 && isRestored.not()) {
+                                // Play first reel
+                                if (RTVariable.reelsCache.isNotEmpty()) {
+                                    val firstReel = RTVariable.reelsCache[0]
+                                    adapter.currentPlayingPosition = 0
                                     binding.viewPager.setCurrentItem(0, false)
-                                } else {
-                                    adapter.updateList(
-                                        it.data.payload.reels?.toMutableList() ?: mutableListOf()
-                                    )
+                                    playVideo(firstReel.assetUrl ?: "", firstReel.lastPlaybackPosition ?: 0L)
                                 }
+                            } else {
+                                // Pagination → append only (this fixes your bug)
+                                val oldSize = RTVariable.reelsCache.size
+                                RTVariable.reelsCache.addAll(newReels)
+
+                                // Use the new append method
+                                adapter.appendReels(newReels)
+                                // Optional: smooth scroll if needed
+                                // binding.viewPager.setCurrentItem(oldSize, false)
                             }
+
+                            RTVariable.IS_REELS_LOADED = true
+
                         } else {
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
+                            // No more data
+                            isLoading = false
+                            Toast.makeText(requireContext(), "No more reels", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(requireContext(), data?.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
                     }
-                    ProcessDialog.dismissDialog(true)
-                }
-
-                Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
                 }
 
                 Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
+                    isLoading = false
+                    binding.swipeRefresh.isRefreshing = false
                     ProcessDialog.dismissDialog(true)
+
+                    Log.e("TAG", "Reels Error: ${response.message}")
+                    Toast.makeText(requireContext(), response.message ?: "Error occurred", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+//        viewModel.getReelsLiveData().observe(viewLifecycleOwner) {
+//            when (it.status) {
+//                Status.SUCCESS -> {
+//                    Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
+//                    if (it.data?.status == 1) {
+//                        if (it.data.code == 200) {
+//                            binding.swipeRefresh.isRefreshing = false
+//                            if (it.data.payload.reels?.isNotEmpty() == true) {
+//
+//                                reelsList.addAll(it.data.payload.reels)
+//                                adapter.updateList(it.data.payload.reels.toMutableList())
+//
+//                                val currentSize = it.data.payload.reels.size
+//
+//                                // ✅ CASE 1: Target position is already loaded
+//                                if (!isRestored && targetPosition < currentSize) {
+//
+//                                    binding.viewPager.post {
+//                                        binding.viewPager.setCurrentItem(targetPosition, false)
+//
+//                                        adapter.currentPlayingPosition = targetPosition
+//
+//                                        playVideo(
+//                                            it.data.payload.reels[targetPosition].assetUrl,
+//                                            it.data.payload.reels[targetPosition].lastPlaybackPosition
+//                                        )
+//                                    }
+//
+//                                    isRestored = true
+//                                }
+//
+//                                // ✅ CASE 2: Target position NOT loaded yet → load more
+//                                else if (!isRestored && targetPosition >= currentSize) {
+//
+//                                    currentPage++
+//                                    hitGetReelsApi(currentPage)
+//                                }
+//
+//                                // ✅ Normal flow after restore
+//                                else if (currentPage == 1 && isRestored.not()) {
+//                                    binding.viewPager.setCurrentItem(0, false)
+//                                } else {
+//                                    adapter.updateList(
+//                                        it.data.payload.reels?.toMutableList() ?: mutableListOf()
+//                                    )
+//                                }
+//                            }
+//                        } else {
+//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+//                                .show()
+//                        }
+//                    } else {
+//                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+//                            .show()
+//                    }
+//                    ProcessDialog.dismissDialog(true)
+//                }
+//
+//                Status.LOADING -> {
+//                    ProcessDialog.showDialog(requireContext(), true)
+//                }
+//
+//                Status.ERROR -> {
+//                    Log.e("TAG", "Login Failed: ${it.message}")
+//                    ProcessDialog.dismissDialog(true)
+//                }
+//            }
+//        }
         viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
 
@@ -1626,8 +1696,11 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     override fun onPause() {
         super.onPause()
         if (::exoPlayer.isInitialized) {
+            RTVariable.REELS_PLAYING_POSITION = exoPlayer.currentPosition
             exoPlayer.pause()
         }
+        val position = binding.viewPager.currentItem
+        UserDataManager.setReelsPosition(requireContext(), position)
     }
 
     override fun onDestroyView() {
@@ -1648,6 +1721,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
             if (cached != null) {
                 viewModel.commentPayloadCache = cached
+                RTVariable.IS_FROM_RESUME = true
                 openCommentsBottomSheet(cached)
             }
         }

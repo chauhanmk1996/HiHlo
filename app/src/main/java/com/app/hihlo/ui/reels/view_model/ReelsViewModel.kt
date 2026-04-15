@@ -27,10 +27,11 @@ import com.app.hihlo.model.reel.response.Reel
 @HiltViewModel
 class ReelsViewModel @Inject constructor():ViewModel() {
 
-    var isreelsDataLoaded = false
+    var isreelsDataLoaded: Boolean = false
 
     var reelsCache: MutableList<Reel> = mutableListOf()
-    var current_page: Int = 0
+    var current_page: Int = 1
+    var scroll_position: Int = 0
     var commentPayloadCache: Payload? = null
     private val deletePostLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 

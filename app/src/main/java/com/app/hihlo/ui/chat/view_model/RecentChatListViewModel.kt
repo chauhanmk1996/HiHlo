@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.common_response.CommonResponse
 import com.app.hihlo.model.chat.RecentChats
 import com.app.hihlo.model.get_recent_chat.response.GetRecentChatResponse
+import com.app.hihlo.model.get_recent_chat.response.RecentChat
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
 import com.app.hihlo.model.save_recent_chat.response.SaveRecentChatResponse
 import com.app.hihlo.network_call.repository.ApiRepository
@@ -19,6 +20,10 @@ import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 
 class RecentChatListViewModel: ViewModel() {
+
+    var chat_recentList: List<RecentChat> = emptyList()
+    var chat_requestUsersList: List<RecentChat> = emptyList()
+    var isLoaded: Boolean = false
     val firestore = FirebaseFirestore.getInstance()
 
     fun getRecentChatLists(userId: String): LiveData<List<RecentChats>> {

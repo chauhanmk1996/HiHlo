@@ -17,6 +17,8 @@ import com.app.hihlo.utils.ChatUtils.getChatListDay
 import com.app.hihlo.utils.ChatUtils.getCurrentTime
 import com.app.hihlo.utils.ChatUtils.getDay
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.signature.ObjectKey
 import java.util.Locale
 import java.util.Locale.getDefault
 
@@ -84,7 +86,14 @@ class AdapterChatList(
                 getDefault()
             )
 
-            Glide.with(root.context).load(chats[position].userDetails?.profileImage).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(userImage)
+            Glide.with(userImage)
+                .load(chats[position].userDetails?.profileImage)
+                .placeholder(R.drawable.profile_placeholder)
+                .error(R.drawable.profile_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .skipMemoryCache(false)
+                .signature(ObjectKey(chats[position].userDetails?.name ?: "1"))
+                .into(userImage)
 
             verifiedNameTick.isVisible = chats[position].userDetails?.isCreator == 1
 
