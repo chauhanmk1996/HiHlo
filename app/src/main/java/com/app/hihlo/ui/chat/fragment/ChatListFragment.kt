@@ -104,7 +104,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
             isInboxSelected = position == 0
             // Clear search and reset list
             binding.searchEdittext.setText("")
-            val listToShow = if (position == 0) viewModel.chat_recentList else viewModel.chat_requestUsersList
+            val listToShow = if (position == 0) RTVariable.chat_recentList else RTVariable.chat_requestUsersList
             viewPagerAdapter.updateList(listToShow, position)
             if (position == 0) {
                 moveSelectorToLeft()
@@ -116,42 +116,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
     }
 
     override fun initView(savedInstanceState: Bundle?) {
-        binding.searchEdittext.addTextChangedListener(searchTextWatcher)
-        viewPagerAdapter = ChatListViewPagerAdapter(viewModel.chat_recentList, viewModel.chat_requestUsersList, ::onLongTap) { click, position, data, view ->
-            Log.i("TAG", "initView: click=$click, position=$position, data=$data")
-            when (click) {
-                0 -> {
-                    data.userDetails?.let {
-                        val bundle = Bundle().apply {
-                            putParcelableArrayList("storyList", ArrayList(listOf(mapRecentChatToStory(data))))
-                            putInt("position", 0)
-                        }
-                        try {
-                            findNavController().navigate(R.id.secondStoryFragment, bundle)
-                        } catch (e: Exception) {
-                            Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                            Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-                1 -> {
-                    Log.i("TAG", "setObserver: ${UserPreference.CHAT_PUSH_NOTIFICATION_ID}")
-                    data.userDetails?.let {
-                        val bundle = Bundle().apply {
-                            putParcelable("userDetail", it)
-                            putString("from", if (isInboxSelected) TYPE_INBOX else TYPE_REQUEST)
-                            putString("chatId", data.chatId.toString())
-                        }
-                        findNavController().navigate(R.id.action_chatListFragment_to_chatFragment, bundle)
-                    }
-                }
-            }
-        }
-        binding.viewPager.adapter = viewPagerAdapter
-        binding.viewPager.offscreenPageLimit = 2
-        binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.viewPager.reduceDragSensitivity(4)
-        binding.viewPager.registerOnPageChangeCallback(pageChangeCallback)
+
     }
 
     fun ViewPager2.reduceDragSensitivity(factor: Int = 4) {
@@ -210,30 +175,29 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
     }
 
     fun searchChats(query: String): List<RecentChat> {
-        return viewModel.chat_recentList.filter { chat ->
+        return RTVariable.chat_recentList.filter { chat ->
             val username = chat.userDetails?.username
             val name = chat.userDetails?.name
             Log.i("TAG", "Checking chat: id=${chat.chatId}, username=$username, name=$name, query=$query")
             (username?.contains(query, ignoreCase = true) == true) ||
                     (name?.contains(query, ignoreCase = true) == true)
         }.also {
-            Log.i("TAG", "searchChats: Input list size=${viewModel.chat_recentList.size}, Filtered size=${it.size}")
+            Log.i("TAG", "searchChats: Input list size=${RTVariable.chat_recentList.size}, Filtered size=${it.size}")
         }
     }
 
     fun searchRequestChats(query: String): List<RecentChat> {
-        return viewModel.chat_requestUsersList.filter { chat ->
+        return RTVariable.chat_requestUsersList.filter { chat ->
             val username = chat.userDetails?.username
             Log.i("TAG", "Checking request chat: id=${chat.chatId}, username=$username, query=$query")
             username?.contains(query, ignoreCase = true) == true
         }.also {
-            Log.i("TAG", "searchRequestChats: Input list size=${viewModel.chat_requestUsersList.size}, Filtered size=${it.size}")
+            Log.i("TAG", "searchRequestChats: Input list size=${RTVariable.chat_requestUsersList.size}, Filtered size=${it.size}")
         }
     }
 
     override fun onResume() {
         super.onResume()
-
     }
 
     private fun setObserver() {
@@ -242,17 +206,17 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "get recent success: ${Gson().toJson(it)}")
                     if (it.data?.status == 1 && it.data.code == 200) {
-                        viewModel.chat_recentList = it.data.payload.recentChats
-                        Log.i("TAG", "Recent chats updated: size=${recentList.size}")
-                        viewModel.chat_recentList.forEach { chat ->
+                        RTVariable.chat_recentList = it.data.payload.recentChats
+                        Log.i("TAG", "Recent chats updated: size=${RTVariable.chat_recentList.size}")
+                        RTVariable.chat_recentList.forEach { chat ->
                             Log.i("TAG", "Recent chat: id=${chat.chatId}, username=${chat.userDetails?.username}")
                         }
-                        viewPagerAdapter.updateList(viewModel.chat_recentList, 0)
+                        viewPagerAdapter.updateList(RTVariable.chat_recentList, 0)
                         viewModel.isLoaded = true
                         if (UserPreference.CHAT_PUSH_NOTIFICATION_ID?.isNotEmpty() == true) {
                             val targetChatId = UserPreference.CHAT_PUSH_NOTIFICATION_ID?.toInt()
                             Log.i("TAG", "setObserver: $targetChatId")
-                            val matchedChat = viewModel.chat_recentList.firstOrNull { it.chatId == targetChatId }
+                            val matchedChat = RTVariable.chat_recentList.firstOrNull { it.chatId == targetChatId }
                             matchedChat?.let { chat ->
                                 UserPreference.CHAT_PUSH_NOTIFICATION_ID = null
                                 Log.d("Match", "Chat matched: ${chat.message}")
@@ -262,6 +226,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                                 findNavController().navigate(R.id.action_chatListFragment_to_chatFragment, bundle)
                             }
                         }
+                        RTVariable.IS_CHAT_LOADED = true
                     } else {
                         Toast.makeText(requireContext(), it.data?.message ?: "", Toast.LENGTH_SHORT).show()
                     }
@@ -281,18 +246,19 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "get request success: ${Gson().toJson(it)}")
                     if (it.data?.status == 1 && it.data.code == 200) {
-                        viewModel.chat_requestUsersList = it.data.payload.recentChats
-                        Log.i("TAG", "Request chats updated: size=${viewModel.chat_requestUsersList.size}")
-                        viewModel.chat_requestUsersList.forEach { chat ->
+                        RTVariable.chat_requestUsersList = it.data.payload.recentChats
+                        Log.i("TAG", "Request chats updated: size=${RTVariable.chat_requestUsersList.size}")
+                        RTVariable.chat_requestUsersList.forEach { chat ->
                             Log.i("TAG", "Request chat: id=${chat.chatId}, username=${chat.userDetails?.username}")
                         }
-                        viewPagerAdapter.updateList(viewModel.chat_requestUsersList, 1)
+                        viewPagerAdapter.updateList(RTVariable.chat_requestUsersList, 1)
                         viewModel.isLoaded = true
-                        binding.requestButton.text = "Request(${viewModel.chat_requestUsersList.size})"
+                        RTVariable.IS_CHAT_LOADED = true
+                        binding.requestButton.text = "Request(${RTVariable.chat_requestUsersList.size})"
                     } else {
                         Toast.makeText(requireContext(), it.data?.message ?: "", Toast.LENGTH_SHORT).show()
                     }
-                    ProcessDialog.dismissDialog(true)
+                    //ProcessDialog.dismissDialog(true)
                 }
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
@@ -388,6 +354,42 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.searchEdittext.addTextChangedListener(searchTextWatcher)
+        viewPagerAdapter = ChatListViewPagerAdapter(RTVariable.chat_recentList, RTVariable.chat_requestUsersList, ::onLongTap) { click, position, data, view ->
+            Log.i("TAG", "initView: click=$click, position=$position, data=$data")
+            when (click) {
+                0 -> {
+                    data.userDetails?.let {
+                        val bundle = Bundle().apply {
+                            putParcelableArrayList("storyList", ArrayList(listOf(mapRecentChatToStory(data))))
+                            putInt("position", 0)
+                        }
+                        try {
+                            findNavController().navigate(R.id.secondStoryFragment, bundle)
+                        } catch (e: Exception) {
+                            Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+                            Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                1 -> {
+                    Log.i("TAG", "setObserver: ${UserPreference.CHAT_PUSH_NOTIFICATION_ID}")
+                    data.userDetails?.let {
+                        val bundle = Bundle().apply {
+                            putParcelable("userDetail", it)
+                            putString("from", if (isInboxSelected) TYPE_INBOX else TYPE_REQUEST)
+                            putString("chatId", data.chatId.toString())
+                        }
+                        findNavController().navigate(R.id.action_chatListFragment_to_chatFragment, bundle)
+                    }
+                }
+            }
+        }
+        binding.viewPager.adapter = viewPagerAdapter
+        binding.viewPager.offscreenPageLimit = 2
+        binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+        binding.viewPager.reduceDragSensitivity(4)
+        binding.viewPager.registerOnPageChangeCallback(pageChangeCallback)
         setObserver()
         observeOngoingCall()
         callLayoutListener()
@@ -429,13 +431,13 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
         }
         isInboxSelected = true
         setSelectedTab(true)
-        if(!viewModel.isLoaded){
+        if(!RTVariable.IS_CHAT_LOADED){
             viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
             viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
 //            RTVariable.IS_CHAT_CLICKED = true
 //            RTVariable.IS_CHAT_OTHER = false
         }
-        if(viewModel.isLoaded){
+        if(RTVariable.IS_CHAT_LOADED){
 //            var tabSel = ""
 //            if(tabPos==0){
 //                tabSel = "inbox"
@@ -447,24 +449,24 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 //                tabSel,
 //                0 // store as int
 //            )
-            viewPagerAdapter.updateList(viewModel.chat_recentList, 0)
-            viewPagerAdapter.updateList(viewModel.chat_requestUsersList, 1)
+            viewPagerAdapter.updateList(RTVariable.chat_recentList, 0)
+            viewPagerAdapter.updateList(RTVariable.chat_requestUsersList, 1)
         }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (true) {
-                    delay(300)
-//                    if(RTVariable.IS_CHAT_CLICKED && !RTVariable.IS_CHAT_OTHER){
-//                        RTVariable.IS_CHAT_CLICKED = false
-//                        RTVariable.IS_CHAT_OTHER = false
-//                        if(::viewPagerAdapter.isInitialized){
-//                            val rv = binding.viewPager.getChildAt(tabPos) as RecyclerView
-//                            viewPagerAdapter.scrollToTop(rv, tabPos, true)
-//                        }
-//                    }
-                }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                while (true) {
+//                    delay(300)
+////                    if(RTVariable.IS_CHAT_CLICKED && !RTVariable.IS_CHAT_OTHER){
+////                        RTVariable.IS_CHAT_CLICKED = false
+////                        RTVariable.IS_CHAT_OTHER = false
+////                        if(::viewPagerAdapter.isInitialized){
+////                            val rv = binding.viewPager.getChildAt(tabPos) as RecyclerView
+////                            viewPagerAdapter.scrollToTop(rv, tabPos, true)
+////                        }
+////                    }
+//                }
+//            }
+//        }
     }
 
     private fun callLayoutListener() {
@@ -516,10 +518,12 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
             inboxButton.setOnClickListener {
                 searchEdittext.setText("")
                 viewPager.currentItem = 0
+                moveSelectorToLeft()
             }
             requestButton.setOnClickListener {
                 searchEdittext.setText("")
                 viewPager.currentItem = 1
+                moveSelectorToRight()
             }
             crossButton.setOnClickListener {
                 searchEdittext.setText("")
@@ -583,7 +587,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
     private fun setSelectedTab(isInboxSelected: Boolean) {
         binding.apply {
             Log.i("TAG", "setSelectedTab: $isInboxSelected")
-            Log.i("TAG", "setSelectedTab: recentList size=${viewModel.chat_recentList.size}")
+            Log.i("TAG", "setSelectedTab: recentList size=${RTVariable.chat_recentList.size}")
             if (isInboxSelected) {
                 tabPos = 0
 //                if (recentList.isEmpty()) viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)

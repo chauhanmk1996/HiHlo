@@ -17,6 +17,7 @@ import com.app.hihlo.utils.ChatUtils.getChatListDay
 import com.app.hihlo.utils.ChatUtils.getCurrentTime
 import com.app.hihlo.utils.ChatUtils.getDay
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Priority
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import java.util.Locale
@@ -85,15 +86,30 @@ class AdapterChatList(
             lastMessageTime.text = if(messageTime != "Today") messageTime else getCurrentTime("HH:mm a").uppercase(
                 getDefault()
             )
-
-            Glide.with(userImage)
+//            Glide.with(root.context).load(chats[position].userDetails?.profileImage)
+//                .placeholder(R.drawable.profile_placeholder)
+//                .error(R.drawable.profile_placeholder)
+//                .into(userImage)
+            Glide.with(root.context)
                 .load(chats[position].userDetails?.profileImage)
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .priority(Priority.HIGH)
                 .skipMemoryCache(false)
-                .signature(ObjectKey(chats[position].userDetails?.name ?: "1"))
+                .thumbnail(0.1f)
+                .override(200, 200)
+                .centerCrop()
+                .dontAnimate()
                 .into(userImage)
+//            Glide.with(userImage)
+//                .load(chats[position].userDetails?.profileImage)
+////                .placeholder(R.drawable.profile_placeholder)
+////                .error(R.drawable.profile_placeholder)
+////                .diskCacheStrategy(DiskCacheStrategy.ALL)
+////                .skipMemoryCache(false)
+////                .signature(ObjectKey(chats[position].userDetails?.name ?: "1"))
+//                .into(userImage)
 
             verifiedNameTick.isVisible = chats[position].userDetails?.isCreator == 1
 

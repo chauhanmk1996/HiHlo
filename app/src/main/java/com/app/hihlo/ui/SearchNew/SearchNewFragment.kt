@@ -254,7 +254,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             when(click){
                 0->{
                     val bundle = Bundle().apply {
-                        putParcelableArrayList("storyList", ArrayList(listOf<Story>(mapUserToStory(userList[position])) ?: emptyList()))
+                        putParcelableArrayList("storyList", ArrayList(listOf<Story>(mapUserToStory(RTVariable.users_List[position])) ?: emptyList()))
                         putInt("position", 0)
                     }
                     try {
@@ -270,7 +270,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 //                    bundle.putParcelable("userDetail",mapUserToUserDetailsX(userList[position]))
 //                    findNavController().navigate(R.id.action_searchFragment_to_profileFragment, bundle)
 
-                    findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment("0", userList[position].id.toString()))
+                    findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment("0", RTVariable.users_List[position].id.toString()))
 
                 }
                 2->{

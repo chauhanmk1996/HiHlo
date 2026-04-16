@@ -106,27 +106,28 @@ class ChatListViewPagerAdapter(
                         observer.removeOnGlobalLayoutListener(this)
                     }
                     holder.restorationListener = null
-
+                    binding.nestedScrollView.scrollTo(0, savedScrollY)
+                    holder.isRestoring = false
                     // Extra delay so all item heights (images, text wrapping) are final
-                    binding.nestedScrollView.postDelayed({
-                        val child = binding.nestedScrollView.getChildAt(0) ?: return@postDelayed
-                        val maxScroll = child.height - binding.nestedScrollView.height
-
-                        val targetScroll = when {
-                            savedScrollY <= 0 -> 0
-                            maxScroll <= 0 -> 0
-                            else -> savedScrollY.coerceAtMost(maxScroll)
-                        }
-
-                        binding.nestedScrollView.scrollTo(0, targetScroll)
-
-                        Log.d(
-                            "SCROLL",
-                            "✅ RESTORED = $targetScroll (saved=$savedScrollY, max=$maxScroll)"
-                        )
-
-                        holder.isRestoring = false
-                    }, 50)   // 50ms = very reliable for chat lists
+//                    binding.nestedScrollView.postDelayed({
+//                        val child = binding.nestedScrollView.getChildAt(0) ?: return@postDelayed
+//                        val maxScroll = child.height - binding.nestedScrollView.height
+//
+//                        val targetScroll = when {
+//                            savedScrollY <= 0 -> 0
+//                            maxScroll <= 0 -> 0
+//                            else -> savedScrollY.coerceAtMost(maxScroll)
+//                        }
+//
+//                        binding.nestedScrollView.scrollTo(0, targetScroll)
+//
+//                        Log.d(
+//                            "SCROLL",
+//                            "✅ RESTORED = $targetScroll (saved=$savedScrollY, max=$maxScroll)"
+//                        )
+//
+//                        holder.isRestoring = false
+//                    }, 50)   // 50ms = very reliable for chat lists
                 }
             }
 

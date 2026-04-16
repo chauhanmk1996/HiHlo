@@ -1,5 +1,6 @@
 package com.app.hihlo.utils
 
+import com.app.hihlo.model.get_recent_chat.response.RecentChat
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Post
 import com.app.hihlo.model.home.response.Story
@@ -70,6 +71,13 @@ object RTVariable {
     var SEARCH_MAIN_CURRENT_PAGE: Int = 0
 
     var HOME_INSTANCE_KEY_ID: Int =0
+
+    var REELS_LAST_POSITION: Int = 0
+
+    var IS_CHAT_LOADED: Boolean = false
+
+    var chat_recentList: List<RecentChat> = emptyList()
+    var chat_requestUsersList: List<RecentChat> = emptyList()
 
     fun formatCount(count: Int): String {
         return when {

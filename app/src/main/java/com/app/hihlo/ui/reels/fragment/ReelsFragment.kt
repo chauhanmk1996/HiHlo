@@ -222,24 +222,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             binding.swipeRefresh.isRefreshing = true
             refreshReels()
         }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (true) {
-                    delay(1000)
-                    if (RTVariable.COMMENT_DELETED) {
-                        RTVariable.COMMENT_DELETED = false
-                        //hitGetReelsApi(currentPage)
-                        adapter.updateCommentCount(
-                            RTVariable.POST_POSITION,
-                            RTVariable.COMMENT_COUNT
-                        )
-                    } else {
-                        //Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_ID)
-                        getReels(currentPage, 1)
-                    }
-                }
-            }
-        }
         targetPosition = UserDataManager.getReelsPosition(requireContext())
         Log.e("TAG", "initView: reelPosition " + targetPosition)
         from = args?.from ?: "home"
@@ -293,9 +275,9 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
             Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
             viewPagerAdapter(mutableListOf())
+            currentPage = RTVariable.REELS_LAST_POSITION
             adapter.updateList(RTVariable.reelsCache)
             isLoading = true
-            currentPage = reelPosition.toInt()
             //adapter.notifyDataSetChanged()
             binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
             //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
@@ -308,11 +290,29 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 LOGIN_DATA
             )?.payload?.authToken
         )
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(1000)
+                    if (RTVariable.COMMENT_DELETED) {
+                        RTVariable.COMMENT_DELETED = false
+                        //hitGetReelsApi(currentPage)
+                        adapter.updateCommentCount(
+                            RTVariable.POST_POSITION,
+                            RTVariable.COMMENT_COUNT
+                        )
+                    } else {
+                        //Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_ID)
+                        getReels(currentPage, 6)
+                    }
+                }
+            }
+        }
         requireActivity().supportFragmentManager.setFragmentResultListener("self", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
-            val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
-            recyclerView?.scrollToPosition(0)
             refreshReels()
+//            val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
+//            recyclerView?.scrollToPosition(0)
         }
         requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
@@ -887,16 +887,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
     }
 
-    private val requestSinglePermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
+    private val requestSinglePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) launchMediaPicker()
         else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
     }
 
-    private val requestMultiplePermissionsLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
+    private val requestMultiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         val granted = permissions.values.all { it }
         if (granted) launchMediaPicker()
         else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
@@ -1204,14 +1200,13 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                             }
 
                             RTVariable.IS_REELS_LOADED = true
-
                         } else {
                             // No more data
                             isLoading = false
-                            Toast.makeText(requireContext(), "No more reels", Toast.LENGTH_SHORT).show()
+                            //Toast.makeText(requireContext(), "No more reels", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), data?.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(requireContext(), data?.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -1221,7 +1216,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     ProcessDialog.dismissDialog(true)
 
                     Log.e("TAG", "Reels Error: ${response.message}")
-                    Toast.makeText(requireContext(), response.message ?: "Error occurred", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(requireContext(), response.message ?: "Error occurred", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -1700,6 +1695,9 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             exoPlayer.pause()
         }
         val position = binding.viewPager.currentItem
+        Log.e("LAST POSITION", "LAST POSITION>>> "+position)
+        Log.e("LAST POSITION", "LAST POSITION>>> "+reelId)
+        RTVariable.REELS_LAST_POSITION = currentPage
         UserDataManager.setReelsPosition(requireContext(), position)
     }
 
