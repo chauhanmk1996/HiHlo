@@ -848,9 +848,9 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
                 Status.SUCCESS -> {
                     Log.e("TAG", "Block User success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
+                        RTVariable.isBlocked = true
                         Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         findNavController().popBackStack()
-
                     }else{
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -870,6 +870,7 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
                 Status.SUCCESS -> {
                     Log.e("TAG", "UnBlock User success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
+                        RTVariable.isBlocked = true
                         Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         findNavController().popBackStack()
 

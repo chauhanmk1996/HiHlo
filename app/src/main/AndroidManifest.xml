@@ -136,7 +136,8 @@
             android:name=".ui.splash.activity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Base.Theme.HiHloApp">
+            android:theme="@style/Base.Theme.HiHloApp"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

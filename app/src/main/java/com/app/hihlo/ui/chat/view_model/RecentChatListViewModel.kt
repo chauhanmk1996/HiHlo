@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.chat.view_model
 
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -72,7 +73,7 @@ class RecentChatListViewModel: ViewModel() {
                                 toUserId: String? = null,
                                 type: String? = null,
     ) {
-
+        Log.e("TTTTT", "TTTTT>>> "+fromUserId+" | "+toUserId+" | "+type)
         try {
             recentChatLiveData.postValue(Resources.loading(null))
             viewModelScope.launch {

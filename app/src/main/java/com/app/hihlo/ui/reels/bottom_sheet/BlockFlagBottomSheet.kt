@@ -29,6 +29,7 @@ import com.app.hihlo.ui.signup.activity.SignupFlowActivity
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.CommonUtils.toPx
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -207,8 +208,8 @@ class BlockFlagBottomSheet  : BottomSheetDialogFragment() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Block User success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
+                        RTVariable.isBlocked = true
                         onBlockSuccessful?.invoke()
-
                     }else{
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -230,8 +231,8 @@ class BlockFlagBottomSheet  : BottomSheetDialogFragment() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Flag user success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
+                        RTVariable.isBlocked = true
                         onBlockSuccessful?.invoke()
-
                     }else{
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -248,7 +249,6 @@ class BlockFlagBottomSheet  : BottomSheetDialogFragment() {
                 }
             }
         }
-
         viewModel.getDeleteAccountReasonLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -273,7 +273,6 @@ class BlockFlagBottomSheet  : BottomSheetDialogFragment() {
                 }
             }
         }
-
         viewModel.getDeleteAccountLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -304,7 +303,6 @@ class BlockFlagBottomSheet  : BottomSheetDialogFragment() {
                 }
             }
         }
-
     }
 
     fun performLogout() {

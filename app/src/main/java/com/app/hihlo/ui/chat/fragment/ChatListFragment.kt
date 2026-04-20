@@ -467,6 +467,18 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 //                }
 //            }
 //        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(1000)
+                    if(RTVariable.isBlocked){
+                        RTVariable.isBlocked = false
+                        viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
+                        viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
+                    }
+                }
+            }
+        }
     }
 
     private fun callLayoutListener() {

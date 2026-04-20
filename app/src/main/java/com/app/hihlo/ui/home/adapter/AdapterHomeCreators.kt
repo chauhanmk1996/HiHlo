@@ -31,16 +31,10 @@ class AdapterHomeCreators(private val posts: MutableList<Post>, val getSelectedP
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val layoutParams = holder.itemView.layoutParams
-        layoutParams.height = when (posts[position].post_height_size) {
-            3 -> 190.dpToPx(holder.itemView.context)
-            2 -> 250.dpToPx(holder.itemView.context)
-            1 -> 300.dpToPx(holder.itemView.context)
-            else -> 250.dpToPx(holder.itemView.context)
-        }
+        val randomHeight = (190..300).random()
+        layoutParams.height = randomHeight.dpToPx(holder.itemView.context)
         holder.itemView.layoutParams = layoutParams
-
         holder.binding.apply {
-
             Glide.with(root.context).load(posts[position].asset_url).into(backgroundImage)
             Glide.with(root.context).load(posts[position].creatorDetail?.profile_image).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(userImage)
             userName.text = posts[position].creatorDetail?.name

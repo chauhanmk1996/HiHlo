@@ -233,6 +233,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     binding.nestedScrollView.scrollTo(0, scrollYp)
                 }
             }
+        }else {
+            Log.e("HIT", "HIT>>> Initial load (process death / fresh open)")
+            viewModel.currentPage = 1
+            viewModel.isRefreshing = false
+            binding.swipeRefresh.isRefreshing = true          // shows loading indicator
+            binding.progressBar.isVisible = false
+
+            hitServiceListApi(viewModel.currentPage, 0)
         }
         //binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
         //binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
@@ -303,7 +311,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-
                         binding.swipeRefresh.isRefreshing = true
                         binding.nestedScrollView.post {
                             binding.nestedScrollView.scrollTo(0, 0)
@@ -323,77 +330,76 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
-            Log.i("TAG", "onViewCreated: homeIconTap")
-//            isRefreshedFromMenu = true
-//            allStory?.toMutableList()?.clear()
-//            viewModel.currentPage = 1
-//            binding.progressBar.isVisible=false
-//            binding.swipeRefresh.setColorSchemeColors(
-//                ContextCompat.getColor(requireContext(), R.color.white)
-//            )
-//            binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
-//                ContextCompat.getColor(requireContext(), R.color.white_10)
-//            )
-//            binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
+//        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
+//            Log.i("TAG", "onViewCreated: homeIconTap")
+////            isRefreshedFromMenu = true
+////            allStory?.toMutableList()?.clear()
+////            viewModel.currentPage = 1
+////            binding.progressBar.isVisible=false
+////            binding.swipeRefresh.setColorSchemeColors(
+////                ContextCompat.getColor(requireContext(), R.color.white)
+////            )
+////            binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
+////                ContextCompat.getColor(requireContext(), R.color.white_10)
+////            )
+////            binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
+////
+////            if(!UserDataManager.isGetBackToHome(requireContext())){
+////                binding.swipeRefresh.isRefreshing = true
+////                viewModel.isRefreshing = false
+////            }
 //
-//            if(!UserDataManager.isGetBackToHome(requireContext())){
-//                binding.swipeRefresh.isRefreshing = true
-//                viewModel.isRefreshing = false
+//            //binding.swipeRefresh.isRefreshing = true
+//            if (binding.nestedScrollView.scrollY == 0) {
+//                if (!viewModel.isHomeDataLoaded) {
+//                    if (!UserDataManager.isGetBackToHome(requireContext())) {
+//                        Log.e("HIT", "HIT>>> IH")
+//                        binding.progressBar.isVisible = false
+//                        viewModel.currentPage = 1
+//                        viewModel.isRefreshing = false
+//
+//                        binding.swipeRefresh.isRefreshing = true
+//
+//                        hitServiceListApi(viewModel.currentPage, 0)
+//                    }
+//                } else if (RTVariable.ISHOMECLICKED) {
+//                    UserDataManager.setGetBackToHome(requireContext(), false)
+//                    RTVariable.ISHOMECLICKED = false
+//                    Log.e("HIT", "HIT>>> IHE")
+//                    binding.progressBar.isVisible = false
+//                    viewModel.currentPage = 1
+//                    viewModel.isRefreshing = false
+//                    binding.swipeRefresh.isRefreshing = true
+//                    hitServiceListApi(viewModel.currentPage, 0)
+//                }
+//            } else {
+//                if (binding.nestedScrollView.scrollY > 0) {
+//                    if (RTVariable.ISHOMECLICKED) {
+//                        UserDataManager.setGetBackToHome(requireContext(), false)
+//                        Log.e("HIT", "HIT>>> IHE")
+//                        binding.progressBar.isVisible = false
+//                        viewModel.currentPage = 1
+//                        viewModel.isRefreshing = false
+//
+//                        binding.swipeRefresh.isRefreshing = true
+//                        binding.nestedScrollView.post {
+//                            binding.nestedScrollView.scrollTo(0, 0)
+//                            hitServiceListApi(viewModel.currentPage, 0)
+//                        }
+//                    }
+//                }else{
+//                    binding.nestedScrollView.scrollTo(0, 0)
+////                    binding.nestedScrollView.setOnScrollChangeListener(
+////                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+////                            if (scrollY == 0) {
+////                                binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
+////                                //hitServiceListApi(viewModel.currentPage, selectedGender)
+////                            }
+////                        }
+////                    )
+//                }
 //            }
-
-            //binding.swipeRefresh.isRefreshing = true
-            if (binding.nestedScrollView.scrollY == 0) {
-                if (!viewModel.isHomeDataLoaded) {
-                    if (!UserDataManager.isGetBackToHome(requireContext())) {
-                        Log.e("HIT", "HIT>>> IH")
-                        binding.progressBar.isVisible = false
-                        viewModel.currentPage = 1
-                        viewModel.isRefreshing = false
-
-                        binding.swipeRefresh.isRefreshing = true
-
-                        hitServiceListApi(viewModel.currentPage, 0)
-                    }
-                } else if (RTVariable.ISHOMECLICKED) {
-                    UserDataManager.setGetBackToHome(requireContext(), false)
-                    RTVariable.ISHOMECLICKED = false
-                    Log.e("HIT", "HIT>>> IHE")
-                    binding.progressBar.isVisible = false
-                    viewModel.currentPage = 1
-                    viewModel.isRefreshing = false
-
-                    binding.swipeRefresh.isRefreshing = true
-                    hitServiceListApi(viewModel.currentPage, 0)
-                }
-            } else {
-                if (binding.nestedScrollView.scrollY > 0) {
-                    if (RTVariable.ISHOMECLICKED) {
-                        UserDataManager.setGetBackToHome(requireContext(), false)
-                        Log.e("HIT", "HIT>>> IHE")
-                        binding.progressBar.isVisible = false
-                        viewModel.currentPage = 1
-                        viewModel.isRefreshing = false
-
-                        binding.swipeRefresh.isRefreshing = true
-                        binding.nestedScrollView.post {
-                            binding.nestedScrollView.scrollTo(0, 0)
-                            hitServiceListApi(viewModel.currentPage, 0)
-                        }
-                    }
-                }else{
-                    binding.nestedScrollView.smoothScrollTo(0, 0)
-                    binding.nestedScrollView.setOnScrollChangeListener(
-                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
-                            if (scrollY == 0) {
-                                binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-                                hitServiceListApi(viewModel.currentPage, selectedGender)
-                            }
-                        }
-                    )
-                }
-            }
-        }
+//        }
         setupScrollListener()  // ← Call here too if needed, but initView is fine
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -401,6 +407,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     delay(1000)
                     if(RTVariable.COMMENT_DELETED){
                         RTVariable.COMMENT_DELETED = false
+                        hitServiceListApi(viewModel.currentPage, 0)
+                    }
+                    if(RTVariable.ISHOMECLICKED){
+                        RTVariable.ISHOMECLICKED = false
+                        binding.progressBar.isVisible = false
+                        viewModel.currentPage = 1
+                        viewModel.isRefreshing = false
+
+                        binding.swipeRefresh.isRefreshing = true
+
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                 }

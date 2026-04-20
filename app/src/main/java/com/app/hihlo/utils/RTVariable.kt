@@ -79,6 +79,8 @@ object RTVariable {
     var chat_recentList: List<RecentChat> = emptyList()
     var chat_requestUsersList: List<RecentChat> = emptyList()
 
+    var isBlocked: Boolean = false
+
     fun formatCount(count: Int): String {
         return when {
             count >= 1_000_000 -> {

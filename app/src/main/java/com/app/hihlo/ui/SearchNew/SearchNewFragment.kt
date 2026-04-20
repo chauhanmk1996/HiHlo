@@ -36,6 +36,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -113,6 +114,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private var genderList: List<Gender>? = null
     var FIRSTVisiblePosition = -1
     var offsetY = 0
+    var makeRefresh: Boolean = false
 
     override fun getLayoutId(): Int = R.layout.fragment_search_new
 
@@ -189,9 +191,10 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         lastScrollY = 0
         requireActivity().supportFragmentManager.setFragmentResultListener("self", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: searchIconTap")
+            makeRefresh = true
             binding.nestedScrollView.post {
                 binding.nestedScrollView.smoothScrollTo(0, 0)
-                refreshData()
+                //refreshData2()
                 binding.searchEdittext.setText("")
                 search_adapter.clearList()
                 isSearchStarted = false
@@ -229,8 +232,12 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     override fun initView(savedInstanceState: Bundle?) {
         isSearchStarted = false
         viewModel.hitGenderListApi()
-        val layoutManager = StaggeredGridLayoutManager(2 , StaggeredGridLayoutManager.VERTICAL)
+        val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        //layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
+        //layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
+        //(binding.creatorsRecycler.itemAnimator as? DefaultItemAnimator)?.supportsChangeAnimations = false
         binding.creatorsRecycler.layoutManager = layoutManager
+        //binding.creatorsRecycler.setHasFixedSize(false)
         Log.i("TAG", "initView: "+ Preferences.getStringPreference(requireContext(), FCM_TOKEN))
         Log.i("TAG", "initView: "+ Preferences.getStringPreference(requireContext(), LOGIN_DATA))
         adapterHomePosts = AdapterHomeCreators(mutableListOf()){ post, click, position ->
@@ -450,6 +457,21 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             binding.creatorsRecycler.visibility = View.VISIBLE
             //binding.homeFilterGenderRecycler.isVisible=false
         }, 1000)
+    }
+
+    private fun refreshData2() {
+        RTVariable.postsCache.clear()
+        viewModel.currentPage = 1
+        selectedGender = 0
+        binding.allButton.text = "All"
+        hitServiceListApi(viewModel.currentPage, selectedGender)
+        binding.swipeRefresh.isRefreshing = false
+        isSearchStarted = false
+        binding.nestedScrollView2.visibility = View.GONE
+        binding.nestedScrollView.visibility = View.VISIBLE
+        binding.searchRecycler.visibility = View.GONE
+        binding.creatorsRecycler.visibility = View.VISIBLE
+        //binding.homeFilterGenderRecycler.isVisible=false
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -869,23 +891,34 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                                 search_adapter?.addStory(listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
                             }
                             RTVariable.IS_SEARCH_MAIN_LOADED = true
+//                            if(makeRefresh){
+//                                makeRefresh = false
+//                                binding.nestedScrollView.smoothScrollTo(0, 0)
+//                            }
                         }else{
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
                     }else{
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    ProcessDialog.dismissDialog(true)
+
+                    if(!makeRefresh){
+                        ProcessDialog.dismissDialog(true)
+                    }
                     //binding.progressBar.isVisible=false
                 }
                 Status.LOADING -> {
                     if (viewModel.currentPage==1) {
-                        ProcessDialog.showDialog(requireContext(), true)
+                        if(!makeRefresh){
+                            ProcessDialog.showDialog(requireContext(), true)
+                        }
                     }
                 }
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
+                    if(!makeRefresh){
+                        ProcessDialog.dismissDialog(true)
+                    }
                     //binding.progressBar.isVisible=false
                 }
             }
