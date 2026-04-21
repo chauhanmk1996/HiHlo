@@ -25,6 +25,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.collection.mutableIntListOf
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -90,6 +91,11 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.getValue
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
+
 class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     private var myStoryData: MyStory = MyStory()
@@ -115,6 +121,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     var FIRSTVisiblePosition = -1
     var offsetY = 0
     var makeRefresh: Boolean = false
+    private var searchJob: Job? = null
 
     override fun getLayoutId(): Int = R.layout.fragment_search_new
 
@@ -361,39 +368,72 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }
         binding.searchEdittext.doAfterTextChanged {
             val query = it?.toString()?.trim() ?: ""
-            if (query.isEmpty()) {
-                isSearchStarted = false
-                RTVariable.SEARCH_TEXT = ""
-                RTVariable.IS_USER_SEARCH_STARTED = false
-                //binding.crossButton.visibility = View.GONE
-                //binding.searchRecycler.visibility = View.GONE
-                binding.creatorsRecycler.visibility = View.VISIBLE
-                //binding.allButtonContainer.isVisible = true
-                //binding.homeFilterGenderRecycler.isVisible=false
-                //val text = binding.searchEdittext.text.toString().trim()
-//                if (text.isEmpty()) {
-//                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//                    imm.hideSoftInputFromWindow(binding.searchEdittext.windowToken, 0)
-//                }
-            }else{
-                isSearchStarted = true
-                RTVariable.SEARCH_TEXT = query
-                RTVariable.IS_USER_SEARCH_STARTED = true
-                binding.nestedScrollView2.visibility = View.VISIBLE
-                binding.nestedScrollView.visibility = View.GONE
-                binding.crossButton.visibility = View.VISIBLE
-                binding.searchRecycler.visibility = View.VISIBLE
-                binding.creatorsRecycler.visibility = View.GONE
-                binding.allButtonContainer.isVisible = false
-                //binding.homeFilterGenderRecycler.isVisible=false
+            searchJob?.cancel()
+            searchJob = lifecycleScope.launch {
+                delay(400)
+                if (query.isEmpty()) {
+                    isSearchStarted = false
+                    RTVariable.SEARCH_TEXT = ""
+                    RTVariable.IS_USER_SEARCH_STARTED = false
+                    binding.creatorsRecycler.visibility = View.VISIBLE
+                    search_adapter.clearList()
+                    search_adapter.updateList(mutableListOf())
+                } else {
+                    isSearchStarted = true
+                    RTVariable.SEARCH_TEXT = query
+                    RTVariable.IS_USER_SEARCH_STARTED = true
+                    binding.nestedScrollView2.visibility = View.VISIBLE
+                    binding.nestedScrollView.visibility = View.GONE
+                    binding.crossButton.visibility = View.VISIBLE
+                    binding.searchRecycler.visibility = View.VISIBLE
+                    binding.creatorsRecycler.visibility = View.GONE
+                    binding.allButtonContainer.isVisible = false
+                    //binding.homeFilterGenderRecycler.isVisible=false
+                    RTVariable.users_List.clear()
+                    search_adapter.clearList()
+                    search_adapter.updateList(mutableListOf())
+                    hitSearchUserApi()
+                }
             }
-            //isSearchStarted = true
-            //binding.crossButton.visibility = View.VISIBLE
-            //binding.searchRecycler.visibility = View.VISIBLE
-            //binding.creatorsRecycler.visibility = View.GONE
-            //binding.crossButton.isVisible = binding.searchEdittext.text.isNotEmpty()
-            hitSearchUserApi()
         }
+//        binding.searchEdittext.doAfterTextChanged {
+//            val query = it?.toString()?.trim() ?: ""
+//            if (query.isEmpty()) {
+//                isSearchStarted = false
+//                RTVariable.SEARCH_TEXT = ""
+//                RTVariable.IS_USER_SEARCH_STARTED = false
+//                //binding.crossButton.visibility = View.GONE
+//                //binding.searchRecycler.visibility = View.GONE
+//                binding.creatorsRecycler.visibility = View.VISIBLE
+//                search_adapter.clearList()
+//                search_adapter.updateList(mutableListOf())
+//                //binding.allButtonContainer.isVisible = true
+//                //binding.homeFilterGenderRecycler.isVisible=false
+//                //val text = binding.searchEdittext.text.toString().trim()
+////                if (text.isEmpty()) {
+////                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+////                    imm.hideSoftInputFromWindow(binding.searchEdittext.windowToken, 0)
+////                }
+//            }else{
+//                isSearchStarted = true
+//                RTVariable.SEARCH_TEXT = query
+//                RTVariable.IS_USER_SEARCH_STARTED = true
+//                binding.nestedScrollView2.visibility = View.VISIBLE
+//                binding.nestedScrollView.visibility = View.GONE
+//                binding.crossButton.visibility = View.VISIBLE
+//                binding.searchRecycler.visibility = View.VISIBLE
+//                binding.creatorsRecycler.visibility = View.GONE
+//                binding.allButtonContainer.isVisible = false
+//                //binding.homeFilterGenderRecycler.isVisible=false
+//                RTVariable.users_List.clear()
+//                hitSearchUserApi()
+//            }
+//            //isSearchStarted = true
+//            //binding.crossButton.visibility = View.VISIBLE
+//            //binding.searchRecycler.visibility = View.VISIBLE
+//            //binding.creatorsRecycler.visibility = View.GONE
+//            //binding.crossButton.isVisible = binding.searchEdittext.text.isNotEmpty()
+//        }
     }
 
     private fun getSendFollow(user_id: String){
@@ -845,6 +885,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         super.onPause()
     }
     fun hitSearchUserApi(){
+        Log.e("TAG", "get search list: ${binding.searchEdittext.text.trim().toString()}")
         viewModel2.hitSearchUsersList("Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.text.trim().toString())
     }
     private fun hitServiceListApi(page: Int, genderId:Int?=null) {

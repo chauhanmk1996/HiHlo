@@ -1029,6 +1029,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 if (viewModel.isRefreshing) {
                                     viewModel.postsCache.clear()
                                     viewModel.isRefreshing = false
+                                }else{
+                                    viewModel.postsCache.clear()
+                                    viewModel.isRefreshing = false
                                 }
                                 viewModel.postsCache.addAll(it.data.payload.posts)
                                 postAdapter.setPosts(

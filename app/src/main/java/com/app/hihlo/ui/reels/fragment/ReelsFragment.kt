@@ -1198,7 +1198,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                                 // Optional: smooth scroll if needed
                                 // binding.viewPager.setCurrentItem(oldSize, false)
                             }
-
+                            RTVariable.REELS_LAST_POSITION = currentPage
                             RTVariable.IS_REELS_LOADED = true
                         } else {
                             // No more data
@@ -1689,7 +1689,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
 
     override fun onPause() {
-        super.onPause()
         if (::exoPlayer.isInitialized) {
             RTVariable.REELS_PLAYING_POSITION = exoPlayer.currentPosition
             exoPlayer.pause()
@@ -1697,15 +1696,16 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         val position = binding.viewPager.currentItem
         Log.e("LAST POSITION", "LAST POSITION>>> "+position)
         Log.e("LAST POSITION", "LAST POSITION>>> "+reelId)
-        RTVariable.REELS_LAST_POSITION = currentPage
+        //RTVariable.REELS_LAST_POSITION = currentPage
         UserDataManager.setReelsPosition(requireContext(), position)
+        super.onPause()
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         if (::exoPlayer.isInitialized) {
             exoPlayer.release()
         }
+        super.onDestroyView()
     }
 
     override fun onResume() {
