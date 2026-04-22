@@ -464,7 +464,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             retriever.release()
         }
     }
-    fun getSelectedStory(position:Int, story:Story, view:View){
+    fun getSelectedStory(position:Int, story:Story, view:View, intVal: Int){
             if(position==0){
                 if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                     if (isMediaUploaded==1){

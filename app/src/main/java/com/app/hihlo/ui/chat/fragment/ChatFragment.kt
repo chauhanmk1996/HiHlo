@@ -106,6 +106,7 @@ import com.app.hihlo.model.static.MIN_COINS_FOR_VIDEO
 import com.app.hihlo.model.static.MIN_COINS_TO_INITIATE_CHAT
 import com.app.hihlo.model.static.StaticLists.longPressMessageList
 import com.app.hihlo.model.unblock_user.request.UnblockUserRequest
+import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.CALLER_USER_IMAGE
 import com.app.hihlo.ui.chat.adapter.AdapterPredefinedChat
@@ -872,8 +873,11 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
                     if (it.data?.status==1){
                         RTVariable.isBlocked = true
                         Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        findNavController().popBackStack()
-
+                        //findNavController().popBackStack()
+                        otherUserDetails?.blockStatus?.iBlockedThem = 0
+                        runChatListAPI()
+                        runRequestListAPI()
+                        runUISet(false)
                     }else{
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -886,6 +890,73 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
                 }
+            }
+        }
+    }
+
+    private fun runUISet(boolean: Boolean){
+        if(boolean){
+            binding.apply {
+                predefinedTextRecycler.isVisible = false
+                openPredefinedChatScreen.isVisible = false
+                bottomLayout.isVisible = false
+                sendButton.isVisible = false
+                recordAudioButton.isVisible = false
+                openGallery.isVisible = false
+                giftButton.isVisible = false
+            }
+            binding.blockedStatusText.isVisible=true
+            binding.blockedStatusText.text = "You blocked this user."
+        }else{
+            binding.apply {
+                predefinedTextRecycler.isVisible = true
+                openPredefinedChatScreen.isVisible = true
+                bottomLayout.isVisible = true
+                sendButton.isVisible = true
+                recordAudioButton.isVisible = true
+                openGallery.isVisible = true
+                giftButton.isVisible = true
+            }
+            binding.blockedStatusText.isVisible=false
+        }
+    }
+
+    private fun runChatListAPI(){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getRecentChats(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    fromUserId = null,
+                    toUserId = null,
+                    type = "inbox"
+                )
+                if (response.status == 1 && response.code == 200) {
+                    RTVariable.chat_recentList = emptyList()
+                    RTVariable.chat_recentList = response.payload.recentChats
+                    Log.e("CCCC", "CCCC>>> "+RTVariable.chat_recentList)
+                } else {
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun runRequestListAPI(){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getRecentChats(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    fromUserId = null,
+                    toUserId = null,
+                    type = "request"
+                )
+                if (response.status == 1 && response.code == 200) {
+                    RTVariable.chat_requestUsersList = emptyList()
+                    RTVariable.chat_requestUsersList = response.payload.recentChats
+                    Log.e("CCCC", "CCCC>>> R"+RTVariable.chat_requestUsersList)
+                } else {
+                }
+            }catch (e: Exception) {
             }
         }
     }
@@ -1301,7 +1372,11 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
                 bottomSheetFragment.arguments = bundle
                 bottomSheetFragment.onBlockSuccessful = {
                     bottomSheetFragment.dismiss()
-                    findNavController().popBackStack()
+                    //findNavController().popBackStack()
+                    runChatListAPI()
+                    runRequestListAPI()
+                    runUISet(true)
+                    otherUserDetails?.blockStatus?.iBlockedThem = 1
                 }
                 bottomSheetFragment.show(requireActivity().supportFragmentManager, "BlockBottomSheet")
             }

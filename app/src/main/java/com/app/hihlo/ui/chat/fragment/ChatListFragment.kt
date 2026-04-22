@@ -31,6 +31,7 @@ import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.home.response.UserDetails
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
+import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
@@ -467,16 +468,60 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 //                }
 //            }
 //        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                while (true) {
+//                    delay(300)
+//                    runChatListAPI()
+//                    runRequestListAPI()
+////                    if(RTVariable.isBlocked){
+////                        RTVariable.isBlocked = false
+////                        runChatListAPI()
+////                        runRequestListAPI()
+////                        viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
+////                        viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
+////                    }
+//                }
+//            }
+//        }
+    }
+
+    private fun runChatListAPI(){
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (true) {
-                    delay(200)
-                    if(RTVariable.isBlocked){
-                        RTVariable.isBlocked = false
-                        viewModel.hitGetRecentChatDataApi("Bearer $authToken", type = TYPE_INBOX)
-                        viewModel.hitGetRequestChatDataApi("Bearer $authToken", type = TYPE_REQUEST)
-                    }
+            try {
+                val response = RetrofitBuilder.apiService.getRecentChats(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    fromUserId = "",
+                    toUserId = "",
+                    type = "inbox"
+                )
+                if (response.status == 1 && response.code == 200) {
+                    RTVariable.chat_recentList = emptyList()
+                    RTVariable.chat_recentList = response.payload.recentChats
+                    Log.e("CCCC", "CCCC>>> "+RTVariable.chat_recentList)
+                } else {
                 }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun runRequestListAPI(){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getRecentChats(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    fromUserId = "",
+                    toUserId = "",
+                    type = "request"
+                )
+                if (response.status == 1 && response.code == 200) {
+                    RTVariable.chat_requestUsersList = emptyList()
+                    RTVariable.chat_requestUsersList = response.payload.recentChats
+                    Log.e("CCCC", "CCCC>>> R"+RTVariable.chat_requestUsersList)
+                } else {
+                }
+            }catch (e: Exception) {
             }
         }
     }

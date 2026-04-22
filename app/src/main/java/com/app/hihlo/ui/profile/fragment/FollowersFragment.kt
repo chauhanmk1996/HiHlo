@@ -97,28 +97,48 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 getSendUnFollow(userId.toString())
             }
             4->{
-                //Toast.makeText(requireActivity(), "B ${data.id}", Toast.LENGTH_LONG).show()
-                val stories = adapterFollowers!!.getStoriesList()
-                //val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
-                val story = adapterFollowers!!.getStoriesList().find { it.user_id == RTVariable.USER_ID.toInt() }
-//                                val my_story = postAdapter.getMyStoriesList().getOrNull(0)
-//                                    ?: MyStory()
-                val currentUserId = Preferences.getCustomModelPreference<LoginResponse>(
-                    requireContext(), LOGIN_DATA
-                )?.payload?.userId?.toString() ?: ""
-                //val isMyStoryValue = if (post.user_id.toString() == currentUserId) "1" else "0"
-                Log.e("TTTTT", "SSSSS>>> Story clicked: $story")
-                val bundle = Bundle().apply {
-                    putParcelableArrayList("storyList", ArrayList(allStory ?: emptyList()))
-                    putParcelable("myStoryData", myStoryData)
-                    putInt("position", RTVariable.STORY_POSITION)
-                }
-                try {
+                RTVariable.IS_FROM_PROFILE = true
+                val stories = adapterFollowers.getStoriesList()
+                val storyPosition = stories.indexOfFirst { it.user_id == RTVariable.USER_ID.toInt() }
+                val story = stories.find { it.user_id == RTVariable.USER_ID.toInt() }
+
+// Use the same list for navigation, not a separate `allStory`
+                val storyListToPass = stories   // or ensure allStory is properly populated
+
+                if (storyPosition != -1 && storyListToPass.isNotEmpty()) {
+                    val bundle = Bundle().apply {
+                        putParcelableArrayList("storyList", ArrayList(storyListToPass))
+                        putInt("position", storyPosition)
+                        // ...
+                    }
                     findNavController().navigate(R.id.secondStoryFragment, bundle)
-                } catch (e: Exception) {
-                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Handle error: story not found or list empty
+                    Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
                 }
+
+//                //Toast.makeText(requireActivity(), "B ${data.id}", Toast.LENGTH_LONG).show()
+//                val stories = adapterFollowers!!.getStoriesList()
+//                //val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
+//                val story = adapterFollowers!!.getStoriesList().find { it.user_id == RTVariable.USER_ID.toInt() }
+////                                val my_story = postAdapter.getMyStoriesList().getOrNull(0)
+////                                    ?: MyStory()
+//                val currentUserId = Preferences.getCustomModelPreference<LoginResponse>(
+//                    requireContext(), LOGIN_DATA
+//                )?.payload?.userId?.toString() ?: ""
+//                //val isMyStoryValue = if (post.user_id.toString() == currentUserId) "1" else "0"
+//                Log.e("TTTTT", "SSSSS>>> Story clicked: $story")
+//                val bundle = Bundle().apply {
+//                    putParcelableArrayList("storyList", ArrayList(allStory ?: emptyList()))
+//                    putParcelable("myStoryData", myStoryData)
+//                    putInt("position", RTVariable.STORY_POSITION)
+//                }
+//                try {
+//                    findNavController().navigate(R.id.secondStoryFragment, bundle)
+//                } catch (e: Exception) {
+//                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+//                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+//                }
             }
         }
 

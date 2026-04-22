@@ -150,9 +150,10 @@ class StoryFragment : BaseFragment<FragmentStoryBinding>() {
             (requireActivity() as HomeActivity).setOnlineStatusVisibility(false)
             findNavController().popBackStack()
         }
-//        binding.rightClickArea.setOnClickListener {
-//            navigateToOtherStory()
-//        }
+        binding.rightClickArea.setOnClickListener {
+            findNavController().popBackStack()
+            //navigateToOtherStory()
+        }
         binding.deleteButton.setOnClickListener {
             pauseSeekBar() // Pause when dialog is shown
             pausePlayer()       // Pause video playback (if video)

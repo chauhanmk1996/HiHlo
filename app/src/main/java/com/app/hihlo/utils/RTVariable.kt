@@ -81,6 +81,8 @@ object RTVariable {
 
     var isBlocked: Boolean = false
 
+    var IS_FROM_PROFILE: Boolean = false
+
     fun formatCount(count: Int): String {
         return when {
             count >= 1_000_000 -> {

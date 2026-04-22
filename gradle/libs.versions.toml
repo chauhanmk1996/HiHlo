@@ -1,5 +1,5 @@
 [versions]
-agp = "9.1.1"
+agp = "9.2.0"
 firebaseBom = "33.15.0"
 googleAuthLibraryOauth2Http = "1.22.0"
 kotlin = "2.2.10"

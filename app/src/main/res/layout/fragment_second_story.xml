@@ -232,7 +232,11 @@
                 app:layout_constraintTop_toTopOf="@id/sendEditText"
                 app:layout_constraintBottom_toBottomOf="@id/sendEditText"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:src="@drawable/send_button_chat"/>
+                android:background="@drawable/story_view_edittext_background"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="-5dp"
+                android:src="@drawable/fluent_send_filled"/>
             <EditText
                 android:maxLines="1"
                 app:layout_constraintTop_toTopOf="parent"
@@ -241,8 +245,7 @@
                 android:layout_marginTop="13dp"
                 android:layout_marginBottom="3dp"
                 android:layout_marginStart="8dp"
-                android:background="@drawable/background_25dp_corner_no_stroke"
-                android:backgroundTint="@color/gray_303030"
+                android:background="@drawable/story_view_edittext_background"
                 android:paddingHorizontal="13dp"
                 android:paddingVertical="14dp"
                 app:layout_constraintBottom_toBottomOf="parent"

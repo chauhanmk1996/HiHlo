@@ -19,7 +19,7 @@ class AdapterStoriesRecycler(
     var isMediaInMyStory: Int,
     var myStoryData: MyStory,
     var storyListing: List<Story>,
-    val getSelectedStory: (Int, Story, view: View) -> Unit,
+    val getSelectedStory: (Int, Story, view: View, Int) -> Unit,
     val myProfileImage: String?,
 ) : RecyclerView.Adapter<AdapterStoriesRecycler.ViewHolder>() {
 
@@ -100,14 +100,23 @@ class AdapterStoriesRecycler(
         // Click listeners
         holder.binding.storyLayout.setOnClickListener {
             if (position == 0) {
-                getSelectedStory(position, Story(), holder.binding.root)
+                getSelectedStory(position, Story(), holder.binding.root, 1)
+                holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
             } else {
-                getSelectedStory(position, storyListing[position - 1], holder.binding.root)
+                getSelectedStory(position, storyListing[position - 1], holder.binding.root, 2)
+                holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
             }
         }
 
         holder.binding.plusBottomRight.setOnClickListener {
             // selector.uploadStory()
+            getSelectedStory(position, Story(), holder.binding.root, 3)
+            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        }
+        holder.binding.name.setOnClickListener {
+            // selector.uploadStory()
+            getSelectedStory(position, Story(), holder.binding.root, 3)
+            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
     }
 

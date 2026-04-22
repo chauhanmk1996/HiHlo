@@ -51,6 +51,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.dpToPx
 import com.app.hihlo.utils.CommonUtils.setupUIToHideKeyboard
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.VideoCacheManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
@@ -528,7 +529,11 @@ class SecondStoryFragment : Fragment(){
                 delay(80)
                 // To navigate next story use navigateToNextStory(true) then also this isVideoEnded = false
                 //navigateToNextStory(true)
-                findNavController().popBackStack()
+                if(RTVariable.IS_FROM_PROFILE){
+                    findNavController().popBackStack()
+                }else{
+                    navigateToNextStory(true)
+                }
                 //isVideoEnded = false // Reset after navigation
             }
         } else {
@@ -574,8 +579,13 @@ class SecondStoryFragment : Fragment(){
         navigationScope.launch {
             CommonUtils.hideKeyboard(requireActivity())
             delay(80)
+            if(RTVariable.IS_FROM_PROFILE){
+                findNavController().popBackStack()
+            }else{
+                navigateToNextStory(true)
+            }
             //navigateToNextStory(true)
-            findNavController().popBackStack()
+
         }
     }
 

@@ -90,14 +90,14 @@
             app:layout_constraintStart_toStartOf="parent" />
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/plusBottomRight"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:elevation="2dp"
-            app:layout_constraintBottom_toBottomOf="@id/myStoryGradient"
-            app:layout_constraintEnd_toEndOf="@id/myStoryGradient"
-            android:background="@drawable/bg_circle_stroke">
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@drawable/story_upload_btn">
 
             <ImageView
                 android:id="@+id/ivPlusIcon"
@@ -105,13 +105,13 @@
                 android:layout_height="match_parent"
                 android:padding="2dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/plus_icon_pink"
+                android:src="@drawable/btn_upload_icon"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/white" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
         <TextView
             android:layout_marginStart="2dp"

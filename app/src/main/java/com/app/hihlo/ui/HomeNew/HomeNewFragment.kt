@@ -764,31 +764,24 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 post.user_id?.let { openCoinsBottomSheet(it, it, post.creatorDetail?.name.toString()) }
                             }
                             PostsAdapter.PostClickAction.TOWARDS_STORY -> {
+                                RTVariable.IS_FROM_PROFILE = true
                                 val stories = postAdapter.getStoriesList()
                                 val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
-                                val story = postAdapter.getStoriesList().find { it.user_id == post.user_id }
-//                                val my_story = postAdapter.getMyStoriesList().getOrNull(0)
-//                                    ?: MyStory()
-                                val currentUserId = Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(), LOGIN_DATA
-                                )?.payload?.userId?.toString() ?: ""
-                                //val isMyStoryValue = if (post.user_id.toString() == currentUserId) "1" else "0"
-                                Log.e("TTTTT", "SSSSS>>> Story clicked: $story")
-                                val bundle = Bundle().apply {
-                                    putParcelableArrayList("storyList", ArrayList(allStory ?: emptyList()))
-                                    putParcelable("myStoryData", myStoryData)
-                                    putInt("position", storyPosition)
-                                }
-                                try {
-                                    post_position = position
-                                    viewModel.scroll_position = position
-                                    //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
-                                    //UserDataManager.postMainSP(requireContext(), currentPage, post_position)
-                                    UserDataManager.postMainIsSetShow(requireContext(), true)
+                                val story = stories.find { it.user_id == post.user_id }
+
+// Use the same list for navigation, not a separate `allStory`
+                                val storyListToPass = stories   // or ensure allStory is properly populated
+
+                                if (storyPosition != -1 && storyListToPass.isNotEmpty()) {
+                                    val bundle = Bundle().apply {
+                                        putParcelableArrayList("storyList", ArrayList(storyListToPass))
+                                        putInt("position", storyPosition)
+                                        // ...
+                                    }
                                     findNavController().navigate(R.id.secondStoryFragment, bundle)
-                                } catch (e: Exception) {
-                                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    // Handle error: story not found or list empty
+                                    Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -1023,6 +1016,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         if (it.data.code == 200) {
                             viewModel.myStory = it.data.payload.my_story ?: MyStory()
                             viewModel.stories = it.data.payload.stories
+                            isMediaUploaded = it.data.payload.is_story_uploaded
                             viewModel.isStoryUploaded = it.data.payload.is_story_uploaded
                             viewModel.profileImage = it.data.payload.myProfile.profileImage
                             if (viewModel.currentPage == 1) {
@@ -1498,32 +1492,20 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }
 
-    fun getSelectedStory(position:Int, story:Story, view:View){
-        if(position==0){
+    fun getSelectedStory(position:Int, story:Story, view:View, intVal: Int){
+        Log.e("TTTT", "TTTT "+isMediaUploaded+" | "+position+ " | "+intVal)
+        if(intVal == 1){
             if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                 if (isMediaUploaded==1){
-                    findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(isMyStory = "1", myStoryData = myStoryData, otherStoryData = allStory?.toTypedArray() ?: emptyArray()))
-                }else if(isMediaUploaded==2){
-                    ReusablePopup(
-                        context = requireContext(),
-                        anchorView = view,
-                        onOption1Click = {
-                            checkGalleryPermissionAndPick()
-                        },
-                        onOption2Click = {},
-                        option1Text = "Open Gallery",
-                        option2Text = "Cancel",
-                        option1ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-                        option2ImageRes = R.drawable.ic_cancel_red
-                    ).show()
+                    RTVariable.IS_FROM_PROFILE = false
+                    findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(isMyStory = "1", myStoryData = viewModel.myStory ?: MyStory(), otherStoryData = viewModel.stories?.toTypedArray() ?: emptyArray()))
                 }
-            }else{
-                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
             }
-        }else{
+        }else if(intVal == 2){
+            RTVariable.IS_FROM_PROFILE = false
             val bundle = Bundle().apply {
-                putParcelableArrayList("storyList", ArrayList(allStory ?: emptyList()))
-                putParcelable("myStoryData", myStoryData)
+                putParcelableArrayList("storyList", ArrayList(viewModel.stories ?: emptyList()))
+                putParcelable("myStoryData", viewModel.myStory ?: MyStory())
                 putInt("position", position - 1)
             }
             try {
@@ -1532,7 +1514,60 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
                 Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
             }
+        }else if(intVal == 3){
+            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                ReusablePopup(
+                    context = requireContext(),
+                    anchorView = view,
+                    onOption1Click = {
+                        checkGalleryPermissionAndPick()
+                    },
+                    onOption2Click = {},
+                    option1Text = "Open Gallery",
+                    option2Text = "Cancel",
+                    option1ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
+                    option2ImageRes = R.drawable.ic_cancel_red
+                ).show()
+            }else{
+                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+            }
         }
+//        if(position==0){
+//            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+//                if (isMediaUploaded==1){
+//                    RTVariable.IS_FROM_PROFILE = false
+//                    findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(isMyStory = "1", myStoryData = viewModel.myStory ?: MyStory(), otherStoryData = viewModel.stories?.toTypedArray() ?: emptyArray()))
+//                }else if(isMediaUploaded==2){
+//                    ReusablePopup(
+//                        context = requireContext(),
+//                        anchorView = view,
+//                        onOption1Click = {
+//                            checkGalleryPermissionAndPick()
+//                        },
+//                        onOption2Click = {},
+//                        option1Text = "Open Gallery",
+//                        option2Text = "Cancel",
+//                        option1ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
+//                        option2ImageRes = R.drawable.ic_cancel_red
+//                    ).show()
+//                }
+//            }else{
+//                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+//            }
+//        }else{
+//            RTVariable.IS_FROM_PROFILE = false
+//            val bundle = Bundle().apply {
+//                putParcelableArrayList("storyList", ArrayList(viewModel.stories ?: emptyList()))
+//                putParcelable("myStoryData", viewModel.myStory ?: MyStory())
+//                putInt("position", position - 1)
+//            }
+//            try {
+//                findNavController().navigate(R.id.secondStoryFragment, bundle)
+//            } catch (e: Exception) {
+//                Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+//                Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+//            }
+//        }
     }
 
     private val requestSinglePermissionLauncher = registerForActivityResult(
