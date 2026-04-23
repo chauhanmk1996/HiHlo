@@ -2,10 +2,12 @@ package com.app.hihlo.ui.profile.fragment
 
 import android.Manifest
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,16 +27,23 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
+import com.amazonaws.services.s3.AmazonS3Client
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentProfileBinding
 import com.app.hihlo.databinding.PopupChatSideOptionsBinding
+import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.get_profile.Data
 import com.app.hihlo.model.get_profile.Posts
@@ -49,9 +58,11 @@ import com.app.hihlo.model.static.profileDetailList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
+import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
 import com.app.hihlo.ui.home.bottom_sheet.ViewPostBottomSheetFragment
+import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.profile.activity.RechargeCoinsActivity
 import com.app.hihlo.ui.profile.adapter.AdapterProfileMediaViewPager
 import com.app.hihlo.ui.profile.adapter.ShowProfileDetailsAdapter
@@ -59,6 +70,7 @@ import com.app.hihlo.ui.profile.fragment.profile_view_pager.ProfilePostsFragment
 import com.app.hihlo.ui.profile.view_model.GetProfileViewModel
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.ui.trim_video.TrimVideoActivity
+import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
@@ -72,6 +84,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.getValue
 
 /**
  * Fragment responsible for displaying user profiles.
@@ -117,6 +130,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     var from = ""
     private var selectedMediaType: String = "I"
     private var selectedBottomSheetType = ""
+    private val viewModel2: HomeViewModel by activityViewModels()
 
     companion object{
         val REQUEST_CODE_CROP_VIDEO = 10
@@ -423,6 +437,31 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
             }
         }
+        viewModel2.addStoryLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Add story success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200){
+                            RTVariable.IS_STORY_UPDATED_FROM_PROFILE = true
+                            //hitServiceListApi(viewModel.currentPage, selectedGender)
+                        }else{
+                            //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }else{
+                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    }
+                    //ProcessDialog.dismissDialog(true)
+                }
+                Status.LOADING -> {
+                    //if (currentPage==1) ProcessDialog.showDialog(requireContext(), true)
+                }
+                Status.ERROR -> {
+                    Log.e("TAG", "Login Failed: ${it.message}")
+                    //ProcessDialog.dismissDialog(true)
+                }
+            }
+        }
     }
 
     private fun updateProfileDetails(userDetails: UserDetailsX) {
@@ -497,6 +536,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 //                    }else{
                         selectedBottomSheetType = "profile"
                         openUploadBottomSheet("profile")
+                addReel.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 //                    }
 //                }else{
 //                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
@@ -519,24 +559,37 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             context = requireContext(),
             anchorView = binding.addReel,
             onOption1Click = {
+                if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                    RTVariable.SELECT_OPTION = true
+                    checkGalleryPermissionAndPick2()
+                }else{
+                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onOption2Click = {
                         selectedBottomSheetType = "post"
 //                        openUploadBottomSheet("post")
-                        checkGalleryPermissionAndPick("I")            },
-            onOption2Click = {
+                RTVariable.SELECT_OPTION = false
+                        checkGalleryPermissionAndPick("I")
+                             },
+            onOption3Click = {
                 if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                     selectedBottomSheetType = "reel"
 //                            openUploadBottomSheet("reel")
+                    RTVariable.SELECT_OPTION = false
                     checkGalleryPermissionAndPick("V")
                 }else{
                     Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                 }
             },
-            option1Text = "Upload Photo",
-            option2Text = "Upload Video",
-            option3Text = "Cancel",
-            option1ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-            option2ImageRes = R.drawable.icon_over_video,
-            option3ImageRes = R.drawable.ic_cancel_red
+            option1Text = "Upload Status",
+            option2Text = "Upload Photo",
+            option3Text = "Upload Video",
+            option4Text = "Cancel",
+            option1ImageRes = R.drawable.btn_status_icon,
+            option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
+            option3ImageRes = R.drawable.icon_over_video,
+            option4ImageRes = R.drawable.ic_cancel_red
         ).show()
 //        bottomSheetFragment = UploadMediaBottomSheet.newInstance(check).apply {
 //            onGallerySelected = {
@@ -631,6 +684,133 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
         mediaPickerLauncher.launch(PickVisualMediaRequest(mediaType))
     }*/
+
+
+    private val requestSinglePermissionLauncher2 = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) launchMediaPicker2()
+        else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun checkGalleryPermissionAndPick2() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            launchMediaPicker2()
+        } else {
+            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+                launchMediaPicker2()
+            } else {
+                requestSinglePermissionLauncher2.launch(permission)
+            }
+        }
+    }
+
+
+    private fun launchMediaPicker2() {
+        mediaPickerLauncher2.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+        )
+    }
+
+    private val mediaPickerLauncher2 = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            val mimeType = requireContext().contentResolver.getType(uri)
+            if (mimeType?.startsWith("video") == true) {
+                val durationInMillis = getVideoDuration(requireContext(), uri)
+                val durationInSeconds = durationInMillis / 1000
+
+                UserPreference.seletedUri = Uri.EMPTY
+                val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+                intent.putExtra("videoUrl",uri.toString())
+                intent.putExtra("from","home")
+                startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+            } else {
+                openCropActivity2(uri)
+            }
+        } else {
+            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openCropActivity2(imageUri: Uri) {
+        val options = UCrop.Options().apply {
+            setFreeStyleCropEnabled(true)
+        }
+        val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        UCrop.of(imageUri, destinationUri)
+            .withOptions(options)
+            .start(requireContext(), this)
+    }
+
+    private fun getVideoDuration(context: Context, uri: Uri): Long {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(context, uri)
+            val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            time?.toLongOrNull() ?: 0L
+        } catch (e: Exception) {
+            0L
+        } finally {
+            retriever.release()
+        }
+    }
+
+    fun initializeS3Client(accessKey: String, secretKey: String): AmazonS3Client {
+        val credentials = BasicAWSCredentials(accessKey, secretKey)
+        val clientConfig = com.amazonaws.ClientConfiguration()
+        clientConfig.connectionTimeout = 120000 // 120 sec
+        clientConfig.socketTimeout = 120000 // 120 sec
+        clientConfig.maxErrorRetry = 5 // Retry in case of network issues
+        return AmazonS3Client(credentials)
+    }
+
+    fun uploadImageToS3(context: Context, file: File, bucketName: String, objectKey: String, accessKey: String, secretKey: String, assetType:String) {
+        // Initialize S3 client
+        val s3Client = initializeS3Client(accessKey, secretKey)
+        val transferUtility = TransferUtility.builder()
+            .context(context)
+            .s3Client(s3Client)
+            .build()
+        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(context)
+        val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
+        ProcessDialog.showDialog(requireContext(), true)
+        uploadObserver.setTransferListener(object : TransferListener {
+            override fun onStateChanged(id: Int, state: TransferState) {
+                if (state == TransferState.COMPLETED) {
+                    ProcessDialog.dismissDialog(true)
+                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.AWS_CDN_URL
+                    val slash = "/"
+                    val mediaUrl = "$urlCdn$slash$objectKey"
+                    println("Image URL: $mediaUrl")
+                    viewModel2.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
+                    //viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
+                } else if (state == TransferState.FAILED) {
+                    println("Upload failed")
+                }
+            }
+
+            override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
+                val percentDone = (bytesCurrent.toFloat() / bytesTotal.toFloat() * 100).toInt()
+                println("Progress: $percentDone%")
+            }
+
+            override fun onError(id: Int, ex: Exception) {
+                ProcessDialog.dismissDialog(true)
+                ex.printStackTrace()
+            }
+        })
+    }
+
+    private fun uploadImage(imageFile: File, assetType:String) {
+        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+        val bucketName = s3Data?.BUCKET_NAME
+        val objectKey = "${System.currentTimeMillis()}"
+        uploadImageToS3(requireContext(), imageFile, bucketName ?: "", objectKey, s3Data?.ACCESS_KEY ?: "", s3Data?.SECRET_KEY ?: "", assetType)
+    }
+
 private fun checkGalleryPermissionAndPick(mediaType: String) {
     selectedMediaType = mediaType
 
@@ -779,45 +959,64 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
    @Deprecated("Deprecated in Java")
    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
        super.onActivityResult(requestCode, resultCode, data)
-
-       if (resultCode == RESULT_OK) {
-           if (requestCode == REQUEST_CODE_CROP_VIDEO) {
-               UserPreference.selectedMediaToUpload = selectedBottomSheetType
-               findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
-
-           } else if (requestCode == UCrop.REQUEST_CROP) {
-               val resultUri = UCrop.getOutput(data!!)
-               if (resultUri != null) {
-                   // get cropped image info
-                   val extras = data.extras
-                   val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
-                   val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
-
-                   var selectedRatio = 0 // default (unknown)
-
-                   if (width > 0 && height > 0) {
-                       val ratio = width.toFloat() / height.toFloat()
-
-                       selectedRatio = when {
-                           isCloseTo(ratio, 1f) -> 2   // 1:1
-                           isCloseTo(ratio, 9f / 16f) -> 1   // 9:16
-                           isCloseTo(ratio, 16f / 9f) -> 3   // 16:9
-                           else -> 0 // unknown
-                       }
+       if(RTVariable.SELECT_OPTION){
+           RTVariable.SELECT_OPTION = false
+           if (resultCode==RESULT_OK){
+               when(requestCode){
+                   REQUEST_CODE_CROP_VIDEO->{
+                       val file = File(UserPreference.seletedUri.path)
+                       uploadImage(file, "V")
                    }
-
-                   Log.d("ProfileFragment", "Cropped ratio int: $selectedRatio")
-
-                   UserPreference.seletedUri = resultUri
-                   UserPreference.selectedMediaToUpload = selectedBottomSheetType
-                   UserPreference.selectedCropRatio = selectedRatio
-                   Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
-
-                   findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+                   UCrop.REQUEST_CROP -> {
+                       val resultUri = UCrop.getOutput(data!!)
+                       Log.i("TAG", "onActivityResult: "+resultUri)
+                       val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
+                       uploadImage(file, "I")
+                   }
                }
+           }else {
+               Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
            }
-       } else {
-           Log.w("ProfileFragment", "cropping was cancelled or failed with code: $resultCode")
+       }else{
+           if (resultCode == RESULT_OK) {
+               if (requestCode == REQUEST_CODE_CROP_VIDEO) {
+                   UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                   findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+
+               } else if (requestCode == UCrop.REQUEST_CROP) {
+                   val resultUri = UCrop.getOutput(data!!)
+                   if (resultUri != null) {
+                       // get cropped image info
+                       val extras = data.extras
+                       val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
+                       val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
+
+                       var selectedRatio = 0 // default (unknown)
+
+                       if (width > 0 && height > 0) {
+                           val ratio = width.toFloat() / height.toFloat()
+
+                           selectedRatio = when {
+                               isCloseTo(ratio, 1f) -> 2   // 1:1
+                               isCloseTo(ratio, 9f / 16f) -> 1   // 9:16
+                               isCloseTo(ratio, 16f / 9f) -> 3   // 16:9
+                               else -> 0 // unknown
+                           }
+                       }
+
+                       Log.d("ProfileFragment", "Cropped ratio int: $selectedRatio")
+
+                       UserPreference.seletedUri = resultUri
+                       UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                       UserPreference.selectedCropRatio = selectedRatio
+                       Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
+
+                       findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+                   }
+               }
+           } else {
+               Log.w("ProfileFragment", "cropping was cancelled or failed with code: $resultCode")
+           }
        }
    }
 

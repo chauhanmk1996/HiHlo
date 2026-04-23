@@ -51,9 +51,14 @@ class AdapterStoriesRecycler(
             holder.binding.otherStoryCardview.isVisible = false
             holder.binding.myStoryGradient.isVisible = true
             holder.binding.plusBottomRight.isVisible = isMediaInMyStory != 1
-
+            holder.binding.plusBottomRight.isVisible = false
+            holder.binding.uploadLayout.isVisible = isMediaInMyStory != 1
             holder.binding.name.text = "My Story"
-
+            if(isMediaInMyStory==1){
+                holder.binding.name.visibility = View.VISIBLE
+            }else{
+                holder.binding.name.visibility = View.INVISIBLE
+            }
             // Load profile image safely
             if (!myProfileImage.isNullOrEmpty()) {
                 Glide.with(holder.binding.root.context)
@@ -79,8 +84,9 @@ class AdapterStoriesRecycler(
             holder.binding.otherStoryCardview.isVisible = true
             holder.binding.myStoryGradient.isVisible = false
             holder.binding.plusBottomRight.isVisible = false
-
+            holder.binding.uploadLayout.isVisible = false
             val story = storyListing[position - 1]
+            holder.binding.name.visibility = View.VISIBLE
             holder.binding.name.text = story.userDetail?.name ?: ""
 
             Glide.with(holder.binding.root.context)
@@ -114,6 +120,11 @@ class AdapterStoriesRecycler(
             holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
         holder.binding.name.setOnClickListener {
+            // selector.uploadStory()
+            getSelectedStory(position, Story(), holder.binding.root, 3)
+            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        }
+        holder.binding.uploadLayout.setOnClickListener {
             // selector.uploadStory()
             getSelectedStory(position, Story(), holder.binding.root, 3)
             holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)

@@ -1463,6 +1463,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postMainIsSetShow(requireContext(), false)
         }
+        if(RTVariable.IS_STORY_UPDATED_FROM_PROFILE){
+            refreshData()
+        }
 
 //        binding.nestedScrollView.post {
 //            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)

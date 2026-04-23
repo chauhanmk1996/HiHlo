@@ -97,7 +97,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/story_upload_btn">
+            android:background="@drawable/story_upload_btn"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivPlusIcon"
@@ -124,12 +125,50 @@
             android:gravity="center_horizontal"
             android:maxLines="1"
             android:paddingTop="8dp"
+            android:paddingBottom="2dp"
             android:text="My Story"
             android:textColor="@color/white"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="invisible"/>
+
+        <LinearLayout
+            android:id="@+id/uploadLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="1.5dp"
+            android:paddingBottom="1.5dp"
+            android:background="@drawable/bg_upload_button"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope_semibold"
+                android:text="Upload"
+                android:layout_marginEnd="1dp"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginStart="1dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/story_upload_icon"
+                app:tint="@color/white" />
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/onlineImage"
