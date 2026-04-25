@@ -208,7 +208,8 @@ class BlockedUserFragment : Fragment() {
                     if (it.data?.status==1){
                         if (it.data.code == 200){
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                            findNavController().popBackStack()
+                            //findNavController().popBackStack()
+                            viewModel.hitBlockedUsersDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
                         }else{
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }

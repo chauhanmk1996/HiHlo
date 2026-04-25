@@ -133,6 +133,11 @@
             <!-- </intent-filter> -->
         </activity>
         <activity
+            android:name=".ImageVideoConverter.ImageVideoConverter"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
             android:name=".ui.splash.activity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"

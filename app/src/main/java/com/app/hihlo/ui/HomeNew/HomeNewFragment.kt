@@ -12,6 +12,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
@@ -24,6 +25,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
@@ -42,6 +44,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.services.s3.AmazonS3Client
+import com.app.hihlo.ImageVideoConverter.ImageVideoConverter
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentHomeNewBinding
@@ -86,6 +89,7 @@ import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
+import com.yalantis.ucrop.model.AspectRatio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -129,6 +133,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private var pendingScrollPostId: String? = null
     private var pendingScrollPosition: Int = -1   // optional fallback
     var scrollY = 0
+    private var selectedMediaType: String = "I"
+    private var selectedBottomSheetType = ""
 
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
 
@@ -411,6 +417,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     }
                     if(RTVariable.ISHOMECLICKED){
                         RTVariable.ISHOMECLICKED = false
+                        binding.progressBar.isVisible = false
+                        viewModel.currentPage = 1
+                        viewModel.isRefreshing = false
+
+                        binding.swipeRefresh.isRefreshing = true
+
+                        hitServiceListApi(viewModel.currentPage, 0)
+                    }
+                    if(RTVariable.IS_MEDIA_UPLOADED){
+                        RTVariable.IS_MEDIA_UPLOADED = false
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
@@ -1523,13 +1539,26 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     context = requireContext(),
                     anchorView = view,
                     onOption1Click = {
+                        RTVariable.SELECT_OPTION = true
                         checkGalleryPermissionAndPick()
                     },
-                    onOption2Click = {},
-                    option1Text = "Open Gallery",
-                    option2Text = "Cancel",
-                    option1ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-                    option2ImageRes = R.drawable.ic_cancel_red
+                    onOption2Click = {
+                        RTVariable.SELECT_OPTION = false
+                        checkGalleryPermissionAndPick2("I")
+                    },
+                    onOption3Click = {
+                        RTVariable.SELECT_OPTION = false
+                        checkGalleryPermissionAndPick2("V")
+                    },
+                    //onOption4Click = {},
+                    option1Text = "Upload Status",
+                    option2Text = "Upload Photo",
+                    option3Text = "Upload Video",
+                    //option4Text = "Cancel",
+                    option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
+                    option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
+                    option3ImageRes = R.drawable.icon_over_video,
+                    //option4ImageRes = R.drawable.ic_cancel_red
                 ).show()
             }else{
                 Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
@@ -1573,6 +1602,119 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //        }
     }
 
+    private fun checkGalleryPermissionAndPick2(mediaType: String) {
+        selectedMediaType = mediaType
+
+        // Clear any previous limited access selections for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            clearPhotoPickerSelections()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Request only the permission we actually need
+            val requiredPermissions = when (mediaType) {
+                "I" -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+                "V" -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
+                else -> arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO
+                )
+            }
+            requestMultiplePermissionsLauncher.launch(requiredPermissions)
+        } else {
+            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+                launchMediaPicker()
+            } else {
+                requestSinglePermissionLauncher.launch(permission)
+            }
+        }
+    }
+
+    private val requestMultiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasImagePermission = permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
+            val hasVideoPermission = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
+
+            // For Android 13+, if any permission was requested but denied,
+            // it might still be limited access which works with media picker
+            val wasImageRequested = permissions.containsKey(Manifest.permission.READ_MEDIA_IMAGES)
+            val wasVideoRequested = permissions.containsKey(Manifest.permission.READ_MEDIA_VIDEO)
+
+            val canProceed = when (selectedMediaType) {
+                "I" -> hasImagePermission || wasImageRequested
+                "V" -> hasVideoPermission || wasVideoRequested
+                else -> hasImagePermission || hasVideoPermission || wasImageRequested || wasVideoRequested
+            }
+
+            if (canProceed) {
+                launchMediaPicker2()
+            } else {
+                Toast.makeText(requireContext(), "Required permissions not granted", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            val granted = permissions.values.all { it }
+            if (granted) launchMediaPicker2()
+            else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun launchMediaPicker2() {
+        val mediaType = when (selectedMediaType) {
+            "I" -> ActivityResultContracts.PickVisualMedia.ImageOnly
+            "V" -> ActivityResultContracts.PickVisualMedia.VideoOnly
+            else -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
+        }
+
+        // Configure picker to allow only single selection
+        val request = PickVisualMediaRequest.Builder()
+            .setMediaType(mediaType)
+            .build()
+
+        mediaPickerLauncher2.launch(request)
+    }
+
+    private val mediaPickerLauncher2 = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            val mimeType = requireContext().contentResolver.getType(uri)
+            UserPreference.selectedMediaType = selectedMediaType
+            if (mimeType?.startsWith("video") == true) {
+//                UserPreference.seletedUri = uri
+                if (uri != null) {
+                    val mimeType = requireContext().contentResolver.getType(uri)
+                    Log.e("TAG", "mimeType $mimeType")
+                    if (mimeType?.startsWith("video") == true) {
+                        UserPreference.seletedUri = Uri.EMPTY
+                        val intent = Intent(requireActivity(),TrimVideoActivity::class.java)
+                        intent.putExtra("videoUrl",uri.toString())
+                        startActivityForResult(intent,REQUEST_CODE_CROP_VIDEO)
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                openCropActivity2(uri)
+            }
+        } else {
+            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun clearPhotoPickerSelections() {
+        try {
+            // This clears the previous selections in the photo picker
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                // For Android 14+, you can use MediaStore.clearUserSelection() if available
+                // MediaStore.clearUserSelection(requireContext().contentResolver)
+            }
+            // For Android 13, there's no direct API to clear selections
+            // The picker will still show previous selections
+        } catch (e: Exception) {
+            Log.e("PhotoPicker", "Could not clear selections", e)
+        }
+    }
+
     private val requestSinglePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -1595,9 +1737,60 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
 
     private fun launchMediaPicker() {
-        mediaPickerLauncher.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+        pickMedia.launch("*/*")
+//        mediaPickerLauncher.launch(
+//            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+//        )
+    }
+
+    private val pickMedia =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { openPreview(it) }
+        }
+
+    private val previewResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val savedUri = data?.getStringExtra("uri")
+                val mediaType = data?.getStringExtra("type")
+                val uri = Uri.parse(savedUri)
+                val file = if (mediaType == "video") {
+                    copyToHiHloFolder(uri, Environment.DIRECTORY_MOVIES, "mp4")
+                } else {
+                    copyToHiHloFolder(uri, Environment.DIRECTORY_PICTURES, "jpg")
+                }
+                if(mediaType.equals("video")){
+                    uploadImage(file, "V")
+                }else{
+                    uploadImage(file, "I")
+                }
+            }
+        }
+
+    fun copyToHiHloFolder(uri: Uri, folderType: String, extension: String): File {
+        val dir = File(
+            Environment.getExternalStoragePublicDirectory(folderType),
+            "HiHlo"
         )
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dir, "file_${System.currentTimeMillis()}.$extension")
+        requireContext().contentResolver.openInputStream(uri)?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return file
+    }
+
+    private fun openPreview(uri: Uri) {
+        val type = requireContext().contentResolver.getType(uri) ?: ""
+        val isVideo = type.startsWith("video")
+        val intent = Intent(requireActivity(), ImageVideoConverter::class.java).apply {
+            putExtra("uri", uri.toString())
+            putExtra("isVideo", isVideo)
+        }
+        previewResultLauncher.launch(intent)
     }
 
     private val mediaPickerLauncher = registerForActivityResult(
@@ -1608,7 +1801,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             if (mimeType?.startsWith("video") == true) {
                 val durationInMillis = getVideoDuration(requireContext(), uri)
                 val durationInSeconds = durationInMillis / 1000
-
                 UserPreference.seletedUri = Uri.EMPTY
                 val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
                 intent.putExtra("videoUrl",uri.toString())
@@ -1621,6 +1813,29 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun openCropActivity2(imageUri: Uri) {
+        val options = UCrop.Options().apply {
+            setFreeStyleCropEnabled(false)
+
+            // Supply only the ratios you want (exclude "Original")
+            setAspectRatioOptions(
+                0, // default selection index
+                AspectRatio("1:1", 1f, 1f),
+                AspectRatio("9:16", 9f, 16f),
+                AspectRatio("16:9", 16f, 9f)
+            )
+        }
+
+        val destinationUri = Uri.fromFile(
+            File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
+        )
+
+        UCrop.of(imageUri, destinationUri)
+            .withOptions(options)
+            .start(requireContext(), this)
+    }
+
     private fun openCropActivity(imageUri: Uri) {
         val options = UCrop.Options().apply {
             setFreeStyleCropEnabled(true)
@@ -1630,27 +1845,71 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             .withOptions(options)
             .start(requireContext(), this)
     }
-    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data) // Always call super
-        Log.i("TAG", "onActivityResult: "+"outside")
-        if (resultCode==RESULT_OK){
-            when(requestCode){
-                REQUEST_CODE_CROP_VIDEO->{
-                    val file = File(UserPreference.seletedUri.path)
-                    uploadImage(file, "V")
+        super.onActivityResult(requestCode, resultCode, data)
+        if(RTVariable.SELECT_OPTION){
+            RTVariable.SELECT_OPTION = false
+            if (resultCode==RESULT_OK){
+                when(requestCode){
+                    REQUEST_CODE_CROP_VIDEO->{
+                        val file = File(UserPreference.seletedUri.path)
+                        uploadImage(file, "V")
+                    }
+                    UCrop.REQUEST_CROP -> {
+                        val resultUri = UCrop.getOutput(data!!)
+                        Log.i("TAG", "onActivityResult: "+resultUri)
+                        val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
+                        uploadImage(file, "I")
+                    }
                 }
-                UCrop.REQUEST_CROP -> {
-                    val resultUri = UCrop.getOutput(data!!)
-                    Log.i("TAG", "onActivityResult: "+resultUri)
-                    val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
-                    uploadImage(file, "I")
-                }
+            }else {
+                Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
             }
-        }else {
-            Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
-        }
+        }else{
+            if (resultCode == RESULT_OK) {
+                if (requestCode == REQUEST_CODE_CROP_VIDEO) {
+                    UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                    findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
 
+                } else if (requestCode == UCrop.REQUEST_CROP) {
+                    val resultUri = UCrop.getOutput(data!!)
+                    if (resultUri != null) {
+                        // get cropped image info
+                        val extras = data.extras
+                        val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
+                        val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
+
+                        var selectedRatio = 0 // default (unknown)
+
+                        if (width > 0 && height > 0) {
+                            val ratio = width.toFloat() / height.toFloat()
+
+                            selectedRatio = when {
+                                isCloseTo(ratio, 1f) -> 2   // 1:1
+                                isCloseTo(ratio, 9f / 16f) -> 1   // 9:16
+                                isCloseTo(ratio, 16f / 9f) -> 3   // 16:9
+                                else -> 0 // unknown
+                            }
+                        }
+
+                        Log.d("ProfileFragment", "Cropped ratio int: $selectedRatio")
+
+                        UserPreference.seletedUri = resultUri
+                        UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                        UserPreference.selectedCropRatio = selectedRatio
+                        Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
+
+                        findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
+                    }
+                }
+            } else {
+                Log.w("ProfileFragment", "cropping was cancelled or failed with code: $resultCode")
+            }
+        }
+    }
+
+    private fun isCloseTo(value: Float, target: Float, tolerance: Float = 0.05f): Boolean {
+        return kotlin.math.abs(value - target) <= tolerance
     }
     private fun getVideoDuration(context: Context, uri: Uri): Long {
         val retriever = MediaMetadataRetriever()

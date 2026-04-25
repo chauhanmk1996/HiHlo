@@ -50,14 +50,16 @@ class AdapterStoriesRecycler(
             holder.binding.myStoryCardView.isVisible = true
             holder.binding.otherStoryCardview.isVisible = false
             holder.binding.myStoryGradient.isVisible = true
-            holder.binding.plusBottomRight.isVisible = isMediaInMyStory != 1
-            holder.binding.plusBottomRight.isVisible = false
-            holder.binding.uploadLayout.isVisible = isMediaInMyStory != 1
-            holder.binding.name.text = "My Story"
+            //holder.binding.plusBottomRight.isVisible = isMediaInMyStory != 1
+            holder.binding.plusBottomRight.isVisible = true
+            holder.binding.uploadLayout.isVisible = false
+            //holder.binding.name.text = "My Story"
             if(isMediaInMyStory==1){
                 holder.binding.name.visibility = View.VISIBLE
+                holder.binding.name.text = "Upload"
             }else{
-                holder.binding.name.visibility = View.INVISIBLE
+                holder.binding.name.visibility = View.VISIBLE
+                holder.binding.name.text = "Upload"
             }
             // Load profile image safely
             if (!myProfileImage.isNullOrEmpty()) {

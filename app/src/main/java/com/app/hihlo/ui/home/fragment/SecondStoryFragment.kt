@@ -6,6 +6,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -17,10 +18,13 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.annotation.OptIn
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -50,7 +54,6 @@ import com.app.hihlo.ui.home.view_model.NewStoryViewModel
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.dpToPx
-import com.app.hihlo.utils.CommonUtils.setupUIToHideKeyboard
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.VideoCacheManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
@@ -63,7 +66,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SecondStoryFragment : Fragment(){
+class SecondStoryFragment : Fragment() {
     private lateinit var binding: FragmentSecondStoryBinding
     private var storyList: ArrayList<Story> = arrayListOf()
     private var currentPage = 0
@@ -74,7 +77,7 @@ class SecondStoryFragment : Fragment(){
     private var isKeyboardVisible = false
     private var lastInsets: WindowInsetsCompat? = null
 
-    // SeekBar management (moved from adapter)
+    // SeekBar management
     private var seekBarHandler: Handler? = null
     private var seekBarRunnable: Runnable? = null
     private var seekBarStartTime = 0L
@@ -82,13 +85,16 @@ class SecondStoryFragment : Fragment(){
     private var seekBarDuration = 6000L
     private var isSeekBarRunning = false
 
-    private var isNavigating = false // Flag to prevent overlapping navigations
-    private var isVideoEnded = false // Flag to prevent multiple onVideoEnd calls
-    private val navigationJob = Job() // Job to manage coroutines
+    private var isNavigating = false
+    private var isVideoEnded = false
+    private val navigationJob = Job()
     private val navigationScope = CoroutineScope(Dispatchers.Main + navigationJob)
 
-    private lateinit var gestureDetector: GestureDetector // Move initialization to initViews
+    private lateinit var gestureDetector: GestureDetector
     private var myStoryData: MyStory = MyStory()
+
+    private var keyboardLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    private var rootView: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,12 +102,11 @@ class SecondStoryFragment : Fragment(){
         arguments?.let {
             storyList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 it.getParcelableArrayList("storyList", Story::class.java) ?: arrayListOf()
-//                getDummyStories()
             } else {
                 @Suppress("DEPRECATION")
                 it.getParcelableArrayList("storyList") ?: arrayListOf()
             }
-            currentPage = it.getInt("position", 0) // Provide default value
+            currentPage = it.getInt("position", 0)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 myStoryData = it.getParcelable("myStoryData", MyStory::class.java) ?: MyStory()
             }
@@ -111,51 +116,22 @@ class SecondStoryFragment : Fragment(){
             currentPage = 0
             Log.e("TAG", "onCreate: No arguments provided")
         }
-        Log.i("TAG", "onCreate: "+storyList)
+        Log.i("TAG", "onCreate: $storyList")
     }
+
     private fun getDummyStories(): ArrayList<Story> {
         return arrayListOf(
-            Story(
-                asset_type = "V",
-                asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                id = 1
-            ),
-            Story(
-                asset_type = "V",
-                asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-                id = 2
-            ),
-            Story(
-                asset_type = "I",
-                asset_url = "https://m.media-amazon.com/images/I/511XEZbADQL._UF1000,1000_QL80_.jpg",
-                id = 3
-            ),
-            Story(
-                asset_type = "V",
-                asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-                id = 4
-            ),
-            Story(
-                asset_type = "V",
-                asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-                id = 5
-            ),
-            Story(
-                asset_type = "I",
-                asset_url = "https://m.media-amazon.com/images/I/51fY0wjRGTL._UF1000,1000_QL80_.jpg",
-                id = 6
-            ),
-            Story(
-                asset_type = "V",
-                asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-                id = 7
-            )
+            Story(asset_type = "V", asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", id = 1),
+            Story(asset_type = "V", asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", id = 2),
+            Story(asset_type = "I", asset_url = "https://m.media-amazon.com/images/I/511XEZbADQL._UF1000,1000_QL80_.jpg", id = 3),
+            Story(asset_type = "V", asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", id = 4),
+            Story(asset_type = "V", asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4", id = 5),
+            Story(asset_type = "I", asset_url = "https://m.media-amazon.com/images/I/51fY0wjRGTL._UF1000,1000_QL80_.jpg", id = 6),
+            Story(asset_type = "V", asset_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", id = 7)
         )
     }
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSecondStoryBinding.inflate(layoutInflater)
         initViews()
         return binding.root
@@ -167,20 +143,14 @@ class SecondStoryFragment : Fragment(){
             private val SWIPE_THRESHOLD = 50
             private val SWIPE_VELOCITY_THRESHOLD = 50
 
-            override fun onFling(
-                e1: MotionEvent?,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
+            override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
                 if (e1 != null && e2 != null) {
                     val diffY = e2.y - e1.y
                     val diffX = e2.x - e1.x
-
                     if (Math.abs(diffY) > Math.abs(diffX)) {
                         if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                             if (diffY > 0) {
-                                Log.d("Swipe", "Swipe down detected: diffY=$diffY, velocityY=$velocityY")
+                                Log.d("Swipe", "Swipe down detected")
                                 onSwipeDown()
                                 return true
                             }
@@ -190,9 +160,8 @@ class SecondStoryFragment : Fragment(){
                 return false
             }
         })
-        // Set up touch listeners for swipe down
+
         binding.root.setOnTouchListener { _, event ->
-            Log.e("TAG", "Touch event received: ${event.action}")
             gestureDetector.onTouchEvent(event)
             false
         }
@@ -210,37 +179,20 @@ class SecondStoryFragment : Fragment(){
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 when (state) {
-                    Player.STATE_BUFFERING -> {
-                        binding.videoLoader.visibility = View.VISIBLE
-                    }
-                    Player.STATE_READY -> {
-                        binding.videoLoader.visibility = View.GONE
-                    }
-                    Player.STATE_ENDED -> {
-                        onVideoEnd()
-                    }
+                    Player.STATE_BUFFERING -> binding.videoLoader.visibility = View.VISIBLE
+                    Player.STATE_READY -> binding.videoLoader.visibility = View.GONE
+                    Player.STATE_ENDED -> onVideoEnd()
                 }
             }
         })
 
-        // Click listeners
-//        setupUIToHideKeyboard(binding.root, requireActivity())
-
         binding.playerView.setOnClickListener {
             CommonUtils.hideKeyboard(requireActivity())
         }
-//        binding.leftClickArea.setOnClickListener {
-//            leftClickAreaClicked()
-//        }
-        binding.rightClickArea.setOnClickListener {
-            rightClickAreaClicked()
-        }
-        binding.sideOptions.setOnClickListener {
-            onSideOptionsClicked()
-        }
-        binding.userImageCardView.setOnClickListener {
-            getClick(0)
-        }
+        binding.leftClickArea.setOnClickListener { leftClickAreaClicked() }
+        binding.rightClickArea.setOnClickListener { rightClickAreaClicked() }
+        binding.sideOptions.setOnClickListener { onSideOptionsClicked() }
+        binding.userImageCardView.setOnClickListener { getClick(0) }
         binding.sendButton.setOnClickListener {
             val message = binding.sendEditText.text.toString()
             if (message.isEmpty()) {
@@ -248,53 +200,98 @@ class SecondStoryFragment : Fragment(){
             } else {
                 sendMessage(storyList[currentPage], message)
                 binding.sendEditText.setText("")
+                // If keyboard is already hidden, resume manually
+                if (!isKeyboardVisible) resumeStory()
             }
         }
+        binding.sendEditText.setOnClickListener { pauseStory() }
+        binding.sendEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) pauseStory()
+        }
 
-        // Load initial story
         bindStory(currentPage)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setObserver()
+        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         if (storyList[currentPage].is_seen == 0 && isAdded && isVisible) {
             viewModel.hitSeenStoryDataApi(
                 "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
                 StorySeen(storyId = storyList[currentPage].id.toString())
             )
         }
+
+        // Window insets listener
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            lastInsets = insets
-            isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-
-            if (isKeyboardVisible) {
-                pauseStory()
-            } else {
-                resumeStory()
-            }
-            handleKeyboardInsets(insets, isKeyboardVisible)
-
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val isKeyboardNowVisible = imeHeight > 0
+            updateKeyboardVisibility(isKeyboardNowVisible)
+            handleKeyboardInsets(insets, isKeyboardNowVisible)
             insets
         }
+
+        // Fallback layout listener for keyboard visibility
+        var rootView = binding.root
+        rootView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val rect = Rect()
+                rootView.getWindowVisibleDisplayFrame(rect)
+                val screenHeight = rootView.height
+                val keypadHeight = screenHeight - rect.bottom
+                val isKeyboardVisibleFallback = keypadHeight > screenHeight * 0.15
+                if (isKeyboardVisibleFallback != isKeyboardVisible) {
+                    updateKeyboardVisibility(isKeyboardVisibleFallback)
+                }
+            }
+        })
+        val root = binding.root
+        val bottomLayout = binding.bottomLayout
+        rootView = root  // store for removal in onDestroyView
+        val defaultMarginPx = (10 * resources.displayMetrics.density).toInt()
+        keyboardLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val rect = Rect()
+            root.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = root.height
+            val keypadHeight = screenHeight - rect.bottom
+            val keyboardOpen = keypadHeight > screenHeight * 0.15
+
+            val params = bottomLayout.layoutParams as ConstraintLayout.LayoutParams
+            if (keyboardOpen) {
+                params.bottomMargin = keypadHeight
+            } else {
+                params.bottomMargin = defaultMarginPx
+            }
+            bottomLayout.layoutParams = params
+        }
+
+        root.viewTreeObserver.addOnGlobalLayoutListener(keyboardLayoutListener)
+
+        //rootView?.viewTreeObserver?.addOnGlobalLayoutListener(keyboardLayoutListener)
+        requireActivity().window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
+    }
+
+    private fun updateKeyboardVisibility(visible: Boolean) {
+        if (isKeyboardVisible == visible) return
+        isKeyboardVisible = visible
+        if (visible) pauseStory() else resumeStory()
     }
 
     private fun bindStory(position: Int) {
         if (storyList.isEmpty()) {
-            Log.e("TAG", "Story list is empty")
             findNavController().popBackStack()
             return
         }
         if (position < 0 || position >= storyList.size) {
-            Log.e("TAG", "Invalid story position: $position")
             findNavController().popBackStack()
             return
         }
         currentPage = position
         val story = storyList[currentPage]
-        Log.e("TAG", "bind:fsya $story, asset_url=${story.asset_url}, asset_type=${story.asset_type}")
-
-        binding.root.alpha = 1f // Reset alpha before binding
+        binding.root.alpha = 1f
         isVideoEnded = false
 
         binding.apply {
@@ -313,14 +310,15 @@ class SecondStoryFragment : Fragment(){
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder)
                 .into(userImage)
-            statusTime.text = if (story.created_at?.isNotEmpty() == true) CommonUtils.getTimeAgo(story.created_at)+" ago" else ""
+            statusTime.text = if (story.created_at?.isNotEmpty() == true) CommonUtils.getTimeAgo(story.created_at) + " ago" else ""
             userName.text = story.userDetail?.name
+            Log.e("userDetail", "userDetail>>> "+story.userDetail?.city+ " | "+story.userDetail?.country)
             userLocation.text = story.userDetail?.city + ", " + (story.userDetail?.country ?: "India")
             when (story.userDetail?.user_live_status) {
                 "1" -> onlineStatusImage.setImageResource(R.drawable.online_status_green)
                 "2", "3" -> onlineStatusImage.setImageResource(R.drawable.offline_status_red)
-//                "3" -> onlineStatusImage.setImageResource(R.drawable.busy_status)
             }
+
             stopSeekBar()
             exoPlayer.stop()
             exoPlayer.clearMediaItems()
@@ -330,9 +328,7 @@ class SecondStoryFragment : Fragment(){
                 playerView.isVisible = false
                 storySeekBar.isVisible = true
                 videoLoader.isVisible = false
-
                 Glide.with(requireContext()).load(story.asset_url).into(storyImage)
-
                 storySeekBar.progress = 0
                 startSeekBarProgress()
             } else {
@@ -350,48 +346,42 @@ class SecondStoryFragment : Fragment(){
             )
         }
     }
+
     private fun navigateToNextStory(forward: Boolean) {
         if (isNavigating) return
         isNavigating = true
-
         val direction = if (forward) 1 else -1
         val newPos = currentPage + direction
         if (newPos < 0 || newPos >= storyList.size) {
             isNavigating = false
             if (!forward) {
-//                if (currentPage == 0 && !forward){
-                    Log.i("TAG", "navigateToNextStory: curr 0")
-                    val navOptions = NavOptions.Builder().setPopUpTo(R.id.secondStoryFragment, inclusive = true).build()
-                    try {
-                        findNavController().navigate(SecondStoryFragmentDirections.actionSecondStoryFragmentToStoryFragment(isMyStory = "1", myStoryData = myStoryData, otherStoryData = storyList.toTypedArray()), navOptions)
-                    } catch (e: Exception) {
-                        Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                        Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
-                    }
-//                    return
-//                }
+                val navOptions = NavOptions.Builder().setPopUpTo(R.id.secondStoryFragment, inclusive = true).build()
+                try {
+                    findNavController().navigate(
+                        SecondStoryFragmentDirections.actionSecondStoryFragmentToStoryFragment(
+                            isMyStory = "1",
+                            myStoryData = myStoryData,
+                            otherStoryData = storyList.toTypedArray()
+                        ), navOptions
+                    )
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                }
                 return
             } else {
-                Log.i("TAG", "navigateToNextStory: ")
                 findNavController().popBackStack()
                 return
             }
         }
-
-        // Pause current story
         pauseStory()
-
-        // Pre-load next story content but keep view off-screen
         val width = binding.root.width.toFloat()
         binding.root.translationX = if (forward) width else -width
         currentPage = newPos
         bindStory(currentPage)
-
-        // Animate slide-in with fade
         val slideAnim = ObjectAnimator.ofFloat(binding.root, "translationX", binding.root.translationX, 0f)
         val fadeOutAnim = ObjectAnimator.ofFloat(binding.root, "alpha", 1f, 0.2f)
         val fadeInAnim = ObjectAnimator.ofFloat(binding.root, "alpha", 0.2f, 1f)
-
         AnimatorSet().apply {
             play(slideAnim).with(fadeOutAnim).before(fadeInAnim)
             duration = 300
@@ -400,16 +390,16 @@ class SecondStoryFragment : Fragment(){
                 override fun onAnimationEnd(animation: Animator) {
                     isNavigating = false
                     binding.root.alpha = 1f
-                    // Resume story after animation
                     resumeStory()
                 }
             })
             start()
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        navigationJob.cancel() // Cancel any pending coroutines
+        navigationJob.cancel()
         stopSeekBar()
         try {
             if (::exoPlayer.isInitialized) {
@@ -420,40 +410,51 @@ class SecondStoryFragment : Fragment(){
             Log.e("ExoPlayer", "Error releasing player: ${e.message}")
         }
     }
+
     private fun pauseStory() {
-        val story = storyList[currentPage]
+        if (!::binding.isInitialized) return
+        val story = storyList.getOrNull(currentPage) ?: return
+        binding.leftClickArea.isClickable = false
+        binding.rightClickArea.isClickable = false
         if (story.asset_type == "I") {
             pauseSeekBar()
         } else {
-            exoPlayer.playWhenReady = false
+            if (::exoPlayer.isInitialized) {
+                exoPlayer.playWhenReady = false
+            }
         }
     }
 
     private fun resumeStory() {
-        val story = storyList[currentPage]
+        if (!::binding.isInitialized || isKeyboardVisible) return
+        val story = storyList.getOrNull(currentPage) ?: return
+        binding.leftClickArea.isClickable = true
+        binding.rightClickArea.isClickable = true
         if (story.asset_type == "I") {
             resumeSeekBar()
         } else {
-            exoPlayer.playWhenReady = true
+            if (::exoPlayer.isInitialized) {
+                exoPlayer.playWhenReady = true
+            }
         }
     }
 
     private fun handleKeyboardInsets(insets: WindowInsetsCompat, isKeyboardVisible: Boolean) {
-        // Adjust bottom padding if needed, similar to original holder
-        // For example, adjust bottomLayout paddingBottom based on insets
         val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-        var finalHeight=imeHeight
-        if (isKeyboardVisible){
-            finalHeight = if (isGestureNavigation()) imeHeight else imeHeight-dpToPx(40)
+        var finalHeight = imeHeight
+        if (isKeyboardVisible) {
+            finalHeight = if (isGestureNavigation()) imeHeight else imeHeight - dpToPx(40)
         } else {
-            finalHeight=imeHeight+dpToPx(20)
+            finalHeight = imeHeight + dpToPx(20)
         }
         binding.bottomLayout.setPadding(0, 0, 0, finalHeight)
     }
-    fun isGestureNavigation(): Boolean {
+
+    private fun isGestureNavigation(): Boolean {
         val resId = resources.getIdentifier("config_navBarInteractionMode", "integer", "android")
         return resId > 0 && resources.getInteger(resId) == 2
     }
+
     private fun stopSeekBar() {
         isSeekBarRunning = false
         seekBarHandler?.removeCallbacks(seekBarRunnable ?: return)
@@ -461,14 +462,13 @@ class SecondStoryFragment : Fragment(){
     }
 
     private fun startSeekBarProgress() {
-        stopSeekBar() // stop any old progress
+        stopSeekBar()
         binding.storySeekBar.max = 100
         binding.storySeekBar.progress = 0
         seekBarStartTime = System.currentTimeMillis()
         isSeekBarRunning = true
         seekBarDuration = delayMillis
         seekBarElapsedTime = 0L
-
         seekBarHandler = Handler(Looper.getMainLooper())
         seekBarRunnable = object : Runnable {
             override fun run() {
@@ -476,11 +476,10 @@ class SecondStoryFragment : Fragment(){
                 val elapsed = System.currentTimeMillis() - seekBarStartTime
                 val progress = ((elapsed.toFloat() / seekBarDuration) * 100).toInt()
                 binding.storySeekBar.progress = progress.coerceAtMost(100)
-
                 if (progress < 100) {
                     seekBarHandler?.postDelayed(this, 16)
                 } else {
-                    onVideoEnd() // called for images
+                    onVideoEnd()
                 }
             }
         }
@@ -507,39 +506,27 @@ class SecondStoryFragment : Fragment(){
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         exoPlayer.seekTo(0)
-
         val mediaItem = MediaItem.fromUri(videoUrl)
         val cacheFactory = VideoCacheManager.buildCacheDataSource(requireContext())
-        val mediaSource = ProgressiveMediaSource.Factory(cacheFactory)
-            .createMediaSource(mediaItem)
-
+        val mediaSource = ProgressiveMediaSource.Factory(cacheFactory).createMediaSource(mediaItem)
         exoPlayer.setMediaSource(mediaSource)
         exoPlayer.prepare()
-        exoPlayer.playWhenReady = true
-
+        exoPlayer.playWhenReady = !isKeyboardVisible
         binding.videoLoader.visibility = View.VISIBLE
     }
 
     fun onVideoEnd() {
-        if (isVideoEnded || isNavigating) return // Prevent multiple calls
+        if (isVideoEnded || isNavigating || isKeyboardVisible) return
         isVideoEnded = true
         if (currentPage < storyList.size - 1) {
             navigationScope.launch {
                 CommonUtils.hideKeyboard(requireActivity())
                 delay(80)
-                // To navigate next story use navigateToNextStory(true) then also this isVideoEnded = false
-                //navigateToNextStory(true)
-                if(RTVariable.IS_FROM_PROFILE){
-                    findNavController().popBackStack()
-                }else{
-                    navigateToNextStory(true)
-                }
-                //isVideoEnded = false // Reset after navigation
+                navigateToNextStory(true)
             }
         } else {
             if (isAdded && view != null) {
                 try {
-//                    (requireActivity() as HomeActivity).navigateToHome()
                     findNavController().popBackStack()
                 } catch (e: IllegalStateException) {
                     Log.e("NewStoryFragment", "Nav error: ${e.message}")
@@ -547,16 +534,14 @@ class SecondStoryFragment : Fragment(){
             }
         }
     }
-     fun onSwipeDown() {
-        Log.e("TAG", "Swipe down detected, navigating back")
+
+    fun onSwipeDown() {
         if (isAdded && isVisible) {
             try {
                 findNavController().popBackStack()
             } catch (e: IllegalStateException) {
                 Log.e("TAG", "Navigation error on swipe down: ${e.message}", e)
             }
-        } else {
-            Log.e("TAG", "Fragment not in valid state for navigation: isAdded=$isAdded, isVisible=$isVisible")
         }
     }
 
@@ -579,29 +564,39 @@ class SecondStoryFragment : Fragment(){
         navigationScope.launch {
             CommonUtils.hideKeyboard(requireActivity())
             delay(80)
-            if(RTVariable.IS_FROM_PROFILE){
-                findNavController().popBackStack()
-            }else{
-                navigateToNextStory(true)
-            }
-            //navigateToNextStory(true)
-
+            navigateToNextStory(true)
         }
     }
 
     fun getClick(click: Int) {
         when (click) {
             0 -> {
-                findNavController().navigate(SecondStoryFragmentDirections.actionSecondStoryFragmentToProfileFragment("0", storyList[currentPage].user_id.toString(), from = "secondStory"))
+                findNavController().navigate(
+                    SecondStoryFragmentDirections.actionSecondStoryFragmentToProfileFragment(
+                        "0",
+                        storyList[currentPage].user_id.toString(),
+                        from = "secondStory"
+                    )
+                )
             }
         }
     }
 
     fun sendMessage(otherStoryData: Story, message: String) {
-        viewModel.hitSaveRecentChatDataApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
-            SaveRecentChatRequest(toUserId = otherStoryData.user_id.toString(), message = message))
-
-        sendMessage((Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId ?: "").toString(), otherStoryData.user_id.toString(), otherStoryData.userDetail?.name ?: "" , otherStoryData.userDetail?.profile_image ?: "", MediaType.TEXT.name, message, "0", "0")
+        viewModel.hitSaveRecentChatDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+            SaveRecentChatRequest(toUserId = otherStoryData.user_id.toString(), message = message)
+        )
+        sendMessage(
+            (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId ?: "").toString(),
+            otherStoryData.user_id.toString(),
+            otherStoryData.userDetail?.name ?: "",
+            otherStoryData.userDetail?.profile_image ?: "",
+            MediaType.TEXT.name,
+            message,
+            "0",
+            "0"
+        )
     }
 
     private fun setObserver() {
@@ -609,18 +604,9 @@ class SecondStoryFragment : Fragment(){
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Story Seen success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-                        } else {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-//                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
-                    }
                     ProcessDialog.dismissDialog(true)
                 }
-                Status.LOADING -> {
-                }
+                Status.LOADING -> {}
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -632,7 +618,6 @@ class SecondStoryFragment : Fragment(){
     private fun openSideOptionsPopup() {
         val inflater = LayoutInflater.from(requireContext())
         val binding = PopupChatSideOptionsBinding.inflate(inflater)
-
         binding.title1.text = "Block"
         binding.title2.text = "Report"
         val popupWindow = PopupWindow(
@@ -692,7 +677,6 @@ class SecondStoryFragment : Fragment(){
     ) {
         viewModel.sendMessage(sender, receiver, friendName, friendImage, messageType, message, pinned, archived, url ?: "")
     }
-
 
     override fun onPause() {
         super.onPause()

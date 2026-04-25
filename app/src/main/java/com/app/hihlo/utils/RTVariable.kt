@@ -85,6 +85,7 @@ object RTVariable {
 
     var SELECT_OPTION: Boolean = false
     var IS_STORY_UPDATED_FROM_PROFILE: Boolean = false
+    var IS_MEDIA_UPLOADED: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {

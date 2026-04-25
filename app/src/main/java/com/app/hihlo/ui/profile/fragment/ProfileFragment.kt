@@ -11,6 +11,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -39,6 +40,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.services.s3.AmazonS3Client
+import com.app.hihlo.ImageVideoConverter.ImageVideoConverter
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentProfileBinding
@@ -708,9 +710,60 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
 
     private fun launchMediaPicker2() {
-        mediaPickerLauncher2.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+        pickMedia.launch("*/*")
+//        mediaPickerLauncher2.launch(
+//            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+//        )
+    }
+
+    private val pickMedia =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { openPreview(it) }
+        }
+
+    private val previewResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val savedUri = data?.getStringExtra("uri")
+                val mediaType = data?.getStringExtra("type")
+                val uri = Uri.parse(savedUri)
+                val file = if (mediaType == "video") {
+                    copyToHiHloFolder(uri, Environment.DIRECTORY_MOVIES, "mp4")
+                } else {
+                    copyToHiHloFolder(uri, Environment.DIRECTORY_PICTURES, "jpg")
+                }
+                if(mediaType.equals("video")){
+                    uploadImage(file, "V")
+                }else{
+                    uploadImage(file, "I")
+                }
+            }
+        }
+
+    fun copyToHiHloFolder(uri: Uri, folderType: String, extension: String): File {
+        val dir = File(
+            Environment.getExternalStoragePublicDirectory(folderType),
+            "HiHlo"
         )
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dir, "file_${System.currentTimeMillis()}.$extension")
+        requireContext().contentResolver.openInputStream(uri)?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return file
+    }
+
+    private fun openPreview(uri: Uri) {
+        val type = requireContext().contentResolver.getType(uri) ?: ""
+        val isVideo = type.startsWith("video")
+        val intent = Intent(requireActivity(), ImageVideoConverter::class.java).apply {
+            putExtra("uri", uri.toString())
+            putExtra("isVideo", isVideo)
+        }
+        previewResultLauncher.launch(intent)
     }
 
     private val mediaPickerLauncher2 = registerForActivityResult(

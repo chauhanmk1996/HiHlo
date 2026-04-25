@@ -39,6 +39,7 @@ import com.app.hihlo.ui.reels.view_model.AddReelViewModel
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.dpToPx
 import com.app.hihlo.utils.MediaUtils
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -100,6 +101,7 @@ class AddReelFragment : Fragment() {
                     Log.e("TAG", "Add Reel success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         if (it.data.code == 200){
+                            RTVariable.IS_MEDIA_UPLOADED = true
                             Toast.makeText(requireContext(), "Your Reel Uploaded Successfully", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }else{
@@ -125,9 +127,9 @@ class AddReelFragment : Fragment() {
                     Log.e("TAG", "Add Post success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         if (it.data.code == 200){
+                            RTVariable.IS_MEDIA_UPLOADED = true
                             Toast.makeText(requireContext(), "Your Post Uploaded Successfully", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
-
                         }else{
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }

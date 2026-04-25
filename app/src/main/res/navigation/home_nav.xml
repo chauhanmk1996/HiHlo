@@ -41,6 +41,9 @@
         <action
             android:id="@+id/action_homeNewFragment_to_secondStoryFragment"
             app:destination="@id/secondStoryFragment" />
+        <action
+            android:id="@+id/action_homeNewFragment_to_addReelFragment"
+            app:destination="@id/addReelFragment" />
     </fragment>
     <fragment
         android:id="@+id/homeFragment"
