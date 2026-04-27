@@ -28,6 +28,7 @@ import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.bumptech.glide.Glide
 import ja.burhanrashid52.photoeditor.PhotoEditorView
 import kotlin.math.atan2
+import kotlin.math.hypot
 
 class ImageVideoConverter : AppCompatActivity() {
 
@@ -130,52 +131,102 @@ class ImageVideoConverter : AppCompatActivity() {
         Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
     }
 
+    // Fixed gesture handling with smooth pinch, zoom, rotate, and drag
     @SuppressLint("ClickableViewAccessibility")
     private fun attachGesturesToView(view: View, isText: Boolean) {
-        val longPressDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+        // Set pivot to centre for natural scaling/rotation (avoids shifting)
+        view.post {
+            view.pivotX = view.width / 2f
+            view.pivotY = view.height / 2f
+        }
+
+        var mode = 0          // 0 = none, 1 = drag, 2 = zoom/rotate
+        var initialX = 0f
+        var initialY = 0f
+        var initialTranslationX = 0f
+        var initialTranslationY = 0f
+        var initialScaleX = 1f
+        var initialScaleY = 1f
+        var initialRotation = 0f
+        var initialDistance = 0f
+        var initialAngle = 0f
+
+        // Long press detector for edit/delete menu on text views
+        val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 if (isText) showDeleteMenu(view)
             }
         })
-        val sgd = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(d: ScaleGestureDetector): Boolean {
-                view.scaleX *= d.scaleFactor
-                view.scaleY *= d.scaleFactor
-                return true
-            }
-        })
-        var lastX = 0f
-        var lastY = 0f
-        var prevAngle = 0f
+
         view.setOnTouchListener { v, event ->
-            longPressDetector.onTouchEvent(event)
-            sgd.onTouchEvent(event)
+            gestureDetector.onTouchEvent(event)
+
+            val pointerCount = event.pointerCount
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    lastX = event.rawX
-                    lastY = event.rawY
+                    mode = 1 // DRAG
+                    initialX = event.rawX
+                    initialY = event.rawY
+                    initialTranslationX = v.translationX
+                    initialTranslationY = v.translationY
                     if (isText) v.bringToFront()
+                    true
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> {
-                    if (event.pointerCount == 2) prevAngle = getAngle(event)
+                    if (pointerCount == 2) {
+                        mode = 2 // ZOOM/ROTATE
+                        // Use raw coordinates to avoid fluctuations caused by view transformations
+                        initialDistance = getRawDistance(event)
+                        initialAngle = getRawAngle(event)
+                        initialScaleX = v.scaleX
+                        initialScaleY = v.scaleY
+                        initialRotation = v.rotation
+                    }
+                    true
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    if (event.pointerCount == 1) {
-                        val dx = event.rawX - lastX
-                        val dy = event.rawY - lastY
-                        v.translationX += dx
-                        v.translationY += dy
-                        lastX = event.rawX
-                        lastY = event.rawY
-                    } else if (event.pointerCount == 2) {
-                        val currentAngle = getAngle(event)
-                        v.rotation += (currentAngle - prevAngle)
-                        prevAngle = currentAngle
+                    when (mode) {
+                        1 -> { // Single-finger drag
+                            val dx = event.rawX - initialX
+                            val dy = event.rawY - initialY
+                            v.translationX = initialTranslationX + dx
+                            v.translationY = initialTranslationY + dy
+                        }
+                        2 -> { // Two-finger zoom and rotate
+                            if (pointerCount >= 2) {
+                                val currentDistance = getRawDistance(event)
+                                val currentAngle = getRawAngle(event)
+                                val scaleFactor = currentDistance / initialDistance
+                                v.scaleX = initialScaleX * scaleFactor
+                                v.scaleY = initialScaleY * scaleFactor
+                                val angleDelta = currentAngle - initialAngle
+                                v.rotation = initialRotation + angleDelta
+                            }
+                        }
                     }
+                    true
                 }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                    mode = 0
+                    true
+                }
+                else -> false
             }
-            true
         }
+    }
+
+    // Helper: distance between two pointers using raw coordinates
+    private fun getRawDistance(event: MotionEvent): Float {
+        val dx = event.getRawX(0) - event.getRawX(1)
+        val dy = event.getRawY(0) - event.getRawY(1)
+        return hypot(dx.toDouble(), dy.toDouble()).toFloat()
+    }
+
+    // Helper: angle between two pointers using raw coordinates
+    private fun getRawAngle(event: MotionEvent): Float {
+        val dx = (event.getRawX(1) - event.getRawX(0)).toDouble()
+        val dy = (event.getRawY(1) - event.getRawY(0)).toDouble()
+        return Math.toDegrees(atan2(dy, dx)).toFloat()
     }
 
     private fun showDeleteMenu(view: View) {
@@ -201,7 +252,6 @@ class ImageVideoConverter : AppCompatActivity() {
             when (items[position]) {
                 "Delete" -> {
                     overlayContainer.removeView(view)
-                    //Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show()
                 }
                 "Edit" -> {
                     val tv = (view as? ViewGroup)?.getChildAt(0) as? TextView
@@ -211,12 +261,6 @@ class ImageVideoConverter : AppCompatActivity() {
             listPopupWindow.dismiss()
         }
         listPopupWindow.show()
-    }
-
-    private fun getAngle(e: MotionEvent): Float {
-        val dx = (e.getX(1) - e.getX(0)).toDouble()
-        val dy = (e.getY(1) - e.getY(0)).toDouble()
-        return Math.toDegrees(atan2(dy, dx)).toFloat()
     }
 
     private fun startAndAutoSaveVideo(durationMs: Long) {

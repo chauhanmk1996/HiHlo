@@ -17,10 +17,11 @@
             android:scaleType="centerCrop"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:paddingBottom="85dp"
+            android:layout_marginBottom="33dp"
             android:layout_marginTop="35dp"
             android:layout_width="match_parent"
             android:layout_height="0dp"/>
+
         <SeekBar
             android:elevation="1dp"
             app:layout_constraintTop_toTopOf="@id/storyImage"
@@ -38,7 +39,7 @@
             android:id="@+id/playerView"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:paddingBottom="85dp"
+            android:layout_marginBottom="33dp"
             android:layout_marginTop="35dp"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -78,6 +79,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
             <androidx.cardview.widget.CardView
                 android:backgroundTint="@color/black"
                 android:id="@+id/userImageCardView"
@@ -87,11 +89,14 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:cardCornerRadius="50dp"
                 app:cardElevation="0dp">
+
                 <ImageView
                     android:id="@+id/userImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
+
             </androidx.cardview.widget.CardView>
+
             <ImageView
                 app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
                 app:layout_constraintEnd_toEndOf="@id/userImageCardView"
@@ -99,12 +104,14 @@
                 android:src="@drawable/online_status_green"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"/>
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/nameLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView">
+
                 <TextView
                     android:maxLines="1"
                     android:ellipsize="end"
@@ -118,6 +125,7 @@
                     android:fontFamily="@font/manrope_regular"
                     android:textSize="12sp"
                     android:textColor="@color/white"/>
+
                 <ImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="2dp"
@@ -127,6 +135,7 @@
                     app:layout_constraintStart_toEndOf="@+id/userName"
                     app:layout_constraintTop_toTopOf="@+id/userName"
                     app:layout_constraintBottom_toBottomOf="@id/userName"/>
+
                 <TextView
                     android:id="@+id/statusTime"
                     android:layout_marginStart="6dp"
@@ -140,6 +149,7 @@
                     app:layout_constraintStart_toEndOf="@+id/verifiedNameTick"
                     app:layout_constraintTop_toTopOf="@+id/userName"
                     app:layout_constraintBottom_toBottomOf="@id/userName"/>
+
                 <TextView
                     android:maxLines="1"
                     android:ellipsize="end"
@@ -154,6 +164,7 @@
                     android:fontFamily="@font/manrope_regular"
                     android:textSize="12sp"
                     android:textColor="@color/white"/>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
@@ -165,7 +176,9 @@
                 android:visibility="visible"
                 android:layout_height="20dp"
                 android:src="@drawable/side_options_vertical"/>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
         <View
             android:id="@+id/leftClickArea"
             android:layout_width="80dp"
@@ -183,12 +196,20 @@
             app:layout_constraintTop_toBottomOf="@id/userDetailsLayout"
             app:layout_constraintBottom_toTopOf="@id/bottomLayout"
             app:layout_constraintEnd_toEndOf="parent" />
-        <androidx.constraintlayout.widget.ConstraintLayout
 
+        <View
+            android:id="@+id/blur_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#70000000"
+            android:visibility="gone"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottomLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent">
+
             <LinearLayout
                 android:id="@+id/seenLayout"
                 android:layout_marginStart="15dp"
@@ -213,6 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
+
             <ImageView
                 android:id="@+id/deleteButton"
                 android:layout_width="24dp"
@@ -229,7 +251,6 @@
                 android:layout_width="46dp"
                 android:layout_height="46dp"
                 android:layout_marginEnd="8dp"
-                app:layout_constraintTop_toTopOf="@id/sendEditText"
                 app:layout_constraintBottom_toBottomOf="@id/sendEditText"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:background="@drawable/story_view_edittext_background"
@@ -238,12 +259,12 @@
                 android:paddingEnd="-5dp"
                 android:src="@drawable/fluent_send_filled"/>
             <EditText
-                android:maxLines="1"
+                android:maxLines="3"
                 app:layout_constraintTop_toTopOf="parent"
                 android:id="@+id/sendEditText"
                 android:layout_marginEnd="5dp"
                 android:layout_marginTop="13dp"
-                android:layout_marginBottom="3dp"
+                android:layout_marginBottom="0dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/story_view_edittext_background"
                 android:paddingHorizontal="13dp"

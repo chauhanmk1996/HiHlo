@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
@@ -21,6 +22,7 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.annotation.OptIn
@@ -153,6 +155,10 @@ class SecondStoryFragment : Fragment() {
                                 Log.d("Swipe", "Swipe down detected")
                                 onSwipeDown()
                                 return true
+                            } else {
+                                Log.d("Swipe", "Swipe up detected")
+                                onSwipeUp()
+                                return true
                             }
                         }
                     }
@@ -204,13 +210,27 @@ class SecondStoryFragment : Fragment() {
                 if (!isKeyboardVisible) resumeStory()
             }
         }
-        binding.sendEditText.setOnClickListener { pauseStory() }
+        binding.sendEditText.setOnClickListener {
+            binding.blurBackground.isVisible = true
+            pauseStory()
+        }
         binding.sendEditText.setOnFocusChangeListener { _, hasFocus ->
+            binding.blurBackground.isVisible = true
             if (hasFocus) pauseStory()
+        }
+        binding.blurBackground.setOnClickListener {
+            updateKeyboardVisibility(false)
+            CommonUtils.hideKeyboard(requireActivity())
         }
 
         bindStory(currentPage)
     }
+
+//    fun View.hideKeyboard() {
+//        val inputManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//        inputManager.hideSoftInputFromWindow(windowToken, 0)
+//    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -277,7 +297,12 @@ class SecondStoryFragment : Fragment() {
     private fun updateKeyboardVisibility(visible: Boolean) {
         if (isKeyboardVisible == visible) return
         isKeyboardVisible = visible
-        if (visible) pauseStory() else resumeStory()
+        if (visible){
+            pauseStory()
+        } else {
+            binding.blurBackground.isVisible = false
+            resumeStory()
+        }
     }
 
     private fun bindStory(position: Int) {
@@ -398,7 +423,6 @@ class SecondStoryFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         navigationJob.cancel()
         stopSeekBar()
         try {
@@ -409,6 +433,7 @@ class SecondStoryFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("ExoPlayer", "Error releasing player: ${e.message}")
         }
+        super.onDestroyView()
     }
 
     private fun pauseStory() {
@@ -536,13 +561,23 @@ class SecondStoryFragment : Fragment() {
     }
 
     fun onSwipeDown() {
-        if (isAdded && isVisible) {
-            try {
-                findNavController().popBackStack()
-            } catch (e: IllegalStateException) {
-                Log.e("TAG", "Navigation error on swipe down: ${e.message}", e)
-            }
-        }
+        findNavController().popBackStack()
+//        if (isAdded && isVisible) {
+//            try {
+//                findNavController().popBackStack()
+//            } catch (e: IllegalStateException) {
+//                Log.e("TAG", "Navigation error on swipe down: ${e.message}", e)
+//            }
+//        }
+    }
+
+    private fun onSwipeUp() {
+        if (isKeyboardVisible) return
+        pauseStory()
+        binding.blurBackground.isVisible = true
+        binding.sendEditText.requestFocus()
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(binding.sendEditText, InputMethodManager.SHOW_IMPLICIT)
     }
 
     fun onSideOptionsClicked() {
@@ -679,9 +714,9 @@ class SecondStoryFragment : Fragment() {
     }
 
     override fun onPause() {
-        super.onPause()
         if (::exoPlayer.isInitialized) {
             exoPlayer.pause()
         }
+        super.onPause()
     }
 }

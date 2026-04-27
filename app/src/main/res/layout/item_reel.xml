@@ -174,7 +174,11 @@
                     android:fontFamily="@font/manrope_semibold"
                     android:textSize="12sp"
                     android:textColor="@color/white"
-                    android:text="Isha_00"/>
+                    android:text="Isha_00"
+                    android:shadowColor="#000000"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="4"/>
                 <ImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="2dp"
@@ -197,6 +201,10 @@
                     android:fontFamily="@font/manrope_regular"
                     android:textSize="10sp"
                     android:textColor="@color/white"
+                    android:shadowColor="#000000"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="4"
                     android:text="Jaipur, India"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -219,6 +227,10 @@
                     android:fontFamily="@font/manrope_regular"
                     android:textSize="13sp"
                     android:textColor="@color/white_FEFEFF"
+                    android:shadowColor="#000000"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="4"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:scrollHorizontally="false" />

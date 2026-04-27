@@ -710,10 +710,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
 
     private fun launchMediaPicker2() {
-        pickMedia.launch("*/*")
-//        mediaPickerLauncher2.launch(
-//            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
-//        )
+        //pickMedia.launch("*/*")
+        mediaPickerLauncher2.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+        )
     }
 
     private val pickMedia =
@@ -770,19 +770,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            val mimeType = requireContext().contentResolver.getType(uri)
-            if (mimeType?.startsWith("video") == true) {
-                val durationInMillis = getVideoDuration(requireContext(), uri)
-                val durationInSeconds = durationInMillis / 1000
-
-                UserPreference.seletedUri = Uri.EMPTY
-                val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
-                intent.putExtra("videoUrl",uri.toString())
-                intent.putExtra("from","home")
-                startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
-            } else {
-                openCropActivity2(uri)
-            }
+//            val mimeType = requireContext().contentResolver.getType(uri)
+//            if (mimeType?.startsWith("video") == true) {
+//                val durationInMillis = getVideoDuration(requireContext(), uri)
+//                val durationInSeconds = durationInMillis / 1000
+//
+//                UserPreference.seletedUri = Uri.EMPTY
+//                val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+//                intent.putExtra("videoUrl",uri.toString())
+//                intent.putExtra("from","home")
+//                startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+//            } else {
+//                openCropActivity2(uri)
+//            }
+            openPreview(uri)
         } else {
             Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }

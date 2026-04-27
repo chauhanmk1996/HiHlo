@@ -112,6 +112,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         UserDataManager.saveChatScrollPosition(binding.root.context, "inbox", 0)
         UserDataManager.setReelsPosition(binding.root.context, 0)
         UserDataManager.setReelMute(this, false)
+        RTVariable.reelsCache.clear()
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
