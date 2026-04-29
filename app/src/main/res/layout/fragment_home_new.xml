@@ -25,14 +25,14 @@
                 android:background="@color/screen_background_black"
                 android:id="@+id/nestedScrollView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:fillViewport="true"
                 android:clipToPadding="false">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/mainLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:paddingTop="0dp"
                     android:paddingBottom="20dp"
@@ -100,6 +100,7 @@
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/storiesLayout"
+                        android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:elevation="4dp"
@@ -114,8 +115,7 @@
                             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:listitem="@layout/adapter_stories_recycler" />
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +40,9 @@ import com.app.hihlo.model.send_gift.SendGiftRequest
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.adapter.AdapterUserPostList
@@ -85,6 +89,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     private var myStoryData: MyStory = MyStory()
     private var allStory: List<Story>? = null
     private var currentVisiblePosition = 0
+    private val viewModel6: StatusViewModel by activityViewModels()
+    private lateinit var statusListGlobal: List<StatusItem>
     override fun initView(savedInstanceState: Bundle?) {
         homePosts = args.homePosts.toMutableList()
         from = args.from
@@ -218,6 +224,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     private fun hitServiceListApi() {
         viewModel5.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
         viewModel4.hitCoinDetailsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
+        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
     }
 
     private fun onClick() {
@@ -539,6 +546,25 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 }
             }
         }
+        viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            statusListGlobal = it.data.payload
+                            Log.e("TAG", "Status success: ${statusListGlobal}")
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
+                }
+            }
+        }
     }
     private fun openCommentsBottomSheet(payload: Payload) {
         commentsBottomSheetFragment = CommentReelBottomSheet().apply {
@@ -640,7 +666,21 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 data.user_id?.let { openCoinsBottomSheet(it, it, data.creator_username.toString()) }
             }
             8->{
-                RTVariable.IS_FROM_PROFILE = true
+                val targetUserId = data.user_id.toString()
+                val newList = statusListGlobal.drop(1)
+                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                //intent.putExtra("play_position", storyPosition)
+                val json = Gson().toJson(newList)
+                intent.putExtra("story_list", json)
+                intent.putExtra("is_play_single", true)
+                intent.putExtra("user_id", targetUserId)
+                startActivity(intent)
+                requireActivity().overridePendingTransition(
+                    R.anim.slide_up,
+                    0
+                )
+
+                /*RTVariable.IS_FROM_PROFILE = true
                 val stories = adapter!!.getStoriesList()
                 val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
                 val story = stories.find { it.user_id == post.user_id }
@@ -658,7 +698,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 } else {
                     // Handle error: story not found or list empty
                     Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
-                }
+                } */
 
 
 

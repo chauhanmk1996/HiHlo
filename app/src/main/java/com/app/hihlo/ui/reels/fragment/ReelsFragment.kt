@@ -255,10 +255,11 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             }
             viewPagerAdapter(mutableListOf())
             adapter.updateList(RTVariable.reelsCache)
-            lifecycleScope.launch {
-                delay(300) // delay in milliseconds
-                binding.viewPager.currentItem = reelPosition.toInt()
-            }
+//            lifecycleScope.launch {
+//                delay(300) // delay in milliseconds
+//                binding.viewPager.currentItem = reelPosition.toInt()
+//            }
+            binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
         } else {
             if(!RTVariable.IS_REELS_LOADED){
                 currentPage = 1
@@ -270,19 +271,23 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 setReelsAdapterPagination()
             }
         }
-        Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
-        if(RTVariable.IS_REELS_LOADED){
-            Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
-            Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
-            viewPagerAdapter(mutableListOf())
-            currentPage = RTVariable.REELS_LAST_POSITION
-            adapter.updateList(RTVariable.reelsCache)
-            isLoading = true
-            //adapter.notifyDataSetChanged()
-            binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
-            //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
-            //recyclerView?.scrollToPosition(reelPosition.toInt())
-            //binding.viewPager.currentItem = reelPosition.toInt()
+        if (from == "profile") {
+
+        }else{
+            Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
+            if(RTVariable.IS_REELS_LOADED){
+                Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
+                Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
+                viewPagerAdapter(mutableListOf())
+                currentPage = RTVariable.REELS_LAST_POSITION
+                adapter.updateList(RTVariable.reelsCache)
+                isLoading = true
+                //adapter.notifyDataSetChanged()
+                binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
+                //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
+                //recyclerView?.scrollToPosition(reelPosition.toInt())
+                //binding.viewPager.currentItem = reelPosition.toInt()
+            }
         }
         viewModel.hitCoinDetailsApi(
             "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(

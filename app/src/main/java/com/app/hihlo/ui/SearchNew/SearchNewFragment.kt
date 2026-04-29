@@ -32,6 +32,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -95,6 +96,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.model.StatusItem
+import kotlin.getValue
 
 class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
@@ -122,6 +127,9 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     var offsetY = 0
     var makeRefresh: Boolean = false
     private var searchJob: Job? = null
+
+    private val viewModel6: StatusViewModel by activityViewModels()
+    private var statusListGlobal: List<StatusItem>? = null
 
     override fun getLayoutId(): Int = R.layout.fragment_search_new
 
@@ -294,7 +302,29 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     getSendUnFollow(RTVariable.USER_ID)
                 }
                 4->{
-                    RTVariable.IS_FROM_PROFILE = true
+
+                    val targetUserId = RTVariable.USER_ID.toInt().toString()
+
+                    // Safe check: if statusListGlobal is null or empty, show retry message and re-fetch
+                    if (statusListGlobal == null || statusListGlobal!!.isEmpty()) {
+                        Toast.makeText(requireContext(), "Loading stories, please wait...", Toast.LENGTH_SHORT).show()
+                        viewModel6.hitStatusDataApi(
+                            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(), LOGIN_DATA
+                            )?.payload?.authToken, "0"
+                        )
+                        // No return – just don't navigate. The lambda will finish normally.
+                    } else {
+                        val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                        val json = Gson().toJson(statusListGlobal)
+                        intent.putExtra("story_list", json)
+                        intent.putExtra("is_play_single", true)
+                        intent.putExtra("user_id", targetUserId)
+                        startActivity(intent)
+                        requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+                    }
+
+                    /*RTVariable.IS_FROM_PROFILE = true
                     val stories = search_adapter.getStoriesList()
                     val storyPosition = stories.indexOfFirst { it.user_id == RTVariable.USER_ID.toInt() }
                     val story = stories.find { it.user_id == RTVariable.USER_ID.toInt() }
@@ -312,7 +342,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     } else {
                         // Handle error: story not found or list empty
                         Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
-                    }
+                    } */
 
 
 
@@ -915,6 +945,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private fun hitServiceListApi(page: Int, genderId:Int?=null) {
         Log.e("TAG", "Home success: ${Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken}")
         viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "10", genderId.toString())
+        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
     }
     private fun setObserver() {
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
@@ -1092,6 +1123,25 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
+                }
+            }
+        }
+        viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            statusListGlobal = it.data.payload
+                            Log.e("TAG", "Status success: ${statusListGlobal}")
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
                 }
             }
         }

@@ -60,6 +60,13 @@ class ApiRepository {
         if (genderId.isEmpty()) null else genderId,
     )
 
+    suspend fun getStatusDataApi(
+        token: String, genderId: String
+    ) = service.getStatusData(
+        token = token,
+        genderId = genderId
+    )
+
     suspend fun getReelsApi(
         token: String, page: String,
         limit: String,

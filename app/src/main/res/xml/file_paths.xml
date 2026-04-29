@@ -1,5 +1,5 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <external-path name="download" path="Download/" />
     <cache-path name="shared_image" path="." />
-
+    <cache-path name="cache" path="/" />
 </paths>

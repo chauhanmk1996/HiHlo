@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -725,21 +726,49 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
-                val savedUri = data?.getStringExtra("uri")
+                val savedUriString = data?.getStringExtra("uri")
                 val mediaType = data?.getStringExtra("type")
-                val uri = Uri.parse(savedUri)
-                val file = if (mediaType == "video") {
-                    copyToHiHloFolder(uri, Environment.DIRECTORY_MOVIES, "mp4")
+                val contentUri = Uri.parse(savedUriString)
+
+                val file = getCacheFileFromContentUri(contentUri)
+                if (file != null && file.exists()) {
+                    val typeCode = if (mediaType == "video") "V" else "I"
+                    uploadImage(file, typeCode)
+
+                    // Optional: delete after successful upload
+                    // file.delete()
                 } else {
-                    copyToHiHloFolder(uri, Environment.DIRECTORY_PICTURES, "jpg")
-                }
-                if(mediaType.equals("video")){
-                    uploadImage(file, "V")
-                }else{
-                    uploadImage(file, "I")
+                    // handle error
                 }
             }
         }
+
+    private fun getCacheFileFromContentUri(contentUri: Uri): File? {
+        return try {
+            val cursor = requireContext().contentResolver.query(contentUri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val dataColumn = it.getColumnIndex(MediaStore.MediaColumns.DATA)
+                    if (dataColumn != -1) {
+                        val filePath = it.getString(dataColumn)
+                        return File(filePath)
+                    }
+                }
+            }
+            val cacheDir = requireContext().cacheDir
+            // Fallback: copy to a temporary file (if DATA column not available)
+            val tempFile = File(cacheDir, "temp_${System.currentTimeMillis()}.${contentUri.lastPathSegment?.substringAfterLast('.') ?: "file"}")
+            requireContext().contentResolver.openInputStream(contentUri)?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            tempFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     fun copyToHiHloFolder(uri: Uri, folderType: String, extension: String): File {
         val dir = File(

@@ -94,6 +94,7 @@ class SecondStoryFragment : Fragment() {
 
     private lateinit var gestureDetector: GestureDetector
     private var myStoryData: MyStory = MyStory()
+    var isMyStory: Boolean = false
 
     private var keyboardLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var rootView: View? = null
@@ -103,13 +104,16 @@ class SecondStoryFragment : Fragment() {
         (requireActivity() as HomeActivity).setOnlineStatusVisibility(true)
         arguments?.let {
             storyList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                isMyStory = false
                 it.getParcelableArrayList("storyList", Story::class.java) ?: arrayListOf()
             } else {
+                isMyStory = false
                 @Suppress("DEPRECATION")
                 it.getParcelableArrayList("storyList") ?: arrayListOf()
             }
             currentPage = it.getInt("position", 0)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                isMyStory = true
                 myStoryData = it.getParcelable("myStoryData", MyStory::class.java) ?: MyStory()
             }
             Log.e("TAG", "onCreate: storyList=$storyList, currentPage=$currentPage")
@@ -541,6 +545,7 @@ class SecondStoryFragment : Fragment() {
     }
 
     fun onVideoEnd() {
+        Log.e("onVideoEnd", "onVideoEnd:")
         if (isVideoEnded || isNavigating || isKeyboardVisible) return
         isVideoEnded = true
         if (currentPage < storyList.size - 1) {
@@ -586,6 +591,7 @@ class SecondStoryFragment : Fragment() {
     }
 
     fun leftClickAreaClicked() {
+        Log.e("leftClickAreaClicked", "leftClickAreaClicked>> "+isMyStory)
         if (isNavigating) return
         navigationScope.launch {
             CommonUtils.hideKeyboard(requireActivity())
@@ -595,6 +601,7 @@ class SecondStoryFragment : Fragment() {
     }
 
     fun rightClickAreaClicked() {
+        Log.e("leftClickAreaClicked", "leftClickAreaClicked>> "+isMyStory)
         if (isNavigating) return
         navigationScope.launch {
             CommonUtils.hideKeyboard(requireActivity())
@@ -639,12 +646,12 @@ class SecondStoryFragment : Fragment() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Story Seen success: ${Gson().toJson(it)}")
-                    ProcessDialog.dismissDialog(true)
+                    //ProcessDialog.dismissDialog(true)
                 }
                 Status.LOADING -> {}
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
+                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }

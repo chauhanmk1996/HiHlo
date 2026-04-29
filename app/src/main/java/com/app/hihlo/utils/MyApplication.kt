@@ -28,6 +28,7 @@ class MyApplication : Application(), LifecycleObserver {
 
     companion object {
         var appContext: Context? = null
+        var isStackMode = false
     }
 
     private val apiRepository = ApiRepository()

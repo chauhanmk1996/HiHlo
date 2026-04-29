@@ -61,6 +61,7 @@ import com.app.hihlo.model.set_notification.SetNotificationRequest
 import com.app.hihlo.model.update_call_charge.UpdateCallChargeResponse
 import com.app.hihlo.model.update_call_status.UpdateCallStatusRequest
 import com.app.hihlo.model.update_call_status.UpdateCallStatusResponse
+import com.app.hihlo.ui.HomeNew.model.StatusResponse
 import com.app.hihlo.ui.profile.become_creater.model.CreatorsBenefitsResponse
 import com.app.hihlo.ui.profile.become_creater.model.SendOtpPhoneRequest
 import com.app.hihlo.ui.profile.become_creater.model.UserToCreatorRequest
@@ -126,6 +127,11 @@ interface ApiService {
                            @Query("pageSize") limit: String? = null ,
                            @Query("genderId") genderId: String? = null
     ): HomeResponse
+
+    @GET("get-all-status")
+    suspend fun getStatusData(@Header("Authorization") token: String,
+                              @Query("genderId") genderId: String? = null
+    ): StatusResponse
 
     @GET("reels")
     suspend fun getReels(@Header("Authorization") token: String,

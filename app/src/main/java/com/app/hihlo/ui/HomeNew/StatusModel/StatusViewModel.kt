@@ -1,0 +1,43 @@
+package com.app.hihlo.ui.HomeNew.StatusModel
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.app.hihlo.network_call.repository.ApiRepository
+import com.app.hihlo.ui.HomeNew.model.StatusResponse
+import com.app.hihlo.utils.network_utils.Resources
+import com.app.hihlo.utils.network_utils.SingleLiveEvent
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+class StatusViewModel @Inject constructor():ViewModel() {
+
+    private val statusLiveDate = SingleLiveEvent<Resources<StatusResponse>>()
+
+    fun getStatusLiveData(): LiveData<Resources<StatusResponse>> {
+        return statusLiveDate
+    }
+
+    fun hitStatusDataApi(token: String, genderId: String) {
+
+        try {
+            statusLiveDate.postValue(Resources.loading(null))
+            viewModelScope.launch {
+                try {
+                    statusLiveDate.postValue(
+                        Resources.success(
+                            ApiRepository().getStatusDataApi(token, genderId)
+                        )
+                    )
+                } catch (ex: Exception) {
+                    statusLiveDate.postValue(Resources.error(ex.localizedMessage, null))
+
+                }
+            }
+
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+}

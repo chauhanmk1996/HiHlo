@@ -11,6 +11,7 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -18,6 +19,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -27,6 +29,8 @@ import com.app.hihlo.R
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.bumptech.glide.Glide
 import ja.burhanrashid52.photoeditor.PhotoEditorView
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.atan2
 import kotlin.math.hypot
 
@@ -131,16 +135,14 @@ class ImageVideoConverter : AppCompatActivity() {
         Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
     }
 
-    // Fixed gesture handling with smooth pinch, zoom, rotate, and drag
     @SuppressLint("ClickableViewAccessibility")
     private fun attachGesturesToView(view: View, isText: Boolean) {
-        // Set pivot to centre for natural scaling/rotation (avoids shifting)
         view.post {
             view.pivotX = view.width / 2f
             view.pivotY = view.height / 2f
         }
 
-        var mode = 0          // 0 = none, 1 = drag, 2 = zoom/rotate
+        var mode = 0
         var initialX = 0f
         var initialY = 0f
         var initialTranslationX = 0f
@@ -151,7 +153,6 @@ class ImageVideoConverter : AppCompatActivity() {
         var initialDistance = 0f
         var initialAngle = 0f
 
-        // Long press detector for edit/delete menu on text views
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 if (isText) showDeleteMenu(view)
@@ -164,7 +165,7 @@ class ImageVideoConverter : AppCompatActivity() {
             val pointerCount = event.pointerCount
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    mode = 1 // DRAG
+                    mode = 1
                     initialX = event.rawX
                     initialY = event.rawY
                     initialTranslationX = v.translationX
@@ -174,8 +175,7 @@ class ImageVideoConverter : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     if (pointerCount == 2) {
-                        mode = 2 // ZOOM/ROTATE
-                        // Use raw coordinates to avoid fluctuations caused by view transformations
+                        mode = 2
                         initialDistance = getRawDistance(event)
                         initialAngle = getRawAngle(event)
                         initialScaleX = v.scaleX
@@ -186,13 +186,13 @@ class ImageVideoConverter : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_MOVE -> {
                     when (mode) {
-                        1 -> { // Single-finger drag
+                        1 -> {
                             val dx = event.rawX - initialX
                             val dy = event.rawY - initialY
                             v.translationX = initialTranslationX + dx
                             v.translationY = initialTranslationY + dy
                         }
-                        2 -> { // Two-finger zoom and rotate
+                        2 -> {
                             if (pointerCount >= 2) {
                                 val currentDistance = getRawDistance(event)
                                 val currentAngle = getRawAngle(event)
@@ -215,14 +215,14 @@ class ImageVideoConverter : AppCompatActivity() {
         }
     }
 
-    // Helper: distance between two pointers using raw coordinates
+    @SuppressLint("NewApi")
     private fun getRawDistance(event: MotionEvent): Float {
         val dx = event.getRawX(0) - event.getRawX(1)
         val dy = event.getRawY(0) - event.getRawY(1)
         return hypot(dx.toDouble(), dy.toDouble()).toFloat()
     }
 
-    // Helper: angle between two pointers using raw coordinates
+    @SuppressLint("NewApi")
     private fun getRawAngle(event: MotionEvent): Float {
         val dx = (event.getRawX(1) - event.getRawX(0)).toDouble()
         val dy = (event.getRawY(1) - event.getRawY(0)).toDouble()
@@ -263,100 +263,187 @@ class ImageVideoConverter : AppCompatActivity() {
         listPopupWindow.show()
     }
 
+    // ---------------------- VIDEO RECORDING (CLEAN, WORKING VERSION) ----------------------
     private fun startAndAutoSaveVideo(durationMs: Long) {
         ProcessDialog.showDialog(this@ImageVideoConverter, true)
-        if (mediaContainer.width <= 0 || mediaContainer.height <= 0) return
+
+        // Make sure layout is measured
+        if (mediaContainer.width <= 0 || mediaContainer.height <= 0) {
+            ProcessDialog.dismissDialog(true)
+            Toast.makeText(this, "Layout not ready", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val width = (mediaContainer.width / 2) * 2   // ensure even
+        val height = (mediaContainer.height / 2) * 2
+
+        val videoFile = File(cacheDir, "HiHlo_${System.currentTimeMillis()}.mp4")
+        videoFile.parentFile?.mkdirs()
+        Log.d("ImageVideoConverter", "Output file: ${videoFile.absolutePath}")
+
         try {
-            val width = if (mediaContainer.width % 2 != 0) mediaContainer.width - 1 else mediaContainer.width
-            val height = if (mediaContainer.height % 2 != 0) mediaContainer.height - 1 else mediaContainer.height
-            val values = ContentValues().apply {
-                put(MediaStore.Video.Media.DISPLAY_NAME, "HiHlo_${System.currentTimeMillis()}.mp4")
-                put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-                put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/HiHlo")
+            mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                MediaRecorder(this)
+            } else {
+                MediaRecorder()
             }
-            val uri = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
-            savedUri = uri
-            mediaType = "video"
-            val pfd = contentResolver.openFileDescriptor(uri!!, "rw")
-            mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(this) else MediaRecorder()
-            if (checkAudioPermission()) mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+            val audioGranted = checkAudioPermission()
+            if (audioGranted) {
+                mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+            }
+
             mediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            if (checkAudioPermission()) {
+
+            if (audioGranted) {
                 mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 mediaRecorder?.setAudioSamplingRate(44100)
                 mediaRecorder?.setAudioEncodingBitRate(128000)
             }
+            // --- Video-only recording (no audio, avoids many issues) ---
+            //mediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+            //mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             mediaRecorder?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
             mediaRecorder?.setVideoSize(width, height)
-            mediaRecorder?.setVideoEncodingBitRate(15000000)
             mediaRecorder?.setVideoFrameRate(30)
-            mediaRecorder?.setOutputFile(pfd?.fileDescriptor)
+            mediaRecorder?.setVideoEncodingBitRate(8000000)
+
+            // For audio, uncomment these lines and handle permissions carefully:
+//             if (checkAudioPermission()) {
+//                 mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+//                 mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+//                 mediaRecorder?.setAudioSamplingRate(44100)
+//                 mediaRecorder?.setAudioEncodingBitRate(128000)
+//             }
+
+            mediaRecorder?.setOutputFile(videoFile.absolutePath)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
-            val recordingSurface = mediaRecorder!!.surface
-            isRecording = true
-            btnDone.isEnabled = false
-            btnDone.text = "Converting"
-            val choreographer = Choreographer.getInstance()
-            val frameCallback = object : Choreographer.FrameCallback {
-                override fun doFrame(frameTimeNanos: Long) {
-                    if (!isRecording) return
-                    try {
-                        val canvas = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                            recordingSurface.lockHardwareCanvas() else recordingSurface.lockCanvas(null)
-                        canvas.drawColor(Color.BLACK)
-                        mediaContainer.draw(canvas)
-                        overlayContainer.draw(canvas)
-                        recordingSurface.unlockCanvasAndPost(canvas)
-                    } catch (e: Exception) { e.printStackTrace() }
-                    choreographer.postFrameCallback(this)
-                }
-            }
-            choreographer.postFrameCallback(frameCallback)
-            Handler(Looper.getMainLooper()).postDelayed({ stopVideoRecording() }, durationMs)
         } catch (e: Exception) {
+            Log.e("ImageVideoConverter", "MediaRecorder prepare/start failed", e)
+            ProcessDialog.dismissDialog(true)
             btnDone.isEnabled = true
+            btnDone.text = "Send"
+            Toast.makeText(this, "Cannot start recording: ${e.message}", Toast.LENGTH_LONG).show()
+            mediaRecorder?.release()
+            mediaRecorder = null
+            return
+        }
+
+        val recordingSurface = mediaRecorder!!.surface
+        isRecording = true
+        btnDone.isEnabled = false
+        btnDone.text = "Converting"
+
+        val choreographer = Choreographer.getInstance()
+        val frameCallback = object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                if (!isRecording) return
+                try {
+                    val canvas = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        recordingSurface.lockHardwareCanvas()
+                    } else {
+                        recordingSurface.lockCanvas(null)
+                    }
+                    canvas.drawColor(Color.BLACK)
+                    mediaContainer.draw(canvas)
+                    overlayContainer.draw(canvas)
+                    recordingSurface.unlockCanvasAndPost(canvas)
+                } catch (e: Exception) {
+                    Log.e("ImageVideoConverter", "Frame drawing error", e)
+                }
+                choreographer.postFrameCallback(this)
+            }
+        }
+        choreographer.postFrameCallback(frameCallback)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            stopVideoRecording(videoFile)
+        }, durationMs)
+    }
+
+    private fun stopVideoRecording(videoFile: File) {
+        if (!isRecording) return
+        isRecording = false
+
+        try {
+            mediaRecorder?.stop()
+        } catch (e: Exception) {
+            Log.e("ImageVideoConverter", "stop() failed", e)
+        }
+        try {
+            mediaRecorder?.release()
+        } catch (e: Exception) {
+            Log.e("ImageVideoConverter", "release() failed", e)
+        }
+        mediaRecorder = null
+
+        // Get content URI via FileProvider
+        try {
+            val authority = "${packageName}.provider"
+            val contentUri = FileProvider.getUriForFile(this, authority, videoFile)
+            savedUri = contentUri
+            mediaType = "video"
+
+            if (!videoFile.exists() || videoFile.length() == 0L) {
+                throw Exception("Video file is missing or empty")
+            }
+
+            btnDone.text = "Done!"
+            ProcessDialog.dismissDialog(true)
+            Handler(Looper.getMainLooper()).postDelayed({ finalize_data() }, 500)
+        } catch (e: Exception) {
+            Log.e("ImageVideoConverter", "File provider error", e)
+            ProcessDialog.dismissDialog(true)
+            btnDone.isEnabled = true
+            btnDone.text = "Send"
+            Toast.makeText(this, "Failed to save video: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun stopVideoRecording() {
-        isRecording = false
-        Handler(Looper.getMainLooper()).postDelayed({
-            try {
-                mediaRecorder?.stop()
-                mediaRecorder?.release()
-                mediaRecorder = null
-                btnDone.text = "Done!"
-                Handler(Looper.getMainLooper()).postDelayed({ finalize_data() }, 1000)
-            } catch (e: Exception) { e.printStackTrace() }
-        }, 500)
-    }
-
+    // ---------------------- IMAGE SAVING (ALSO FIXED) ----------------------
     private fun saveFinalImage() {
         ProcessDialog.showDialog(this@ImageVideoConverter, true)
         btnDone.text = "Converting"
+
         val bitmap = Bitmap.createBitmap(mediaContainer.width, mediaContainer.height, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(bitmap)
         mediaContainer.draw(canvas)
         overlayContainer.draw(canvas)
 
-        val values = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "HiHlo_${System.currentTimeMillis()}.jpg")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/HiHlo")
+        val imageFile = File(cacheDir, "HiHlo_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(imageFile).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
         }
-        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-        savedUri = uri
-        mediaType = "image"
 
-        uri?.let {
-            contentResolver.openOutputStream(it)?.use { out ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
-            }
-            btnDone.text = "Done!"
-            finalize_data()
+        try {
+            val authority = "${packageName}.provider"
+            val contentUri = FileProvider.getUriForFile(this, authority, imageFile)
+            savedUri = contentUri
+            mediaType = "image"
+        } catch (e: Exception) {
+            Log.e("ImageVideoConverter", "Image save error", e)
+            ProcessDialog.dismissDialog(true)
+            btnDone.isEnabled = true
+            btnDone.text = "Send"
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_LONG).show()
+            return
         }
+
+        btnDone.text = "Done!"
+        ProcessDialog.dismissDialog(true)
+        finalize_data()
+    }
+
+    private fun createNomediaFile(folderPath: String) {
+        try {
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, ".nomedia")
+                put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, folderPath)
+            }
+            contentResolver.insert(MediaStore.Files.getContentUri("external"), values)
+        } catch (_: Exception) {}
     }
 
     fun finalize_data() {
@@ -365,7 +452,6 @@ class ImageVideoConverter : AppCompatActivity() {
             putExtra("type", mediaType)
         }
         setResult(RESULT_OK, intent)
-        ProcessDialog.dismissDialog(true)
         finish()
     }
 
@@ -387,7 +473,6 @@ class ImageVideoConverter : AppCompatActivity() {
             isClickable = true
             isLongClickable = true
         }
-
         val customTypeface = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.manrope_regular)
         val tv = TextView(this).apply {
             this.text = text
@@ -397,8 +482,10 @@ class ImageVideoConverter : AppCompatActivity() {
             gravity = Gravity.CENTER
         }
         container.addView(tv)
-
-        val params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        )
         params.gravity = Gravity.CENTER
         overlayContainer.addView(container, params)
         attachGesturesToView(container, isText = true)
@@ -422,14 +509,23 @@ class ImageVideoConverter : AppCompatActivity() {
         btnText.isVisible = true
     }
 
-    private fun checkAudioPermission(): Boolean = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    private fun checkAudioPermission(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+
     private fun requestAudioPermission() {
-        if (!checkAudioPermission()) ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), RECORD_AUDIO_REQUEST_CODE)
+        if (!checkAudioPermission()) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                RECORD_AUDIO_REQUEST_CODE
+            )
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         player?.release()
         mediaRecorder?.release()
+        mediaRecorder = null
     }
 }

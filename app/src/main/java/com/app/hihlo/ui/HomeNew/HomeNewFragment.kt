@@ -17,6 +17,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.os.SystemClock
+import android.provider.MediaStore
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -62,7 +63,11 @@ import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter
+import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
@@ -135,6 +140,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     var scrollY = 0
     private var selectedMediaType: String = "I"
     private var selectedBottomSheetType = ""
+
+    private val viewModel5: StatusViewModel by activityViewModels()
+    private lateinit var statusListGlobal: List<StatusItem>
 
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
 
@@ -221,13 +229,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 listOf(viewModel.myStory ?: MyStory()),
                 viewModel.stories
             )
-            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
-                viewModel.isStoryUploaded,
-                viewModel.myStory ?: MyStory(),
-                viewModel.stories,
-                ::getSelectedStory,
-                viewModel.profileImage
+            binding.storiesLayout.visibility = View.VISIBLE
+            binding.storiesRecycler.adapter = StatusAdapter(
+                RTVariable.statusListGlobal,
+                ::getSelectedTheStory
             )
+//            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
+//                viewModel.isStoryUploaded,
+//                viewModel.myStory ?: MyStory(),
+//                viewModel.stories,
+//                ::getSelectedStory,
+//                viewModel.profileImage
+//            )
             if(!UserDataManager.isGetBackToHome(requireContext())){
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
                 binding.nestedScrollView.post {
@@ -434,6 +447,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.swipeRefresh.isRefreshing = true
 
                         hitServiceListApi(viewModel.currentPage, 0)
+                    }
+                    if(RTVariable.IS_STATUS_DELETED){
+                        RTVariable.IS_STATUS_DELETED = false
+                        viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
                     }
                 }
             }
@@ -780,6 +797,21 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 post.user_id?.let { openCoinsBottomSheet(it, it, post.creatorDetail?.name.toString()) }
                             }
                             PostsAdapter.PostClickAction.TOWARDS_STORY -> {
+                                val targetUserId = post.user_id.toString()
+                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                                //intent.putExtra("play_position", storyPosition)
+                                val json = Gson().toJson(statusListGlobal)
+                                intent.putExtra("story_list", json)
+                                intent.putExtra("is_play_single", true)
+                                intent.putExtra("user_id", targetUserId)
+                                startActivity(intent)
+                                requireActivity().overridePendingTransition(
+                                    R.anim.slide_up,
+                                    0
+                                )
+
+
+                                /*
                                 RTVariable.IS_FROM_PROFILE = true
                                 val stories = postAdapter.getStoriesList()
                                 val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
@@ -799,6 +831,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                     // Handle error: story not found or list empty
                                     Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
                                 }
+                                */
                             }
                         }
                     }
@@ -948,6 +981,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         Log.e("TAG", "Home success: ${Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken}")
         viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "10", "0")
         viewModel4.hitCoinDetailsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
+        viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
     }
 
     private fun profileOptions( view:View, postId: String, userId: String) {
@@ -1057,13 +1091,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                     viewModel.stories
                                 )
                             }
-                            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
-                                viewModel.isStoryUploaded,
-                                viewModel.myStory ?: MyStory(),
-                                viewModel.stories,
-                                ::getSelectedStory,
-                                viewModel.profileImage
-                            )
+//                            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
+//                                viewModel.isStoryUploaded,
+//                                viewModel.myStory ?: MyStory(),
+//                                viewModel.stories,
+//                                ::getSelectedStory,
+//                                viewModel.profileImage
+//                            )
                             viewModel.isHomeDataLoaded = true
                             isLoadingMore = false
                             if (RTVariable.ISHOMECLICKED) {
@@ -1400,6 +1434,30 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+        viewModel5.getStatusLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            statusListGlobal = it.data.payload
+                            RTVariable.statusListGlobal = statusListGlobal
+                            binding.storiesRecycler.adapter = StatusAdapter(
+                                statusListGlobal,
+                                ::getSelectedTheStory
+                            )
+                            binding.storiesLayout.visibility = View.VISIBLE
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
+                }
+            }
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -1509,6 +1567,57 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }
         }
         commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
+    }
+
+    fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, view:View){
+        if(option==2){
+            Log.e("VALUE", "VALUE>>> "+value)
+            val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+
+            intent.putExtra("play_position", position)
+
+            val json = Gson().toJson(statusListGlobal)
+            intent.putExtra("story_list", json)
+            intent.putExtra("is_play_single", false)
+            intent.putExtra("user_id", "")
+
+            startActivity(intent)
+            requireActivity().overridePendingTransition(
+                R.anim.slide_up,
+                0
+            )
+        }
+        if(option==3){
+            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                ReusablePopup(
+                    context = requireContext(),
+                    anchorView = view,
+                    onOption1Click = {
+                        RTVariable.SELECT_OPTION = true
+                        checkGalleryPermissionAndPick()
+                    },
+                    onOption2Click = {
+                        RTVariable.SELECT_OPTION = false
+                        checkGalleryPermissionAndPick2("I")
+                    },
+                    onOption3Click = {
+                        RTVariable.SELECT_OPTION = false
+                        checkGalleryPermissionAndPick2("V")
+                    },
+                    //onOption4Click = {},
+                    option1Text = "Upload Status",
+                    option2Text = "Upload Photo",
+                    option3Text = "Upload Video",
+                    //option4Text = "Cancel",
+                    option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
+                    option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
+                    option3ImageRes = R.drawable.icon_over_video,
+                    //option4ImageRes = R.drawable.ic_cancel_red
+                ).show()
+            }else{
+                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     fun getSelectedStory(position:Int, story:Story, view:View, intVal: Int){
@@ -1752,21 +1861,49 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
-                val savedUri = data?.getStringExtra("uri")
+                val savedUriString = data?.getStringExtra("uri")
                 val mediaType = data?.getStringExtra("type")
-                val uri = Uri.parse(savedUri)
-                val file = if (mediaType == "video") {
-                    copyToHiHloFolder(uri, Environment.DIRECTORY_MOVIES, "mp4")
+                val contentUri = Uri.parse(savedUriString)
+
+                val file = getCacheFileFromContentUri(contentUri)
+                if (file != null && file.exists()) {
+                    val typeCode = if (mediaType == "video") "V" else "I"
+                    uploadImage(file, typeCode)
+
+                    // Optional: delete after successful upload
+                    // file.delete()
                 } else {
-                    copyToHiHloFolder(uri, Environment.DIRECTORY_PICTURES, "jpg")
-                }
-                if(mediaType.equals("video")){
-                    uploadImage(file, "V")
-                }else{
-                    uploadImage(file, "I")
+                    // handle error
                 }
             }
         }
+
+    private fun getCacheFileFromContentUri(contentUri: Uri): File? {
+        return try {
+            val cursor = requireContext().contentResolver.query(contentUri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val dataColumn = it.getColumnIndex(MediaStore.MediaColumns.DATA)
+                    if (dataColumn != -1) {
+                        val filePath = it.getString(dataColumn)
+                        return File(filePath)
+                    }
+                }
+            }
+            val cacheDir = requireContext().cacheDir
+            // Fallback: copy to a temporary file (if DATA column not available)
+            val tempFile = File(cacheDir, "temp_${System.currentTimeMillis()}.${contentUri.lastPathSegment?.substringAfterLast('.') ?: "file"}")
+            requireContext().contentResolver.openInputStream(contentUri)?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            tempFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     fun copyToHiHloFolder(uri: Uri, folderType: String, extension: String): File {
         val dir = File(

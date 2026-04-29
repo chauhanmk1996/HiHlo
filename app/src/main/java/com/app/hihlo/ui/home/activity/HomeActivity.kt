@@ -51,18 +51,27 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.ui.HomeNew.HomeNewFragment
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.calling.CallStateHolder
 import com.app.hihlo.ui.calling.view_model.CallStateViewModel
+import com.app.hihlo.ui.home.fragment.SecondStoryFragmentDirections
+import com.app.hihlo.ui.profile.fragment.ProfileFragmentDirections
+import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListener {
 
@@ -72,6 +81,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     var applyBottomBarPadding: Boolean = true
     var userImageUrl = ""
     val vm: CallStateViewModel by viewModels()
+    var isBack: Boolean = false
 
     // Optional: also animate the FAB + imgBtn together if you want
     override fun hideBottomElements() {
@@ -129,7 +139,22 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         Handler(Looper.getMainLooper()).post {
             handleIntentNavigation(intent)
         }
+        handleIntent(intent)
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(2)
+                    if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
+                        RTVariable.IS_STATUS_VIEWER_FINISHED = false
+                        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+                            RTVariable.IS_STATUS_PROFILE_CLICKED = false
+                            //popBackToHome2()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun setOnlineStatusVisibility(boolean: Boolean){
@@ -162,7 +187,22 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntentNavigation(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
 
+    private fun handleIntent(intent: Intent) {
+        if (intent.getBooleanExtra("navigate_to_profile", false)) {
+            val userId = intent.getStringExtra("profile_user_id") ?: return
+            val from = intent.getStringExtra("profile_from") ?: ""
+            val bundle = Bundle().apply {
+                putString("isMyProfile", "0")
+                putString("userId", userId)
+                putString("from", from)
+            }
+            navController.navigate(R.id.profileFragment, bundle)
+            intent.removeExtra("navigate_to_profile")
+        }
     }
 
     private fun handleIntentNavigation(intent: Intent) {
@@ -183,40 +223,51 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     private fun handleActivityBackButton() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val currentDestinationId = navController.currentDestination?.id
-                setOnlineStatusVisibility(false)
-                when (currentDestinationId) {
-                    R.id.homeNewFragment -> {
-                        Log.e("CCCCC", "CCCCC")
-                        finish()
-                        showNavigationView()
+                if (MyApplication.isStackMode) {
+                    // Bring PlayStatusActivity to the front (top of stack)
+                    val intent = Intent(this@HomeActivity, PlayStatusActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                     }
-                    R.id.searchNewFragment, R.id.chatListFragment -> {
-                        //popBackToHome()
-                        navController.popBackStack()
-                        showNavigationView()
-                    }
-                    R.id.reelsFragment -> {
-                        if (UserPreference.navigatedToMyProfile){
-//                            UserPreference.navigatedToMyProfile=false
+                    startActivity(intent)
+                    // Reset the flag to avoid re‑triggering on subsequent back presses
+                    MyApplication.isStackMode = false
+                }else{
+                    val currentDestinationId = navController.currentDestination?.id
+                    setOnlineStatusVisibility(false)
+                    when (currentDestinationId) {
+                        R.id.homeNewFragment -> {
+                            Log.e("CCCCC", "CCCCC")
+                            finish()
+                            showNavigationView()
+                        }
+                        R.id.searchNewFragment, R.id.chatListFragment -> {
+                            //popBackToHome()
+                            binding.bottomNavigationView.menu.findItem(R.id.search).icon = ContextCompat.getDrawable(this@HomeActivity, R.drawable.search_icon)
                             navController.popBackStack()
                             showNavigationView()
-//                            navigateToProfile(navController.currentDestination?.id, Preferences.getCustomModelPreference<LoginResponse>(this@HomeActivity, LOGIN_DATA)?.payload?.profileImage.toString())
-                        }else{
-                            popBackToHome()
                         }
-                    }
-                    R.id.profileFragment -> {
+                        R.id.reelsFragment -> {
+                            if (UserPreference.navigatedToMyProfile){
+//                            UserPreference.navigatedToMyProfile=false
+                                navController.popBackStack()
+                                showNavigationView()
+//                            navigateToProfile(navController.currentDestination?.id, Preferences.getCustomModelPreference<LoginResponse>(this@HomeActivity, LOGIN_DATA)?.payload?.profileImage.toString())
+                            }else{
+                                popBackToHome()
+                            }
+                        }
+                        R.id.profileFragment -> {
 //                        popBackToHome()
-                        navController.popBackStack()
-                        showNavigationView()
-                    }
-                    R.id.openAdFragment -> {
+                            navController.popBackStack()
+                            showNavigationView()
+                        }
+                        R.id.openAdFragment -> {
 
-                    }
-                    else -> {
-                        navController.popBackStack()
-                        showNavigationView()
+                        }
+                        else -> {
+                            navController.popBackStack()
+                            showNavigationView()
+                        }
                     }
                 }
             }
@@ -229,6 +280,18 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
             // HomeFragment not in back stack — navigate to it
             navController.navigate(R.id.homeNewFragment)
         }
+        binding.bottomNavigationView.selectedItemId = R.id.home
+        showBottomElements()
+    }
+
+    private fun popBackToHome2() {
+//        val currentDestId = navController.currentDestination?.id
+//        if (currentDestId != R.id.homeNewFragment) {
+//            navController.navigate(R.id.homeNewFragment)
+//        }else{
+//            supportFragmentManager.setFragmentResult("home_click", Bundle())
+//        }
+        supportFragmentManager.setFragmentResult("home_click", Bundle())
         binding.bottomNavigationView.selectedItemId = R.id.home
         showBottomElements()
     }
@@ -771,6 +834,13 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     override fun onResume() {
         super.onResume()
         RTVariable.ISHOMECLICKED = false
+        if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
+            RTVariable.IS_STATUS_VIEWER_FINISHED = false
+            if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+                RTVariable.IS_STATUS_PROFILE_CLICKED = false
+                navController.popBackStack()
+            }
+        }
     }
 
     override fun onStop() {

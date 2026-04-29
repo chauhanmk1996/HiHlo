@@ -6,6 +6,7 @@ import com.app.hihlo.model.home.response.Post
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.reel.response.Reel
 import com.app.hihlo.model.search_user_list.response.SearchUserListResponse
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 
 object RTVariable {
     var MY_USER_ID: String = ""
@@ -86,6 +87,11 @@ object RTVariable {
     var SELECT_OPTION: Boolean = false
     var IS_STORY_UPDATED_FROM_PROFILE: Boolean = false
     var IS_MEDIA_UPLOADED: Boolean = false
+
+    var statusListGlobal: List<StatusItem> = arrayListOf()
+    var IS_STATUS_DELETED: Boolean = false
+    var IS_STATUS_PROFILE_CLICKED: Boolean = false
+    var IS_STATUS_VIEWER_FINISHED: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {

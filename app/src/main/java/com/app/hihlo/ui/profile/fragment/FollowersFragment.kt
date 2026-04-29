@@ -1,10 +1,12 @@
 package com.app.hihlo.ui.profile.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -20,6 +22,9 @@ import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.home.fragment.HomeFragmentDirections
 import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.profile.adapter.AdapterFollowers
@@ -29,6 +34,7 @@ import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
     private var screenCheck: String = ""
@@ -40,6 +46,9 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
     private lateinit var adapterFollowers: AdapterFollowers
     private var myStoryData: MyStory = MyStory()
     private var allStory: List<Story>? = null
+
+    private val viewModel6: StatusViewModel by activityViewModels()
+    private lateinit var statusListGlobal: List<StatusItem>
 
 
     override fun getLayoutId(): Int {
@@ -97,7 +106,23 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 getSendUnFollow(userId.toString())
             }
             4->{
-                RTVariable.IS_FROM_PROFILE = true
+
+                val targetUserId = RTVariable.USER_ID.toInt().toString()
+                val newList = statusListGlobal.drop(1)
+                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                //intent.putExtra("play_position", storyPosition)
+                val json = Gson().toJson(newList)
+                intent.putExtra("story_list", json)
+                intent.putExtra("is_play_single", true)
+                intent.putExtra("user_id", targetUserId)
+                startActivity(intent)
+                requireActivity().overridePendingTransition(
+                    R.anim.slide_up,
+                    0
+                )
+
+
+                /*RTVariable.IS_FROM_PROFILE = true
                 val stories = adapterFollowers.getStoriesList()
                 val storyPosition = stories.indexOfFirst { it.user_id == RTVariable.USER_ID.toInt() }
                 val story = stories.find { it.user_id == RTVariable.USER_ID.toInt() }
@@ -115,7 +140,7 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 } else {
                     // Handle error: story not found or list empty
                     Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
-                }
+                } */
 
 //                //Toast.makeText(requireActivity(), "B ${data.id}", Toast.LENGTH_LONG).show()
 //                val stories = adapterFollowers!!.getStoriesList()
@@ -236,6 +261,7 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 }
             }
             viewModel5.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
+            viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
         }
     }
     private fun setObserver() {
@@ -399,6 +425,25 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                             Log.e("TAG", "Home success: ${myStoryData}")
                             Log.e("TAG", "Home success: ${allStory}")
                             adapterFollowers?.addStory(listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
+                }
+            }
+        }
+        viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            statusListGlobal = it.data.payload
+                            Log.e("TAG", "Status success: ${statusListGlobal}")
                         }else{
                         }
                     }else{
