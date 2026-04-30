@@ -2,19 +2,18 @@ package com.app.hihlo.ImageVideoConverter
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
-import android.media.MediaMetadataRetriever
-import android.media.MediaRecorder
+import android.media.*
 import android.net.Uri
 import android.os.*
-import android.provider.MediaStore
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,6 +30,7 @@ import com.bumptech.glide.Glide
 import ja.burhanrashid52.photoeditor.PhotoEditorView
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
 
@@ -42,10 +42,12 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var playerView: PlayerView
     private lateinit var btnText: Button
     private lateinit var btnDone: Button
+    private lateinit var btnDone2: Button              // "Next" button
     private lateinit var inputLayout: LinearLayout
     private lateinit var etInput: EditText
     private lateinit var tvDone: TextView
     private lateinit var ivBack: ImageView
+    private lateinit var videoTrimmerView: VideoTrimmerView
 
     private var player: ExoPlayer? = null
     private var isVideoMedia = false
@@ -57,39 +59,73 @@ class ImageVideoConverter : AppCompatActivity() {
     private var savedUri: Uri? = null
     private var mediaType: String = ""
 
+    private var trimStartMs = 0L
+    private var trimEndMs = Long.MAX_VALUE
+    private var originalVideoDurationMs = 0L
+
+    // Steps for video flow: step 1 = trim, step 2 = caption/send
+    private enum class VideoStep { TRIM, CAPTION }
+    private var currentVideoStep = VideoStep.TRIM
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.image_video_converter)
         initViews()
+
         val uri = intent.getStringExtra("uri") ?: ""
         isVideoMedia = intent.getBooleanExtra("isVideo", false)
+
         if (isVideoMedia) {
             setupVideo(uri)
-            btnDone.text = "Send"
+            goToStep(VideoStep.TRIM)
             requestAudioPermission()
+            attachGesturesToView(playerView, isText = false)   // ✅ restored
         } else {
-            btnDone.text = "Send"
             setupImage(uri)
+            btnDone.text = "Send"
+            btnDone.isVisible = true
+            btnDone2.isVisible = false
+            btnText.isVisible = false
+            inputLayout.isVisible = true
+            attachGesturesToView(photoEditorView, isText = false)   // ✅ restored
         }
+
         setupEditor()
-        if (isVideoMedia) {
-            attachGesturesToView(playerView, isText = false)
-        } else {
-            attachGesturesToView(photoEditorView, isText = false)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isVideoMedia && currentVideoStep == VideoStep.CAPTION) {
+                    goToStep(VideoStep.TRIM)
+                } else {
+                    finish()
+                }
+            }
+        })
+
+        btnDone2.setOnClickListener {
+            if (isVideoMedia) {
+                trimStartMs = videoTrimmerView.getTrimStartMs()
+                trimEndMs = videoTrimmerView.getTrimEndMs()
+                goToStep(VideoStep.CAPTION)
+            }
         }
+
         btnDone.setOnClickListener {
             if (isVideoMedia) {
-                if (!isRecording) {
-                    val videoUri = intent.getStringExtra("uri") ?: ""
-                    val duration = getVideoDuration(videoUri)
-                    startAndAutoSaveVideo(durationMs = duration)
-                }
+                if (!isRecording) startRecordingWithTrimRange()
             } else {
                 saveFinalImage()
             }
         }
-        ivBack.setOnClickListener { finish() }
+
+        ivBack.setOnClickListener {
+            if (isVideoMedia && currentVideoStep == VideoStep.CAPTION) {
+                goToStep(VideoStep.TRIM)
+            } else {
+                finish()
+            }
+        }
     }
 
     private fun initViews() {
@@ -99,10 +135,30 @@ class ImageVideoConverter : AppCompatActivity() {
         playerView = findViewById(R.id.playerView)
         btnText = findViewById(R.id.btnText)
         btnDone = findViewById(R.id.btnDone)
+        btnDone2 = findViewById(R.id.btnDone2)
         inputLayout = findViewById(R.id.inputLayout)
         etInput = findViewById(R.id.etInput)
         tvDone = findViewById(R.id.tvDone)
         ivBack = findViewById(R.id.ivBack)
+        videoTrimmerView = findViewById(R.id.videoTrimmerView)
+    }
+
+    private fun setupVideo(uri: String) {
+        photoEditorView.visibility = View.GONE
+        playerView.visibility = View.VISIBLE
+        player = ExoPlayer.Builder(this).build()
+        playerView.player = player
+        player?.repeatMode = Player.REPEAT_MODE_ALL
+        player?.setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
+        player?.prepare()
+        player?.play()
+
+        originalVideoDurationMs = getVideoDuration(uri)
+        videoTrimmerView.setVideoUri(Uri.parse(uri), originalVideoDurationMs)
+        videoTrimmerView.setOnTrimChangedListener { start, end ->
+            trimStartMs = start
+            trimEndMs = end
+        }
     }
 
     private fun getVideoDuration(uriString: String): Long {
@@ -118,21 +174,38 @@ class ImageVideoConverter : AppCompatActivity() {
         }
     }
 
-    private fun setupVideo(uri: String) {
-        photoEditorView.visibility = View.GONE
-        playerView.visibility = View.VISIBLE
-        player = ExoPlayer.Builder(this).build()
-        playerView.player = player
-        player?.repeatMode = Player.REPEAT_MODE_ALL
-        player?.setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
-        player?.prepare()
-        player?.play()
-    }
-
     private fun setupImage(uri: String) {
         photoEditorView.visibility = View.VISIBLE
         playerView.visibility = View.GONE
         Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
+        videoTrimmerView.visibility = View.GONE
+    }
+
+    /**
+     * Show the appropriate UI for the given video step
+     */
+    private fun goToStep(step: VideoStep) {
+        currentVideoStep = step
+        when (step) {
+            VideoStep.TRIM -> {
+                // Restore trim range if we have one (coming back from caption step)
+                if (trimEndMs != Long.MAX_VALUE) {
+                    videoTrimmerView.setTrimRange(trimStartMs, trimEndMs)
+                }
+                videoTrimmerView.visibility = View.VISIBLE
+                btnDone2.isVisible = true
+                btnDone.isVisible = false
+                btnText.isVisible = false
+                inputLayout.isVisible = false
+            }
+            VideoStep.CAPTION -> {
+                videoTrimmerView.visibility = View.GONE
+                btnDone2.isVisible = false
+                btnDone.isVisible = true
+                btnText.isVisible = true
+                inputLayout.isVisible = false   // will be shown when user taps btnText
+            }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -250,9 +323,7 @@ class ImageVideoConverter : AppCompatActivity() {
         listPopupWindow.setAdapter(adapter)
         listPopupWindow.setOnItemClickListener { _, _, position, _ ->
             when (items[position]) {
-                "Delete" -> {
-                    overlayContainer.removeView(view)
-                }
+                "Delete" -> overlayContainer.removeView(view)
                 "Edit" -> {
                     val tv = (view as? ViewGroup)?.getChildAt(0) as? TextView
                     openInputBar(tv)
@@ -263,23 +334,47 @@ class ImageVideoConverter : AppCompatActivity() {
         listPopupWindow.show()
     }
 
-    // ---------------------- VIDEO RECORDING (CLEAN, WORKING VERSION) ----------------------
+    private fun startRecordingWithTrimRange() {
+        // At this point trimStartMs and trimEndMs are already set from the trim step
+        var segmentDurationMs = trimEndMs - trimStartMs
+        if (segmentDurationMs <= 0L) {
+            trimStartMs = 0L
+            trimEndMs = originalVideoDurationMs
+            segmentDurationMs = originalVideoDurationMs
+        }
+
+        player?.seekTo(trimStartMs)
+        player?.playWhenReady = true
+
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    val currentPos = player?.currentPosition ?: 0L
+                    if (abs(currentPos - trimStartMs) < 100) {
+                        player?.removeListener(this)
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            startAndAutoSaveVideo(segmentDurationMs)
+                        }, 50)
+                    }
+                }
+            }
+        }
+        player?.addListener(listener)
+    }
+
     private fun startAndAutoSaveVideo(durationMs: Long) {
         ProcessDialog.showDialog(this@ImageVideoConverter, true)
 
-        // Make sure layout is measured
         if (mediaContainer.width <= 0 || mediaContainer.height <= 0) {
             ProcessDialog.dismissDialog(true)
             Toast.makeText(this, "Layout not ready", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val width = (mediaContainer.width / 2) * 2   // ensure even
+        val width = (mediaContainer.width / 2) * 2
         val height = (mediaContainer.height / 2) * 2
-
         val videoFile = File(cacheDir, "HiHlo_${System.currentTimeMillis()}.mp4")
         videoFile.parentFile?.mkdirs()
-        Log.d("ImageVideoConverter", "Output file: ${videoFile.absolutePath}")
 
         try {
             mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -291,36 +386,22 @@ class ImageVideoConverter : AppCompatActivity() {
             if (audioGranted) {
                 mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             }
-
             mediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-
             if (audioGranted) {
                 mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 mediaRecorder?.setAudioSamplingRate(44100)
                 mediaRecorder?.setAudioEncodingBitRate(128000)
             }
-            // --- Video-only recording (no audio, avoids many issues) ---
-            //mediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-            //mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             mediaRecorder?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
             mediaRecorder?.setVideoSize(width, height)
             mediaRecorder?.setVideoFrameRate(30)
             mediaRecorder?.setVideoEncodingBitRate(8000000)
-
-            // For audio, uncomment these lines and handle permissions carefully:
-//             if (checkAudioPermission()) {
-//                 mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-//                 mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-//                 mediaRecorder?.setAudioSamplingRate(44100)
-//                 mediaRecorder?.setAudioEncodingBitRate(128000)
-//             }
-
             mediaRecorder?.setOutputFile(videoFile.absolutePath)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
         } catch (e: Exception) {
-            Log.e("ImageVideoConverter", "MediaRecorder prepare/start failed", e)
+            Log.e("ImageVideoConverter", "MediaRecorder start failed", e)
             ProcessDialog.dismissDialog(true)
             btnDone.isEnabled = true
             btnDone.text = "Send"
@@ -366,19 +447,15 @@ class ImageVideoConverter : AppCompatActivity() {
         if (!isRecording) return
         isRecording = false
 
-        try {
-            mediaRecorder?.stop()
-        } catch (e: Exception) {
-            Log.e("ImageVideoConverter", "stop() failed", e)
-        }
-        try {
-            mediaRecorder?.release()
-        } catch (e: Exception) {
-            Log.e("ImageVideoConverter", "release() failed", e)
-        }
+        try { mediaRecorder?.stop() } catch (_: Exception) {}
+        try { mediaRecorder?.release() } catch (_: Exception) {}
         mediaRecorder = null
 
-        // Get content URI via FileProvider
+        player?.playWhenReady = false
+        useFinalFile(videoFile)
+    }
+
+    private fun useFinalFile(videoFile: File) {
         try {
             val authority = "${packageName}.provider"
             val contentUri = FileProvider.getUriForFile(this, authority, videoFile)
@@ -401,13 +478,12 @@ class ImageVideoConverter : AppCompatActivity() {
         }
     }
 
-    // ---------------------- IMAGE SAVING (ALSO FIXED) ----------------------
     private fun saveFinalImage() {
         ProcessDialog.showDialog(this@ImageVideoConverter, true)
         btnDone.text = "Converting"
 
         val bitmap = Bitmap.createBitmap(mediaContainer.width, mediaContainer.height, Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(bitmap)
+        val canvas = Canvas(bitmap)
         mediaContainer.draw(canvas)
         overlayContainer.draw(canvas)
 
@@ -433,17 +509,6 @@ class ImageVideoConverter : AppCompatActivity() {
         btnDone.text = "Done!"
         ProcessDialog.dismissDialog(true)
         finalize_data()
-    }
-
-    private fun createNomediaFile(folderPath: String) {
-        try {
-            val values = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, ".nomedia")
-                put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, folderPath)
-            }
-            contentResolver.insert(MediaStore.Files.getContentUri("external"), values)
-        } catch (_: Exception) {}
     }
 
     fun finalize_data() {

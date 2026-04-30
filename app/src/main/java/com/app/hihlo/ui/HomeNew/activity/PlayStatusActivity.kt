@@ -70,13 +70,13 @@ class PlayStatusActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private val progressHandler = Handler(Looper.getMainLooper())
-    private var imageDuration = 5000L
+    private var imageDuration = 10000L  // 20 seconds
     private var imageRemaining = 5000L
     private var imageStartTime = 0L
     private var isKeyboardVisible = false
 
     private val viewModel: NewStoryViewModel by viewModels()
-    private val viewModel2: StoryViewModel by viewModels()
+    //private val viewModel2: StoryViewModel by viewModels()
 
     private val imageRunnable = Runnable {
         playNext()

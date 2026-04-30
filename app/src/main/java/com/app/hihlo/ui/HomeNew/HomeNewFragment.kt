@@ -1,13 +1,12 @@
 package com.app.hihlo.ui.HomeNew
 
-import CommentPrefs.mergeComments
 import android.Manifest
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -15,14 +14,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.os.Parcelable
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,16 +27,13 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
@@ -64,20 +58,16 @@ import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.FilePickerStatus
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter
 import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
-import com.app.hihlo.ui.home.activity.HomeActivity
-import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.adapter.AdapterUserPostList
-import com.app.hihlo.ui.home.fragment.HomeFragmentDirections
 import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.REQUEST_CODE_CROP_VIDEO
-import com.app.hihlo.ui.profile.view_model.FollowersViewModel
-import com.app.hihlo.ui.profile.view_model.GetProfileViewModel
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
@@ -1442,11 +1432,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
-                            binding.storiesRecycler.adapter = StatusAdapter(
-                                statusListGlobal,
-                                ::getSelectedTheStory
-                            )
-                            binding.storiesLayout.visibility = View.VISIBLE
+                            lifecycleScope.launch {
+                                delay(1000)
+                                binding.storiesRecycler.adapter = StatusAdapter(
+                                    statusListGlobal,
+                                    ::getSelectedTheStory
+                                )
+                                binding.storiesLayout.visibility = View.VISIBLE
+                            }
                         }else{
                         }
                     }else{
@@ -1569,6 +1562,40 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }
 
+    private val filePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.getStringExtra("uri") ?: ""
+            val type = result.data?.getStringExtra("type") ?: ""
+            Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $type")
+            // TODO: use the returned data here (upload, display, etc.)
+            val mediaType = type
+            val contentUri = Uri.parse(uri)
+
+//            val file = getCacheFileFromContentUri(contentUri)
+//            Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $file")
+//            if (file != null && file.exists()) {
+//                val typeCode = if (mediaType == "video") "V" else "I"
+//                Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $file, code = $typeCode")
+////                val s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+////                Log.d("UPLOAD_CHECK", "Bucket: ${s3Data?.BUCKET_NAME}, Keys: ${s3Data?.ACCESS_KEY}")
+////                Log.d("UPLOAD_CHECK", "File exists: ${file?.exists()}, size: ${file?.length()}")
+//                uploadImage(file, typeCode)
+//
+//                // Optional: delete after successful upload
+//                // file.delete()
+//            }
+            Handler(Looper.getMainLooper()).post {
+                // now the fragment is safely attached
+                val file = getCacheFileFromContentUri(contentUri)
+                // ...
+                val typeCode = if (mediaType == "video") "V" else "I"
+                file?.let { uploadImage(it, typeCode) }
+            }
+        }
+    }
+
     fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, view:View){
         if(option==2){
             Log.e("VALUE", "VALUE>>> "+value)
@@ -1595,6 +1622,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     onOption1Click = {
                         RTVariable.SELECT_OPTION = true
                         checkGalleryPermissionAndPick()
+//                        val intent = Intent(requireContext(), FilePickerStatus::class.java)
+//                        filePickerLauncher.launch(intent)
+//                        requireActivity().overridePendingTransition(
+//                            R.anim.slide_up_2,
+//                            0
+//                        )
                     },
                     onOption2Click = {
                         RTVariable.SELECT_OPTION = false

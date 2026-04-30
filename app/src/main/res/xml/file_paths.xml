@@ -2,4 +2,5 @@
     <external-path name="download" path="Download/" />
     <cache-path name="shared_image" path="." />
     <cache-path name="cache" path="/" />
+    <cache-path name="cache" path="." />
 </paths>

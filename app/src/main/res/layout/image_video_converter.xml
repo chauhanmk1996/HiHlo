@@ -35,6 +35,14 @@
         android:layout_height="match_parent"
         android:clipChildren="false"/>
 
+    <com.app.hihlo.ImageVideoConverter.VideoTrimmerView
+        android:id="@+id/videoTrimmerView"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="8dp" />
+
     <LinearLayout
         android:id="@+id/inputLayout"
         android:layout_width="match_parent"
@@ -43,7 +51,7 @@
         android:layout_gravity="bottom"
         android:background="#CC000000"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="10dp"
         android:visibility="gone">
 
         <EditText
@@ -67,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:padding="10dp"
-            android:text="\u271A Caption"
+            android:text="\u2191 Done"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:textSize="15sp"
@@ -93,7 +101,7 @@
         android:textAllCaps="false"
         android:fontFamily="@font/manrope_semibold"
         android:textColor="@android:color/white"
-        android:visibility="visible"/>
+        android:visibility="gone"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnDone"
@@ -109,7 +117,25 @@
         android:textSize="15sp"
         android:textAllCaps="false"
         android:fontFamily="@font/manrope_semibold"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:visibility="gone"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnDone2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/btn_background"
+        android:backgroundTint="#008000"
+        android:text="Next"
+        android:textSize="15sp"
+        android:textAllCaps="false"
+        android:fontFamily="@font/manrope_semibold"
+        android:textColor="@android:color/white"
+        android:visibility="gone"/>
 
     <LinearLayout
         app:layout_constraintTop_toTopOf="parent"
