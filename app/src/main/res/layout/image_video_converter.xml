@@ -39,6 +39,8 @@
         android:id="@+id/videoTrimmerView"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:layout_height="72dp"
         android:layout_marginTop="8dp" />

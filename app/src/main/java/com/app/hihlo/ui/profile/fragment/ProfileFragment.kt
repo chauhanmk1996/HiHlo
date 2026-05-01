@@ -12,6 +12,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -62,6 +64,7 @@ import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
+import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
 import com.app.hihlo.ui.home.bottom_sheet.ViewPostBottomSheetFragment
@@ -564,7 +567,23 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             onOption1Click = {
                 if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                     RTVariable.SELECT_OPTION = true
-                    checkGalleryPermissionAndPick2()
+                    //checkGalleryPermissionAndPick2()
+                    val bottomSheet = FilePickerBottomsheet()
+                    bottomSheet.setOnMediaSelectedListener { uri, type ->
+                        // uri and type are already returned as strings, no Intent parsing needed
+                        val mediaType = type          // "image" or "video"
+                        val contentUri = Uri.parse(uri)
+                        Handler(Looper.getMainLooper()).post {
+                            // Ensure your fragment/activity is still attached if needed
+                            val file = getCacheFileFromContentUri(contentUri)
+                            val typeCode = if (mediaType == "video") "V" else "I"
+                            file?.let { uploadImage(it, typeCode) }
+                        }
+                    }
+                    bottomSheet.show(
+                        parentFragmentManager,   // or childFragmentManager, depending on where you are
+                        "FilePickerBottomSheet"
+                    )
                 }else{
                     Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                 }

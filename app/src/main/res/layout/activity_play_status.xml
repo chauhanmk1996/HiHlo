@@ -49,6 +49,7 @@
             android:layout_height="0dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="33dp"
+            app:resize_mode="fit"
             app:use_controller="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -201,22 +202,22 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="0dp"
+            android:paddingBottom="7dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
+            <!-- Seen Layout -->
             <!-- Seen Layout -->
             <LinearLayout
                 android:id="@+id/seenLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:layout_marginTop="18dp"
-                android:layout_marginBottom="18dp"
+                android:layout_marginBottom="0dp"
                 android:orientation="horizontal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
 
                 <ImageView
@@ -239,13 +240,13 @@
             <!-- Delete -->
             <ImageView
                 android:id="@+id/deleteButton"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_marginEnd="6dp"
+                android:layout_marginBottom="0dp"
                 android:src="@drawable/delete_icon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/seenLayout"
-                app:layout_constraintBottom_toBottomOf="@id/seenLayout" />
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <!-- Send Button -->
             <ImageView

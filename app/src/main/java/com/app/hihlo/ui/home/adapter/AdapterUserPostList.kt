@@ -38,7 +38,7 @@ class AdapterUserPostList(
     val homePosts: MutableList<Post>,
     val profilePosts: Posts,
     val from: String,
-    val getSelectedPost: (Post, Data, Int, Int, View) -> Unit
+    val getSelectedPost: (Post, Data, Int, Int, View, View) -> Unit
 ) : RecyclerView.Adapter<AdapterUserPostList.ViewHolder>() {
 
     override fun onCreateViewHolder(
@@ -117,10 +117,10 @@ class AdapterUserPostList(
 //                        "3" -> onlineStatusImage.setImageResource(R.drawable.busy_status)
                     }
                     sideOptions.setOnClickListener {
-                        getSelectedPost(homePosts[position], Data(), 0, position, sideOptions)
+                        getSelectedPost(homePosts[position], Data(), 0, position, sideOptions, sideOptions)
                     }
                     userImageCardView.setOnClickListener {
-                        getSelectedPost(homePosts[position], Data(), 1, position, sideOptions)
+                        getSelectedPost(homePosts[position], Data(), 1, position, sideOptions, userImageCardView)
                     }
                     likeImage.setOnClickListener {
                         if (homePosts[position].isLiked == 1) {
@@ -138,22 +138,22 @@ class AdapterUserPostList(
                             }
                             Glide.with(root.context).load(R.drawable.btn_heart_fill).into(likeImage)
                         }
-                        getSelectedPost(homePosts[position], Data(), 2, position, sideOptions)
+                        getSelectedPost(homePosts[position], Data(), 2, position, sideOptions, likeImage)
                     }
                     commentImage.setOnClickListener {
                         RTVariable.POST_ID = homePosts[position].id.toString()
                         RTVariable.COMMENT_FROM = false
                         Toast.makeText(root.context, "H", Toast.LENGTH_SHORT).show()
-                        getSelectedPost(homePosts[position], Data(), 3, position, sideOptions)
+                        getSelectedPost(homePosts[position], Data(), 3, position, sideOptions, commentImage)
                     }
                     shareImage.setOnClickListener {
-                        getSelectedPost(homePosts[position], Data(), 4, position, sideOptions)
+                        getSelectedPost(homePosts[position], Data(), 4, position, sideOptions, shareImage)
                     }
                     followButtonImage.setOnClickListener {
                         if (homePosts[position]?.is_follow!=1){
-                            getSelectedPost(homePosts[position], Data(), 5, position, sideOptions)
+                            getSelectedPost(homePosts[position], Data(), 5, position, sideOptions, followButtonImage)
                         }else{
-                            getSelectedPost(homePosts[position], Data(), 6, position, sideOptions)
+                            getSelectedPost(homePosts[position], Data(), 6, position, sideOptions, followButtonImage)
                         }
                     }
                 }
@@ -344,25 +344,25 @@ class AdapterUserPostList(
                             root.context.resources.getDrawable(R.drawable.gredient_circle_transparent, null)
                         }
                     sideOptions.setOnClickListener {
-                        getSelectedPost(Post(), profilePosts.data[position], 0, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 0, position, sideOptions, sideOptions)
                     }
                     userImageCardView.setOnClickListener {
                         var user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
                         if (profilePosts.data[position].creator_name==user){
-                            getSelectedPost(Post(), profilePosts.data[position], 1, position, sideOptions)
+                            getSelectedPost(Post(), profilePosts.data[position], 1, position, sideOptions, userImageCardView)
                         }else{
                             val story = storiesList.find { it.user_id == profilePosts.data[position].user_id }
                             if (story != null) {
                                 val storyPosition = storiesList.indexOfFirst { it.user_id == profilePosts.data[position].user_id }
                                 RTVariable.STORY_POSITION = storyPosition
-                                getSelectedPost(Post(), profilePosts.data[position], 8, position, sideOptions)
+                                getSelectedPost(Post(), profilePosts.data[position], 8, position, sideOptions, userImageCardView)
                             } else {
-                                getSelectedPost(Post(), profilePosts.data[position], 1, position, sideOptions)
+                                getSelectedPost(Post(), profilePosts.data[position], 1, position, sideOptions, userImageCardView)
                             }
                         }
                     }
                     userName.setOnClickListener {
-                        getSelectedPost(Post(), profilePosts.data[position], 1, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 1, position, sideOptions, userName)
                     }
                     verifiedNameTick.isVisible = true
                     likeImage.setOnClickListener {
@@ -402,7 +402,7 @@ class AdapterUserPostList(
                                     .start()
                             }
                         }
-                        getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions, likeImage)
                     }
                     btnLike.setOnClickListener {
                         if (profilePosts.data[position].isLiked == 1) {
@@ -441,36 +441,36 @@ class AdapterUserPostList(
                                     .start()
                             }
                         }
-                        getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 2, position, sideOptions, btnLike)
                     }
                     commentImage.setOnClickListener {
                         RTVariable.POST_POSITION = position
                         RTVariable.POST_ID = profilePosts.data[position].id.toString()
                         RTVariable.COMMENT_FROM = false
                         //Toast.makeText(root.context, "P ${profilePosts.data[position].id}", Toast.LENGTH_SHORT).show()
-                        getSelectedPost(Post(), profilePosts.data[position], 3, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 3, position, sideOptions, commentImage)
                     }
                     btnComment.setOnClickListener {
                         RTVariable.POST_POSITION = position
                         RTVariable.POST_ID = profilePosts.data[position].id.toString()
                         RTVariable.COMMENT_FROM = false
                         //Toast.makeText(root.context, "P ${profilePosts.data[position].id}", Toast.LENGTH_SHORT).show()
-                        getSelectedPost(Post(), profilePosts.data[position], 3, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 3, position, sideOptions, btnComment)
                     }
                     shareImage.setOnClickListener {
-                        getSelectedPost(Post(), profilePosts.data[position], 4, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 4, position, sideOptions, shareImage)
                     }
                     followButtonImage.setOnClickListener {
                         //Toast.makeText(root.context, "A ${profilePosts.data[position].user_id}", Toast.LENGTH_LONG).show()
                         if(RTVariable.USER_IS_FOLLOWING){
-                            getSelectedPost(Post(), profilePosts.data[position], 6, position, sideOptions)
+                            getSelectedPost(Post(), profilePosts.data[position], 6, position, sideOptions, followButtonImage)
                         }else{
-                            getSelectedPost(Post(), profilePosts.data[position], 5, position, sideOptions)
+                            getSelectedPost(Post(), profilePosts.data[position], 5, position, sideOptions, followButtonImage)
                         }
                     }
                     giftImage.setOnClickListener {
                         //val post = profilePosts.data[position] ?: return@setOnClickListener
-                        getSelectedPost(Post(), profilePosts.data[position], 7, position, sideOptions)
+                        getSelectedPost(Post(), profilePosts.data[position], 7, position, sideOptions, giftImage)
                     }
                 }
             }

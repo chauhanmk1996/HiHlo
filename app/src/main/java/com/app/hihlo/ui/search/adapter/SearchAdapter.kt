@@ -3,6 +3,7 @@ package com.app.hihlo.ui.search.adapter
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +20,7 @@ import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.utils.RTVariable
 import com.bumptech.glide.Glide
 
-class SearchAdapter(val users: MutableList<SearchUserListResponse.Payload.User>, val getSelectedChat: (Int, Int) -> Unit): RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
+class SearchAdapter(val users: MutableList<SearchUserListResponse.Payload.User>, val getSelectedChat: (Int, Int, View) -> Unit): RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -115,7 +116,7 @@ class SearchAdapter(val users: MutableList<SearchUserListResponse.Payload.User>,
             userImage.setOnClickListener {
                 var user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
                 if (users[position].username==user){
-                    getSelectedChat(position, 1)
+                    getSelectedChat(position, 1, userImage)
                 }else{
                     if(users[position].isStoryUploaded == 1){
                         val story = storiesList.find { it.user_id == users[position].id }
@@ -124,33 +125,33 @@ class SearchAdapter(val users: MutableList<SearchUserListResponse.Payload.User>,
                             val storyPosition = storiesList.indexOfFirst { it.user_id == users[position].id }
                             RTVariable.USER_ID = users[position].id.toString()
                             RTVariable.STORY_POSITION = storyPosition
-                            getSelectedChat(position, 4)
+                            getSelectedChat(position, 4, userImage)
                         } else {
                             val storyPosition = storiesList.indexOfFirst { it.user_id == users[position].id }
                             RTVariable.USER_ID = users[position].id.toString()
                             RTVariable.STORY_POSITION = storyPosition
-                            getSelectedChat(position, 4)
+                            getSelectedChat(position, 4, userImage)
                         }
                     }else{
-                        getSelectedChat(position, 1)
+                        getSelectedChat(position, 1, userImage)
                     }
                 }
             }
             name.setOnClickListener {
-                getSelectedChat(position, 1)
+                getSelectedChat(position, 1, name)
             }
             followButtonImage.setOnClickListener {
                 //getSelectedUser(data.follower_id, data.isFollowing, 3)
                 //RTVariable.MY_USER_ID = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.userId.toString()
                 RTVariable.USER_ID = users[position].id.toString()
                 if (users[position].is_follow!=1){
-                    getSelectedChat(position, 2)
+                    getSelectedChat(position, 2, followButtonImage)
                 }else{
-                    getSelectedChat(position, 3)
+                    getSelectedChat(position, 3, followButtonImage)
                 }
             }
             root.setOnClickListener {
-                getSelectedChat(position, 1)
+                getSelectedChat(position, 1, root)
             }
         }
 

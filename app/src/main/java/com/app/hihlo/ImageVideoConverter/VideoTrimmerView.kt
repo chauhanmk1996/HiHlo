@@ -11,7 +11,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 @SuppressLint("ViewConstructor")
 class VideoTrimmerView @JvmOverloads constructor(
@@ -20,184 +21,388 @@ class VideoTrimmerView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val handleTouchArea = 30f.dp
+    // =========================================================
+    // INSTAGRAM STYLE VIDEO TRIMMER
+    // Full Ready To Use
+    // =========================================================
+
+    private val density = context.resources.displayMetrics.density
+
+    private val handleWidth = 14f * density
+    private val cornerRadius = 10f * density
+    private val borderStroke = 3f * density
+    private val thumbTouchExtra = 24f * density
+    private val progressWidth = 2f * density
+
     private val minDurationMs = 1000L
+    private val frameCount = 12
 
     private var videoDurationMs = 0L
     private var startMs = 0L
     private var endMs = 0L
-    private var startX = 0f
-    private var endX = 0f
 
-    private var thumbnails: List<Bitmap> = emptyList()
-    private var frameCount = 10
+    private var leftX = 0f
+    private var rightX = 0f
+    private var progressX = 0f
 
-    private var onTrimChangedListener: ((startMs: Long, endMs: Long) -> Unit)? = null
-    private var draggingLeftHandle = false
-    private var draggingRightHandle = false
+    private var draggingLeft = false
+    private var draggingRight = false
+    private var draggingProgress = false
 
-    // Paints
-    private val framePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val dimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#80000000")
+    private var thumbnails: MutableList<Bitmap> = mutableListOf()
+
+    private var trimListener: ((Long, Long) -> Unit)? = null
+    private var scrubListener: ((Long) -> Unit)? = null
+
+    // =========================================================
+    // PAINTS
+    // =========================================================
+
+    private val bitmapPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    private val shadePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#88000000")
     }
-    private val handlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        strokeWidth = 3f.dp
+
+    private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#FFFFFFFF")
         style = Paint.Style.STROKE
+        strokeWidth = borderStroke
     }
-    private val handleFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+
+    private val handlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#FFFFFFFF")
         style = Paint.Style.FILL
     }
 
+    private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#FFFFFFFF")
+        strokeWidth = progressWidth
+    }
+
+    private val progressCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#FFFFFFFF")
+        style = Paint.Style.FILL
+    }
+
+    // =========================================================
+
     fun setVideoUri(uri: Uri, durationMs: Long) {
         videoDurationMs = durationMs
-        // Default to full range unless later set by setTrimRange
         startMs = 0L
         endMs = durationMs
-        updateHandlePositions()
-        generateThumbnails(uri)
+        progressX = 0f
+
+        post {
+            leftX = 0f
+            rightX = width.toFloat()
+            progressX = leftX
+            invalidate()
+            generateFrames(uri)
+        }
     }
 
-    /** Allows the external Activity to restore a previously selected range */
     fun setTrimRange(startMs: Long, endMs: Long) {
         if (videoDurationMs <= 0) return
-        this.startMs = startMs.coerceIn(0, videoDurationMs)
-        this.endMs = endMs.coerceIn(this.startMs + minDurationMs, videoDurationMs)
-        updateHandlePositions()
-    }
 
-    fun setOnTrimChangedListener(listener: (startMs: Long, endMs: Long) -> Unit) {
-        onTrimChangedListener = listener
-    }
+        this.startMs = startMs
+        this.endMs = endMs
 
-    fun getTrimStartMs() = startMs
-    fun getTrimEndMs() = endMs
+        leftX = (startMs.toFloat() / videoDurationMs) * width
+        rightX = (endMs.toFloat() / videoDurationMs) * width
 
-    private fun updateHandlePositions() {
-        if (videoDurationMs == 0L) return
-        startX = (startMs.toFloat() / videoDurationMs) * width
-        endX = (endMs.toFloat() / videoDurationMs) * width
+        progressX = leftX
         invalidate()
     }
 
-    @SuppressLint("NewApi")
-    private fun generateThumbnails(uri: Uri) {
-        if (videoDurationMs <= 0) return
-        Thread {
-            val retriever = MediaMetadataRetriever()
-            try {
-                retriever.setDataSource(context, uri)
-                val bitmaps = mutableListOf<Bitmap>()
-                val interval = if (frameCount > 1) videoDurationMs / (frameCount - 1) else videoDurationMs
-                for (i in 0 until frameCount) {
-                    val timeUs = (i * interval) * 1000L
-                    val frame = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST)
-                    if (frame != null) {
-                        val scaled = Bitmap.createScaledBitmap(frame, 200, height, true)
-                        if (scaled != frame) frame.recycle()
-                        bitmaps.add(scaled)
-                    } else {
-                        bitmaps.add(createPlaceholder())
-                    }
-                }
-                Handler(Looper.getMainLooper()).post {
-                    thumbnails = bitmaps
-                    invalidate()
-                }
-            } catch (e: Exception) {
-                Log.e("VideoTrimmerView", "Cannot extract frames", e)
-            } finally {
-                try { retriever.release() } catch (_: Exception) {}
-            }
-        }.start()
+    fun setOnTrimChangedListener(listener: (Long, Long) -> Unit) {
+        trimListener = listener
     }
 
-    private fun createPlaceholder(): Bitmap {
-        val bmp = Bitmap.createBitmap(200, height, Bitmap.Config.ARGB_8888)
-        Canvas(bmp).drawColor(Color.DKGRAY)
-        return bmp
+    fun setOnScrubChangedListener(listener: (Long) -> Unit) {
+        scrubListener = listener
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        updateHandlePositions()
-    }
+    fun getTrimStartMs(): Long = startMs
+    fun getTrimEndMs(): Long = endMs
+
+    // =========================================================
+    // DRAW
+    // =========================================================
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (thumbnails.isEmpty() || videoDurationMs == 0L) return
 
-        val segmentWidth = width.toFloat() / frameCount
-        for (i in thumbnails.indices) {
-            val left = i * segmentWidth
-            canvas.drawBitmap(thumbnails[i], null,
-                RectF(left, 0f, left + segmentWidth, height.toFloat()), framePaint)
+        if (width == 0 || height == 0) return
+
+        drawFrames(canvas)
+        drawShades(canvas)
+        drawBorder(canvas)
+        drawHandles(canvas)
+        drawProgress(canvas)
+    }
+
+    private fun drawFrames(canvas: Canvas) {
+        if (thumbnails.isEmpty()) {
+            canvas.drawColor(Color.DKGRAY)
+            return
         }
 
-        if (startX > 0) canvas.drawRect(0f, 0f, startX, height.toFloat(), dimPaint)
-        if (endX < width) canvas.drawRect(endX, 0f, width.toFloat(), height.toFloat(), dimPaint)
+        val frameWidth = width.toFloat() / thumbnails.size
 
-        drawHandle(canvas, startX)
-        drawHandle(canvas, endX)
+        thumbnails.forEachIndexed { index, bmp ->
+            val left = index * frameWidth
+
+            canvas.drawBitmap(
+                bmp,
+                null,
+                RectF(left, 0f, left + frameWidth, height.toFloat()),
+                bitmapPaint
+            )
+        }
     }
 
-    private fun drawHandle(canvas: Canvas, x: Float) {
-        canvas.drawLine(x, 0f, x, height.toFloat(), handlePaint)
-        val r = 6f.dp
-        canvas.drawCircle(x, r, r, handleFillPaint)
-        canvas.drawCircle(x, height - r, r, handleFillPaint)
+    private fun drawShades(canvas: Canvas) {
+        canvas.drawRect(0f, 0f, leftX, height.toFloat(), shadePaint)
+        canvas.drawRect(rightX, 0f, width.toFloat(), height.toFloat(), shadePaint)
     }
+
+    private fun drawBorder(canvas: Canvas) {
+        val rect = RectF(leftX, 0f, rightX, height.toFloat())
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, borderPaint)
+    }
+
+    private fun drawHandles(canvas: Canvas) {
+
+        // left
+        val leftRect = RectF(
+            leftX,
+            0f,
+            leftX + handleWidth,
+            height.toFloat()
+        )
+
+        canvas.drawRoundRect(
+            leftRect,
+            cornerRadius,
+            cornerRadius,
+            handlePaint
+        )
+
+        // right
+        val rightRect = RectF(
+            rightX - handleWidth,
+            0f,
+            rightX,
+            height.toFloat()
+        )
+
+        canvas.drawRoundRect(
+            rightRect,
+            cornerRadius,
+            cornerRadius,
+            handlePaint
+        )
+
+        // left grip
+        val cx1 = leftX + handleWidth / 2
+        canvas.drawLine(cx1, height * .35f, cx1, height * .65f, borderPaint)
+
+        // right grip
+        val cx2 = rightX - handleWidth / 2
+        canvas.drawLine(cx2, height * .35f, cx2, height * .65f, borderPaint)
+    }
+
+    private fun drawProgress(canvas: Canvas) {
+        val x = progressX.coerceIn(leftX, rightX)
+
+        canvas.drawLine(
+            x,
+            0f,
+            x,
+            height.toFloat(),
+            progressPaint
+        )
+
+        canvas.drawCircle(
+            x,
+            height / 2f,
+            5f * density,
+            progressCirclePaint
+        )
+    }
+
+    // =========================================================
+    // TOUCH
+    // =========================================================
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (videoDurationMs == 0L) return false
+
         val x = event.x
 
         when (event.actionMasked) {
+
             MotionEvent.ACTION_DOWN -> {
-                if (x >= startX - handleTouchArea && x <= startX + handleTouchArea) {
-                    draggingLeftHandle = true
-                    return true
+
+                draggingLeft = isNearLeft(x)
+                draggingRight = isNearRight(x)
+
+                if (!draggingLeft && !draggingRight) {
+                    if (x in leftX..rightX) {
+                        draggingProgress = true
+                    }
                 }
-                if (x >= endX - handleTouchArea && x <= endX + handleTouchArea) {
-                    draggingRightHandle = true
-                    return true
-                }
-                return false
+
+                parent.requestDisallowInterceptTouchEvent(true)
+                return true
             }
+
             MotionEvent.ACTION_MOVE -> {
-                if (draggingLeftHandle) {
-                    startX = x.coerceIn(0f, endX - minHandlePixelDistance())
-                    startMs = (startX / width * videoDurationMs).toLong()
-                    notifyTrimChanged()
-                    invalidate()
-                    return true
+
+                when {
+                    draggingLeft -> moveLeft(x)
+                    draggingRight -> moveRight(x)
+                    draggingProgress -> moveProgress(x)
                 }
-                if (draggingRightHandle) {
-                    endX = x.coerceIn(startX + minHandlePixelDistance(), width.toFloat())
-                    endMs = (endX / width * videoDurationMs).toLong()
-                    notifyTrimChanged()
-                    invalidate()
-                    return true
-                }
+
+                invalidate()
+                return true
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                draggingLeftHandle = false
-                draggingRightHandle = false
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                draggingLeft = false
+                draggingRight = false
+                draggingProgress = false
                 return true
             }
         }
-        return false
+
+        return super.onTouchEvent(event)
     }
 
-    private fun minHandlePixelDistance(): Float =
-        (minDurationMs.toFloat() / videoDurationMs) * width
+    private fun moveLeft(x: Float) {
 
-    private fun notifyTrimChanged() {
-        onTrimChangedListener?.invoke(startMs, endMs)
+        val minGap = minGapPx()
+
+        leftX = x.coerceIn(
+            0f,
+            rightX - minGap
+        )
+
+        startMs = ((leftX / width) * videoDurationMs).toLong()
+
+        if (progressX < leftX) progressX = leftX
+
+        trimListener?.invoke(startMs, endMs)
     }
 
-    private val Float.dp: Float get() = this * context.resources.displayMetrics.density
+    private fun moveRight(x: Float) {
+
+        val minGap = minGapPx()
+
+        rightX = x.coerceIn(
+            leftX + minGap,
+            width.toFloat()
+        )
+
+        endMs = ((rightX / width) * videoDurationMs).toLong()
+
+        if (progressX > rightX) progressX = rightX
+
+        trimListener?.invoke(startMs, endMs)
+    }
+
+    private fun moveProgress(x: Float) {
+
+        progressX = x.coerceIn(leftX, rightX)
+
+        val ms = ((progressX / width) * videoDurationMs).toLong()
+
+        scrubListener?.invoke(ms)
+    }
+
+    private fun isNearLeft(x: Float): Boolean {
+        return x >= leftX - thumbTouchExtra &&
+                x <= leftX + handleWidth + thumbTouchExtra
+    }
+
+    private fun isNearRight(x: Float): Boolean {
+        return x >= rightX - handleWidth - thumbTouchExtra &&
+                x <= rightX + thumbTouchExtra
+    }
+
+    private fun minGapPx(): Float {
+        return (minDurationMs.toFloat() / videoDurationMs) * width
+    }
+
+    // =========================================================
+    // THUMBNAILS
+    // =========================================================
+
+    @SuppressLint("UseKtx")
+    private fun generateFrames(uri: Uri) {
+
+        Thread {
+
+            val retriever = MediaMetadataRetriever()
+
+            try {
+                retriever.setDataSource(context, uri)
+
+                val list = mutableListOf<Bitmap>()
+
+                val each = videoDurationMs / frameCount
+
+                for (i in 0 until frameCount) {
+
+                    val timeUs = i * each * 1000L
+
+                    val bmp = retriever.getFrameAtTime(
+                        timeUs,
+                        MediaMetadataRetriever.OPTION_CLOSEST_SYNC
+                    )
+
+                    if (bmp != null) {
+                        list.add(
+                            Bitmap.createScaledBitmap(
+                                bmp,
+                                200,
+                                max(1, height),
+                                true
+                            )
+                        )
+                    }
+                }
+
+                Handler(Looper.getMainLooper()).post {
+                    thumbnails.clear()
+                    thumbnails.addAll(list)
+                    invalidate()
+                }
+
+            } catch (e: Exception) {
+                Log.e("VideoTrimmerView", "frame error", e)
+            } finally {
+                try {
+                    retriever.release()
+                } catch (_: Exception) {
+                }
+            }
+
+        }.start()
+    }
+
+    // =========================================================
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+
+        thumbnails.forEach {
+            if (!it.isRecycled) it.recycle()
+        }
+
+        thumbnails.clear()
+    }
 }

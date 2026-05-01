@@ -77,6 +77,16 @@ class PlayStatusActivity : AppCompatActivity() {
 
     private val viewModel: NewStoryViewModel by viewModels()
     //private val viewModel2: StoryViewModel by viewModels()
+    private var downYRight = 0f
+    private var downXRight = 0f
+    private var isSwipeDownRight = false
+
+    private var downYLeft = 0f
+    private var downXLeft = 0f
+    private var isSwipeDownLeft = false
+
+    private var swipeThreshold = 0f
+    private var clickThreshold = 0f
 
     private val imageRunnable = Runnable {
         playNext()
@@ -94,22 +104,22 @@ class PlayStatusActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayStatusBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        binding.root.alpha = 0f
+        binding.root.post {
+            startOpenAnimation()
+        }
         val json = intent.getStringExtra("story_list") ?: "[]"
         val type = object : TypeToken<ArrayList<StatusItem>>() {}.type
         val fullStoryList: ArrayList<StatusItem> = Gson().fromJson(json, type)
-
         val isSinglePlay = intent.getBooleanExtra("is_play_single", false)
         val targetUserId = intent.getStringExtra("user_id") ?: ""
-
         isSinglePlayMode = isSinglePlay
-
         if (isSinglePlay && targetUserId.isNotEmpty()) {
             val filteredList = fullStoryList.filter { it.user_id.toString() == targetUserId }
             storyList = ArrayList(filteredList)
             currentPosition = 0
             if (storyList.isEmpty()) {
-                Toast.makeText(this, "No stories found for this user", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "No stories found for this user", Toast.LENGTH_SHORT).show()
                 finish()
                 return
             }
@@ -117,7 +127,80 @@ class PlayStatusActivity : AppCompatActivity() {
             storyList = fullStoryList
             currentPosition = intent.getIntExtra("play_position", 0)
         }
-
+        swipeThreshold = 120 * resources.displayMetrics.density
+        clickThreshold = 10 * resources.displayMetrics.density
+        binding.rightClickArea.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    downYRight = event.rawY
+                    downXRight = event.rawX
+                    isSwipeDownRight = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val diffY = event.rawY - downYRight
+                    val diffX = kotlin.math.abs(event.rawX - downXRight)
+                    if (diffY > swipeThreshold && diffX < clickThreshold * 5) {
+                        isSwipeDownRight = true
+                    }
+                    if (isSwipeDownRight) {
+                        handleSwipeDownAnimation(event, downYRight)
+                    } else {
+                        true
+                    }
+                }
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    if (isSwipeDownRight) {
+                        handleSwipeDownAnimation(event, downYRight)
+                    } else {
+                        val totalMoveX = kotlin.math.abs(event.rawX - downXRight)
+                        val totalMoveY = kotlin.math.abs(event.rawY - downYRight)
+                        if (totalMoveX < clickThreshold && totalMoveY < clickThreshold) {
+                            v.performClick()
+                        }
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+        binding.leftClickArea.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    downYLeft = event.rawY
+                    downXLeft = event.rawX
+                    isSwipeDownLeft = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val diffY = event.rawY - downYLeft
+                    val diffX = kotlin.math.abs(event.rawX - downXLeft)
+                    if (diffY > swipeThreshold && diffX < clickThreshold * 5) {
+                        isSwipeDownLeft = true
+                    }
+                    if (isSwipeDownLeft) {
+                        handleSwipeDownAnimation(event, downYLeft)
+                    } else {
+                        true
+                    }
+                }
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    if (isSwipeDownLeft) {
+                        handleSwipeDownAnimation(event, downYLeft)
+                    } else {
+                        val totalMoveX = kotlin.math.abs(event.rawX - downXLeft)
+                        val totalMoveY = kotlin.math.abs(event.rawY - downYLeft)
+                        if (totalMoveX < clickThreshold && totalMoveY < clickThreshold) {
+                            v.performClick()
+                        }
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
         binding.rightClickArea.setOnClickListener {
             playNext()
         }
@@ -157,6 +240,10 @@ class PlayStatusActivity : AppCompatActivity() {
             )
         }
         binding.userImageCardView.setOnClickListener { getClick(0) }
+        binding.blurBackground.setOnClickListener {
+            updateKeyboardVisibility(false)
+            CommonUtils.hideKeyboard(this@PlayStatusActivity)
+        }
         playStory()
         setObserver()
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
@@ -177,19 +264,30 @@ class PlayStatusActivity : AppCompatActivity() {
         }
 
         var downY = 0f
-        binding.root.setOnTouchListener { v, event ->
+
+        binding.root.setOnTouchListener { _, event ->
+            if (isKeyboardVisible) {
+                return@setOnTouchListener false
+            }
             when (event.action) {
+
                 MotionEvent.ACTION_DOWN -> {
                     downY = event.rawY
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     val diff = event.rawY - downY
+
                     if (diff > 0) {
                         binding.root.translationY = diff
                     }
                 }
-                MotionEvent.ACTION_UP -> {
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+
                     val diff = event.rawY - downY
+
                     if (diff > 250) {
                         finish()
                     } else {
@@ -200,7 +298,82 @@ class PlayStatusActivity : AppCompatActivity() {
                     }
                 }
             }
+
             true
+        }
+    }
+
+    private fun startOpenAnimation() {
+
+        val startX = intent.getIntExtra("start_x", 0).toFloat()
+        val startY = intent.getIntExtra("start_y", 0).toFloat()
+        val startW = intent.getIntExtra("start_width", 100).toFloat()
+        val startH = intent.getIntExtra("start_height", 100).toFloat()
+
+        val screenW = binding.root.width.toFloat()
+        val screenH = binding.root.height.toFloat()
+
+        val scaleX = startW / screenW
+        val scaleY = startH / screenH
+
+        binding.root.pivotX = 0f
+        binding.root.pivotY = 0f
+
+        binding.root.scaleX = scaleX
+        binding.root.scaleY = scaleY
+        binding.root.translationX = startX
+        binding.root.translationY = startY
+        binding.root.alpha = 1f
+
+        binding.root.animate()
+            .translationX(0f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(280)
+            .start()
+    }
+
+    // ADD THIS FUNCTION IN ACTIVITY
+    private fun handleSwipeDownAnimation(event: MotionEvent, startY: Float): Boolean {
+
+        when (event.action) {
+
+            MotionEvent.ACTION_MOVE -> {
+                val diff = event.rawY - startY
+
+                if (diff > 0) {
+                    binding.root.translationY = diff
+                }
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+
+                val diff = event.rawY - startY
+
+                if (diff > 250) {
+                    finish()
+                } else {
+                    binding.root.animate()
+                        .translationY(0f)
+                        .setDuration(150)
+                        .start()
+                }
+            }
+        }
+
+        return true
+    }
+
+    private fun updateKeyboardVisibility(visible: Boolean) {
+        if (isKeyboardVisible == visible) return
+        isKeyboardVisible = visible
+        if (visible){
+            pauseStory()
+        } else {
+            binding.blurBackground.isVisible = false
+            resumeStory()
         }
     }
 
@@ -530,9 +703,35 @@ class PlayStatusActivity : AppCompatActivity() {
         }
     }
 
+//    override fun finish() {
+//        super.finish()
+//        RTVariable.IS_STATUS_VIEWER_FINISHED = true
+//        overridePendingTransition(0, R.anim.slide_down)
+//    }
     override fun finish() {
-        super.finish()
-        RTVariable.IS_STATUS_VIEWER_FINISHED = true
-        overridePendingTransition(0, R.anim.slide_down)
+
+        val startX = intent.getIntExtra("start_x", 0).toFloat()
+        val startY = intent.getIntExtra("start_y", 0).toFloat()
+        val startW = intent.getIntExtra("start_width", 100).toFloat()
+        val startH = intent.getIntExtra("start_height", 100).toFloat()
+
+        val screenW = resources.displayMetrics.widthPixels.toFloat()
+        val screenH = resources.displayMetrics.heightPixels.toFloat()
+
+        val scaleX = startW / screenW
+        val scaleY = startH / screenH
+
+        binding.root.animate()
+            .scaleX(scaleX)
+            .scaleY(scaleY)
+            .translationX(startX)
+            .translationY(startY)
+            .setDuration(220)
+            .withEndAction {
+                RTVariable.IS_STATUS_VIEWER_FINISHED = true
+                super.finish()
+                overridePendingTransition(0, 0)
+            }
+            .start()
     }
 }

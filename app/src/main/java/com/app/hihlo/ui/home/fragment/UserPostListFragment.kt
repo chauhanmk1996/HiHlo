@@ -594,7 +594,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         return R.layout.fragment_user_post_list
 
     }
-    private fun getSelectedPost(post: Post, data:Data, click: Int, position: Int, view:View){
+    private fun getSelectedPost(post: Post, data:Data, click: Int, position: Int, view:View, clickView: View){
         positionToComment = position
         Log.e("TAG", "sharePost: $post")
         Log.e("TAG", "sharePost: $data")
@@ -666,6 +666,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 data.user_id?.let { openCoinsBottomSheet(it, it, data.creator_username.toString()) }
             }
             8->{
+                val location = IntArray(2)
+                clickView.getLocationOnScreen(location)
                 val targetUserId = data.user_id.toString()
                 val newList = statusListGlobal.drop(1)
                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
@@ -674,11 +676,13 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 intent.putExtra("story_list", json)
                 intent.putExtra("is_play_single", true)
                 intent.putExtra("user_id", targetUserId)
+                intent.putExtra("start_x", location[0])
+                intent.putExtra("start_y", location[1])
+                intent.putExtra("start_width", clickView.width)
+                intent.putExtra("start_height", clickView.height)
                 startActivity(intent)
-                requireActivity().overridePendingTransition(
-                    R.anim.slide_up,
-                    0
-                )
+                //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+                requireActivity().overridePendingTransition(0, 0)
 
                 /*RTVariable.IS_FROM_PROFILE = true
                 val stories = adapter!!.getStoriesList()

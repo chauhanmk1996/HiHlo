@@ -63,6 +63,7 @@ import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter
 import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
+import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.adapter.AdapterUserPostList
 import com.app.hihlo.ui.home.view_model.HomeViewModel
@@ -787,19 +788,44 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 post.user_id?.let { openCoinsBottomSheet(it, it, post.creatorDetail?.name.toString()) }
                             }
                             PostsAdapter.PostClickAction.TOWARDS_STORY -> {
+//                                val targetUserId = post.user_id.toString()
+//                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+//                                //intent.putExtra("play_position", storyPosition)
+//                                val json = Gson().toJson(statusListGlobal)
+//                                intent.putExtra("story_list", json)
+//                                intent.putExtra("is_play_single", true)
+//                                intent.putExtra("user_id", targetUserId)
+//                                startActivity(intent)
+//                                requireActivity().overridePendingTransition(
+//                                    R.anim.slide_up,
+//                                    0
+//                                )
+
+
+
+                                // clicked view ki position lo
                                 val targetUserId = post.user_id.toString()
+                                val location = IntArray(2)
+                                view.getLocationOnScreen(location)
+
                                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
-                                //intent.putExtra("play_position", storyPosition)
+
+                                // normal data
+                                intent.putExtra("play_position", position)
+
                                 val json = Gson().toJson(statusListGlobal)
                                 intent.putExtra("story_list", json)
                                 intent.putExtra("is_play_single", true)
                                 intent.putExtra("user_id", targetUserId)
-                                startActivity(intent)
-                                requireActivity().overridePendingTransition(
-                                    R.anim.slide_up,
-                                    0
-                                )
 
+                                // instagram style animation data
+                                intent.putExtra("start_x", location[0])
+                                intent.putExtra("start_y", location[1])
+                                intent.putExtra("start_width", view.width)
+                                intent.putExtra("start_height", view.height)
+
+                                startActivity(intent)
+                                requireActivity().overridePendingTransition(0, 0)
 
                                 /*
                                 RTVariable.IS_FROM_PROFILE = true
@@ -1598,9 +1624,15 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, view:View){
         if(option==2){
-            Log.e("VALUE", "VALUE>>> "+value)
+            Log.e("VALUE", "VALUE>>> $value")
+
+            // clicked view ki position lo
+            val location = IntArray(2)
+            view.getLocationOnScreen(location)
+
             val intent = Intent(requireContext(), PlayStatusActivity::class.java)
 
+            // normal data
             intent.putExtra("play_position", position)
 
             val json = Gson().toJson(statusListGlobal)
@@ -1608,11 +1640,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             intent.putExtra("is_play_single", false)
             intent.putExtra("user_id", "")
 
+            // instagram style animation data
+            intent.putExtra("start_x", location[0])
+            intent.putExtra("start_y", location[1])
+            intent.putExtra("start_width", view.width)
+            intent.putExtra("start_height", view.height)
+
             startActivity(intent)
-            requireActivity().overridePendingTransition(
-                R.anim.slide_up,
-                0
-            )
+//            requireActivity().overridePendingTransition(
+//                R.anim.slide_up,
+//                0
+//            )
+            requireActivity().overridePendingTransition(R.anim.slide_up, 0)
         }
         if(option==3){
             if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
@@ -1621,13 +1660,29 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     anchorView = view,
                     onOption1Click = {
                         RTVariable.SELECT_OPTION = true
-                        checkGalleryPermissionAndPick()
+//                        checkGalleryPermissionAndPick()
 //                        val intent = Intent(requireContext(), FilePickerStatus::class.java)
 //                        filePickerLauncher.launch(intent)
 //                        requireActivity().overridePendingTransition(
 //                            R.anim.slide_up_2,
 //                            0
 //                        )
+                        val bottomSheet = FilePickerBottomsheet()
+                        bottomSheet.setOnMediaSelectedListener { uri, type ->
+                            // uri and type are already returned as strings, no Intent parsing needed
+                            val mediaType = type          // "image" or "video"
+                            val contentUri = Uri.parse(uri)
+                            Handler(Looper.getMainLooper()).post {
+                                // Ensure your fragment/activity is still attached if needed
+                                val file = getCacheFileFromContentUri(contentUri)
+                                val typeCode = if (mediaType == "video") "V" else "I"
+                                file?.let { uploadImage(it, typeCode) }
+                            }
+                        }
+                        bottomSheet.show(
+                            parentFragmentManager,   // or childFragmentManager, depending on where you are
+                            "FilePickerBottomSheet"
+                        )
                     },
                     onOption2Click = {
                         RTVariable.SELECT_OPTION = false

@@ -80,7 +80,7 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
         adapterFollowers.from = screenCheck
         binding.followersRecycler.adapter = adapterFollowers
     }
-    private fun getSelectedUser(userId: Int, isFollowing: Int, click:Int){
+    private fun getSelectedUser(userId: Int, isFollowing: Int, click:Int, view: View){
         when(click){
             0->{
                 when(screenCheck){
@@ -106,7 +106,8 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 getSendUnFollow(userId.toString())
             }
             4->{
-
+                val location = IntArray(2)
+                view.getLocationOnScreen(location)
                 val targetUserId = RTVariable.USER_ID.toInt().toString()
                 val newList = statusListGlobal.drop(1)
                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
@@ -115,11 +116,13 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 intent.putExtra("story_list", json)
                 intent.putExtra("is_play_single", true)
                 intent.putExtra("user_id", targetUserId)
+                intent.putExtra("start_x", location[0])
+                intent.putExtra("start_y", location[1])
+                intent.putExtra("start_width", view.width)
+                intent.putExtra("start_height", view.height)
                 startActivity(intent)
-                requireActivity().overridePendingTransition(
-                    R.anim.slide_up,
-                    0
-                )
+                //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+                requireActivity().overridePendingTransition(0, 0)
 
 
                 /*RTVariable.IS_FROM_PROFILE = true

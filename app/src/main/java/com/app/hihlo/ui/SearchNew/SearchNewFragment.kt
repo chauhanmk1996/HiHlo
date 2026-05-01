@@ -272,7 +272,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             }
         }
         binding.creatorsRecycler.adapter = adapterHomePosts
-        search_adapter = SearchAdapter(mutableListOf()){ position, click ->
+        search_adapter = SearchAdapter(mutableListOf()){ position, click, clickedView ->
             when(click){
                 0->{
                     val bundle = Bundle().apply {
@@ -315,13 +315,20 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         )
                         // No return – just don't navigate. The lambda will finish normally.
                     } else {
+                        val location = IntArray(2)
+                        clickedView.getLocationOnScreen(location)
                         val intent = Intent(requireContext(), PlayStatusActivity::class.java)
                         val json = Gson().toJson(statusListGlobal)
                         intent.putExtra("story_list", json)
                         intent.putExtra("is_play_single", true)
                         intent.putExtra("user_id", targetUserId)
+                        intent.putExtra("start_x", location[0])
+                        intent.putExtra("start_y", location[1])
+                        intent.putExtra("start_width", clickedView.width)
+                        intent.putExtra("start_height", clickedView.height)
                         startActivity(intent)
-                        requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+                        //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+                        requireActivity().overridePendingTransition(0, 0)
                     }
 
                     /*RTVariable.IS_FROM_PROFILE = true

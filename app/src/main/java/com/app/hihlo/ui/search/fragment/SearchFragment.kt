@@ -37,7 +37,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     private var userList: MutableList<SearchUserListResponse.Payload.User> = mutableListOf()
 
     override fun initView(savedInstanceState: Bundle?) {
-        adapter = SearchAdapter(mutableListOf()){ position, click ->
+        adapter = SearchAdapter(mutableListOf()){ position, click, clickView ->
             when(click){
                 0->{
                     val bundle = Bundle().apply {

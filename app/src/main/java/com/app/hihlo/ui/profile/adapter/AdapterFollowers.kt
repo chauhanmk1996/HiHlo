@@ -3,6 +3,7 @@ package com.app.hihlo.ui.profile.adapter
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +21,7 @@ import com.bumptech.glide.Glide
 
 class AdapterFollowers(
     val isMyProfile: String,
-    val getSelectedUser: (userId: Int, isFollowing:Int, click: Int) -> Unit,
+    val getSelectedUser: (userId: Int, isFollowing:Int, click: Int, view: View) -> Unit,
 ) :
     RecyclerView.Adapter<AdapterFollowers.ViewHolder>() {
     private val my_storiesList: MutableList<MyStory> = mutableListOf()
@@ -175,33 +176,33 @@ class AdapterFollowers(
                         var user = Preferences.getCustomModelPreference<LoginResponse>(binding.root.context, LOGIN_DATA)?.payload?.username
                         if (data.userDetails.username==user){
                             if(from=="followers"){
-                                getSelectedUser(data.follower_id, data.follower_id, 1)
+                                getSelectedUser(data.follower_id, data.follower_id, 1, userImageCardView)
                             }else{
-                                getSelectedUser(data.following_id, data.following_id, 1)
+                                getSelectedUser(data.following_id, data.following_id, 1, userImageCardView)
                             }
                         }else{
                             if(data?.isStoryUploaded==1){
                                 if(from=="followers"){
                                     RTVariable.USER_ID = data.follower_id.toString()
-                                    getSelectedUser(data.follower_id, data.follower_id, 4)
+                                    getSelectedUser(data.follower_id, data.follower_id, 4, userImageCardView)
                                 }else{
                                     RTVariable.USER_ID = data.following_id.toString()
-                                    getSelectedUser(data.following_id, data.following_id, 4)
+                                    getSelectedUser(data.following_id, data.following_id, 4, userImageCardView)
                                 }
                             }else{
                                 if(from=="followers"){
-                                    getSelectedUser(data.follower_id, data.follower_id, 1)
+                                    getSelectedUser(data.follower_id, data.follower_id, 1, userImageCardView)
                                 }else{
-                                    getSelectedUser(data.following_id, data.following_id, 1)
+                                    getSelectedUser(data.following_id, data.following_id, 1, userImageCardView)
                                 }
                             }
                         }
                     }
                     userName.setOnClickListener {
                         if(from=="followers"){
-                            getSelectedUser(data.follower_id, data.follower_id, 1)
+                            getSelectedUser(data.follower_id, data.follower_id, 1, userName)
                         }else{
-                            getSelectedUser(data.following_id, data.following_id, 1)
+                            getSelectedUser(data.following_id, data.following_id, 1, userName)
                         }
                     }
                 }else{
@@ -209,36 +210,36 @@ class AdapterFollowers(
                         if(data?.isStoryUploaded==1){
                             if(from=="followers"){
                                 RTVariable.USER_ID = data.follower_id.toString()
-                                getSelectedUser(data.follower_id, data.follower_id, 4)
+                                getSelectedUser(data.follower_id, data.follower_id, 4, userImageCardView)
                             }else{
                                 RTVariable.USER_ID = data.following_id.toString()
-                                getSelectedUser(data.following_id, data.following_id, 4)
+                                getSelectedUser(data.following_id, data.following_id, 4, userImageCardView)
                             }
                         }else{
                             if(from=="followers"){
-                                getSelectedUser(data.follower_id, data.follower_id, 1)
+                                getSelectedUser(data.follower_id, data.follower_id, 1, userImageCardView)
                             }else{
-                                getSelectedUser(data.following_id, data.following_id, 1)
+                                getSelectedUser(data.following_id, data.following_id, 1, userImageCardView)
                             }
                         }
                     }
                     userName.setOnClickListener {
                         if(from=="followers"){
-                            getSelectedUser(data.follower_id, data.follower_id, 1)
+                            getSelectedUser(data.follower_id, data.follower_id, 1, userName)
                         }else{
-                            getSelectedUser(data.following_id, data.following_id, 1)
+                            getSelectedUser(data.following_id, data.following_id, 1, userName)
                         }
                     }
                 }
                 followButton.setOnClickListener {
                     if(from=="followers"){
                         if (data.isFollowing==1){
-                            getSelectedUser(data.follower_id, data.isFollowing, 0)
+                            getSelectedUser(data.follower_id, data.isFollowing, 0, followButton)
                         }else{
-                            getSelectedUser(data.follower_id, data.isFollowing, 0)
+                            getSelectedUser(data.follower_id, data.isFollowing, 0, followButton)
                         }
                     }else{
-                        getSelectedUser(data.following_id, -1, 0)
+                        getSelectedUser(data.following_id, -1, 0, followButton)
                     }
                 }
                 followButtonImage.setOnClickListener {
@@ -246,15 +247,15 @@ class AdapterFollowers(
                     //getSelectedUser(data.follower_id, data.isFollowing, 3)
                     if(from=="followers"){
                         if (data.isFollowedByMe!=1){
-                            getSelectedUser(data.follower_id, data.isFollowing, 2)
+                            getSelectedUser(data.follower_id, data.isFollowing, 2, followButtonImage)
                         }else{
-                            getSelectedUser(data.follower_id, data.isFollowing, 3)
+                            getSelectedUser(data.follower_id, data.isFollowing, 3, followButtonImage)
                         }
                     }else{
                         if (data.isFollowedByMe!=1){
-                            getSelectedUser(data.following_id, data.isFollowing, 2)
+                            getSelectedUser(data.following_id, data.isFollowing, 2, followButtonImage)
                         }else{
-                            getSelectedUser(data.following_id, data.isFollowing, 3)
+                            getSelectedUser(data.following_id, data.isFollowing, 3, followButtonImage)
                         }
                     }
                 }
@@ -263,12 +264,12 @@ class AdapterFollowers(
                     //getSelectedUser(data.follower_id, data.isFollowing, 3)
                     if(from=="followers"){
                         if (data.isFollowing==1){
-                            getSelectedUser(data.follower_id, data.isFollowing, 0)
+                            getSelectedUser(data.follower_id, data.isFollowing, 0, followButtonImage2)
                         }else{
-                            getSelectedUser(data.follower_id, data.isFollowing, 0)
+                            getSelectedUser(data.follower_id, data.isFollowing, 0, followButtonImage2)
                         }
                     }else{
-                        getSelectedUser(data.following_id, -1, 0)
+                        getSelectedUser(data.following_id, -1, 0, followButtonImage2)
                     }
                 }
             }
