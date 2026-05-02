@@ -104,6 +104,7 @@ class PlayStatusActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayStatusBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        RTVariable.IS_STATUS_VIEWER_ACTIVATED = true
         binding.root.alpha = 0f
         binding.root.post {
             startOpenAnimation()
@@ -423,8 +424,14 @@ class PlayStatusActivity : AppCompatActivity() {
             return
         }
         val item = storyList[currentPosition]
-
         if (currentPosition != 0) {
+            viewModel.hitSeenStoryDataApi(
+                "Bearer " + (Preferences.getCustomModelPreference<LoginResponse>(
+                    this@PlayStatusActivity, LOGIN_DATA
+                )?.payload?.authToken ?: ""),
+                StorySeen(storyId = item.id.toString())
+            )
+        }else{
             viewModel.hitSeenStoryDataApi(
                 "Bearer " + (Preferences.getCustomModelPreference<LoginResponse>(
                     this@PlayStatusActivity, LOGIN_DATA

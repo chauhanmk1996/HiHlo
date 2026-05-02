@@ -106,6 +106,9 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 getSendUnFollow(userId.toString())
             }
             4->{
+                if (statusListGlobal.isEmpty()) {
+                    return
+                }
                 val location = IntArray(2)
                 view.getLocationOnScreen(location)
                 val targetUserId = RTVariable.USER_ID.toInt().toString()

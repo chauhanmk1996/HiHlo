@@ -93,25 +93,24 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:elevation="2dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/story_upload_btn"
+            android:background="@drawable/user_image_background"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivPlusIcon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="2dp"
+                android:padding="0dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/btn_upload_icon"
+                android:src="@drawable/plus_icon_pink"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:tint="@color/white" />
+                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView

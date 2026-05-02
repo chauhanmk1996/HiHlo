@@ -37,13 +37,15 @@ class StatusAdapter(
             holder.binding.uploadLayout.isVisible = false
             holder.binding.otherStoryCardview.isVisible = false
             holder.binding.myStoryGradient.isVisible = true
-            if(item.isStoriesUploaded){
-                holder.binding.name.visibility = View.VISIBLE
-                holder.binding.name.text = "Upload"
-            }else{
-                holder.binding.name.visibility = View.VISIBLE
-                holder.binding.name.text = "Upload"
-            }
+//            if(item.isStoriesUploaded){
+//                holder.binding.name.visibility = View.VISIBLE
+//                holder.binding.name.text = "Upload"
+//            }else{
+//                holder.binding.name.visibility = View.VISIBLE
+//                holder.binding.name.text = "Upload"
+//            }
+            holder.binding.name.visibility = View.INVISIBLE
+            holder.binding.uploadLayout.visibility = View.VISIBLE
             Glide.with(holder.binding.root.context)
                 .load(item.userDetail.profile_image)
                 .placeholder(R.drawable.profile_placeholder)
@@ -62,6 +64,7 @@ class StatusAdapter(
             holder.binding.myStoryGradient.isVisible = false
             holder.binding.name.visibility = View.VISIBLE
             holder.binding.name.text = item.userDetail.name
+            holder.binding.uploadLayout.visibility = View.GONE
             Log.e("ISSEEN", "ISSEEN>>> "+item.is_seen)
             Glide.with(holder.binding.root.context)
                 .load(item.userDetail.profile_image)
@@ -93,6 +96,10 @@ class StatusAdapter(
             holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
         holder.binding.name.setOnClickListener {
+            getSelectedTheStory(3, item, position, holder.binding.root)
+            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        }
+        holder.binding.uploadLayout.setOnClickListener {
             getSelectedTheStory(3, item, position, holder.binding.root)
             holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }

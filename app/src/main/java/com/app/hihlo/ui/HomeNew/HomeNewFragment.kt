@@ -424,9 +424,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-
                         binding.swipeRefresh.isRefreshing = true
-
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                     if(RTVariable.IS_MEDIA_UPLOADED){
@@ -434,14 +432,19 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-
                         binding.swipeRefresh.isRefreshing = true
-
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                     if(RTVariable.IS_STATUS_DELETED){
                         RTVariable.IS_STATUS_DELETED = false
                         viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                    }
+                    Log.e("RTVariable.IS_STATUS_VIEWER_ACTIVATED", "RTVariable.IS_STATUS_VIEWER_ACTIVATED>>> "+RTVariable.IS_STATUS_VIEWER_ACTIVATED)
+                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        getRefreshStory(1, 0)
+                        getRefreshMainStory(0)
                     }
                 }
             }
@@ -801,8 +804,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                                    0
 //                                )
 
-
-
+                                if (statusListGlobal.isEmpty()) {
+                                    return
+                                }
                                 // clicked view ki position lo
                                 val targetUserId = post.user_id.toString()
                                 val location = IntArray(2)
@@ -943,6 +947,51 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                        Toast.LENGTH_SHORT
 //                    ).show()
                     postAdapter.updateFollow(position, 2)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshStory(page: Int, gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getHomeData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    page.toString(),
+                    10.toString(),
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    viewModel.stories = response.payload.stories
+                    postAdapter.updateStories(viewModel.stories)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshMainStory(gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStatusData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    statusListGlobal = response.payload
+                    RTVariable.statusListGlobal = statusListGlobal
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        delay(1000)
+                        if (!isAdded || _binding == null) return@launch
+                        binding.storiesRecycler.adapter =
+                            StatusAdapter(statusListGlobal, ::getSelectedTheStory)
+                        binding.storiesLayout.visibility = View.VISIBLE
+                    }
                 } else {
                     Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
                 }
@@ -1458,12 +1507,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
-                            lifecycleScope.launch {
+                            viewLifecycleOwner.lifecycleScope.launch {
                                 delay(1000)
-                                binding.storiesRecycler.adapter = StatusAdapter(
-                                    statusListGlobal,
-                                    ::getSelectedTheStory
-                                )
+                                if (!isAdded || _binding == null) return@launch
+                                binding.storiesRecycler.adapter =
+                                    StatusAdapter(statusListGlobal, ::getSelectedTheStory)
                                 binding.storiesLayout.visibility = View.VISIBLE
                             }
                         }else{

@@ -666,6 +666,9 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 data.user_id?.let { openCoinsBottomSheet(it, it, data.creator_username.toString()) }
             }
             8->{
+                if (statusListGlobal.isEmpty()) {
+                    return
+                }
                 val location = IntArray(2)
                 clickView.getLocationOnScreen(location)
                 val targetUserId = data.user_id.toString()

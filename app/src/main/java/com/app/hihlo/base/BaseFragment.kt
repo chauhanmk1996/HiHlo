@@ -8,7 +8,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 
 abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
-    private var _binding: DB? = null
+    var _binding: DB? = null
     protected val binding get() = _binding!!
     open fun getLayoutId(): Int {
         return 0 // Default: you should override this

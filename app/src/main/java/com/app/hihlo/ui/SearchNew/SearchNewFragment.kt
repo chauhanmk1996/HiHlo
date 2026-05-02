@@ -315,6 +315,9 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         )
                         // No return – just don't navigate. The lambda will finish normally.
                     } else {
+                        if (statusListGlobal!!.isEmpty()) {
+                            return@SearchAdapter
+                        }
                         val location = IntArray(2)
                         clickedView.getLocationOnScreen(location)
                         val intent = Intent(requireContext(), PlayStatusActivity::class.java)

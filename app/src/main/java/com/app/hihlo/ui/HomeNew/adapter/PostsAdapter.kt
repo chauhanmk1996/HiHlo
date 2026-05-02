@@ -78,6 +78,16 @@ class PostsAdapter(
         notifyItemRangeInserted(start, morePosts.size)   // ← better than notifyDataSetChanged
     }
 
+    fun updateStories(stories_List: List<Story>) {
+
+        Log.e("TAG", "updateStories size = ${stories_List.size}")
+
+        storiesList.clear()
+        storiesList.addAll(stories_List)
+
+        notifyItemRangeChanged(0, itemCount)
+    }
+
     fun setPosts(newPosts: List<Post>, my_story: List<MyStory>, stories_List: List<Story>) {
         postsList.clear()
         postsList.addAll(newPosts)

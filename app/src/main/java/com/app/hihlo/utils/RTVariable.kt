@@ -92,6 +92,7 @@ object RTVariable {
     var IS_STATUS_DELETED: Boolean = false
     var IS_STATUS_PROFILE_CLICKED: Boolean = false
     var IS_STATUS_VIEWER_FINISHED: Boolean = false
+    var IS_STATUS_VIEWER_ACTIVATED: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {
