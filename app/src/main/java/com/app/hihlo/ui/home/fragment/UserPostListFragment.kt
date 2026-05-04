@@ -42,6 +42,7 @@ import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
@@ -148,6 +149,12 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                         adapter?.update_comment_count(RTVariable.COMMENT_COUNT, RTVariable.POST_POSITION)
                         //viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
                     }
+                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        getRefreshStory(1, 0)
+                        getRefreshMainStory(0)
+                    }
                 }
             }
         }
@@ -175,6 +182,44 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 }
             }
         })
+    }
+
+    private fun getRefreshStory(page: Int, gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getHomeData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    page.toString(),
+                    10.toString(),
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    viewModel5.stories = response.payload.stories
+                    adapter?.updateStories(viewModel5.stories)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshMainStory(gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStatusData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    statusListGlobal = response.payload
+                    RTVariable.statusListGlobal = statusListGlobal
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
     }
 
     override fun onPause() {
@@ -553,6 +598,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     if (it.data?.status==1){
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
+                            RTVariable.statusListGlobal = statusListGlobal
                             Log.e("TAG", "Status success: ${statusListGlobal}")
                         }else{
                         }
@@ -672,7 +718,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 val location = IntArray(2)
                 clickView.getLocationOnScreen(location)
                 val targetUserId = data.user_id.toString()
-                val newList = statusListGlobal.drop(1)
+                val newList = RTVariable.statusListGlobal.drop(1)
                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
                 //intent.putExtra("play_position", storyPosition)
                 val json = Gson().toJson(newList)

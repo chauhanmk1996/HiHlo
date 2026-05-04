@@ -65,6 +65,7 @@ import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
+import com.app.hihlo.ui.HomeNew.utility.ImageFilePickerBottomsheet2
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
 import com.app.hihlo.ui.home.bottom_sheet.ViewPostBottomSheetFragment
@@ -138,12 +139,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     private var selectedBottomSheetType = ""
     private val viewModel2: HomeViewModel by activityViewModels()
 
-    companion object{
+    companion object {
         val REQUEST_CODE_CROP_VIDEO = 10
         val EXTRA_CROPPED_URI = "cropped_video_uri_extra"
 
     }
-
 
 
     override fun onResume() {
@@ -169,7 +169,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         scrollViewListener()
         (requireActivity() as? HomeActivity)?.setOnlineStatusVisibility(false)
     }
-    fun scrollViewListener(){
+
+    fun scrollViewListener() {
         binding.scrollView.setOnScrollChangeListener(
             NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, _ ->
                 val view = v.getChildAt(v.childCount - 1)
@@ -185,25 +186,40 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         )
 
     }
+
     fun getCurrentViewPagerFragment(): Fragment? {
         val currentItem = binding.viewPager.currentItem
-        val adapter = binding.viewPager.adapter as FragmentStateAdapter
-        val fragmentTag = "f$currentItem" // Default tag format
+        binding.viewPager.adapter as FragmentStateAdapter
+        "f$currentItem" // Default tag format
 
         return childFragmentManager.findFragmentByTag("f$currentItem")
     }
 
-    private fun getSelectedPost(asset_url: String, caption: String, posts: Posts, click:Int, reelPosition: Int){
-        when(click){
-            0->{
+    private fun getSelectedPost(
+        asset_url: String,
+        caption: String,
+        posts: Posts,
+        click: Int,
+        reelPosition: Int
+    ) {
+        when (click) {
+            0 -> {
                 openViewPostBottomSheet(Post(asset_url = asset_url, caption = caption))
             }
-            1->{
-                findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToReelsFragment(
-                    Payload(pagination = Pagination(), reels = posts.data.toReelList().toMutableList()), "profile", reelPosition.toString()))
+
+            1 -> {
+                findNavController().navigate(
+                    ProfileFragmentDirections.actionProfileFragmentToReelsFragment(
+                        Payload(
+                            pagination = Pagination(),
+                            reels = posts.data.toReelList().toMutableList()
+                        ), "profile", reelPosition.toString()
+                    )
+                )
             }
         }
     }
+
     fun List<Data>.toReelList(): List<Reel> {
         return this.map { data ->
             Reel(
@@ -219,7 +235,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     profileImage = data.creator_profile_image.toString(),
                     username = data.creator_username ?: "",
                     city = data.userCity ?: "",      // default or fetch if available
-                    country = data.userCountry ?: "" ,   // default or fetch if available
+                    country = data.userCountry ?: "",   // default or fetch if available
                     user_live_status = data.status.toString()
                 ),
                 creatorId = data.creator_id ?: 0,
@@ -242,21 +258,36 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
         viewPostBottomSheetFragment.show(requireActivity().supportFragmentManager, null)
     }
+
     private fun onClickFollowers() {
         binding.followers.setOnClickListener {
-            findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToFollowersFragment(
-                screenCheck = "followers",
-                isMyProfile = if ((userId==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()) || userId.isEmpty()) "1" else "0",
-                userId = userId))
+            findNavController().navigate(
+                ProfileFragmentDirections.actionProfileFragmentToFollowersFragment(
+                    screenCheck = "followers",
+                    isMyProfile = if ((userId == Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.userId.toString()) || userId.isEmpty()
+                    ) "1" else "0",
+                    userId = userId
+                )
+            )
         }
     }
 
     private fun onClickFollowing() {
         binding.following.setOnClickListener {
-            findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToFollowersFragment(
-                screenCheck = "following",
-                isMyProfile = if ((userId==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()) || userId.isEmpty()) "1" else "0",
-                userId = userId))
+            findNavController().navigate(
+                ProfileFragmentDirections.actionProfileFragmentToFollowersFragment(
+                    screenCheck = "following",
+                    isMyProfile = if ((userId == Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.userId.toString()) || userId.isEmpty()
+                    ) "1" else "0",
+                    userId = userId
+                )
+            )
         }
     }
 
@@ -264,39 +295,50 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         super.onViewCreated(view, savedInstanceState)
         setProfileMediaViewPager(Posts(), Posts())
         UserDataManager.setUserInnerPostIsResume(requireContext(), false)
-        if (isMyProfile=="0"){
+        if (isMyProfile == "0") {
 //            (requireActivity() as HomeActivity).hideNavigationView()
-            if (userId==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){
+            if (userId == Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.userId.toString()
+            ) {
 //                UserPreference.navigatedToMyProfile=true
                 onMyProfileOpened()
 //                (requireActivity() as HomeActivity).showNavigationView()
-            }else{
-                val layoutParams = binding.followersNumberLayout.layoutParams as ConstraintLayout.LayoutParams
+            } else {
+                val layoutParams =
+                    binding.followersNumberLayout.layoutParams as ConstraintLayout.LayoutParams
                 layoutParams.topToBottom = binding.followMessageLayout.id
                 binding.followersNumberLayout.layoutParams = layoutParams
-                binding.followMessageLayout.isVisible=true
-                binding.editShareLayout.isVisible=false
-                binding.editProfileButton.isVisible=false
-                binding.addReel.isVisible=false
-                binding.walletButton.isVisible=false
-                binding.backButton.isVisible=true
+                binding.followMessageLayout.isVisible = true
+                binding.editShareLayout.isVisible = false
+                binding.editProfileButton.isVisible = false
+                binding.addReel.isVisible = false
+                binding.walletButton.isVisible = false
+                binding.backButton.isVisible = true
                 binding.sideOptions.setImageResource(R.drawable.side_options_vertical)
-                viewModel.hitOtherUserProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, userId, "1", "14")
+                viewModel.hitOtherUserProfileDataApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, userId, "1", "14"
+                )
                 onClickFollowers()
                 onClickFollowing()
             }
-           }else{
-               onMyProfileOpened()
+        } else {
+            onMyProfileOpened()
         }
         setObserver()
     }
 
     private fun setOnlineStatus(onlineStatus: String) {
-        when(onlineStatus){
-            "1"->{
+        when (onlineStatus) {
+            "1" -> {
                 binding.onlineStatusImage.setImageResource(R.drawable.online_status_green)
             }
-            "2", "3"->{
+
+            "2", "3" -> {
                 binding.onlineStatusImage.setImageResource(R.drawable.offline_status_red)
             }
             /*"3"->{
@@ -306,13 +348,19 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     }
 
     private fun onMyProfileOpened() {
-        val layoutParams = binding.followersNumberLayout.layoutParams as ConstraintLayout.LayoutParams
+        val layoutParams =
+            binding.followersNumberLayout.layoutParams as ConstraintLayout.LayoutParams
         layoutParams.topToBottom = binding.editShareLayout.id
         binding.followersNumberLayout.layoutParams = layoutParams
 
-        binding.followMessageLayout.isVisible=false
-        binding.editShareLayout.isVisible=true
-        viewModel.hitProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "14")
+        binding.followMessageLayout.isVisible = false
+        binding.editShareLayout.isVisible = true
+        viewModel.hitProfileDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "1", "14"
+        )
         onClickFollowers()
         onClickFollowing()
         (requireActivity() as HomeActivity).selectProfileTabIcon()
@@ -331,26 +379,34 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            setCountData(it.data.payload.userDetails.posts_count, it.data.payload.userDetails.followers_count, it.data.payload.userDetails.following_count)
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            setCountData(
+                                it.data.payload.userDetails.posts_count,
+                                it.data.payload.userDetails.followers_count,
+                                it.data.payload.userDetails.following_count
+                            )
                             userDetails = it.data.payload.userDetails
                             ///Log.e(TAG, "setObserver: ", )
                             updateProfileDetails(it.data.payload.userDetails)
                             setProfileMediaViewPager(it.data.payload.reels, it.data.payload.posts)
                             setOnlineStatus(it.data.payload.userDetails.user_live_status ?: "2")
 
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -361,32 +417,40 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             userDetails = it.data.payload.userDetails
                             updateProfileDetails(it.data.payload.userDetails)
-                            setCountData(it.data.payload.userDetails.posts_count, it.data.payload.userDetails.followers_count, it.data.payload.userDetails.following_count)
+                            setCountData(
+                                it.data.payload.userDetails.posts_count,
+                                it.data.payload.userDetails.followers_count,
+                                it.data.payload.userDetails.following_count
+                            )
                             setProfileMediaViewPager(it.data.payload.reels, it.data.payload.posts)
                             isFollowing = it.data.payload.userDetails.is_following == 1
-                            if (it.data.payload.userDetails.is_following == 1){
+                            if (it.data.payload.userDetails.is_following == 1) {
                                 binding.followUserButton.text = "Unfollow"
                                 RTVariable.USER_IS_FOLLOWING = true
-                            }else{
+                            } else {
                                 binding.followUserButton.text = "Follow"
                                 RTVariable.USER_IS_FOLLOWING = false
                             }
                             setOnlineStatus(it.data.payload.userDetails.user_live_status ?: "2")
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -397,21 +461,31 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                            viewModel.hitOtherUserProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, userId, "", "")
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
+                            viewModel.hitOtherUserProfileDataApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, userId, "", ""
+                            )
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -422,21 +496,31 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "unfollow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                            viewModel.hitOtherUserProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, userId, "", "")
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
+                            viewModel.hitOtherUserProfileDataApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, userId, "", ""
+                            )
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -447,21 +531,23 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Add story success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             RTVariable.IS_STORY_UPDATED_FROM_PROFILE = true
                             //hitServiceListApi(viewModel.currentPage, selectedGender)
-                        }else{
+                        } else {
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //if (currentPage==1) ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -471,13 +557,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     }
 
     private fun updateProfileDetails(userDetails: UserDetailsX) {
-        Log.e("TAG", "updateProfileDetails:ddd $userDetails", )
+        Log.e("TAG", "updateProfileDetails:ddd $userDetails")
         binding.apply {
-            if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-                verifiedNameTick.isVisible=true
-            }else{
-                verifiedNameTick.isVisible=false
-            }
+            verifiedNameTick.isVisible = Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.isCreator == 1
             name.text = userDetails.name
             username.text = userDetails.username
             bioEditText.text = userDetails.about
@@ -487,13 +572,15 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             list[2].title = userDetails.country ?: ""
             list[3].title = userDetails.interest_name.toString()
             binding.profileDetailsRecycler.adapter = ShowProfileDetailsAdapter(list)
-            Glide.with(requireContext()).load(userDetails.profile_image).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(profileImage)
+            Glide.with(requireContext()).load(userDetails.profile_image)
+                .placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder)
+                .into(profileImage)
             profileImage.bringToFront()
-          /*  if (userDetails.is_story_uploaded==1){
-                binding.myStoryGradient.background = resources.getDrawable(R.drawable.story_gradient_border, null)
-            }else{
-                binding.myStoryGradient.background = resources.getDrawable(R.drawable.story_gray_border, null)
-            }*/
+            /*  if (userDetails.is_story_uploaded==1){
+                  binding.myStoryGradient.background = resources.getDrawable(R.drawable.story_gradient_border, null)
+              }else{
+                  binding.myStoryGradient.background = resources.getDrawable(R.drawable.story_gray_border, null)
+              }*/
         }
     }
 
@@ -504,29 +591,30 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         setTabsClick()
     }*/
     private fun setProfileMediaViewPager(reels: Posts, posts: Posts) {
-        profileMediaViewPager = AdapterProfileMediaViewPager(this, reels, posts, isMyProfile, userId)
+        profileMediaViewPager =
+            AdapterProfileMediaViewPager(this, reels, posts, isMyProfile, userId)
         binding.viewPager.adapter = profileMediaViewPager
         viewPagerCallback()
         setTabsClick()
         lifecycleScope.launch {
             delay(300)
-            if (UserPreference.navigatedToMyProfile){
-                UserPreference.navigatedToMyProfile=false
-                binding.viewPager.currentItem=1
+            if (UserPreference.navigatedToMyProfile) {
+                UserPreference.navigatedToMyProfile = false
+                binding.viewPager.currentItem = 1
             }
         }
 
     }
 
-    private fun setTabsClick(){
+    private fun setTabsClick() {
         binding.apply {
             gallery.setOnClickListener {
-                if (viewPager.currentItem!=0){
+                if (viewPager.currentItem != 0) {
                     viewPager.currentItem = 0
                 }
             }
             openReel.setOnClickListener {
-                if (viewPager.currentItem!=1){
+                if (viewPager.currentItem != 1) {
                     viewPager.currentItem = 1
                 }
             }
@@ -540,9 +628,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 //                        openUploadBottomSheet("profile")
 ////                        bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
 //                    }else{
-                        selectedBottomSheetType = "profile"
-                        openUploadBottomSheet("profile")
-                addReel.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                selectedBottomSheetType = "profile"
+                openUploadBottomSheet("profile")
+                addReel.setBackgroundColor(Color.TRANSPARENT)
 //                    }
 //                }else{
 //                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
@@ -550,10 +638,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
             }
             followUserButton.setOnClickListener {
-                if (isFollowing){
-                    viewModel.hitUnfollowUserDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, FollowRequest(unfollowId = userId))
-                }else{
-                    viewModel.hitFollowUserDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, FollowRequest(following_id = userId))
+                if (isFollowing) {
+                    viewModel.hitUnfollowUserDataApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken, FollowRequest(unfollowId = userId)
+                    )
+                } else {
+                    viewModel.hitFollowUserDataApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken, FollowRequest(following_id = userId)
+                    )
 
                 }
             }
@@ -565,7 +663,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             context = requireContext(),
             anchorView = binding.addReel,
             onOption1Click = {
-                if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                if (Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.isCreator == 1
+                ) {
                     RTVariable.SELECT_OPTION = true
                     //checkGalleryPermissionAndPick2()
                     val bottomSheet = FilePickerBottomsheet()
@@ -584,24 +686,48 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         parentFragmentManager,   // or childFragmentManager, depending on where you are
                         "FilePickerBottomSheet"
                     )
-                }else{
-                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT)
+                        .show()
                 }
             },
             onOption2Click = {
-                        selectedBottomSheetType = "post"
+                //selectedBottomSheetType = "post"
 //                        openUploadBottomSheet("post")
+                //RTVariable.SELECT_OPTION = false
+                //checkGalleryPermissionAndPick("I")
                 RTVariable.SELECT_OPTION = false
-                        checkGalleryPermissionAndPick("I")
-                             },
+                selectedBottomSheetType = "post"   // still needed for title/API logic
+
+                val bottomSheet = ImageFilePickerBottomsheet2()
+                bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
+                    val resultUri = Uri.parse(uri)
+                    if (resultUri.scheme == null || resultUri.path == null) {
+                        Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT).show()
+                        return@setOnMediaSelectedListener
+                    }
+                    UserPreference.seletedUri = resultUri
+                    UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                    UserPreference.selectedCropRatio = ratio
+                    UserPreference.selectedMediaType = "I"   // 🔥 ADD THIS LINE
+                    Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
+                    findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+                }
+                bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
+            },
             onOption3Click = {
-                if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                if (Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.isCreator == 1
+                ) {
                     selectedBottomSheetType = "reel"
 //                            openUploadBottomSheet("reel")
                     RTVariable.SELECT_OPTION = false
                     checkGalleryPermissionAndPick("V")
-                }else{
-                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT)
+                        .show()
                 }
             },
             option1Text = "Upload Status",
@@ -680,32 +806,32 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 //        popup.show()
     }
 
-/*    private fun checkGalleryPermissionAndPick(mediaType: String) {
-        selectedMediaType = mediaType
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val permissions = arrayOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
-            requestMultiplePermissionsLauncher.launch(permissions)
-        } else {
-            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
-                launchMediaPicker()
+    /*    private fun checkGalleryPermissionAndPick(mediaType: String) {
+            selectedMediaType = mediaType
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissions = arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO
+                )
+                requestMultiplePermissionsLauncher.launch(permissions)
             } else {
-                requestSinglePermissionLauncher.launch(permission)
+                val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+                if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+                    launchMediaPicker()
+                } else {
+                    requestSinglePermissionLauncher.launch(permission)
+                }
             }
         }
-    }
-    private fun launchMediaPicker() {
-        val mediaType = when (selectedMediaType) {
-            "I" -> ActivityResultContracts.PickVisualMedia.ImageOnly
-            "V" -> ActivityResultContracts.PickVisualMedia.VideoOnly
-            else -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
-        }
+        private fun launchMediaPicker() {
+            val mediaType = when (selectedMediaType) {
+                "I" -> ActivityResultContracts.PickVisualMedia.ImageOnly
+                "V" -> ActivityResultContracts.PickVisualMedia.VideoOnly
+                else -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
+            }
 
-        mediaPickerLauncher.launch(PickVisualMediaRequest(mediaType))
-    }*/
+            mediaPickerLauncher.launch(PickVisualMediaRequest(mediaType))
+        }*/
 
 
     private val requestSinglePermissionLauncher2 = registerForActivityResult(
@@ -720,7 +846,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             launchMediaPicker2()
         } else {
             val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 launchMediaPicker2()
             } else {
                 requestSinglePermissionLauncher2.launch(permission)
@@ -776,7 +906,14 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             }
             val cacheDir = requireContext().cacheDir
             // Fallback: copy to a temporary file (if DATA column not available)
-            val tempFile = File(cacheDir, "temp_${System.currentTimeMillis()}.${contentUri.lastPathSegment?.substringAfterLast('.') ?: "file"}")
+            val tempFile = File(
+                cacheDir,
+                "temp_${System.currentTimeMillis()}.${
+                    contentUri.lastPathSegment?.substringAfterLast(
+                        '.'
+                    ) ?: "file"
+                }"
+            )
             requireContext().contentResolver.openInputStream(contentUri)?.use { input ->
                 tempFile.outputStream().use { output ->
                     input.copyTo(output)
@@ -841,7 +978,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val options = UCrop.Options().apply {
             setFreeStyleCropEnabled(true)
         }
-        val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        val destinationUri = Uri.fromFile(
+            File(
+                requireActivity().cacheDir,
+                "cropped_${System.currentTimeMillis()}.jpg"
+            )
+        )
         UCrop.of(imageUri, destinationUri)
             .withOptions(options)
             .start(requireContext(), this)
@@ -869,25 +1011,44 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         return AmazonS3Client(credentials)
     }
 
-    fun uploadImageToS3(context: Context, file: File, bucketName: String, objectKey: String, accessKey: String, secretKey: String, assetType:String) {
+    fun uploadImageToS3(
+        context: Context,
+        file: File,
+        bucketName: String,
+        objectKey: String,
+        accessKey: String,
+        secretKey: String,
+        assetType: String
+    ) {
         // Initialize S3 client
         val s3Client = initializeS3Client(accessKey, secretKey)
         val transferUtility = TransferUtility.builder()
             .context(context)
             .s3Client(s3Client)
             .build()
-        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(context)
+        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(
+            context
+        )
         val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
         ProcessDialog.showDialog(requireContext(), true)
         uploadObserver.setTransferListener(object : TransferListener {
             override fun onStateChanged(id: Int, state: TransferState) {
                 if (state == TransferState.COMPLETED) {
                     ProcessDialog.dismissDialog(true)
-                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.AWS_CDN_URL
+                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.AWS_CDN_URL
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
                     println("Image URL: $mediaUrl")
-                    viewModel2.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
+                    viewModel2.hitAddStoryDataApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken,
+                        AddStoryRequest(assetUrl = mediaUrl, assetType = assetType)
+                    )
                     //viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
                 } else if (state == TransferState.FAILED) {
                     println("Upload failed")
@@ -906,41 +1067,56 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         })
     }
 
-    private fun uploadImage(imageFile: File, assetType:String) {
-        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+    private fun uploadImage(imageFile: File, assetType: String) {
+        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(
+            requireContext(),
+            LOGIN_DATA
+        )?.payload?.S3Details
         val bucketName = s3Data?.BUCKET_NAME
         val objectKey = "${System.currentTimeMillis()}"
-        uploadImageToS3(requireContext(), imageFile, bucketName ?: "", objectKey, s3Data?.ACCESS_KEY ?: "", s3Data?.SECRET_KEY ?: "", assetType)
+        uploadImageToS3(
+            requireContext(),
+            imageFile,
+            bucketName ?: "",
+            objectKey,
+            s3Data?.ACCESS_KEY ?: "",
+            s3Data?.SECRET_KEY ?: "",
+            assetType
+        )
     }
 
-private fun checkGalleryPermissionAndPick(mediaType: String) {
-    selectedMediaType = mediaType
+    private fun checkGalleryPermissionAndPick(mediaType: String) {
+        selectedMediaType = mediaType
 
-    // Clear any previous limited access selections for Android 13+
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        clearPhotoPickerSelections()
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        // Request only the permission we actually need
-        val requiredPermissions = when (mediaType) {
-            "I" -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
-            "V" -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
-            else -> arrayOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
+        // Clear any previous limited access selections for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            clearPhotoPickerSelections()
         }
-        requestMultiplePermissionsLauncher.launch(requiredPermissions)
-    } else {
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-        if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
-            launchMediaPicker()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Request only the permission we actually need
+            val requiredPermissions = when (mediaType) {
+                "I" -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+                "V" -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
+                else -> arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO
+                )
+            }
+            requestMultiplePermissionsLauncher.launch(requiredPermissions)
         } else {
-            requestSinglePermissionLauncher.launch(permission)
+            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                launchMediaPicker()
+            } else {
+                requestSinglePermissionLauncher.launch(permission)
+            }
         }
     }
-}
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun clearPhotoPickerSelections() {
@@ -972,61 +1148,71 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
         mediaPickerLauncher.launch(request)
     }
 
-    private val requestMultiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val hasImagePermission = permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
-            val hasVideoPermission = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
+    private val requestMultiplePermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val hasImagePermission = permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
+                val hasVideoPermission = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
 
-            // For Android 13+, if any permission was requested but denied,
-            // it might still be limited access which works with media picker
-            val wasImageRequested = permissions.containsKey(Manifest.permission.READ_MEDIA_IMAGES)
-            val wasVideoRequested = permissions.containsKey(Manifest.permission.READ_MEDIA_VIDEO)
+                // For Android 13+, if any permission was requested but denied,
+                // it might still be limited access which works with media picker
+                val wasImageRequested =
+                    permissions.containsKey(Manifest.permission.READ_MEDIA_IMAGES)
+                val wasVideoRequested =
+                    permissions.containsKey(Manifest.permission.READ_MEDIA_VIDEO)
 
-            val canProceed = when (selectedMediaType) {
-                "I" -> hasImagePermission || wasImageRequested
-                "V" -> hasVideoPermission || wasVideoRequested
-                else -> hasImagePermission || hasVideoPermission || wasImageRequested || wasVideoRequested
-            }
+                val canProceed = when (selectedMediaType) {
+                    "I" -> hasImagePermission || wasImageRequested
+                    "V" -> hasVideoPermission || wasVideoRequested
+                    else -> hasImagePermission || hasVideoPermission || wasImageRequested || wasVideoRequested
+                }
 
-            if (canProceed) {
-                launchMediaPicker()
-            } else {
-                Toast.makeText(requireContext(), "Required permissions not granted", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            val granted = permissions.values.all { it }
-            if (granted) launchMediaPicker()
-            else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
-        }
-    }
-    private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            val mimeType = requireContext().contentResolver.getType(uri)
-            UserPreference.selectedMediaType = selectedMediaType
-            if (::bottomSheetFragment.isInitialized){
-                bottomSheetFragment.dismiss()
-            }
-            if (mimeType?.startsWith("video") == true) {
-//                UserPreference.seletedUri = uri
-                if (uri != null) {
-                    val mimeType = requireContext().contentResolver.getType(uri)
-                    Log.e("TAG", "mimeType $mimeType")
-                    if (mimeType?.startsWith("video") == true) {
-                        UserPreference.seletedUri = Uri.EMPTY
-                        val intent = Intent(requireActivity(),TrimVideoActivity::class.java)
-                        intent.putExtra("videoUrl",uri.toString())
-                        startActivityForResult(intent,REQUEST_CODE_CROP_VIDEO)
-                    }
+                if (canProceed) {
+                    launchMediaPicker()
                 } else {
-                    Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Required permissions not granted",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } else {
-                openCropActivity(uri)
+                val granted = permissions.values.all { it }
+                if (granted) launchMediaPicker()
+                else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT)
+                    .show()
             }
-        } else {
-            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }
-    }
+    private val mediaPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                val mimeType = requireContext().contentResolver.getType(uri)
+                UserPreference.selectedMediaType = selectedMediaType
+                if (::bottomSheetFragment.isInitialized) {
+                    bottomSheetFragment.dismiss()
+                }
+                if (mimeType?.startsWith("video") == true) {
+//                UserPreference.seletedUri = uri
+                    if (uri != null) {
+                        val mimeType = requireContext().contentResolver.getType(uri)
+                        Log.e("TAG", "mimeType $mimeType")
+                        if (mimeType?.startsWith("video") == true) {
+                            UserPreference.seletedUri = Uri.EMPTY
+                            val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+                            intent.putExtra("videoUrl", uri.toString())
+                            startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    openCropActivity(uri)
+                }
+            } else {
+                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     private fun openCropActivity(imageUri: Uri) {
         val options = UCrop.Options().apply {
@@ -1049,78 +1235,80 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
             .withOptions(options)
             .start(requireContext(), this)
     }
-   /* private fun openCropActivity(imageUri: Uri) {
-        val options = UCrop.Options().apply {
-            setFreeStyleCropEnabled(true)
+
+    /* private fun openCropActivity(imageUri: Uri) {
+         val options = UCrop.Options().apply {
+             setFreeStyleCropEnabled(true)
+         }
+         val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+         UCrop.of(imageUri, destinationUri)
+             .withOptions(options)
+             .start(requireContext(), this)
+     }*/
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (RTVariable.SELECT_OPTION) {
+            RTVariable.SELECT_OPTION = false
+            if (resultCode == RESULT_OK) {
+                when (requestCode) {
+                    REQUEST_CODE_CROP_VIDEO -> {
+                        val file = File(UserPreference.seletedUri.path)
+                        uploadImage(file, "V")
+                    }
+
+                    UCrop.REQUEST_CROP -> {
+                        val resultUri = UCrop.getOutput(data!!)
+                        Log.i("TAG", "onActivityResult: " + resultUri)
+                        val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
+                        uploadImage(file, "I")
+                    }
+                }
+            } else {
+                Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
+            }
+        } else {
+            if (resultCode == RESULT_OK) {
+                if (requestCode == REQUEST_CODE_CROP_VIDEO) {
+                    UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                    findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+
+                } else if (requestCode == UCrop.REQUEST_CROP) {
+                    val resultUri = UCrop.getOutput(data!!)
+                    if (resultUri != null) {
+                        // get cropped image info
+                        val extras = data.extras
+                        val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
+                        val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
+
+                        var selectedRatio = 0 // default (unknown)
+
+                        if (width > 0 && height > 0) {
+                            val ratio = width.toFloat() / height.toFloat()
+
+                            selectedRatio = when {
+                                isCloseTo(ratio, 1f) -> 2   // 1:1
+                                isCloseTo(ratio, 9f / 16f) -> 1   // 9:16
+                                isCloseTo(ratio, 16f / 9f) -> 3   // 16:9
+                                else -> 0 // unknown
+                            }
+                        }
+
+                        Log.d("ProfileFragment", "Cropped ratio int: $selectedRatio")
+
+                        UserPreference.seletedUri = resultUri
+                        UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                        UserPreference.selectedCropRatio = selectedRatio
+                        Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
+
+                        findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+                    }
+                }
+            } else {
+                Log.w("ProfileFragment", "cropping was cancelled or failed with code: $resultCode")
+            }
         }
-        val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
-        UCrop.of(imageUri, destinationUri)
-            .withOptions(options)
-            .start(requireContext(), this)
-    }*/
-   @Deprecated("Deprecated in Java")
-   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-       super.onActivityResult(requestCode, resultCode, data)
-       if(RTVariable.SELECT_OPTION){
-           RTVariable.SELECT_OPTION = false
-           if (resultCode==RESULT_OK){
-               when(requestCode){
-                   REQUEST_CODE_CROP_VIDEO->{
-                       val file = File(UserPreference.seletedUri.path)
-                       uploadImage(file, "V")
-                   }
-                   UCrop.REQUEST_CROP -> {
-                       val resultUri = UCrop.getOutput(data!!)
-                       Log.i("TAG", "onActivityResult: "+resultUri)
-                       val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
-                       uploadImage(file, "I")
-                   }
-               }
-           }else {
-               Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
-           }
-       }else{
-           if (resultCode == RESULT_OK) {
-               if (requestCode == REQUEST_CODE_CROP_VIDEO) {
-                   UserPreference.selectedMediaToUpload = selectedBottomSheetType
-                   findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
-
-               } else if (requestCode == UCrop.REQUEST_CROP) {
-                   val resultUri = UCrop.getOutput(data!!)
-                   if (resultUri != null) {
-                       // get cropped image info
-                       val extras = data.extras
-                       val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
-                       val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
-
-                       var selectedRatio = 0 // default (unknown)
-
-                       if (width > 0 && height > 0) {
-                           val ratio = width.toFloat() / height.toFloat()
-
-                           selectedRatio = when {
-                               isCloseTo(ratio, 1f) -> 2   // 1:1
-                               isCloseTo(ratio, 9f / 16f) -> 1   // 9:16
-                               isCloseTo(ratio, 16f / 9f) -> 3   // 16:9
-                               else -> 0 // unknown
-                           }
-                       }
-
-                       Log.d("ProfileFragment", "Cropped ratio int: $selectedRatio")
-
-                       UserPreference.seletedUri = resultUri
-                       UserPreference.selectedMediaToUpload = selectedBottomSheetType
-                       UserPreference.selectedCropRatio = selectedRatio
-                       Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
-
-                       findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
-                   }
-               }
-           } else {
-               Log.w("ProfileFragment", "cropping was cancelled or failed with code: $resultCode")
-           }
-       }
-   }
+    }
 
     private fun isCloseTo(value: Float, target: Float, tolerance: Float = 0.05f): Boolean {
         return kotlin.math.abs(value - target) <= tolerance
@@ -1133,13 +1321,13 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
         else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
     }
 
-   /* private val requestMultiplePermissionsLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions.values.all { it }
-        if (granted) launchMediaPicker()
-        else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
-            }*/
+    /* private val requestMultiplePermissionsLauncher = registerForActivityResult(
+         ActivityResultContracts.RequestMultiplePermissions()
+     ) { permissions ->
+         val granted = permissions.values.all { it }
+         if (granted) launchMediaPicker()
+         else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
+             }*/
 
 
     private fun viewPagerCallback() {
@@ -1153,6 +1341,7 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
                         binding.reelIndicator.visibility = View.GONE
                         binding.galleryIndicator.visibility = View.VISIBLE
                     }
+
                     1 -> {
                         binding.openReel.setImageResource(R.drawable.profile_reel_icon_selected)
                         binding.gallery.setImageResource(R.drawable.profile_gallery_icon)
@@ -1170,9 +1359,14 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
     override fun getLayoutId(): Int {
         return R.layout.fragment_profile
     }
+
     private fun onClick() {
         binding.profileImage.setOnClickListener {
-            findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToOpenImageFragment(imageUrl = userDetails.profile_image.toString()))
+            findNavController().navigate(
+                ProfileFragmentDirections.actionProfileFragmentToOpenImageFragment(
+                    imageUrl = userDetails.profile_image.toString()
+                )
+            )
         }
         binding.shareButton.setOnClickListener {
             shareApp()
@@ -1180,46 +1374,48 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
         binding.walletButton.setOnClickListener {
             val intent = Intent(requireActivity(), RechargeCoinsActivity::class.java)
             startActivity(intent)
-           // findNavController().navigate(R.id.walletHistoryFragment)
+            // findNavController().navigate(R.id.walletHistoryFragment)
         }
         binding.backButton.setOnClickListener {
-            if (from=="chat"||from=="secondStory"||from=="reels"){
+            if (from == "chat" || from == "secondStory" || from == "reels") {
                 findNavController().popBackStack()
-            }else{
+            } else {
                 (requireActivity() as HomeActivity).selectBottomNavTab(R.id.home)
             }
         }
         binding.sideOptions.setOnClickListener {
-            if (isMyProfile=="1"){
+            if (isMyProfile == "1") {
                 val bundle = Bundle()
-                bundle.putParcelable("userDetail",userDetails)
-                Log.e("TAG", "onClick: $userDetails", )
-                findNavController().navigate(R.id.profileSettingFragment,bundle)
-            }else{
-               openSideOptionsPopup()
+                bundle.putParcelable("userDetail", userDetails)
+                Log.e("TAG", "onClick: $userDetails")
+                findNavController().navigate(R.id.profileSettingFragment, bundle)
+            } else {
+                openSideOptionsPopup()
             }
         }
         binding.editProfileButton.setOnClickListener {
             val bundle = Bundle()
-            bundle.putParcelable("userDetail",userDetails)
-            Log.e("TAG", "onClick: $userDetails", )
+            bundle.putParcelable("userDetail", userDetails)
+            Log.e("TAG", "onClick: $userDetails")
             (requireActivity() as? HomeActivity)?.setOnlineStatusVisibility(true)
-            findNavController().navigate(R.id.editProfileNewFragment,bundle)
+            findNavController().navigate(R.id.editProfileNewFragment, bundle)
             //findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment(userDetails))
         }
         binding.messageUserButton.setOnClickListener {
             val bundle = Bundle()
             userDetails.profileImage = userDetails.profile_image
-            bundle.putParcelable("userDetail",userDetails)
-            Log.e("TAG", "onClick: $userDetails", )
+            bundle.putParcelable("userDetail", userDetails)
+            Log.e("TAG", "onClick: $userDetails")
             (requireActivity() as? HomeActivity)?.setOnlineStatusVisibility(true)
             findNavController().navigate(R.id.action_profileFragment_to_chatFragment, bundle)
         }
 
 
     }
+
     private fun shareApp() {
-        val appLink = "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
+        val appLink =
+            "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
 
         val shareText = """
         Check out this amazing app!
@@ -1234,6 +1430,7 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
 
         startActivity(Intent.createChooser(shareIntent, "Share App"))
     }
+
     private fun openSideOptionsPopup() {
         val inflater = LayoutInflater.from(requireContext())
         val binding = PopupChatSideOptionsBinding.inflate(inflater)
@@ -1283,6 +1480,7 @@ private fun checkGalleryPermissionAndPick(mediaType: String) {
     }
 
 }
+
 interface PaginatingFragment {
     fun onParentScrolledToBottom()
 }

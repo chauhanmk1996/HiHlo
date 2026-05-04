@@ -98,6 +98,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
 import kotlin.getValue
 
@@ -129,7 +130,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private var searchJob: Job? = null
 
     private val viewModel6: StatusViewModel by activityViewModels()
-    private var statusListGlobal: List<StatusItem>? = null
+    private lateinit var statusListGlobal: List<StatusItem>
 
     override fun getLayoutId(): Int = R.layout.fragment_search_new
 
@@ -189,6 +190,12 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                             //val text = binding.searchEdittext.text.toString().trim()
                         }
                     }
+                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        getRefreshStory(1, 0)
+                        getRefreshMainStory(0)
+                    }
                 }
             }
         }
@@ -233,6 +240,44 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
             RTVariable.SEARCH_SELF_CLICKED = 0
+        }
+    }
+
+    private fun getRefreshStory(page: Int, gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getHomeData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    page.toString(),
+                    10.toString(),
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    viewModel.stories = response.payload.stories
+                    search_adapter.updateStories(viewModel.stories)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshMainStory(gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStatusData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    statusListGlobal = response.payload
+                    RTVariable.statusListGlobal = statusListGlobal
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
         }
     }
 
@@ -321,7 +366,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         val location = IntArray(2)
                         clickedView.getLocationOnScreen(location)
                         val intent = Intent(requireContext(), PlayStatusActivity::class.java)
-                        val json = Gson().toJson(statusListGlobal)
+                        val json = Gson().toJson(RTVariable.statusListGlobal)
                         intent.putExtra("story_list", json)
                         intent.putExtra("is_play_single", true)
                         intent.putExtra("user_id", targetUserId)
@@ -1143,6 +1188,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     if (it.data?.status==1){
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
+                            RTVariable.statusListGlobal = statusListGlobal
                             Log.e("TAG", "Status success: ${statusListGlobal}")
                         }else{
                         }

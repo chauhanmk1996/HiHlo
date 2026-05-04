@@ -176,6 +176,13 @@ class SearchAdapter(val users: MutableList<SearchUserListResponse.Payload.User>,
         this.users.addAll(users)
         notifyItemRangeInserted(start, this.users.size)
     }
+
+    fun updateStories(stories_List: List<Story>) {
+        Log.e("TAG", "updateStories size = ${stories_List.size}")
+        storiesList.clear()
+        storiesList.addAll(stories_List)
+        notifyItemRangeChanged(0, itemCount)
+    }
     fun clearList(){
         var size = users.size
         users.clear()

@@ -363,6 +363,9 @@
         android:id="@+id/deleteConfirmationFragment"
         android:name="com.app.hihlo.ui.profile.fragment.DeleteConfirmationFragment"
         android:label="DeleteConfirmationFragment" />
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profileFragment" />
     <dialog
         android:id="@+id/roundedBottomSheet"
         android:name="com.app.hihlo.ui.reels.bottom_sheet.RoundedBottomSheet"

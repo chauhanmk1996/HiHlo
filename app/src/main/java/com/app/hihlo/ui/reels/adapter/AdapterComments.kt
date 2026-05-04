@@ -11,6 +11,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -43,7 +44,7 @@ class AdapterComments(
     val onDeleteClick: (isReply: Boolean, parentCommentId: Int?, itemId: Int) -> Unit,
     val onReplySelected: (commentId: Int) -> Unit,
     val onProfileSelected: (commentId: Int) -> Unit,
-    val onProfileImageSelected: (commentId: Int) -> Unit,
+    val onProfileImageSelected: (commentId: Int, view: View) -> Unit,
     val onMentionClick: (user_id: String) -> Unit,
     val commentsRecycler: RecyclerView,
     private val viewModel: UserPostListViewModel
@@ -128,10 +129,10 @@ class AdapterComments(
                     UserDataManager.setCommentToScroll(root.context, true)
                     onProfileSelected(user_id)
                 },
-                onReplyProfileImageSelected = { user_id ->
+                onReplyProfileImageSelected = { user_id, view ->
                     UserDataManager.postCommentPosition(root.context, position)
                     UserDataManager.setCommentToScroll(root.context, true)
-                    onProfileImageSelected(user_id)
+                    onProfileImageSelected(user_id, view)
                 },
                 onMentionClick = { user_name ->
                     UserDataManager.postCommentPosition(root.context, position)
@@ -340,12 +341,12 @@ class AdapterComments(
                             UserDataManager.postCommentPosition(root.context, position)
                             UserDataManager.setCommentToScroll(root.context, true)
                             UserDataManager.postCommentIsShow(root.context, true)
-                            onProfileImageSelected(commentItem.user?.id ?: -1)
+                            onProfileImageSelected(commentItem.user?.id ?: -1, userImage)
                         } else {
                             UserDataManager.postCommentPosition(root.context, position)
                             UserDataManager.setCommentToScroll(root.context, true)
                             UserDataManager.postCommentIsShow(root.context, true)
-                            onProfileImageSelected(commentItem.user?.id ?: -1)
+                            onProfileImageSelected(commentItem.user?.id ?: -1, userImage)
                         }
                     }else{
                         UserDataManager.postCommentPosition(root.context, position)

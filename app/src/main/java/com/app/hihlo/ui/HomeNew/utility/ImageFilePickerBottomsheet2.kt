@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -21,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,8 +35,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.yalantis.ucrop.UCrop
+import com.yalantis.ucrop.model.AspectRatio
+import java.io.File
 
-class FilePickerBottomsheet : BottomSheetDialogFragment() {
+class ImageFilePickerBottomsheet2 : BottomSheetDialogFragment() {
 
     private var _binding: FilePickerForStatusBinding? = null
     private val binding get() = _binding!!
@@ -45,28 +50,45 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
 
     override fun getTheme(): Int = R.style.FilePickerTheme
 
-    /**
-     * Callback interface to return the selected media URI and type.
-     */
     fun interface OnMediaSelectedListener {
-        fun onMediaSelected(uri: String, type: String)
+        fun onMediaSelected(uri: String, type: String, ratio: Int)
     }
 
     fun setOnMediaSelectedListener(listener: OnMediaSelectedListener) {
         this.listener = listener
     }
 
-    // Launcher for ImageVideoConverter activity
     private val converterLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            val returnedUri = result.data?.getStringExtra("uri") ?: ""
-            val returnedType = result.data?.getStringExtra("type") ?: ""
-            Log.d("RETURNED_DATA", "uri = $returnedUri, type = $returnedType")
-            listener?.onMediaSelected(returnedUri, returnedType)
+            val resultUri = UCrop.getOutput(result.data!!)
+            if (resultUri != null) {
+                val extras = result.data?.extras
+                val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
+                val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
+                var ratio = 0
+                if (width > 0 && height > 0) {
+                    val w = width.toFloat()
+                    val h = height.toFloat()
+                    ratio = when {
+                        isCloseTo(w/h, 1f)    -> 2
+                        isCloseTo(w/h, 9f/16f) -> 1
+                        isCloseTo(w/h, 16f/9f) -> 3
+                        else -> 0
+                    }
+                }
+                listener?.onMediaSelected(resultUri.toString(), "image", ratio)
+            } else {
+                Toast.makeText(requireContext(), "Failed to crop image", Toast.LENGTH_SHORT).show()
+            }
             dismiss()
         }
+    }
+
+    // Helper (same as your old code)
+    private fun isCloseTo(value: Float, target: Float, tolerance: Float = 0.05f): Boolean {
+        return kotlin.math.abs(value - target) <= tolerance
     }
 
     override fun onCreateView(
@@ -80,8 +102,10 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView = view.findViewById(R.id.recyclerView)
+        binding.titleTextView.text = "Choose Image"
+        recyclerView = binding.recyclerView
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+
         val cornerRadius = 25f.toPx(requireContext())
         val shapeDrawable = MaterialShapeDrawable(
             ShapeAppearanceModel.Builder()
@@ -89,41 +113,44 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
                 .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
                 .build()
         )
+
         shapeDrawable.fillColor = ColorStateList.valueOf(
             ContextCompat.getColor(requireContext(), R.color.bottom_sheet_color)
         )
+
         binding.root.background = shapeDrawable
-        dialog?.window?.setBackgroundDrawable(
-            ColorDrawable(Color.TRANSPARENT)
-        )
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
         checkPermission()
     }
 
     override fun onStart() {
         super.onStart()
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val bottomSheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+
+        val bottomSheet = dialog?.findViewById<View>(
+            com.google.android.material.R.id.design_bottom_sheet
+        )
         bottomSheet?.apply {
             setBackgroundColor(Color.TRANSPARENT)
             background = null
             clipToOutline = false
         }
-        val container = dialog?.findViewById<View>(com.google.android.material.R.id.container)
-        container?.setBackgroundColor(Color.TRANSPARENT)
-        container?.background = null
     }
 
     fun Float.toPx(context: android.content.Context): Float =
-        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics)
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            this,
+            context.resources.displayMetrics
+        )
 
     // ─── Permissions ────────────────────────────────────────────────
     private fun checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(
-                arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO
-                ), 100
+                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                100
             )
         } else {
             requestPermissions(
@@ -139,70 +166,59 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         if (requestCode == 100) {
-            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                loadAllMedia()
+            if (grantResults.isNotEmpty() && grantResults.all {
+                    it == PackageManager.PERMISSION_GRANTED
+                }) {
+                loadImages()
             } else {
-                Toast.makeText(requireContext(), "Permissions required to show media", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Permission required to show images",
+                    Toast.LENGTH_SHORT
+                ).show()
                 dismiss()
             }
         }
     }
 
-    // ─── Media loading ──────────────────────────────────────────────
-    private fun loadAllMedia() {
-        val collection = MediaStore.Files.getContentUri("external")
+    // ─── Load only images ───────────────────────────────────────────
+    private fun loadImages() {
+        val collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
         val projection = arrayOf(
-            MediaStore.Files.FileColumns._ID,
-            MediaStore.Files.FileColumns.MEDIA_TYPE,
-            MediaStore.Files.FileColumns.DATA,
-            MediaStore.Files.FileColumns.SIZE,
-            MediaStore.Video.VideoColumns.DURATION
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.SIZE
         )
 
-        val selection =
-            "${MediaStore.Files.FileColumns.MEDIA_TYPE}=? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE}=?"
-        val args = arrayOf(
-            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
-            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
-        )
-        val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
+        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
         val cursor = requireContext().contentResolver.query(
-            collection, projection, selection, args, sortOrder
+            collection,
+            projection,
+            null,
+            null,
+            sortOrder
         )
 
         cursor?.use {
-            val idCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-            val typeCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
-            val pathCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA)
-            val sizeCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
-            val durationCol = it.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION)
+            val idCol = it.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            val sizeCol = it.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
 
             while (it.moveToNext()) {
                 val id = it.getLong(idCol)
-                val type = it.getInt(typeCol)
-                val path = it.getString(pathCol) ?: ""
                 val size = it.getLong(sizeCol)
-                val duration = it.getLong(durationCol)
 
-                val contentUri = when (type) {
-                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE ->
-                        ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                    else ->
-                        ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
-                }
-
-                val mediaType = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) "image" else "video"
+                val contentUri = ContentUris.withAppendedId(collection, id)
 
                 mediaList.add(
                     MediaModel(
                         uri = contentUri,
-                        actualPath = path,
-                        mediaType = mediaType,
+                        actualPath = "",
+                        mediaType = "image",
                         fileSize = size,
-                        duration = duration
+                        duration = 0L
                     )
                 )
             }
@@ -211,7 +227,7 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
         recyclerView.adapter = MediaAdapter(mediaList)
     }
 
-    // ─── RecyclerView adapter (inner class) ─────────────────────────
+    // ─── Adapter ────────────────────────────────────────────────────
     inner class MediaAdapter(private val list: ArrayList<MediaModel>) :
         RecyclerView.Adapter<MediaAdapter.ViewHolder>() {
 
@@ -235,39 +251,35 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
             Glide.with(holder.itemView.context)
                 .load(item.uri)
                 .into(holder.imgThumb)
-
             holder.txtType.text =
                 item.mediaType.replaceFirstChar { it.uppercase() }
-            if (item.mediaType == "video"){
-                holder.txtDuration.text = formatDuration(item.duration)
-                holder.txtDuration.isVisible = true
-            }else{
-                holder.txtDuration.isVisible = false
-            }
-//            holder.txtDuration.text =
-//                if (item.mediaType == "video") formatDuration(item.duration) else ""
+            holder.txtDuration.isVisible = false
 
             holder.itemView.setOnClickListener {
                 Log.d("MEDIA_DATA", "uri = ${item.uri}")
-                Log.d("MEDIA_DATA", "actual_path = ${item.actualPath}")
-                Log.d("MEDIA_DATA", "media_type = ${item.mediaType}")
-                Log.d("MEDIA_DATA", "file_size = ${item.fileSize}")
-                Log.d("MEDIA_DATA", "duration = ${item.duration}")
-
-                val isVideo = item.mediaType == "video"
-                val intent = Intent(requireContext(), ImageVideoConverter::class.java).apply {
-                    putExtra("uri", item.uri.toString())
-                    putExtra("isVideo", isVideo)
+                val options = UCrop.Options().apply {
+                    setFreeStyleCropEnabled(false)
+                    setAspectRatioOptions(
+                        0,
+                        AspectRatio("1:1", 1f, 1f),
+                        AspectRatio("9:16", 9f, 16f),
+                        AspectRatio("16:9", 16f, 9f)
+                    )
                 }
-                converterLauncher.launch(intent)
-            }
-        }
 
-        private fun formatDuration(ms: Long): String {
-            val sec = ms / 1000
-            val min = sec / 60
-            val remain = sec % 60
-            return String.format("%02d:%02d", min, remain)
+                // 🔥 Create a content URI via FileProvider
+                val destinationFile = File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
+                val destinationUri = FileProvider.getUriForFile(
+                    requireContext(),
+                    "${requireContext().packageName}.provider",
+                    destinationFile
+                )
+
+                val uCropIntent = UCrop.of(item.uri, destinationUri)
+                    .withOptions(options)
+                    .getIntent(requireContext())
+                converterLauncher.launch(uCropIntent)
+            }
         }
     }
 

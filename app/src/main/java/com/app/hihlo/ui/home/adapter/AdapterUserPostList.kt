@@ -518,6 +518,13 @@ class AdapterUserPostList(
         notifyDataSetChanged()
     }
 
+    fun updateStories(stories_List: List<Story>) {
+        Log.e("TAG", "updateStories size = ${stories_List.size}")
+        storiesList.clear()
+        storiesList.addAll(stories_List)
+        notifyItemRangeChanged(0, itemCount)
+    }
+
     private fun setDescriptionText(
         fullText: String,
         firstLine: TextView,

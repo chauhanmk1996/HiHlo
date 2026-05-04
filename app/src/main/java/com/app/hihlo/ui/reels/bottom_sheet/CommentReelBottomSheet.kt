@@ -12,6 +12,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -48,6 +49,7 @@ import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.HomeNewFragmentDirections
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.home.fragment.UserPostListFragmentDirections
 import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 import com.app.hihlo.ui.reels.adapter.AdapterComments
@@ -64,6 +66,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
 class CommentReelBottomSheet : BottomSheetDialogFragment() {
@@ -377,20 +380,48 @@ class CommentReelBottomSheet : BottomSheetDialogFragment() {
                     findNavController().navigate(UserPostListFragmentDirections.actionUserPostListFragmentToProfileFragment("0", user_id.toString()))
                 }
             },
-            onProfileImageSelected = { user_id ->
-                val storyPosition = stories?.indexOfFirst { it.user_id == user_id }
-                val bundle = Bundle().apply {
-                    putParcelableArrayList("storyList", ArrayList(stories ?: emptyList()))
-                    putParcelable("myStoryData", myStory)
-                    putInt("position", storyPosition!!)
+            onProfileImageSelected = { user_id, view ->
+//                val storyPosition = stories?.indexOfFirst { it.user_id == user_id }
+//                val bundle = Bundle().apply {
+//                    putParcelableArrayList("storyList", ArrayList(stories ?: emptyList()))
+//                    putParcelable("myStoryData", myStory)
+//                    putInt("position", storyPosition!!)
+//                }
+//                try {
+//                    dismiss()
+//                    findNavController().navigate(R.id.secondStoryFragment, bundle)
+//                } catch (e: Exception) {
+//                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
+//                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+//                }
+                if (RTVariable.statusListGlobal.isEmpty()) {
+
+                }else{
+                    //val storyPosition = stories?.indexOfFirst { it.user_id == user_id }
+                    val targetUserId = user_id.toString()
+                    val location = IntArray(2)
+                    view.getLocationOnScreen(location)
+
+                    val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+
+                    // normal data
+                    //intent.putExtra("play_position", storyPosition)
+
+                    val json = Gson().toJson(RTVariable.statusListGlobal)
+                    intent.putExtra("story_list", json)
+                    intent.putExtra("is_play_single", true)
+                    intent.putExtra("user_id", targetUserId)
+
+                    // instagram style animation data
+                    intent.putExtra("start_x", location[0])
+                    intent.putExtra("start_y", location[1])
+                    intent.putExtra("start_width", view.width)
+                    intent.putExtra("start_height", view.height)
+
+                    startActivity(intent)
+                    requireActivity().overridePendingTransition(0, 0)
                 }
-                try {
-                    dismiss()
-                    findNavController().navigate(R.id.secondStoryFragment, bundle)
-                } catch (e: Exception) {
-                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
-                }
+                // clicked view ki position lo
                 //dismiss()
                 //findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
             },

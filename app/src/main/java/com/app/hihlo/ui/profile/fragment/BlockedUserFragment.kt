@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentBlockedUserBinding
@@ -20,6 +22,9 @@ import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.unblock_user.request.UnblockUserRequest
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.fragment.UserPostListFragmentDirections
 import com.app.hihlo.ui.home.view_model.HomeViewModel
@@ -30,6 +35,8 @@ import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.getValue
 
 class BlockedUserFragment : Fragment() {
@@ -39,6 +46,8 @@ class BlockedUserFragment : Fragment() {
     private val viewModel2: HomeViewModel by viewModels()
     private var myStoryData: MyStory = MyStory()
     private var allStory: List<Story>? = null
+    private val viewModel5: StatusViewModel by activityViewModels()
+    private lateinit var statusListGlobal: List<StatusItem>
 
     var data = mutableListOf<UserDetails>()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +64,7 @@ class BlockedUserFragment : Fragment() {
        binding = FragmentBlockedUserBinding.inflate(layoutInflater)
         return binding.root
     }
-    private fun getSelectedUser(click: Int, userId: String){
+    private fun getSelectedUser(click: Int, userId: String, view: View){
         when(click){
             1->{
                 openUnblockUserConfirmationDialog(userId)
@@ -227,6 +236,25 @@ class BlockedUserFragment : Fragment() {
                 }
             }
         }
+//        viewModel5.getStatusLiveData().observe(viewLifecycleOwner) {
+//            when (it.status) {
+//                Status.SUCCESS -> {
+//                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+//                    if (it.data?.status==1){
+//                        if (it.data.code == 200) {
+//                            statusListGlobal = it.data.payload
+//                            RTVariable.statusListGlobal = statusListGlobal
+//                        }else{
+//                        }
+//                    }else{
+//                    }
+//                }
+//                Status.LOADING -> {
+//                }
+//                Status.ERROR -> {
+//                }
+//            }
+//        }
     }
 
     private fun onClick() {

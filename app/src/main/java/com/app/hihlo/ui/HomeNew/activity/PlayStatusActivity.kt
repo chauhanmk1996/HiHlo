@@ -500,6 +500,7 @@ class PlayStatusActivity : AppCompatActivity() {
 
     private fun pauseStory() {
         if (isPaused) return
+        if (currentPosition !in storyList.indices) return
         isPaused = true
         player?.pause()
         val item = storyList[currentPosition]
@@ -515,6 +516,9 @@ class PlayStatusActivity : AppCompatActivity() {
 
     private fun resumeStory() {
         if (!isPaused) return
+        if (currentPosition !in storyList.indices) {
+            return
+        }
         isPaused = false
         val item = storyList[currentPosition]
         if (item.asset_type == "I") {
@@ -530,10 +534,11 @@ class PlayStatusActivity : AppCompatActivity() {
     private fun playNext() {
         currentPosition++
         if (currentPosition >= storyList.size) {
+            currentPosition = storyList.size - 1
             finish()
-        } else {
-            playStory()
+            return
         }
+        playStory()
     }
 
     private fun playPrevious() {

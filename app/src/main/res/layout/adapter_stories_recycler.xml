@@ -97,13 +97,13 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/user_image_background"
+            android:background="@drawable/black_circle"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivPlusIcon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:padding="0dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/plus_icon_pink"
@@ -111,6 +111,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView

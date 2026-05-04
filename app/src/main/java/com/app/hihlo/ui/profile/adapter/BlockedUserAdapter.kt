@@ -2,6 +2,7 @@ package com.app.hihlo.ui.profile.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +17,7 @@ import com.app.hihlo.utils.RTVariable
 import com.bumptech.glide.Glide
 
 class BlockedUserAdapter(
-    val getSelectedUser: (click: Int, userId: String) -> Unit,
+    val getSelectedUser: (click: Int, userId: String, view: View) -> Unit,
     val blockedUsers: List<BlockedUser>,
 ) :
     RecyclerView.Adapter<BlockedUserAdapter.ViewHolder>() {
@@ -84,7 +85,7 @@ class BlockedUserAdapter(
 //                        "3" -> onlineStatusImage.setImageResource(R.drawable.busy_status)
             }
             followButton.setOnClickListener {
-                getSelectedUser(1, blockedUsers[position].blockedUserId)
+                getSelectedUser(1, blockedUsers[position].blockedUserId, followButton)
             }
 //            userImage.setOnClickListener {
 //                if(blockedUsers[position].userDetails.isStoryUploaded==1){

@@ -64,6 +64,7 @@ import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter
 import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
+import com.app.hihlo.ui.HomeNew.utility.ImageFilePickerBottomsheet
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.adapter.AdapterUserPostList
 import com.app.hihlo.ui.home.view_model.HomeViewModel
@@ -1636,9 +1637,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }
 
-    private val filePickerLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri = result.data?.getStringExtra("uri") ?: ""
             val type = result.data?.getStringExtra("type") ?: ""
@@ -1673,27 +1672,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, view:View){
         if(option==2){
             Log.e("VALUE", "VALUE>>> $value")
-
-            // clicked view ki position lo
             val location = IntArray(2)
             view.getLocationOnScreen(location)
-
             val intent = Intent(requireContext(), PlayStatusActivity::class.java)
-
-            // normal data
             intent.putExtra("play_position", position)
-
-            val json = Gson().toJson(statusListGlobal)
+            val json = Gson().toJson(RTVariable.statusListGlobal)
             intent.putExtra("story_list", json)
             intent.putExtra("is_play_single", false)
             intent.putExtra("user_id", "")
-
-            // instagram style animation data
             intent.putExtra("start_x", location[0])
             intent.putExtra("start_y", location[1])
             intent.putExtra("start_width", view.width)
             intent.putExtra("start_height", view.height)
-
             startActivity(intent)
 //            requireActivity().overridePendingTransition(
 //                R.anim.slide_up,
@@ -1734,7 +1724,24 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     },
                     onOption2Click = {
                         RTVariable.SELECT_OPTION = false
-                        checkGalleryPermissionAndPick2("I")
+                        selectedBottomSheetType = "Image"   // still needed for title/API logic
+
+                        val bottomSheet = ImageFilePickerBottomsheet()
+                        bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
+                            val resultUri = Uri.parse(uri)
+                            if (resultUri.scheme == null || resultUri.path == null) {
+                                Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT).show()
+                                return@setOnMediaSelectedListener
+                            }
+                            UserPreference.seletedUri = resultUri
+                            UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                            UserPreference.selectedCropRatio = ratio
+                            UserPreference.selectedMediaType = "I"   // 🔥 ADD THIS LINE
+                            Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
+                            findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
+                        }
+                        bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
+                        //checkGalleryPermissionAndPick2("I")
                     },
                     onOption3Click = {
                         RTVariable.SELECT_OPTION = false
@@ -1988,13 +1995,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
     }
 
-    private val pickMedia =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { openPreview(it) }
         }
 
-    private val previewResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val previewResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
                 val savedUriString = data?.getStringExtra("uri")
@@ -2066,9 +2071,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         previewResultLauncher.launch(intent)
     }
 
-    private val mediaPickerLauncher = registerForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
+    private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
 //            val mimeType = requireContext().contentResolver.getType(uri)
 //            if (mimeType?.startsWith("video") == true) {

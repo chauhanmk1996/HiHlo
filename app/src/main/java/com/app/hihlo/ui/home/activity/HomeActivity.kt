@@ -139,8 +139,9 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         Handler(Looper.getMainLooper()).post {
             handleIntentNavigation(intent)
         }
-        handleIntent(intent)
-
+        if(intent!=null){
+            handleIntent(intent)
+        }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -200,7 +201,12 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                 putString("userId", userId)
                 putString("from", from)
             }
-            navController.navigate(R.id.profileFragment, bundle)
+            val navController = findNavController(R.id.nav_host_fragment)
+            try {
+                navController.navigate(R.id.action_global_profileFragment, bundle)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             intent.removeExtra("navigate_to_profile")
         }
     }

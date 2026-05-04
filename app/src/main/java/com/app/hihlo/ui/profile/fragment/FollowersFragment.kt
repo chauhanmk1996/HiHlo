@@ -8,7 +8,9 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,6 +35,7 @@ import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -66,6 +69,57 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
         super.onViewCreated(view, savedInstanceState)
         setObserver()
         onClick()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(500)
+                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        getRefreshStory(1, 0)
+                        getRefreshMainStory(0)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getRefreshStory(page: Int, gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getHomeData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    page.toString(),
+                    10.toString(),
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    viewModel5.stories = response.payload.stories
+                    adapterFollowers.updateStories(viewModel5.stories)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshMainStory(gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStatusData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    statusListGlobal = response.payload
+                    RTVariable.statusListGlobal = statusListGlobal
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
     }
 
     private fun onClick() {
@@ -112,7 +166,7 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                 val location = IntArray(2)
                 view.getLocationOnScreen(location)
                 val targetUserId = RTVariable.USER_ID.toInt().toString()
-                val newList = statusListGlobal.drop(1)
+                val newList = RTVariable.statusListGlobal.drop(1)
                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
                 //intent.putExtra("play_position", storyPosition)
                 val json = Gson().toJson(newList)
@@ -449,6 +503,7 @@ class FollowersFragment : BaseFragment<FragmentFollowersBinding>() {
                     if (it.data?.status==1){
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
+                            RTVariable.statusListGlobal = statusListGlobal
                             Log.e("TAG", "Status success: ${statusListGlobal}")
                         }else{
                         }

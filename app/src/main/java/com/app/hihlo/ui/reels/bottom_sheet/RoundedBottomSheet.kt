@@ -171,7 +171,7 @@ class RoundedBottomSheet : BottomSheetDialogFragment() {
             onProfileSelected = { user_id ->
                 findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", user_id.toString()))
             },
-            onProfileImageSelected = { user_id ->
+            onProfileImageSelected = { user_id, view ->
                 val storyPosition = stories?.indexOfFirst { it.user_id == user_id }
                 val bundle = Bundle().apply {
                     putParcelableArrayList("storyList", ArrayList(stories ?: emptyList()))

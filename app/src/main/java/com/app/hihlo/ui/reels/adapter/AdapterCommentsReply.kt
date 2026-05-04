@@ -43,7 +43,7 @@ class AdapterCommentsReply(
     val onReplySelect: (String) -> Unit,               // optional — if you still want inline reply
     val onDeleteClick: (replyId: Int) -> Unit,
     val onReplyProfileSelected: (user_id: Int) -> Unit,// ← new
-    val onReplyProfileImageSelected: (user_id: Int) -> Unit,// ← new
+    val onReplyProfileImageSelected: (user_id: Int, view: View) -> Unit,// ← new
     val onMentionClick: (user_id: String) -> Unit
 ) : RecyclerView.Adapter<AdapterCommentsReply.ViewHolder>() {
 
@@ -242,12 +242,12 @@ class AdapterCommentsReply(
                             UserDataManager.postCommentPosition(root.context, position)
                             UserDataManager.setCommentToScroll(root.context, true)
                             UserDataManager.postCommentIsShow(root.context, true)
-                            onReplyProfileImageSelected(replies?.get(position)?.user?.id ?: -1)
+                            onReplyProfileImageSelected(replies?.get(position)?.user?.id ?: -1, holder.binding.userImage)
                         } else {
                             UserDataManager.postCommentPosition(root.context, position)
                             UserDataManager.setCommentToScroll(root.context, true)
                             UserDataManager.postCommentIsShow(root.context, true)
-                            onReplyProfileImageSelected(replies?.get(position)?.user?.id ?: -1)
+                            onReplyProfileImageSelected(replies?.get(position)?.user?.id ?: -1, holder.binding.userImage)
                         }
                     }else{
                         UserDataManager.postCommentPosition(root.context, position)
