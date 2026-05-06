@@ -35,6 +35,9 @@ import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.calling.CallForegroundService
 import com.app.hihlo.ui.calling.activity.OldIncomingCallActivity
 import com.app.hihlo.ui.calling.activity.OldOutgoingCallActivity
@@ -45,6 +48,7 @@ import com.app.hihlo.ui.chat.adapter.AdapterChatList
 import com.app.hihlo.ui.chat.adapter.ChatListViewPagerAdapter
 import com.app.hihlo.ui.chat.view_model.RecentChatListViewModel
 import com.app.hihlo.ui.home.activity.HomeActivity
+import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
@@ -72,6 +76,11 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
         Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken
     }
     private val callStateViewModel: CallStateViewModel by activityViewModels()
+    private val viewModel5: HomeViewModel by viewModels()
+    private val viewModel6: StatusViewModel by activityViewModels()
+    private var myStoryData: MyStory = MyStory()
+    private var allStory: List<Story>? = null
+    private lateinit var statusListGlobal: List<StatusItem>
 
 
     companion object {
@@ -319,6 +328,49 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                 }
             }
         }
+        viewModel5.getHomeLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Home success: ${Gson().toJson(it)}")
+                    Log.e("TAG", "Home success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200){
+                            myStoryData = it.data.payload.my_story ?: MyStory()
+                            allStory = it.data.payload.stories
+                            Log.e("TAG", "Home success: ${myStoryData}")
+                            Log.e("TAG", "Home success: ${allStory}")
+                            viewPagerAdapter?.updateStory(it.data.payload.stories)
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
+                }
+            }
+        }
+        viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            statusListGlobal = it.data.payload
+                            RTVariable.statusListGlobal = statusListGlobal
+                            Log.e("TAG", "Status success: ${statusListGlobal}")
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
+                }
+            }
+        }
     }
 
     fun openDeleteCompleteConfirmationDialog(id: String) {
@@ -383,6 +435,29 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                         }
                         findNavController().navigate(R.id.action_chatListFragment_to_chatFragment, bundle)
                     }
+                }
+                2 -> {
+                    Log.i("TAG", "IMAGE CLICKED:")
+                    if (statusListGlobal.isEmpty()) {
+                        return@ChatListViewPagerAdapter
+                    }
+                    val location = IntArray(2)
+                    view.getLocationOnScreen(location)
+                    val targetUserId = RTVariable.USER_ID.toInt().toString()
+                    val newList = RTVariable.statusListGlobal.drop(1)
+                    val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                    //intent.putExtra("play_position", storyPosition)
+                    val json = Gson().toJson(newList)
+                    intent.putExtra("story_list", json)
+                    intent.putExtra("is_play_single", true)
+                    intent.putExtra("user_id", targetUserId)
+                    intent.putExtra("start_x", location[0])
+                    intent.putExtra("start_y", location[1])
+                    intent.putExtra("start_width", view.width)
+                    intent.putExtra("start_height", view.height)
+                    startActivity(intent)
+                    //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+                    requireActivity().overridePendingTransition(0, 0)
                 }
             }
         }
@@ -453,6 +528,10 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
             viewPagerAdapter.updateList(RTVariable.chat_recentList, 0)
             viewPagerAdapter.updateList(RTVariable.chat_requestUsersList, 1)
         }
+        viewModel5.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
+        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+        getRefreshStory(1, 0)
+        getRefreshMainStory(0)
 //        viewLifecycleOwner.lifecycleScope.launch {
 //            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 //                while (true) {
@@ -484,6 +563,63 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 //                }
 //            }
 //        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(500)
+                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        getRefreshStory(1, 0)
+                        getRefreshMainStory(0)
+                    }
+//                    else{
+//                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+//                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+//                        getRefreshStory(1, 0)
+//                        getRefreshMainStory(0)
+//                    }
+                }
+            }
+        }
+    }
+
+    private fun getRefreshStory(page: Int, gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getHomeData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    page.toString(),
+                    10.toString(),
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    viewModel5.stories = response.payload.stories
+                    viewPagerAdapter?.updateStory(viewModel5.stories)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshMainStory(gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStatusData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    statusListGlobal = response.payload
+                    RTVariable.statusListGlobal = statusListGlobal
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
     }
 
     private fun runChatListAPI(){

@@ -206,7 +206,9 @@
                     android:shadowDy="0"
                     android:shadowRadius="4"
                     android:text="Jaipur, India"/>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/captionContainer"
                 android:layout_width="0dp"

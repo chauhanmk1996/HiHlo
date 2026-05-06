@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.databinding.ChatListViewPagerAdapterBinding
 import com.app.hihlo.model.get_recent_chat.response.RecentChat
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.utils.ScrollKeys
 import com.app.hihlo.utils.UserDataManager
 
@@ -22,6 +23,9 @@ class ChatListViewPagerAdapter(
 
     private val scrollHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var scrollRunnable: Runnable? = null
+
+    private var inboxAdapter: AdapterChatList? = null
+    private var requestAdapter: AdapterChatList? = null
 
     inner class PageViewHolder(val binding: ChatListViewPagerAdapterBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -88,6 +92,11 @@ class ChatListViewPagerAdapter(
             isInbox
         )
         binding.chatListRecycler.adapter = adapter
+        if (isInbox) {
+            inboxAdapter = adapter
+        } else {
+            requestAdapter = adapter
+        }
 
         // ==========================
         // ✅ RESTORE SCROLL – ABSOLUTE + ULTRA STABLE
@@ -172,6 +181,11 @@ class ChatListViewPagerAdapter(
             requestList = newList
             notifyItemChanged(1)
         }
+    }
+
+    fun updateStory(stories_List: List<Story>){
+        inboxAdapter?.updateStories(stories_List)
+        requestAdapter?.updateStories(stories_List)
     }
 
     fun scrollToTop(recyclerView: RecyclerView, tabPosition: Int, isTrue: Boolean) {

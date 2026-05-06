@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.chat.adapter
 
+import android.util.Log
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -10,12 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
 import com.app.hihlo.databinding.AdapterChatListBinding
 import com.app.hihlo.model.get_recent_chat.response.RecentChat
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.utils.ChatUtils.getChatListDay
 import com.app.hihlo.utils.ChatUtils.getCurrentTime
 import com.app.hihlo.utils.ChatUtils.getDay
+import com.app.hihlo.utils.RTVariable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -30,6 +33,8 @@ class AdapterChatList(
     val view: View,
     val isInboxSelected: Boolean
 ) : RecyclerView.Adapter<AdapterChatList.ViewHolder>() {
+
+    private val storiesList: MutableList<Story> = mutableListOf()
 
     inner class ViewHolder(val binding: AdapterChatListBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -119,8 +124,10 @@ class AdapterChatList(
 //                "3" -> onlineStatusImage.setImageResource(R.drawable.busy_status)
             }
             if (position==chats.size-1) bottomLine.isVisible=false else bottomLine.isVisible=true
-            if (chats[position].userDetails?.is_story_uploaded == 1) {
-                if (chats[position].userDetails?.is_seen == 0) {
+            Log.e("isStoryUploaded", "isStoryUploaded>>> "+chats[position].userDetails?.isStoryUploaded)
+            if (chats[position].userDetails?.isStoryUploaded == 1) {
+                val story = storiesList?.find { story -> story.user_id == chats[position].userDetails?.id }
+                if (story != null && story.is_seen == 0) {
                     myStoryGradient.background = root.resources.getDrawable(
                         R.drawable.gredient_circle, null
                     )
@@ -129,13 +136,21 @@ class AdapterChatList(
                         R.drawable.gredient_circle_black, null
                     )
                 }
-                userImage.setOnClickListener {
-                    getSelectedChat(position, 0, root)
-                }
+//                userImage.setOnClickListener {
+//                    getSelectedChat(position, 2, userImage)
+//                }
             } else {
                 myStoryGradient.background = root.resources.getDrawable(
                     R.drawable.gredient_circle_transparent, null
                 )
+            }
+            userImage.setOnClickListener {
+                if (chats[position].userDetails?.isStoryUploaded == 1) {
+                    RTVariable.USER_ID = chats[position].userDetails?.id.toString()
+                    getSelectedChat(position, 2, userImage)
+                }else{
+                    getSelectedChat(position, 1, root)
+                }
             }
             if (isInboxSelected){
                 if (Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.userId==chats[position].messageSentBy){
@@ -169,5 +184,12 @@ class AdapterChatList(
     fun updateList(list: List<RecentChat>) {
         chats = list
         notifyDataSetChanged()
+    }
+
+    fun updateStories(stories_List: List<Story>) {
+        Log.e("TAG", "updateStories size = ${stories_List.size}")
+        storiesList.clear()
+        storiesList.addAll(stories_List)
+        notifyItemRangeChanged(0, itemCount)
     }
 }

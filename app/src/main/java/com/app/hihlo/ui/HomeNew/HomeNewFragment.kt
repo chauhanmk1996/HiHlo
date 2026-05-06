@@ -65,6 +65,7 @@ import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
 import com.app.hihlo.ui.HomeNew.utility.ImageFilePickerBottomsheet
+import com.app.hihlo.ui.HomeNew.utility.VideoFilePickerBottomsheet
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.adapter.AdapterUserPostList
 import com.app.hihlo.ui.home.view_model.HomeViewModel
@@ -1669,33 +1670,36 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, view:View){
+    fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, itemView:View){
         if(option==2){
-            Log.e("VALUE", "VALUE>>> $value")
             val location = IntArray(2)
-            view.getLocationOnScreen(location)
-            val intent = Intent(requireContext(), PlayStatusActivity::class.java)
-            intent.putExtra("play_position", position)
-            val json = Gson().toJson(RTVariable.statusListGlobal)
-            intent.putExtra("story_list", json)
-            intent.putExtra("is_play_single", false)
-            intent.putExtra("user_id", "")
-            intent.putExtra("start_x", location[0])
-            intent.putExtra("start_y", location[1])
-            intent.putExtra("start_width", view.width)
-            intent.putExtra("start_height", view.height)
+            itemView.getLocationOnScreen(location)
+
+            val centerX = location[0] + itemView.width / 2
+            val centerY = location[1] + itemView.height / 2
+
+            val intent = Intent(requireContext(), PlayStatusActivity::class.java).apply {
+                putExtra("play_position", position)
+                putExtra("story_list", Gson().toJson(RTVariable.statusListGlobal))
+                putExtra("is_play_single", false)
+                putExtra("user_id", "")
+
+                putExtra("start_x", centerX)
+                putExtra("start_y", centerY)
+                putExtra("start_width", itemView.width)
+                putExtra("start_height", itemView.height)
+            }
+
             startActivity(intent)
-//            requireActivity().overridePendingTransition(
-//                R.anim.slide_up,
-//                0
-//            )
+
+// Keep this as per your requirement
             requireActivity().overridePendingTransition(R.anim.slide_up, 0)
         }
         if(option==3){
             if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                 ReusablePopup(
                     context = requireContext(),
-                    anchorView = view,
+                    anchorView = itemView,
                     onOption1Click = {
                         RTVariable.SELECT_OPTION = true
 //                        checkGalleryPermissionAndPick()
@@ -1745,7 +1749,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     },
                     onOption3Click = {
                         RTVariable.SELECT_OPTION = false
-                        checkGalleryPermissionAndPick2("V")
+                        selectedBottomSheetType = "Video"   // must match what AddReelFragment expects
+
+                        val bottomSheet = VideoFilePickerBottomsheet()
+                        bottomSheet.setOnVideoPickedListener { uri, _ ->
+                            UserPreference.seletedUri = uri
+                            UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                            UserPreference.selectedMediaType = "V"
+                            UserPreference.selectedCropRatio = 1   // 🔥 valid ratio: 9:16
+                            findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
+                        }
+                        bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
+                        //checkGalleryPermissionAndPick2("V")
                     },
                     //onOption4Click = {},
                     option1Text = "Upload Status",
@@ -1967,9 +1982,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    private val requestSinglePermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
+    private val requestSinglePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) launchMediaPicker()
         else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
     }

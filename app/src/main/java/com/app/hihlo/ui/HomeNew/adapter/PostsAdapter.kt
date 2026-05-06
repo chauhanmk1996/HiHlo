@@ -42,6 +42,10 @@ class PostsAdapter(
     private val onPostClick: ((Post) -> Unit)? = null   // optional - keep only if needed
 ) : RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
+//    init {
+//        setHasStableIds(true)
+//    }
+
     enum class PostClickAction {
         LIKE,
         UNLIKE,
@@ -78,14 +82,16 @@ class PostsAdapter(
         notifyItemRangeInserted(start, morePosts.size)   // ← better than notifyDataSetChanged
     }
 
-    fun updateStories(stories_List: List<Story>) {
-
-        Log.e("TAG", "updateStories size = ${stories_List.size}")
-
+    fun updateStories(newStories: List<Story>) {
         storiesList.clear()
-        storiesList.addAll(stories_List)
+        storiesList.addAll(newStories)
 
-        notifyItemRangeChanged(0, itemCount)
+        postsList.forEachIndexed { index, post ->
+            val hasStory = storiesList.any { it.user_id == post.user_id }
+            if (hasStory) {
+                notifyItemChanged(index, "STORY_UPDATE")
+            }
+        }
     }
 
     fun setPosts(newPosts: List<Post>, my_story: List<MyStory>, stories_List: List<Story>) {
@@ -110,9 +116,19 @@ class PostsAdapter(
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = postsList[position]
-        currentViewHolder = holder
-        holder.bind(post)
+        holder.bind(postsList[position])
+    }
+
+    override fun onBindViewHolder(
+        holder: PostViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isNotEmpty() && payloads.contains("STORY_UPDATE")) {
+            holder.updateStoryUI(postsList[position])
+        } else {
+            holder.bind(postsList[position])
+        }
     }
 
     fun updateFollow(position: Int, isAlreadyFollowed: Int){
@@ -466,6 +482,22 @@ class PostsAdapter(
                     binding.moreLessText.visibility = View.GONE
                 }
             }
+        }
+        fun updateStoryUI(post: Post) {
+            val context = binding.root.context
+
+            val story = storiesList.find { it.user_id == post.user_id }
+
+            binding.userImageCardView.background =
+                if (post.creatorDetail?.isStoryUploaded == 1) {
+                    if (story != null && story.is_seen == 0) {
+                        context.getDrawable(R.drawable.gredient_circle)
+                    } else {
+                        context.getDrawable(R.drawable.gredient_circle_black)
+                    }
+                } else {
+                    context.getDrawable(R.drawable.gredient_circle_transparent)
+                }
         }
     }
 

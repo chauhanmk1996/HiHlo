@@ -120,29 +120,34 @@ object CommonUtils {
         }
     }
     fun getTimeAgo(isoDate: String): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
         sdf.timeZone = TimeZone.getTimeZone("UTC")
 
         return try {
             val pastTime = sdf.parse(isoDate)?.time ?: return "Unknown"
             val now = System.currentTimeMillis()
-            val diff = now - pastTime
+
+            // ❗ Instagram ignores future → clamp to now
+            val diff = maxOf(0, now - pastTime)
 
             val seconds = TimeUnit.MILLISECONDS.toSeconds(diff)
             val minutes = TimeUnit.MILLISECONDS.toMinutes(diff)
             val hours = TimeUnit.MILLISECONDS.toHours(diff)
             val days = TimeUnit.MILLISECONDS.toDays(diff)
+            val weeks = days / 7
 
             when {
-//                seconds < 60 -> "Just now"
+                seconds < 60 -> "Just now"
                 minutes < 60 -> "${minutes}m"
                 hours < 24 -> "${hours}h"
                 days < 7 -> "${days}d"
+                weeks < 5 -> "${weeks}w"
                 else -> {
-                    val outputFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                    outputFormat.format(Date(pastTime))
+                    val months = days / 30
+                    if (months < 12) "${months}mo" else "${days / 365}y"
                 }
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
             "Unknown"

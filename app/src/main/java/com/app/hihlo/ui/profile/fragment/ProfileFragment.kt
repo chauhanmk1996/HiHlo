@@ -66,6 +66,7 @@ import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
 import com.app.hihlo.ui.HomeNew.utility.ImageFilePickerBottomsheet2
+import com.app.hihlo.ui.HomeNew.utility.VideoFilePickerBottomsheet
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
 import com.app.hihlo.ui.home.bottom_sheet.ViewPostBottomSheetFragment
@@ -721,10 +722,22 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         LOGIN_DATA
                     )?.payload?.isCreator == 1
                 ) {
-                    selectedBottomSheetType = "reel"
+                    //selectedBottomSheetType = "reel"
 //                            openUploadBottomSheet("reel")
+                    //RTVariable.SELECT_OPTION = false
+                    //checkGalleryPermissionAndPick("V")
                     RTVariable.SELECT_OPTION = false
-                    checkGalleryPermissionAndPick("V")
+                    selectedBottomSheetType = "reel"   // must match what AddReelFragment expects
+
+                    val bottomSheet = VideoFilePickerBottomsheet()
+                    bottomSheet.setOnVideoPickedListener { uri, _ ->
+                        UserPreference.seletedUri = uri
+                        UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                        UserPreference.selectedMediaType = "V"
+                        UserPreference.selectedCropRatio = 1   // 🔥 valid ratio: 9:16
+                        findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+                    }
+                    bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                 } else {
                     Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT)
                         .show()
