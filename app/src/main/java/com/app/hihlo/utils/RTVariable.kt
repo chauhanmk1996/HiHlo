@@ -93,6 +93,8 @@ object RTVariable {
     var IS_STATUS_PROFILE_CLICKED: Boolean = false
     var IS_STATUS_VIEWER_FINISHED: Boolean = false
     var IS_STATUS_VIEWER_ACTIVATED: Boolean = false
+    var IS_PROFILE_POST_LIST: Boolean = false
+    var IS_STORY_CLICKED_FRON_REELS: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {

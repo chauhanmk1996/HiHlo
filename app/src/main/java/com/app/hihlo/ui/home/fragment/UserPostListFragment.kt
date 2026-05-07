@@ -238,16 +238,19 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             UserDataManager.setUserInnerPostIsResume(requireContext(), false)
             scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
         }
-        if(UserDataManager.get_postCommentShow(requireContext())){
-            UserDataManager.postCommentIsShow(requireContext(), false)
-            //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
-            //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
-            val cached = CommentPrefs.get2Payload(requireContext())
+        if(!RTVariable.IS_PROFILE_POST_LIST){
+            RTVariable.IS_PROFILE_POST_LIST = false
+            if(UserDataManager.get_postCommentShow(requireContext())){
+                UserDataManager.postCommentIsShow(requireContext(), false)
+                //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+                //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+                val cached = CommentPrefs.get2Payload(requireContext())
 
-            if (cached != null) {
-                viewModel2.commentPayloadCache = cached
-                RTVariable.IS_FROM_RESUME = true
-                openCommentsBottomSheet(cached)
+                if (cached != null) {
+                    viewModel2.commentPayloadCache = cached
+                    RTVariable.IS_FROM_RESUME = true
+                    openCommentsBottomSheet(cached)
+                }
             }
         }
     }
@@ -717,6 +720,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 }
                 val location = IntArray(2)
                 clickView.getLocationOnScreen(location)
+                val centerX = location[0] + clickView.width / 2
+                val centerY = location[1] + clickView.height / 2
                 val targetUserId = data.user_id.toString()
                 val newList = RTVariable.statusListGlobal.drop(1)
                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
@@ -725,8 +730,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 intent.putExtra("story_list", json)
                 intent.putExtra("is_play_single", true)
                 intent.putExtra("user_id", targetUserId)
-                intent.putExtra("start_x", location[0])
-                intent.putExtra("start_y", location[1])
+                intent.putExtra("start_x", centerX)
+                intent.putExtra("start_y", centerY)
                 intent.putExtra("start_width", clickView.width)
                 intent.putExtra("start_height", clickView.height)
                 startActivity(intent)

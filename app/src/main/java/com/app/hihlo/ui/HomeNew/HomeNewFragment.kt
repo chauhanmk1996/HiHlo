@@ -42,6 +42,7 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.app.hihlo.ImageVideoConverter.ImageVideoConverter
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
+import com.app.hihlo.databinding.AdapterStoriesRecyclerBinding
 import com.app.hihlo.databinding.FragmentHomeNewBinding
 import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.follow.request.FollowRequest
@@ -136,6 +137,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private val viewModel5: StatusViewModel by activityViewModels()
     private lateinit var statusListGlobal: List<StatusItem>
+    private lateinit var statusAdapter: StatusAdapter
 
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
 
@@ -223,10 +225,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 viewModel.stories
             )
             binding.storiesLayout.visibility = View.VISIBLE
-            binding.storiesRecycler.adapter = StatusAdapter(
-                RTVariable.statusListGlobal,
-                ::getSelectedTheStory
+            // Where you first set the adapter (e.g., in setObserver or onViewCreated)
+            statusAdapter = StatusAdapter(
+                RTVariable.statusListGlobal.toMutableList(),   // initial list
+                ::getSelectedTheStory                // click handler
             )
+            binding.storiesRecycler.adapter = statusAdapter
 //            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
 //                viewModel.isStoryUploaded,
 //                viewModel.myStory ?: MyStory(),
@@ -813,7 +817,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 val targetUserId = post.user_id.toString()
                                 val location = IntArray(2)
                                 view.getLocationOnScreen(location)
-
+                                val centerX = location[0] + view.width / 2
+                                val centerY = location[1] + view.height / 2
                                 val intent = Intent(requireContext(), PlayStatusActivity::class.java)
 
                                 // normal data
@@ -825,8 +830,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 intent.putExtra("user_id", targetUserId)
 
                                 // instagram style animation data
-                                intent.putExtra("start_x", location[0])
-                                intent.putExtra("start_y", location[1])
+                                intent.putExtra("start_x", centerX)
+                                intent.putExtra("start_y", centerY)
                                 intent.putExtra("start_width", view.width)
                                 intent.putExtra("start_height", view.height)
 
@@ -990,8 +995,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     viewLifecycleOwner.lifecycleScope.launch {
                         delay(1000)
                         if (!isAdded || _binding == null) return@launch
-                        binding.storiesRecycler.adapter =
-                            StatusAdapter(statusListGlobal, ::getSelectedTheStory)
+//                        binding.storiesRecycler.adapter =
+//                            StatusAdapter(statusListGlobal.toMutableList(), ::getSelectedTheStory)
+                        statusAdapter.updateStories(statusListGlobal)
                         binding.storiesLayout.visibility = View.VISIBLE
                     }
                 } else {
@@ -1512,8 +1518,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             viewLifecycleOwner.lifecycleScope.launch {
                                 delay(1000)
                                 if (!isAdded || _binding == null) return@launch
-                                binding.storiesRecycler.adapter =
-                                    StatusAdapter(statusListGlobal, ::getSelectedTheStory)
+                                // Where you first set the adapter (e.g., in setObserver or onViewCreated)
+                                statusAdapter = StatusAdapter(
+                                    statusListGlobal.toMutableList(),   // initial list
+                                    ::getSelectedTheStory                // click handler
+                                )
+                                binding.storiesRecycler.adapter = statusAdapter
                                 binding.storiesLayout.visibility = View.VISIBLE
                             }
                         }else{
@@ -1672,11 +1682,16 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, itemView:View){
         if(option==2){
+            val imageView: View = if (position == 0) {
+                itemView.findViewById<View>(R.id.myStoryImageView)
+            } else {
+                itemView.findViewById<View>(R.id.otherStoryImageview)
+            }
             val location = IntArray(2)
-            itemView.getLocationOnScreen(location)
+            imageView.getLocationOnScreen(location)
 
-            val centerX = location[0] + itemView.width / 2
-            val centerY = location[1] + itemView.height / 2
+            val centerX = location[0] + imageView.width / 2
+            val centerY = location[1] + imageView.height / 2
 
             val intent = Intent(requireContext(), PlayStatusActivity::class.java).apply {
                 putExtra("play_position", position)
@@ -1686,8 +1701,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                 putExtra("start_x", centerX)
                 putExtra("start_y", centerY)
-                putExtra("start_width", itemView.width)
-                putExtra("start_height", itemView.height)
+                putExtra("start_width", imageView.width)
+                putExtra("start_height", imageView.height)
             }
 
             startActivity(intent)

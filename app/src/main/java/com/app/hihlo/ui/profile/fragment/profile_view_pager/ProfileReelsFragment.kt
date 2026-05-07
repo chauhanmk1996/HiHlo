@@ -137,7 +137,8 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
                     username = data.creator_username ?: "",
                     city = data.userCity.toString(),      // default or fetch if available
                     country = data.userCountry.toString(),    // default or fetch if available
-                    user_live_status = data.status.toString()
+                    user_live_status = data.status.toString(),
+                    isStoryUploaded = data.is_story_uploaded ?: 0
                 ),
                 creatorId = data.creator_id ?: 0,
                 id = data.id ?: 0,

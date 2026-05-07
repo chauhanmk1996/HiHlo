@@ -27,6 +27,7 @@ import com.app.hihlo.ui.profile.adapter.AdapterProfileMedia
 import com.app.hihlo.ui.profile.fragment.PaginatingFragment
 import com.app.hihlo.ui.profile.fragment.ProfileFragmentDirections
 import com.app.hihlo.ui.profile.view_model.ProfilePostViewModel
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -85,7 +86,7 @@ class ProfilePostsFragment : Fragment(), PaginatingFragment {
 
     private fun getSelectedPost(reelPosition: Int){
 //        val from = if (posts.data.get(reelPosition).user_id==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId) "own" else "other"
-
+        RTVariable.IS_PROFILE_POST_LIST = true
         findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToUserPostListFragment(arrayOf(), posts, "profile", reelPosition.toString()))
 //        findNavController().navigate(R.id.userPostListFragment)
     }

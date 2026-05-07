@@ -443,6 +443,8 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                     }
                     val location = IntArray(2)
                     view.getLocationOnScreen(location)
+                    val centerX = location[0] + view.width / 2
+                    val centerY = location[1] + view.height / 2
                     val targetUserId = RTVariable.USER_ID.toInt().toString()
                     val newList = RTVariable.statusListGlobal.drop(1)
                     val intent = Intent(requireContext(), PlayStatusActivity::class.java)
@@ -451,8 +453,8 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
                     intent.putExtra("story_list", json)
                     intent.putExtra("is_play_single", true)
                     intent.putExtra("user_id", targetUserId)
-                    intent.putExtra("start_x", location[0])
-                    intent.putExtra("start_y", location[1])
+                    intent.putExtra("start_x", centerX)
+                    intent.putExtra("start_y", centerY)
                     intent.putExtra("start_width", view.width)
                     intent.putExtra("start_height", view.height)
                     startActivity(intent)

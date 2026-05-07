@@ -19,6 +19,7 @@ import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
 import com.app.hihlo.databinding.ItemReelBinding
+import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.reel.response.Reel
 import com.app.hihlo.model.static.reelSideOptionsList
@@ -42,7 +43,7 @@ class ReelAdapter(
     private val followSelected: (Int, Int, Int) -> Unit,
     private val addReelSelected: (String) -> Unit,
     private val openSideOptions: (Int, Int, View) -> Unit,
-    private val openProfile: () -> Unit,
+    private val openProfile: (Int, View) -> Unit,
     private val shareReelSelected: (String) -> Unit,
     val from: String,
     private val getSelected: (Int, Int, Int, Int) -> Unit
@@ -51,6 +52,7 @@ class ReelAdapter(
     var currentPlayingPosition: Int = -1
      var currentViewHolder: ReelViewHolder? = null
     var adapterPosition: Int = 0
+    private val storiesList: MutableList<Story> = mutableListOf()
 
     inner class ReelViewHolder(binding: ItemReelBinding) : RecyclerView.ViewHolder(binding.root) {
         val playerView = binding.playerView
@@ -61,6 +63,7 @@ class ReelAdapter(
         private val caption = binding.caption
 //        private val addReelButton = binding.addReelButton
         private val sideOptions = binding.sideOptions
+        private val userImageCardView = binding.userImageCardView
         private val userImage = binding.userImage
         private val onlineStatusImage = binding.onlineStatusImage
         private val muteUnmuteIcon = binding.muteUnmuteIcon
@@ -124,6 +127,39 @@ class ReelAdapter(
             userName.text = reel.creator.name
 //            caption.text = reel.caption
             Glide.with(itemView.context).load(reel.creator.profileImage).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(userImage)
+            val story = storiesList?.find { story -> story.user_id == reel.creatorId }
+            userImageCardView.background =
+                if(reel.creator.isStoryUploaded==1){
+                    /*val padding = 6.toPx(root.context)
+                    userImageCardView.setPadding(
+                        padding,
+                        padding,
+                        padding,
+                        padding
+                    )
+                    val sizeInDp = 42
+                    val scale = root.context.resources.displayMetrics.density
+                    val sizeInPx = (sizeInDp * scale).toInt()
+                    val params = innerCard.layoutParams
+                    params.width = sizeInPx
+                    params.height = sizeInPx
+                    innerCard.layoutParams = params */
+                    if (story != null && story.is_seen == 0) {
+                        itemView.context.resources.getDrawable(R.drawable.gredient_circle, null)
+                    } else {
+                        itemView.context.resources.getDrawable(R.drawable.gredient_circle_black, null)
+                    }
+                }else{
+                    /*userImageCardView.setPadding(0, 0, 0, 0)
+                    val sizeInDp = 55
+                    val scale = root.context.resources.displayMetrics.density
+                    val sizeInPx = (sizeInDp * scale).toInt()
+                    val params = innerCard.layoutParams
+                    params.width = sizeInPx
+                    params.height = sizeInPx
+                    innerCard.layoutParams = params */
+                    itemView.context.resources.getDrawable(R.drawable.gredient_circle_transparent, null)
+                }
             if (reel.creatorId.toString() == currentUserId){
                 followButtonLayout.isVisible = false
             }else if (reel.isFollowing!=1){
@@ -147,7 +183,8 @@ class ReelAdapter(
                 }
             }
             userImage.setOnClickListener {
-                openProfile()
+                RTVariable.USER_ID = reel.creatorId.toString()
+                openProfile(reel.creator.isStoryUploaded, userImage)
             }
             shareReel.setOnClickListener {
                 shareReelSelected(reel.assetUrl)
@@ -473,6 +510,14 @@ class ReelAdapter(
             currentViewHolder?.followButtonImage?.setImageResource(R.drawable.follow_button_reel)
         }
     }
+
+    fun updateStories(stories_List: List<Story>) {
+        Log.e("TAG", "updateStories size = ${stories_List.size}")
+        storiesList.clear()
+        storiesList.addAll(stories_List)
+        notifyItemRangeChanged(0, itemCount)
+    }
+
     fun clearList(){
         var size = reels.size
         reels.clear()

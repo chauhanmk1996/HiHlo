@@ -15,7 +15,7 @@
         android:background="@color/screen_background_black"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="30dp"
+        android:paddingTop="35dp"
         tools:context=".ui.chat.fragment.ChatFragment">
 
         <androidx.constraintlayout.widget.ConstraintLayout

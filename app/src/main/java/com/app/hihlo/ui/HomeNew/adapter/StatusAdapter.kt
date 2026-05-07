@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.HomeNew.adapter
 
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,7 @@ import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.bumptech.glide.Glide
 
 class StatusAdapter(
-    private val list: List<StatusItem>,
+    private val list: MutableList<StatusItem>,
     private val getSelectedTheStory: (Int, StatusItem, Int, view: View) -> Unit
 ) : RecyclerView.Adapter<StatusAdapter.ViewHolder>() {
 
@@ -31,78 +32,117 @@ class StatusAdapter(
     override fun getItemCount(): Int = list.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
         val item = list[position]
+
         if (position == 0) {
+
             holder.binding.plusBottomRight.isVisible = true
-            holder.binding.uploadLayout.isVisible = false
+            holder.binding.uploadLayout.isVisible = true
             holder.binding.otherStoryCardview.isVisible = false
             holder.binding.myStoryGradient.isVisible = true
-//            if(item.isStoriesUploaded){
-//                holder.binding.name.visibility = View.VISIBLE
-//                holder.binding.name.text = "Upload"
-//            }else{
-//                holder.binding.name.visibility = View.VISIBLE
-//                holder.binding.name.text = "Upload"
-//            }
             holder.binding.name.visibility = View.INVISIBLE
-            holder.binding.uploadLayout.visibility = View.VISIBLE
+
             Glide.with(holder.binding.root.context)
                 .load(item.userDetail.profile_image)
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder)
                 .into(holder.binding.myStoryImageView)
+
             holder.binding.myStoryGradient.background =
                 if (item.isStoriesUploaded) {
-                    holder.binding.root.resources.getDrawable(R.drawable.story_gradient_border, null)
+                    holder.binding.root.resources.getDrawable(
+                        R.drawable.story_gradient_border,
+                        null
+                    )
                 } else {
-                    holder.binding.root.resources.getDrawable(R.color.transparent, null)
+                    holder.binding.root.resources.getDrawable(
+                        R.color.transparent,
+                        null
+                    )
                 }
-        }else{
+
+        } else {
+
             holder.binding.plusBottomRight.isVisible = false
             holder.binding.uploadLayout.isVisible = false
             holder.binding.otherStoryCardview.isVisible = true
             holder.binding.myStoryGradient.isVisible = false
+
             holder.binding.name.visibility = View.VISIBLE
             holder.binding.name.text = item.userDetail.name
-            holder.binding.uploadLayout.visibility = View.GONE
-            Log.e("ISSEEN", "ISSEEN>>> "+item.is_seen)
+
+            Log.e("ISSEEN", "ISSEEN>>> ${item.is_seen}")
+
             Glide.with(holder.binding.root.context)
                 .load(item.userDetail.profile_image)
                 .placeholder(R.drawable.profile_placeholder)
                 .error(R.drawable.profile_placeholder)
                 .into(holder.binding.otherStoryImageview)
+
             holder.binding.otherStoryCardview.background =
                 if (item.is_seen == 0) {
-                    holder.binding.root.resources.getDrawable(R.drawable.story_gradient_border, null)
+                    holder.binding.root.resources.getDrawable(
+                        R.drawable.story_gradient_border,
+                        null
+                    )
                 } else {
-                    holder.binding.root.resources.getDrawable(R.drawable.story_gray_border, null)
+                    holder.binding.root.resources.getDrawable(
+                        R.drawable.story_gray_border,
+                        null
+                    )
                 }
         }
+
+        // Story Click
         holder.itemView.setOnClickListener {
-            /// This is the play option
-            if(position==0){
-                if(item.isStoriesUploaded){
+
+            if (position == 0) {
+
+                if (item.isStoriesUploaded) {
                     getSelectedTheStory(2, item, position, holder.binding.root)
-                    holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
                 }
-            }else{
+
+            } else {
+
                 getSelectedTheStory(2, item, position, holder.binding.root)
-                holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
             }
         }
 
+        // Plus Button Click
         holder.binding.plusBottomRight.setOnClickListener {
+
             getSelectedTheStory(3, item, position, holder.binding.root)
-            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
         }
+
+        // Name Click
         holder.binding.name.setOnClickListener {
+
             getSelectedTheStory(3, item, position, holder.binding.root)
-            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
         }
+
+        // Upload Layout Click
         holder.binding.uploadLayout.setOnClickListener {
+
             getSelectedTheStory(3, item, position, holder.binding.root)
-            holder.binding.storyLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
         }
     }
 
+    // =========================================================
+    // UPDATE COMPLETE LIST
+    // =========================================================
+    fun updateStories(storiesList: List<StatusItem>) {
+
+        Log.e("TAG", "updateStories size = ${storiesList.size}")
+
+        list.clear()
+        list.addAll(storiesList)
+
+        notifyDataSetChanged()
+    }
 }

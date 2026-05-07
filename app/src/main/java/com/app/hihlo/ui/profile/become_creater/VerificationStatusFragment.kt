@@ -28,7 +28,7 @@ class VerificationStatusFragment : Fragment() {
     }
 
     private fun initViews() {
-        binding.llBack.setOnClickListener {
+        binding.ivBack.setOnClickListener {
             findNavController().popBackStack()
         }
     }

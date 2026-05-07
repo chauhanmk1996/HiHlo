@@ -17,6 +17,7 @@ import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -54,6 +55,9 @@ import com.app.hihlo.preferences.UserPreference.CALL_USER_NAME
 import com.app.hihlo.preferences.UserPreference.CHANNEL_NAME
 import com.app.hihlo.preferences.UserPreference.OTHER_USER_ID
 import com.app.hihlo.preferences.UserPreference.U_ID
+import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
+import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
+import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.calling.activity.OldOutgoingCallActivity
 import com.app.hihlo.ui.calling.activity.OutgoingVideoCallActivity
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
@@ -95,7 +99,6 @@ import kotlin.getValue
 import kotlin.isInitialized
 import kotlin.toString
 
-
 @AndroidEntryPoint
 class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private lateinit var bottomSheetFragment: UploadMediaBottomSheet
@@ -135,6 +138,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     //var currentPosition = 0
     private var targetPosition = 0
     private var isRestored = false
+    private val viewModel6: StatusViewModel by activityViewModels()
+    private lateinit var statusListGlobal: List<StatusItem>
     /*override fun initView(savedInstanceState: Bundle?) {
         if (!isFirstTime) return
         isFirstTime = false
@@ -295,6 +300,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 LOGIN_DATA
             )?.payload?.authToken
         )
+        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -322,6 +328,61 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
             RTVariable.REELS_INSTANCE_KEY_ID = 0
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(500)
+                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                        RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
+                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        getRefreshStory(1, 0)
+                        getRefreshMainStory(0)
+                    }
+                    if(!RTVariable.IS_STORY_CLICKED_FRON_REELS){
+                        RTVariable.IS_STORY_CLICKED_FRON_REELS = true
+                        exoPlayer.play()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getRefreshStory(page: Int, gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getHomeData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    page.toString(),
+                    10.toString(),
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    viewModel2.stories = response.payload.stories
+                    adapter.updateStories(viewModel2.stories)
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
+    private fun getRefreshMainStory(gender_id: Int){
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStatusData(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    gender_id.toString()
+                )
+                if (response.status == 1 && response.code == 200) {
+                    statusListGlobal = response.payload
+                    RTVariable.statusListGlobal = statusListGlobal
+                } else {
+                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                }
+            }catch (e: Exception) {
+            }
         }
     }
 
@@ -471,15 +532,42 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
     }
 
-    fun openProfile() {
+    fun openProfile(isStoryUploaded: Int, imageView: View) {
         reelPosition = binding.viewPager.currentItem.toString()
-        findNavController().navigate(
-            ReelsFragmentDirections.actionReelsFragmentToProfileFragment(
-                "0",
-                RTVariable.reelsCache[binding.viewPager.currentItem].creatorId.toString(),
-                "reels"
+        if(isStoryUploaded==1){
+            RTVariable.IS_STORY_CLICKED_FRON_REELS = true
+            exoPlayer.pause()
+            if (statusListGlobal.isEmpty()) {
+                return
+            }
+            val location = IntArray(2)
+            imageView.getLocationOnScreen(location)
+            val centerX = location[0] + imageView.width / 2
+            val centerY = location[1] + imageView.height / 2
+            val targetUserId = RTVariable.USER_ID.toInt().toString()
+            val newList = RTVariable.statusListGlobal.drop(1)
+            val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+            //intent.putExtra("play_position", storyPosition)
+            val json = Gson().toJson(newList)
+            intent.putExtra("story_list", json)
+            intent.putExtra("is_play_single", true)
+            intent.putExtra("user_id", targetUserId)
+            intent.putExtra("start_x", centerX)
+            intent.putExtra("start_y", centerY)
+            intent.putExtra("start_width", imageView.width)
+            intent.putExtra("start_height", imageView.height)
+            startActivity(intent)
+            //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
+            requireActivity().overridePendingTransition(0, 0)
+        }else{
+            findNavController().navigate(
+                ReelsFragmentDirections.actionReelsFragmentToProfileFragment(
+                    "0",
+                    RTVariable.reelsCache[binding.viewPager.currentItem].creatorId.toString(),
+                    "reels"
+                )
             )
-        )
+        }
     }
 
     fun shareReelSelected(assetUrl: String) {
@@ -1069,6 +1157,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                             viewModel2.stories = it.data.payload.stories
                             viewModel2.isStoryUploaded = it.data.payload.is_story_uploaded
                             viewModel2.profileImage = it.data.payload.myProfile.profileImage
+                            adapter.updateStories(viewModel2.stories)
                         }else{
                         }
                     }else{
@@ -1616,6 +1705,26 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
+                }
+            }
+        }
+        viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Status success: ${Gson().toJson(it)}")
+                    if (it.data?.status==1){
+                        if (it.data.code == 200) {
+                            statusListGlobal = it.data.payload
+                            RTVariable.statusListGlobal = statusListGlobal
+                            Log.e("TAG", "Status success: ${statusListGlobal}")
+                        }else{
+                        }
+                    }else{
+                    }
+                }
+                Status.LOADING -> {
+                }
+                Status.ERROR -> {
                 }
             }
         }

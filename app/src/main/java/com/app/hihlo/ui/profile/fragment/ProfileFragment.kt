@@ -237,7 +237,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     username = data.creator_username ?: "",
                     city = data.userCity ?: "",      // default or fetch if available
                     country = data.userCountry ?: "",   // default or fetch if available
-                    user_live_status = data.status.toString()
+                    user_live_status = data.status.toString(),
+                    isStoryUploaded = data.is_story_uploaded!!
                 ),
                 creatorId = data.creator_id ?: 0,
                 id = data.id ?: 0,

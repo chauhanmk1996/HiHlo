@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -18,6 +19,8 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -438,56 +441,89 @@ class PlayStatusActivity : AppCompatActivity() {
     override fun finish() {
         val root = binding.root
 
+        // EXTRAS FROM LAUNCH: start_x/start_y are the CENTER of the story bubble
+        val centerX = intent.getIntExtra("start_x", 0).toFloat()
+        val centerY = intent.getIntExtra("start_y", 0).toFloat()
+        val bubbleW = intent.getIntExtra("start_width", 100).toFloat()
+        val bubbleH = intent.getIntExtra("start_height", 100).toFloat()
+
         // Reset transforms
         root.translationY = 0f
         root.scaleX = 1f
         root.scaleY = 1f
         root.alpha = 1f
 
-        val startX = intent.getIntExtra("start_x", root.width / 2)
-        val startY = intent.getIntExtra("start_y", root.height / 2)
+        // Top-left of the bubble
+        val bubbleLeft = centerX - bubbleW / 2f
+        val bubbleTop  = centerY - bubbleH / 2f
 
+        val screenW = root.width.toFloat()
+        val screenH = root.height.toFloat()
+        val targetScaleX = bubbleW / screenW
+        val targetScaleY = bubbleH / screenH
+
+        // Current view position on screen (should be 0,0 normally)
         val location = IntArray(2)
         root.getLocationOnScreen(location)
+        val viewScreenX = location[0].toFloat()
+        val viewScreenY = location[1].toFloat()
 
-        var cx = startX - location[0]
-        var cy = startY - location[1]
+        // Target translation of the view's top‑left corner
+        val targetTransX = bubbleLeft - viewScreenX
+        val targetTransY = bubbleTop  - viewScreenY
 
-        cx = cx.coerceIn(0, root.width)
-        cy = cy.coerceIn(0, root.height)
+        // Maximum radius that covers the whole view from the target center
+        val maxRadius = maxOf(
+            hypot(centerX - viewScreenX, centerY - viewScreenY),
+            hypot(centerX - (viewScreenX + screenW), centerY - viewScreenY),
+            hypot(centerX - viewScreenX, centerY - (viewScreenY + screenH)),
+            hypot(centerX - (viewScreenX + screenW), centerY - (viewScreenY + screenH))
+        ).toFloat()
 
-        val maxRadius = hypot(root.width.toDouble(), root.height.toDouble()).toFloat()
+        root.pivotX = 0f
+        root.pivotY = 0f
 
-        val outlineProvider = CircleOutlineProvider(cx, cy, maxRadius)
-        root.outlineProvider = outlineProvider
-        root.clipToOutline = true
+        ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 300L
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                val fraction = animation.animatedFraction
 
-        // Small delay to let the activity settle before circular animation
-        root.postDelayed({
-            ValueAnimator.ofFloat(maxRadius, 0f).apply {
-                duration = 280
-                interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+                val currScaleX = 1f + (targetScaleX - 1f) * fraction
+                val currScaleY = 1f + (targetScaleY - 1f) * fraction
+                val currTransX = targetTransX * fraction
+                val currTransY = targetTransY * fraction
 
-                addUpdateListener { animation ->
-                    val radius = animation.animatedValue as Float
-                    outlineProvider.updateRadius(radius)
-                    root.invalidateOutline()
-                }
+                root.scaleX = currScaleX
+                root.scaleY = currScaleY
+                root.translationX = currTransX
+                root.translationY = currTransY
 
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        root.clipToOutline = false
-                        root.visibility = View.INVISIBLE
+                val localCenterX = (centerX - currTransX - viewScreenX) / currScaleX
+                val localCenterY = (centerY - currTransY - viewScreenY) / currScaleY
 
-                        // Important: Call super finish with NO transition
-                        super@PlayStatusActivity.finish()
-                        overridePendingTransition(0, R.anim.slide_down)  // or 0,0
-                    }
-                })
+                val currRadius = maxRadius * (1f - fraction)
 
-                start()
+                root.outlineProvider = CircleOutlineProvider(
+                    localCenterX.toInt(), localCenterY.toInt(), currRadius
+                )
+                root.clipToOutline = true
+                root.invalidateOutline()
             }
-        }, 80) // Small delay helps stability
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    root.clipToOutline = false
+                    root.visibility = View.INVISIBLE
+                    root.scaleX = 1f
+                    root.scaleY = 1f
+                    root.translationX = 0f
+                    root.translationY = 0f
+                    super@PlayStatusActivity.finish()
+                    overridePendingTransition(0, 0)
+                }
+            })
+            start()
+        }
     }
 
     private fun playStory() {
@@ -658,6 +694,8 @@ class PlayStatusActivity : AppCompatActivity() {
         isKeyboardVisible = visible
         if (visible) pauseStory()
         else {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
             binding.blurBackground.isVisible = false
             resumeStory()
         }

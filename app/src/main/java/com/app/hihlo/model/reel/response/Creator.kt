@@ -8,6 +8,7 @@ data class Creator(
     val name: String,
     val profileImage: String,
     val user_live_status: String,
+    val isStoryUploaded: Int,
     val username: String,
     val city: String,
     val country: String

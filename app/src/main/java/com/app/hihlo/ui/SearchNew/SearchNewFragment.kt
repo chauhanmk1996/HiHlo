@@ -365,13 +365,15 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         }
                         val location = IntArray(2)
                         clickedView.getLocationOnScreen(location)
+                        val centerX = location[0] + clickedView.width / 2
+                        val centerY = location[1] + clickedView.height / 2
                         val intent = Intent(requireContext(), PlayStatusActivity::class.java)
                         val json = Gson().toJson(RTVariable.statusListGlobal)
                         intent.putExtra("story_list", json)
                         intent.putExtra("is_play_single", true)
                         intent.putExtra("user_id", targetUserId)
-                        intent.putExtra("start_x", location[0])
-                        intent.putExtra("start_y", location[1])
+                        intent.putExtra("start_x", centerX)
+                        intent.putExtra("start_y", centerY)
                         intent.putExtra("start_width", clickedView.width)
                         intent.putExtra("start_height", clickedView.height)
                         startActivity(intent)

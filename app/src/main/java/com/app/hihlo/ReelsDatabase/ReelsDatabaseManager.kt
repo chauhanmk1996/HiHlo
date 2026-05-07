@@ -173,6 +173,7 @@ class ReelsDatabaseManager(context: Context) :
             name = cursor.getString(cursor.getColumnIndexOrThrow("creator_name")),
             profileImage = cursor.getString(cursor.getColumnIndexOrThrow("creator_profileImage")),
             user_live_status = cursor.getString(cursor.getColumnIndexOrThrow("creator_live_status")),
+            isStoryUploaded = cursor.getInt(cursor.getColumnIndexOrThrow("isStoryUploaded")),
             username = cursor.getString(cursor.getColumnIndexOrThrow("creator_username")),
             city = cursor.getString(cursor.getColumnIndexOrThrow("creator_city")),
             country = cursor.getString(cursor.getColumnIndexOrThrow("creator_country"))

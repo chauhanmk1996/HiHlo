@@ -12,30 +12,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:paddingTop="16dp"
         android:background="@color/screen_background_black"
         tools:context=".ui.signup.fragment.EmailFragment">
 
         <LinearLayout
             android:id="@+id/llBack"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp">
+            android:layout_height="wrap_content">
+
             <ImageView
                 android:id="@+id/ivBack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="20dp"
-                android:src="@drawable/back_button_pink"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:paddingVertical="5dp"
+                android:layout_marginVertical="20dp"
+                android:src="@drawable/back_button_pink"/>
             <TextView
                 android:id="@+id/tvTittle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tittle"
+                android:text="@string/contact_us"
                 android:textSize="22sp"
-                android:gravity="start"
                 android:layout_marginEnd="50dp"
+                android:layout_marginStart="10dp"
                 android:textColor="@color/white"
                 android:layout_gravity="center"
                 android:fontFamily="@font/manrope_semibold"/>

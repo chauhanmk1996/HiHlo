@@ -12,32 +12,35 @@
         android:background="@color/screen_background_black"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="16dp"
         tools:context=".ui.profile.fragment.FaqFragment">
 
         <LinearLayout
-            android:gravity="center_vertical"
-            android:layout_marginTop="40dp"
-            android:layout_marginStart="20dp"
+            android:id="@+id/llBack"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
+
             <ImageView
                 android:id="@+id/backButton"
-                android:visibility="visible"
-                android:layout_marginStart="18dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/back_button_pink_small"/>
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:paddingVertical="5dp"
+                android:layout_marginVertical="20dp"
+                android:src="@drawable/back_button_pink"/>
             <TextView
-                android:layout_marginStart="30dp"
-                android:fontFamily="@font/manrope_semibold"
-                android:textSize="22sp"
-                android:textColor="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="FAQ" />
-
+                android:text="FAQ"
+                android:textSize="22sp"
+                android:layout_marginEnd="50dp"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:fontFamily="@font/manrope_semibold"/>
         </LinearLayout>
+
         <TextView
             android:layout_marginTop="30dp"
             android:gravity="center_horizontal"
