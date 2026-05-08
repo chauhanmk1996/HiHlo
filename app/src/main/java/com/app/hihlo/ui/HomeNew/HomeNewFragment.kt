@@ -1725,10 +1725,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                            0
 //                        )
                         val bottomSheet = FilePickerBottomsheet()
-                        bottomSheet.setOnMediaSelectedListener { uri, type ->
+                        bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
                             // uri and type are already returned as strings, no Intent parsing needed
                             val mediaType = type          // "image" or "video"
                             val contentUri = Uri.parse(uri)
+                            RTVariable.HEADLINE_CAPTION = headline
                             Handler(Looper.getMainLooper()).post {
                                 // Ensure your fragment/activity is still attached if needed
                                 val file = getCacheFileFromContentUri(contentUri)
@@ -2255,7 +2256,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
                     println("Image URL: $mediaUrl")
-                    viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
+                    val caption = RTVariable.HEADLINE_CAPTION
+                    RTVariable.HEADLINE_CAPTION = ""
+                    viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType, caption = caption))
                 } else if (state == TransferState.FAILED) {
                     println("Upload failed")
                 }

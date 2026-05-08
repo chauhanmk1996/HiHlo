@@ -11,6 +11,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.TextUtils
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -23,8 +29,11 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupWindow
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -44,6 +53,8 @@ import com.app.hihlo.model.story_seen.request.StorySeen
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.preferences.UserPreference
+import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter.CustomTypefaceSpan
 import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.HomeNew.utility.CircleOutlineProvider
 import com.app.hihlo.ui.home.activity.HomeActivity
@@ -111,6 +122,8 @@ class PlayStatusActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(0, 0)
+        window.setBackgroundDrawableResource(android.R.color.transparent)
         binding = ActivityPlayStatusBinding.inflate(layoutInflater)
         setContentView(binding.root)
         RTVariable.IS_STATUS_VIEWER_ACTIVATED = true
@@ -286,6 +299,12 @@ class PlayStatusActivity : AppCompatActivity() {
                 else -> false
             }
         }
+//        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+//            override fun handleOnBackPressed() {
+//                //RTVariable.IS_STATUS_VIEWER_FINISHED = true
+//                finish()
+//            }
+//        })
     }
 
     private fun handleSideTouch(
@@ -440,7 +459,10 @@ class PlayStatusActivity : AppCompatActivity() {
 
     override fun finish() {
         val root = binding.root
-
+        RTVariable.IS_STATUS_VIEWER_FINISHED = true
+//        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+//            (this as HomeActivity).goBackTOHome()
+//        }
         // EXTRAS FROM LAUNCH: start_x/start_y are the CENTER of the story bubble
         val centerX = intent.getIntExtra("start_x", 0).toFloat()
         val centerY = intent.getIntExtra("start_y", 0).toFloat()
@@ -513,11 +535,14 @@ class PlayStatusActivity : AppCompatActivity() {
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     root.clipToOutline = false
-                    root.visibility = View.INVISIBLE
+
+                    // Reset transforms
                     root.scaleX = 1f
                     root.scaleY = 1f
                     root.translationX = 0f
                     root.translationY = 0f
+
+                    // Finish immediately
                     super@PlayStatusActivity.finish()
                     overridePendingTransition(0, 0)
                 }
@@ -571,7 +596,73 @@ class PlayStatusActivity : AppCompatActivity() {
         binding.userName.text = item.userDetail.name
         binding.userLocation.text = "${item.userDetail?.city ?: ""}, ${item.userDetail?.country ?: "India"}"
         Glide.with(this).load(item.userDetail.profile_image).placeholder(R.drawable.profile_placeholder).into(binding.userImage)
-
+        if (!item.caption.isNullOrEmpty()) {
+            val fullText = item.caption
+            binding.captionCollapsed.text = fullText
+            binding.captionCollapsed.maxLines = 1
+            binding.captionCollapsed.ellipsize = TextUtils.TruncateAt.END
+            binding.captionCollapsed.visibility = View.VISIBLE
+            binding.captionExpanded.visibility = View.GONE
+            binding.moreLessText.visibility = View.GONE
+            binding.moreLessText.text = "More"
+            binding.captionCollapsed.post {
+                val layout = binding.captionCollapsed.layout
+                if (layout != null) {
+                    val isTruncated = layout.lineCount > 1 || (layout.lineCount == 1 && layout.getEllipsisCount(0) > 0)
+                    binding.moreLessText.visibility = if (isTruncated) View.VISIBLE else View.GONE
+                }
+            }
+            binding.moreLessText.setOnClickListener {
+                binding.captionCollapsed.visibility = View.GONE
+                binding.moreLessText.visibility = View.GONE
+                binding.captionExpanded.visibility = View.VISIBLE
+                val spannable = SpannableStringBuilder(fullText)
+                val lessText = " Less"
+                spannable.append(lessText)
+                val typeface = ResourcesCompat.getFont(
+                    binding.root.context,
+                    R.font.manrope_bold
+                )
+                typeface?.let {
+                    spannable.setSpan(
+                        CustomTypefaceSpan(it),
+                        fullText.length,
+                        spannable.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+                val clickableSpan = object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        binding.captionExpanded.visibility = View.GONE
+                        binding.captionCollapsed.visibility = View.VISIBLE
+                        binding.moreLessText.visibility = View.VISIBLE
+                    }
+                    override fun updateDrawState(ds: TextPaint) {
+                        super.updateDrawState(ds)
+                        ds.isUnderlineText = false
+                        ds.color = binding.root.context.getColor(R.color.theme)
+                        ds.bgColor = 0
+                    }
+                }
+                spannable.setSpan(
+                    clickableSpan,
+                    fullText.length,
+                    spannable.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                binding.captionExpanded.text = spannable
+                binding.captionExpanded.movementMethod = LinkMovementMethod.getInstance()
+            }
+            binding.captionExpanded.setOnClickListener {
+                binding.captionExpanded.visibility = View.GONE
+                binding.captionCollapsed.visibility = View.VISIBLE
+                binding.moreLessText.visibility = View.VISIBLE
+            }
+        } else {
+            binding.captionCollapsed.text = ""
+            binding.captionExpanded.text = ""
+            binding.moreLessText.visibility = View.GONE
+        }
         releasePlayer()
         handler.removeCallbacks(imageRunnable)
         progressHandler.removeCallbacksAndMessages(null)
@@ -681,7 +772,12 @@ class PlayStatusActivity : AppCompatActivity() {
         super.onStop()
         player?.pause()
     }
-    override fun onResume() { super.onResume(); player?.play() }
+    override fun onResume() {
+        super.onResume()
+//        RTVariable.IS_STATUS_VIEWER_FINISHED = true
+//        RTVariable.IS_STATUS_PROFILE_CLICKED = true
+        player?.play()
+    }
     override fun onDestroy() {
         super.onDestroy()
         releasePlayer()

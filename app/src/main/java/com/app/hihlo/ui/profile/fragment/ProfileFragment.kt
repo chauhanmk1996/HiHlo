@@ -673,10 +673,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     RTVariable.SELECT_OPTION = true
                     //checkGalleryPermissionAndPick2()
                     val bottomSheet = FilePickerBottomsheet()
-                    bottomSheet.setOnMediaSelectedListener { uri, type ->
+                    bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
                         // uri and type are already returned as strings, no Intent parsing needed
                         val mediaType = type          // "image" or "video"
                         val contentUri = Uri.parse(uri)
+                        RTVariable.HEADLINE_CAPTION = headline
                         Handler(Looper.getMainLooper()).post {
                             // Ensure your fragment/activity is still attached if needed
                             val file = getCacheFileFromContentUri(contentUri)
@@ -1056,12 +1057,14 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
                     println("Image URL: $mediaUrl")
+                    val caption = RTVariable.HEADLINE_CAPTION
+                    RTVariable.HEADLINE_CAPTION = ""
                     viewModel2.hitAddStoryDataApi(
                         "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                             requireContext(),
                             LOGIN_DATA
                         )?.payload?.authToken,
-                        AddStoryRequest(assetUrl = mediaUrl, assetType = assetType)
+                        AddStoryRequest(assetUrl = mediaUrl, assetType = assetType, caption = caption)
                     )
                     //viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
                 } else if (state == TransferState.FAILED) {

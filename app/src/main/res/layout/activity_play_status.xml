@@ -209,6 +209,69 @@
             android:visibility="gone"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/captionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:background="#70000000"
+            app:layout_constraintBottom_toTopOf="@id/bottomLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Collapsed version -->
+            <TextView
+                android:id="@+id/captionCollapsed"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope_regular"
+                android:textSize="13sp"
+                android:textColor="@color/white_FEFEFF"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:visibility="visible"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/moreLessText" />
+
+            <!-- "More" button -->
+            <TextView
+                android:id="@+id/moreLessText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:paddingHorizontal="0dp"
+                android:paddingVertical="0dp"
+                android:layout_marginTop="0dp"
+                android:text="More"
+                android:textColor="@color/theme"
+                android:textSize="13sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                android:fontFamily="@font/manrope_bold"
+                app:layout_constraintBottom_toBottomOf="@id/captionCollapsed"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/captionCollapsed" />
+
+            <!-- Expanded version (single TextView) -->
+            <TextView
+                android:id="@+id/captionExpanded"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope_regular"
+                android:textSize="13sp"
+                android:textColor="@color/white_FEFEFF"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottomLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

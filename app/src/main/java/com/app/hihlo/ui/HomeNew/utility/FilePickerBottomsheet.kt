@@ -49,7 +49,7 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
      * Callback interface to return the selected media URI and type.
      */
     fun interface OnMediaSelectedListener {
-        fun onMediaSelected(uri: String, type: String)
+        fun onMediaSelected(uri: String, type: String, headline_caption: String)
     }
 
     fun setOnMediaSelectedListener(listener: OnMediaSelectedListener) {
@@ -63,8 +63,9 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val returnedUri = result.data?.getStringExtra("uri") ?: ""
             val returnedType = result.data?.getStringExtra("type") ?: ""
+            val headline_caption = result.data?.getStringExtra("headline_caption") ?: ""
             Log.d("RETURNED_DATA", "uri = $returnedUri, type = $returnedType")
-            listener?.onMediaSelected(returnedUri, returnedType)
+            listener?.onMediaSelected(returnedUri, returnedType, headline_caption)
             dismiss()
         }
     }

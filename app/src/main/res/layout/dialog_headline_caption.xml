@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/black_1c1c1c">
+
+    <TextView
+        android:id="@+id/tvSignOut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Caption"
+        android:textColor="@color/theme"
+        android:textSize="20sp"
+        android:layout_marginHorizontal="16dp"
+        android:fontFamily="@font/manrope_bold"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter headline caption"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="16dp"
+        android:fontFamily="@font/manrope_semibold"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/etHeadlineInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Headline..."
+        android:textColor="#FFFFFF"
+        android:textColorHint="#80FFFFFF"
+        android:fontFamily="@font/manrope_regular"
+        android:textSize="16sp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/edit_text_border"
+        android:padding="12dp"
+        android:inputType="textCapSentences"
+        android:maxLines="3"/>
+
+    <!-- Buttons row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:backgroundTint="@color/theme"
+            android:fontFamily="@font/manrope_medium"
+            android:textSize="15sp"
+            android:textAllCaps="false"
+            android:letterSpacing="0"
+            app:cornerRadius="30dp"
+            android:layout_weight="1"
+            android:textColor="@color/white"
+            android:id="@+id/btnCancel"
+            android:layout_marginEnd="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:paddingVertical="12dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:backgroundTint="@color/black_303030"
+            android:fontFamily="@font/manrope_medium"
+            android:textSize="15sp"
+            android:textAllCaps="false"
+            app:cornerRadius="30dp"
+            android:layout_weight="1"
+            android:letterSpacing="0"
+            android:textColor="@color/white"
+            android:id="@+id/btnSave"
+            android:layout_marginStart="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:paddingVertical="12dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

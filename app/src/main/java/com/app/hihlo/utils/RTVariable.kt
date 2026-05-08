@@ -96,6 +96,8 @@ object RTVariable {
     var IS_PROFILE_POST_LIST: Boolean = false
     var IS_STORY_CLICKED_FRON_REELS: Boolean = false
 
+    var HEADLINE_CAPTION: String = ""
+
     fun formatCount(count: Int): String {
         return when {
             count >= 1_000_000 -> {

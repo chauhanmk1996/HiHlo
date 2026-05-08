@@ -27,6 +27,7 @@ import com.app.hihlo.ui.profile.adapter.AdapterProfileMedia
 import com.app.hihlo.ui.profile.fragment.PaginatingFragment
 import com.app.hihlo.ui.profile.fragment.ProfileFragmentDirections
 import com.app.hihlo.ui.profile.view_model.ProfilePostViewModel
+import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
@@ -115,6 +116,7 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
         viewModel.hitOtherUserProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, userId, page.toString(), "14")
     }
     private fun getSelectedPost(reelPosition: Int){
+        RTVariable.IS_PROFILE_POST_LIST = true
         UserPreference.navigatedToMyProfile=true
         Log.i("TAG", "getSelectedPost: "+reels.data.toReelList().toMutableList())
         findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToReelsFragment(

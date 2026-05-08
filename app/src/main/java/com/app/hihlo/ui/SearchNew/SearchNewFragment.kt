@@ -1416,7 +1416,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
                     println("Image URL: $mediaUrl")
-                    viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
+                    val caption = "Test Caption"
+                    viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType, caption = caption))
 
                 } else if (state == TransferState.FAILED) {
                     // Handle failure

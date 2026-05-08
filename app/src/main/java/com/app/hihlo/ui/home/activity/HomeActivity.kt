@@ -142,20 +142,20 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         if(intent!=null){
             handleIntent(intent)
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (true) {
-                    delay(2)
-                    if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
-                        RTVariable.IS_STATUS_VIEWER_FINISHED = false
-                        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
-                            RTVariable.IS_STATUS_PROFILE_CLICKED = false
-                            //popBackToHome2()
-                        }
-                    }
-                }
-            }
-        }
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                while (true) {
+//                    delay(2)
+//                    if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
+//                        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+//                            RTVariable.IS_STATUS_PROFILE_CLICKED = false
+//                            RTVariable.IS_STATUS_VIEWER_FINISHED = false
+//                            //popBackToHome2()
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun setOnlineStatusVisibility(boolean: Boolean){
@@ -840,13 +840,27 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     override fun onResume() {
         super.onResume()
         RTVariable.ISHOMECLICKED = false
-        if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
-            RTVariable.IS_STATUS_VIEWER_FINISHED = false
-            if(RTVariable.IS_STATUS_PROFILE_CLICKED){
-                RTVariable.IS_STATUS_PROFILE_CLICKED = false
-                navController.popBackStack()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(50)
+                    if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
+                        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+                            RTVariable.IS_STATUS_PROFILE_CLICKED = false
+                            RTVariable.IS_STATUS_VIEWER_FINISHED = false
+                            navController.popBackStack()
+                        }
+                    }
+                }
             }
         }
+//        if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
+//            if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+//                RTVariable.IS_STATUS_PROFILE_CLICKED = false
+//                RTVariable.IS_STATUS_VIEWER_FINISHED = false
+//                navController.popBackStack()
+//            }
+//        }
     }
 
     override fun onStop() {

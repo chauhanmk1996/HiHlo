@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.*
 import android.net.Uri
 import android.os.*
@@ -15,6 +16,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -51,6 +53,7 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var videoTrimmerView: VideoTrimmerView
 
     private var player: ExoPlayer? = null
+    private lateinit var btnAddHeadline: Button
     private var isVideoMedia = false
     private var editingTextView: TextView? = null
     private var mediaRecorder: MediaRecorder? = null
@@ -70,6 +73,7 @@ class ImageVideoConverter : AppCompatActivity() {
     private var currentVideoStep = VideoStep.TRIM
     private val progressHandler = Handler(Looper.getMainLooper())
     private lateinit var rotationTooltip: TextView
+    var headline_caption: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -143,6 +147,42 @@ class ImageVideoConverter : AppCompatActivity() {
             )
         }
         overlayContainer.addView(rotationTooltip)
+        btnAddHeadline.setOnClickListener {
+            // Inflate custom view
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_headline_caption, null)
+            val etHeadline = dialogView.findViewById<EditText>(R.id.etHeadlineInput)
+            val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+            val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
+
+            etHeadline.setText(headline_caption)  // pre-fill
+
+            // Build dialog with the custom view, but NO default buttons
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(true)  // allows tap outside / back to cancel
+                .create()
+
+            // Show the dialog
+            dialog.show()
+
+            // Apply window background (so the default white box disappears)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            // Save button action
+            btnSave.setOnClickListener {
+                headline_caption = etHeadline.text.toString().trim()
+//                if (headline_caption.isNotEmpty()) {
+//                    Toast.makeText(this, "Caption Added", Toast.LENGTH_SHORT).show()
+//                    // Optionally update a TextView (e.g., tvHeadlineCaption.text = headline_caption)
+//                }
+                dialog.dismiss()
+            }
+
+            // Cancel button action
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
     }
 
     private fun initViews() {
@@ -158,6 +198,7 @@ class ImageVideoConverter : AppCompatActivity() {
         tvDone = findViewById(R.id.tvDone)
         ivBack = findViewById(R.id.ivBack)
         videoTrimmerView = findViewById(R.id.videoTrimmerView)
+        btnAddHeadline = findViewById(R.id.btnAddHeadline)
     }
 
     private fun setupVideo(uri: String) {
@@ -224,6 +265,7 @@ class ImageVideoConverter : AppCompatActivity() {
 
     private fun setupImage(uri: String) {
         photoEditorView.visibility = View.VISIBLE
+        btnAddHeadline.isVisible = true
         playerView.visibility = View.GONE
         Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
         videoTrimmerView.visibility = View.GONE
@@ -241,6 +283,7 @@ class ImageVideoConverter : AppCompatActivity() {
                 btnDone.isVisible = false
                 btnText.isVisible = false
                 inputLayout.isVisible = false
+                btnAddHeadline.isVisible = false
             }
             VideoStep.CAPTION -> {
                 videoTrimmerView.visibility = View.GONE
@@ -248,6 +291,7 @@ class ImageVideoConverter : AppCompatActivity() {
                 btnDone.isVisible = true
                 btnText.isVisible = true
                 inputLayout.isVisible = false
+                btnAddHeadline.isVisible = true
             }
         }
     }
@@ -668,6 +712,7 @@ class ImageVideoConverter : AppCompatActivity() {
         val intent = android.content.Intent().apply {
             putExtra("uri", savedUri?.toString() ?: "")
             putExtra("type", mediaType)
+            putExtra("headline_caption", headline_caption)
         }
         setResult(RESULT_OK, intent)
         finish()

@@ -5,6 +5,7 @@ data class StatusItem(
     val user_id: Int,
     val asset_url: String,
     val asset_type: String,
+    val caption: String,
     val created_at: String,
     val is_seen: Int,
     val seen_count: Int? = 0,

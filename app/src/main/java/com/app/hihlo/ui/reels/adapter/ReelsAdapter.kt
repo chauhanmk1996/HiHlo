@@ -1,5 +1,11 @@
 package com.app.hihlo.ui.reels.adapter
 import android.annotation.SuppressLint
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.TextUtils
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -9,6 +15,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
@@ -25,6 +32,7 @@ import com.app.hihlo.model.reel.response.Reel
 import com.app.hihlo.model.static.reelSideOptionsList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter.CustomTypefaceSpan
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
 import com.bumptech.glide.Glide
@@ -60,7 +68,9 @@ class ReelAdapter(
 //        private val title = binding.title
         private val userName = binding.userName
         private val userLocation = binding.userLocation
-        private val caption = binding.caption
+        private val captionCollapsed = binding.captionCollapsed
+        private val moreLessText = binding.moreLessText
+        private val captionExpanded = binding.captionExpanded
 //        private val addReelButton = binding.addReelButton
         private val sideOptions = binding.sideOptions
         private val userImageCardView = binding.userImageCardView
@@ -69,7 +79,6 @@ class ReelAdapter(
         private val muteUnmuteIcon = binding.muteUnmuteIcon
         private val muteVolumeButton = binding.muteVolumeButton
         private val reelImageView = binding.reelImageView
-        private val moreLessText = binding.moreLessText
         private val userDetailsLayout = binding.userDetailsLayout
         val followButtonLayout = binding.followButtonLayout
         val shadowLayerLayout = binding.shadowLayerLayout
@@ -189,10 +198,77 @@ class ReelAdapter(
             shareReel.setOnClickListener {
                 shareReelSelected(reel.assetUrl)
             }
+//            if (!reel.caption.isNullOrEmpty()) {
+//                setDescriptionText(reel.caption, caption, moreLessText, shadowLayerLayout)
+//            } else {
+//                captionCollapsed.text = ""
+//                moreLessText.visibility = View.GONE
+//            }
             if (!reel.caption.isNullOrEmpty()) {
-                setDescriptionText(reel.caption, caption, moreLessText, shadowLayerLayout)
+                val fullText = reel.caption
+                captionCollapsed.text = fullText
+                captionCollapsed.maxLines = 1
+                captionCollapsed.ellipsize = TextUtils.TruncateAt.END
+                captionCollapsed.visibility = View.VISIBLE
+                captionExpanded.visibility = View.GONE
+                moreLessText.visibility = View.GONE
+                moreLessText.text = "More"
+                captionCollapsed.post {
+                    val layout = captionCollapsed.layout
+                    if (layout != null) {
+                        val isTruncated = layout.lineCount > 1 || (layout.lineCount == 1 && layout.getEllipsisCount(0) > 0)
+                        moreLessText.visibility = if (isTruncated) View.VISIBLE else View.GONE
+                    }
+                }
+                moreLessText.setOnClickListener {
+                    captionCollapsed.visibility = View.GONE
+                    moreLessText.visibility = View.GONE
+                    captionExpanded.visibility = View.VISIBLE
+                    val spannable = SpannableStringBuilder(fullText)
+                    val lessText = " Less"
+                    spannable.append(lessText)
+                    val typeface = ResourcesCompat.getFont(
+                        itemView.context,
+                        R.font.manrope_bold
+                    )
+                    typeface?.let {
+                        spannable.setSpan(
+                            CustomTypefaceSpan(it),
+                            fullText.length,
+                            spannable.length,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                    }
+                    val clickableSpan = object : ClickableSpan() {
+                        override fun onClick(widget: View) {
+                            captionExpanded.visibility = View.GONE
+                            captionCollapsed.visibility = View.VISIBLE
+                            moreLessText.visibility = View.VISIBLE
+                        }
+                        override fun updateDrawState(ds: TextPaint) {
+                            super.updateDrawState(ds)
+                            ds.isUnderlineText = false
+                            ds.color = itemView.context.getColor(R.color.theme)
+                            ds.bgColor = 0
+                        }
+                    }
+                    spannable.setSpan(
+                        clickableSpan,
+                        fullText.length,
+                        spannable.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    captionExpanded.text = spannable
+                    captionExpanded.movementMethod = LinkMovementMethod.getInstance()
+                }
+                captionExpanded.setOnClickListener {
+                    captionExpanded.visibility = View.GONE
+                    captionCollapsed.visibility = View.VISIBLE
+                    moreLessText.visibility = View.VISIBLE
+                }
             } else {
-                caption.text = ""
+                captionCollapsed.text = ""
+                captionExpanded.text = ""
                 moreLessText.visibility = View.GONE
             }
 //            playerView.setControllerHideOnTouch(false)

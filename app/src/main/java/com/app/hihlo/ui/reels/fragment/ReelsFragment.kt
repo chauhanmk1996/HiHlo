@@ -1824,17 +1824,20 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
     override fun onResume() {
         super.onResume()
-        if(UserDataManager.get_postCommentShow(requireContext())){
-            binding.swipeRefresh.isRefreshing = false
-            UserDataManager.postCommentIsShow(requireContext(), false)
-            //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
-            //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
-            val cached = CommentPrefs.get2Payload(requireContext())
+        if(!RTVariable.IS_PROFILE_POST_LIST){
+            RTVariable.IS_PROFILE_POST_LIST = false
+            if(UserDataManager.get_postCommentShow(requireContext())){
+                binding.swipeRefresh.isRefreshing = false
+                UserDataManager.postCommentIsShow(requireContext(), false)
+                //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
+                //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
+                val cached = CommentPrefs.get2Payload(requireContext())
 
-            if (cached != null) {
-                viewModel.commentPayloadCache = cached
-                RTVariable.IS_FROM_RESUME = true
-                openCommentsBottomSheet(cached)
+                if (cached != null) {
+                    viewModel.commentPayloadCache = cached
+                    RTVariable.IS_FROM_RESUME = true
+                    openCommentsBottomSheet(cached)
+                }
             }
         }
     }
