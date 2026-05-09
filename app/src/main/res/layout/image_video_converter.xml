@@ -67,7 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:hint="Write Caption..."
+            android:hint="Write Text..."
             android:textColor="@android:color/white"
             android:textColorHint="#AAAAAA"
             android:maxLines="3"
@@ -82,7 +82,50 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:padding="10dp"
-            android:text="\u2191 Done"
+            android:text="\u2191 Text"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:textSize="15sp"
+            android:fontFamily="@font/manrope_semibold"
+            android:background="@drawable/btn_background"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/inputLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:layout_gravity="bottom"
+        android:background="#CC000000"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/etInput2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="Write Caption..."
+            android:textColor="@android:color/white"
+            android:textColorHint="#AAAAAA"
+            android:maxLines="3"
+            android:textSize="15sp"
+            android:fontFamily="@font/manrope_regular"
+            android:inputType="textCapSentences|textMultiLine"
+            android:padding="10dp" />
+
+        <TextView
+            android:id="@+id/tvDone2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="10dp"
+            android:text="\u2191 Caption"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:textSize="15sp"
@@ -190,5 +233,16 @@
             android:visibility="gone"/>
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/btnPlayPause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:src="@drawable/pause_icon"
+        android:padding="8dp"
+        android:visibility="visible"
+        android:contentDescription="Play/Pause" />
 
 </FrameLayout>

@@ -837,13 +837,14 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         }
     }
 
+    @SuppressLint("RepeatOnLifecycleWrongUsage")
     override fun onResume() {
         super.onResume()
         RTVariable.ISHOMECLICKED = false
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
-                    delay(50)
+                    delay(2)
                     if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
                         if(RTVariable.IS_STATUS_PROFILE_CLICKED){
                             RTVariable.IS_STATUS_PROFILE_CLICKED = false

@@ -1,12 +1,9 @@
 package com.app.hihlo.ImageVideoConverter
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.media.*
 import android.net.Uri
 import android.os.*
@@ -16,9 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
@@ -45,21 +40,25 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var playerView: PlayerView
     private lateinit var btnText: Button
     private lateinit var btnDone: Button
-    private lateinit var btnDone2: Button              // "Next" button
+    private lateinit var btnDone2: Button
     private lateinit var inputLayout: LinearLayout
     private lateinit var etInput: EditText
     private lateinit var tvDone: TextView
+    private lateinit var inputLayout2: LinearLayout
+    private lateinit var etInput2: EditText
+    private lateinit var tvDone2: TextView
     private lateinit var ivBack: ImageView
     private lateinit var videoTrimmerView: VideoTrimmerView
+    private lateinit var btnAddHeadline: Button
 
     private var player: ExoPlayer? = null
-    private lateinit var btnAddHeadline: Button
+
+    private lateinit var btnPlayPause: ImageView
     private var isVideoMedia = false
     private var editingTextView: TextView? = null
     private var mediaRecorder: MediaRecorder? = null
     private var isRecording = false
 
-    private val RECORD_AUDIO_REQUEST_CODE = 101
     private var savedUri: Uri? = null
     private var mediaType: String = ""
 
@@ -68,121 +67,68 @@ class ImageVideoConverter : AppCompatActivity() {
     private var originalVideoDurationMs = 0L
     private var originalVideoUri: Uri? = null
 
-    // Steps for video flow: step 1 = trim, step 2 = caption/send
-    private enum class VideoStep { TRIM, CAPTION }
-    private var currentVideoStep = VideoStep.TRIM
+    private enum class MediaStep {
+        TRIM, HEADLINE, TEXT_OVERLAY
+    }
+
+    private var currentStep = MediaStep.HEADLINE
     private val progressHandler = Handler(Looper.getMainLooper())
     private lateinit var rotationTooltip: TextView
     var headline_caption: String = ""
+
+    private val autoHideHandler = Handler(Looper.getMainLooper())
+    private val autoHideRunnable = Runnable { hidePlayPauseButton() }
+    private val autoHideDelayMs = 5000L   // 5 seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.image_video_converter)
         initViews()
+
         val uri = intent.getStringExtra("uri") ?: ""
         originalVideoUri = Uri.parse(uri)
         isVideoMedia = intent.getBooleanExtra("isVideo", false)
-        if (isVideoMedia) {
-            setupVideo(uri)
-            goToStep(VideoStep.TRIM)
-            //requestAudioPermission()
-            attachGesturesToView(playerView, isText = false)   // ✅ restored
-        } else {
-            setupImage(uri)
-            btnDone.text = "Send"
-            btnDone.isVisible = true
-            btnDone2.isVisible = false
-            btnText.isVisible = false
-            inputLayout.isVisible = true
-            attachGesturesToView(photoEditorView, isText = false)   // ✅ restored
-        }
-        setupEditor()
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (isVideoMedia && currentVideoStep == VideoStep.CAPTION) {
-                    goToStep(VideoStep.TRIM)
-                } else {
-                    finish()
-                }
-            }
-        })
-        btnDone2.setOnClickListener {
-            if (isVideoMedia) {
-                trimStartMs = videoTrimmerView.getTrimStartMs()
-                trimEndMs = videoTrimmerView.getTrimEndMs()
-                goToStep(VideoStep.CAPTION)
-            }
-        }
-        btnDone.setOnClickListener {
-            if (isVideoMedia) {
-                if (!isRecording) startRecordingWithTrimRange()
-            } else {
-                saveFinalImage()
-            }
-        }
-        ivBack.setOnClickListener {
-            if (isVideoMedia && currentVideoStep == VideoStep.CAPTION) {
-                goToStep(VideoStep.TRIM)
-            } else {
-                finish()
-            }
-        }
+
+        // Setup Rotation Tooltip
         rotationTooltip = TextView(this).apply {
             setBackgroundResource(R.drawable.bg_rotation_tooltip)
             setTextColor(Color.BLACK)
             textSize = 14f
             gravity = Gravity.CENTER
-            typeface = androidx.core.content.res.ResourcesCompat.getFont(this@ImageVideoConverter, R.font.manrope_semibold)  // ✅
+            typeface = androidx.core.content.res.ResourcesCompat.getFont(this@ImageVideoConverter, R.font.manrope_semibold)
             visibility = View.GONE
-            setPaddingRelative(
-                (16 * resources.displayMetrics.density).toInt(),
-                4,
-                (16 * resources.displayMetrics.density).toInt(),
-                4
-            )
+            setPaddingRelative((16 * resources.displayMetrics.density).toInt(), 4, (16 * resources.displayMetrics.density).toInt(), 4)
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             )
         }
         overlayContainer.addView(rotationTooltip)
-        btnAddHeadline.setOnClickListener {
-            // Inflate custom view
-            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_headline_caption, null)
-            val etHeadline = dialogView.findViewById<EditText>(R.id.etHeadlineInput)
-            val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
-            val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
 
-            etHeadline.setText(headline_caption)  // pre-fill
-
-            // Build dialog with the custom view, but NO default buttons
-            val dialog = AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(true)  // allows tap outside / back to cancel
-                .create()
-
-            // Show the dialog
-            dialog.show()
-
-            // Apply window background (so the default white box disappears)
-            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-            // Save button action
-            btnSave.setOnClickListener {
-                headline_caption = etHeadline.text.toString().trim()
-//                if (headline_caption.isNotEmpty()) {
-//                    Toast.makeText(this, "Caption Added", Toast.LENGTH_SHORT).show()
-//                    // Optionally update a TextView (e.g., tvHeadlineCaption.text = headline_caption)
-//                }
-                dialog.dismiss()
-            }
-
-            // Cancel button action
-            btnCancel.setOnClickListener {
-                dialog.dismiss()
-            }
+        if (isVideoMedia) {
+            setupVideo(uri)
+            goToStep(MediaStep.TRIM)
+        } else {
+            setupImage(uri)
+            goToStep(MediaStep.HEADLINE)
         }
+
+        setupListeners()
+        setupEditor()
+        setupBackPress()
+    }
+
+    private fun showPlayPauseButton() {
+        if (!isVideoMedia) return
+        autoHideHandler.removeCallbacks(autoHideRunnable)
+        btnPlayPause.visibility = View.VISIBLE
+        autoHideHandler.postDelayed(autoHideRunnable, autoHideDelayMs)
+    }
+
+    private fun hidePlayPauseButton() {
+        btnPlayPause.visibility = View.GONE
+        autoHideHandler.removeCallbacks(autoHideRunnable)
     }
 
     private fun initViews() {
@@ -196,11 +142,129 @@ class ImageVideoConverter : AppCompatActivity() {
         inputLayout = findViewById(R.id.inputLayout)
         etInput = findViewById(R.id.etInput)
         tvDone = findViewById(R.id.tvDone)
+        inputLayout2 = findViewById(R.id.inputLayout2)
+        etInput2 = findViewById(R.id.etInput2)
+        tvDone2 = findViewById(R.id.tvDone2)
         ivBack = findViewById(R.id.ivBack)
         videoTrimmerView = findViewById(R.id.videoTrimmerView)
         btnAddHeadline = findViewById(R.id.btnAddHeadline)
+        btnPlayPause = findViewById(R.id.btnPlayPause)
     }
 
+    private fun setupListeners() {
+        btnDone2.setOnClickListener {
+            when (currentStep) {
+                MediaStep.TRIM -> {
+                    trimStartMs = videoTrimmerView.getTrimStartMs()
+                    trimEndMs = videoTrimmerView.getTrimEndMs()
+                    goToStep(MediaStep.HEADLINE)
+                }
+                MediaStep.HEADLINE -> goToStep(MediaStep.TEXT_OVERLAY)
+                MediaStep.TEXT_OVERLAY -> {}
+            }
+        }
+
+        btnDone.setOnClickListener {
+            if (isVideoMedia) {
+                if (!isRecording) startRecordingWithTrimRange()
+            } else {
+                saveFinalImage()
+            }
+        }
+
+        ivBack.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+        btnPlayPause.setOnClickListener {
+            player?.let { p ->
+                if (p.isPlaying) {
+                    p.pause()
+                    btnPlayPause.setImageResource(R.drawable.pause_icon)   // show play icon when paused
+                } else {
+                    p.play()
+                    btnPlayPause.setImageResource(R.drawable.play_icon)
+                }
+            }
+            showPlayPauseButton()   // reset the 5‑second timer
+        }
+        playerView.setOnClickListener {
+            player?.let { p ->
+                if (p.isPlaying) {
+                    p.pause()
+                    btnPlayPause.setImageResource(R.drawable.pause_icon)   // show play icon when paused
+                } else {
+                    p.play()
+                    btnPlayPause.setImageResource(R.drawable.play_icon)
+                }
+            }
+            showPlayPauseButton()   // reset the 5‑second timer
+        }
+    }
+
+    private fun setupBackPress() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                when {
+                    // Both Image and Video: From Text Overlay → Headline
+                    currentStep == MediaStep.TEXT_OVERLAY -> {
+                        goToStep(MediaStep.HEADLINE)
+                    }
+                    // Video Only: From Headline → Trim
+                    isVideoMedia && currentStep == MediaStep.HEADLINE -> {
+                        goToStep(MediaStep.TRIM)
+                    }
+                    // Image Headline or Video Trim → Exit
+                    else -> finish()
+                }
+            }
+        })
+    }
+
+    private fun goToStep(step: MediaStep) {
+        currentStep = step
+        when (step) {
+            MediaStep.TRIM -> {
+                videoTrimmerView.visibility = View.VISIBLE
+                inputLayout.visibility = View.GONE
+                inputLayout2.visibility = View.GONE
+                btnDone2.isVisible = true
+                btnDone.isVisible = false
+                btnText.isVisible = false
+                btnAddHeadline.isVisible = false
+                //btnPlayPause.visibility = View.VISIBLE
+            }
+            MediaStep.HEADLINE -> {
+                videoTrimmerView.visibility = View.GONE
+                inputLayout.visibility = View.GONE
+                inputLayout2.visibility = View.VISIBLE
+                btnDone2.isVisible = true
+                btnDone.isVisible = false
+                btnText.isVisible = false
+                btnAddHeadline.isVisible = false
+
+                etInput2.setText(headline_caption)
+                etInput2.requestFocus()
+                etInput.setText("")
+            }
+            MediaStep.TEXT_OVERLAY -> {
+                videoTrimmerView.visibility = View.GONE
+                inputLayout.visibility = View.VISIBLE
+                inputLayout2.visibility = View.GONE
+                btnDone2.isVisible = false
+                btnDone.isVisible = true
+                btnText.isVisible = false
+                btnAddHeadline.isVisible = false
+            }
+        }
+        //updatePlayPauseButtonVisibility()
+        showPlayPauseButton()
+    }
+
+    private fun updatePlayPauseButtonVisibility() {
+        btnPlayPause.visibility = if (isVideoMedia) View.VISIBLE else View.GONE
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupVideo(uri: String) {
         photoEditorView.visibility = View.GONE
         playerView.visibility = View.VISIBLE
@@ -210,29 +274,36 @@ class ImageVideoConverter : AppCompatActivity() {
         player?.setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
         player?.prepare()
         player?.play()
+//        playerView.setOnTouchListener { _, event ->
+//            if (event.action == MotionEvent.ACTION_DOWN && isVideoMedia) {
+//                showPlayPauseButton()
+//            }
+//            false   // let the player handle the touch normally
+//        }
         originalVideoDurationMs = getVideoDuration(uri)
         videoTrimmerView.setVideoUri(Uri.parse(uri), originalVideoDurationMs)
         trimStartMs = 0L
         trimEndMs = originalVideoDurationMs
+
         videoTrimmerView.setOnTrimChangedListener { start, end ->
             trimStartMs = start
             trimEndMs = end
-            val current = player?.currentPosition ?: 0L
-            when {
-                current < trimStartMs -> {
-                    player?.seekTo(trimStartMs)
-                }
-                current > trimEndMs -> {
-                    player?.seekTo(trimStartMs)
-                }
-            }
-            player?.playWhenReady = true
         }
         videoTrimmerView.setOnScrubChangedListener { ms ->
             player?.seekTo(ms)
-            videoTrimmerView.updateProgress(ms)
         }
+        player?.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                runOnUiThread {
+                    btnPlayPause.setImageResource(
+                        if (isPlaying) R.drawable.play_icon else R.drawable.pause_icon
+                    )
+                }
+            }
+        })
+
         startProgressLoop()
+        attachGesturesToView(playerView, isText = false)
     }
 
     private fun startProgressLoop() {
@@ -265,35 +336,80 @@ class ImageVideoConverter : AppCompatActivity() {
 
     private fun setupImage(uri: String) {
         photoEditorView.visibility = View.VISIBLE
-        btnAddHeadline.isVisible = true
         playerView.visibility = View.GONE
-        Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
         videoTrimmerView.visibility = View.GONE
+        Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
+        attachGesturesToView(photoEditorView, isText = false)
     }
 
-    private fun goToStep(step: VideoStep) {
-        currentVideoStep = step
-        when (step) {
-            VideoStep.TRIM -> {
-                if (trimEndMs != Long.MAX_VALUE) {
-                    videoTrimmerView.setTrimRange(trimStartMs, trimEndMs)
-                }
-                videoTrimmerView.visibility = View.VISIBLE
-                btnDone2.isVisible = true
-                btnDone.isVisible = false
-                btnText.isVisible = false
-                inputLayout.isVisible = false
-                btnAddHeadline.isVisible = false
-            }
-            VideoStep.CAPTION -> {
-                videoTrimmerView.visibility = View.GONE
-                btnDone2.isVisible = false
-                btnDone.isVisible = true
-                btnText.isVisible = true
-                inputLayout.isVisible = false
-                btnAddHeadline.isVisible = true
-            }
+    private fun setupEditor() {
+        btnText.setOnClickListener { openInputBar(null) }
+
+        tvDone2.setOnClickListener {
+            headline_caption = etInput2.text.toString().trim()
+            goToStep(MediaStep.TEXT_OVERLAY)
         }
+
+        tvDone.setOnClickListener {
+            val text = etInput.text.toString().trim()
+            if (text.isNotEmpty()) {
+                if (editingTextView != null) {
+                    editingTextView?.text = text
+                } else {
+                    addTextOverlay(text)
+                }
+            }
+            closeInputBar()
+        }
+    }
+
+    private fun addTextOverlay(text: String) {
+        val container = FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            isClickable = true
+            isLongClickable = true
+        }
+        val customTypeface = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.manrope_regular)
+        val tv = TextView(this).apply {
+            this.text = text
+            this.typeface = customTypeface
+            setTextColor(Color.WHITE)
+            textSize = 28f
+            gravity = Gravity.CENTER
+            background = ContextCompat.getDrawable(
+                this@ImageVideoConverter,
+                R.drawable.status_text_bg
+            )
+
+            // Optional padding inside TextView
+            setPadding(40, 20, 40, 20)
+        }
+        container.addView(tv)
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        params.gravity = Gravity.CENTER
+        overlayContainer.addView(container, params)
+        attachGesturesToView(container, isText = true)
+    }
+
+    private fun openInputBar(target: TextView?) {
+        editingTextView = target
+        inputLayout.visibility = View.VISIBLE
+        btnText.visibility = View.GONE
+        etInput.setText(target?.text ?: "")
+        etInput.requestFocus()
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(etInput, 0)
+    }
+
+    private fun closeInputBar() {
+        //inputLayout.visibility = View.GONE
+        editingTextView = null
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(etInput.windowToken, 0)
+        //btnText.isVisible = true
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -313,23 +429,26 @@ class ImageVideoConverter : AppCompatActivity() {
         var initialDistance = 0f
         var initialAngle = 0f
         var tooltipShown = false
+
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 if (isText) showDeleteMenu(view)
             }
         })
+
         view.setOnTouchListener { v, event ->
             gestureDetector.onTouchEvent(event)
             val pointerCount = event.pointerCount
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    if (!isText) showPlayPauseButton()
                     mode = 1
                     initialX = event.rawX
                     initialY = event.rawY
                     initialTranslationX = v.translationX
                     initialTranslationY = v.translationY
                     if (isText) v.bringToFront()
-                    hideRotationTooltip()       // hide if a new gesture starts
+                    hideRotationTooltip()
                     tooltipShown = false
                     true
                 }
@@ -377,7 +496,7 @@ class ImageVideoConverter : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                     mode = 0
-                    hideRotationTooltip()   // ✅
+                    hideRotationTooltip()
                     tooltipShown = false
                     true
                 }
@@ -533,7 +652,6 @@ class ImageVideoConverter : AppCompatActivity() {
 
         player?.playWhenReady = false
 
-        // Now mux with original audio
         ProcessDialog.showDialog(this, true)
         Handler(Looper.getMainLooper()).postDelayed({
             muxVideoWithOriginalAudio(videoFile, originalDurationMs)
@@ -554,7 +672,6 @@ class ImageVideoConverter : AppCompatActivity() {
         try {
             if (originalVideoUri == null) throw Exception("Original video URI is null")
 
-            // ==================== Video Extractor (Silent Recorded) ====================
             videoExtractor = MediaExtractor()
             videoExtractor.setDataSource(silentVideoFile.absolutePath)
 
@@ -563,7 +680,6 @@ class ImageVideoConverter : AppCompatActivity() {
                 format.getString(MediaFormat.KEY_MIME)?.startsWith("video/") == true
             } ?: throw Exception("No video track found in recorded file")
 
-            // ==================== Audio Extractor (Original Video) ====================
             audioExtractor = MediaExtractor()
             audioExtractor.setDataSource(this@ImageVideoConverter, originalVideoUri!!, null)
 
@@ -572,22 +688,17 @@ class ImageVideoConverter : AppCompatActivity() {
                 format.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
             }
 
-            // ==================== Setup Muxer ====================
             muxer = MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
 
-            // Add Video Track
             val videoFormat = videoExtractor.getTrackFormat(videoTrackIndex)
             val videoTrack = muxer.addTrack(videoFormat)
             videoExtractor.selectTrack(videoTrackIndex)
 
-            // Add Audio Track (if available)
             var audioTrack = -1
             if (audioTrackIndex != null) {
                 val audioFormat = audioExtractor.getTrackFormat(audioTrackIndex)
                 audioTrack = muxer.addTrack(audioFormat)
                 audioExtractor.selectTrack(audioTrackIndex)
-            } else {
-                Log.w("ImageVideoConverter", "No audio track found in original video")
             }
 
             muxer.start()
@@ -595,42 +706,31 @@ class ImageVideoConverter : AppCompatActivity() {
             val buffer = ByteBuffer.allocate(1024 * 1024)
             val bufferInfo = MediaCodec.BufferInfo()
 
-            // ==================== Copy Video Track ====================
-            var videoFrameCount = 0
+            // Copy Video
             while (true) {
                 bufferInfo.size = videoExtractor.readSampleData(buffer, 0)
                 if (bufferInfo.size < 0) break
-
                 bufferInfo.presentationTimeUs = videoExtractor.sampleTime
                 bufferInfo.flags = getSampleFlags(videoExtractor)
                 muxer.writeSampleData(videoTrack, buffer, bufferInfo)
                 videoExtractor.advance()
-                videoFrameCount++
             }
 
-            Log.d("ImageVideoConverter", "Copied $videoFrameCount video frames")
-
-            // ==================== Copy Trimmed Audio Track ====================
+            // Copy Trimmed Audio
             if (audioTrack != -1) {
                 val startUs = trimStartMs * 1000L
                 val endUs = trimEndMs * 1000L
-
                 audioExtractor.seekTo(startUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
 
-                var audioSampleCount = 0
                 while (true) {
                     bufferInfo.size = audioExtractor.readSampleData(buffer, 0)
                     if (bufferInfo.size < 0) break
-
                     bufferInfo.presentationTimeUs = audioExtractor.sampleTime - startUs
                     if (bufferInfo.presentationTimeUs > (endUs - startUs)) break
-
                     bufferInfo.flags = getSampleFlags(audioExtractor)
                     muxer.writeSampleData(audioTrack, buffer, bufferInfo)
                     audioExtractor.advance()
-                    audioSampleCount++
                 }
-                Log.d("ImageVideoConverter", "Copied $audioSampleCount audio samples")
             }
 
             muxer.stop()
@@ -638,22 +738,21 @@ class ImageVideoConverter : AppCompatActivity() {
 
         } catch (e: Exception) {
             Log.e("ImageVideoConverter", "Muxing failed", e)
-            Toast.makeText(this, "Failed to add audio: ${e.message ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
-            useFinalFile(silentVideoFile) // fallback to silent video
+            Toast.makeText(this, "Failed to add audio: ${e.message}", Toast.LENGTH_LONG).show()
+            useFinalFile(silentVideoFile)
         } finally {
             videoExtractor?.release()
             audioExtractor?.release()
             try { muxer?.release() } catch (_: Exception) {}
-            silentVideoFile.delete() // clean temporary silent file
+            silentVideoFile.delete()
         }
     }
 
-    /** Safe way to get sample flags (compatible with API < 28) */
     private fun getSampleFlags(extractor: MediaExtractor): Int {
         return try {
             extractor.sampleFlags
         } catch (e: Exception) {
-            0 // fallback
+            0
         }
     }
 
@@ -718,97 +817,17 @@ class ImageVideoConverter : AppCompatActivity() {
         finish()
     }
 
-    private fun setupEditor() {
-        btnText.setOnClickListener { openInputBar(null) }
-        tvDone.setOnClickListener {
-            val text = etInput.text.toString().trim()
-            if (text.isNotEmpty()) {
-                if (editingTextView != null) editingTextView?.text = text
-                else addTextOverlay(text)
-            }
-            closeInputBar()
-        }
-    }
-
-    private fun addTextOverlay(text: String) {
-        val container = FrameLayout(this).apply {
-            setPadding(40, 20, 40, 20)
-            isClickable = true
-            isLongClickable = true
-        }
-        val customTypeface = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.manrope_regular)
-        val tv = TextView(this).apply {
-            this.text = text
-            this.typeface = customTypeface
-            setTextColor(Color.WHITE)
-            textSize = 28f
-            gravity = Gravity.CENTER
-        }
-        container.addView(tv)
-        val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        )
-        params.gravity = Gravity.CENTER
-        overlayContainer.addView(container, params)
-        attachGesturesToView(container, isText = true)
-    }
-
-    private fun openInputBar(target: TextView?) {
-        editingTextView = target
-        inputLayout.visibility = View.VISIBLE
-        btnText.visibility = View.GONE
-        etInput.setText(target?.text ?: "")
-        etInput.requestFocus()
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(etInput, 0)
-    }
-
-    private fun closeInputBar() {
-        inputLayout.visibility = View.GONE
-        editingTextView = null
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(etInput.windowToken, 0)
-        btnText.isVisible = true
-    }
-
-//    private fun checkAudioPermission(): Boolean =
-//        ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-//
-//    private fun requestAudioPermission() {
-//        if (!checkAudioPermission()) {
-//            ActivityCompat.requestPermissions(
-//                this,
-//                arrayOf(Manifest.permission.RECORD_AUDIO),
-//                RECORD_AUDIO_REQUEST_CODE
-//            )
-//        }
-//    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        progressHandler.removeCallbacksAndMessages(null)
-        player?.release()
-        mediaRecorder?.release()
-        mediaRecorder = null
-    }
-
     private fun showRotationTooltip(view: View, rotation: Float) {
-        // Update the text and make the tooltip visible
         rotationTooltip.text = "${Math.round(rotation)}°"
         if (rotationTooltip.visibility != View.VISIBLE) {
             rotationTooltip.visibility = View.VISIBLE
         }
-
-        // Measure the tooltip so we know its real size
         rotationTooltip.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
         val w = rotationTooltip.measuredWidth
         val h = rotationTooltip.measuredHeight
-
-        // Position it exactly in the centre of the overlayContainer (= centre of the screen)
         rotationTooltip.translationX = (overlayContainer.width / 2f) - (w / 2f)
         rotationTooltip.translationY = (overlayContainer.height / 2f) - (h / 2f)
     }
@@ -817,5 +836,14 @@ class ImageVideoConverter : AppCompatActivity() {
         if (rotationTooltip.visibility == View.VISIBLE) {
             rotationTooltip.visibility = View.GONE
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressHandler.removeCallbacksAndMessages(null)
+        autoHideHandler.removeCallbacksAndMessages(null)
+        player?.release()
+        mediaRecorder?.release()
+        mediaRecorder = null
     }
 }

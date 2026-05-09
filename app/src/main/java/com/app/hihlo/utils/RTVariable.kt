@@ -97,6 +97,7 @@ object RTVariable {
     var IS_STORY_CLICKED_FRON_REELS: Boolean = false
 
     var HEADLINE_CAPTION: String = ""
+    var IS_STORY_VIEW: Boolean = false
 
     fun formatCount(count: Int): String {
         return when {

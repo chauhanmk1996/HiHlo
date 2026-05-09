@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:backgroundTint="@color/screen_background_black"
-            app:fabCradleMargin="11dp"
+            app:fabCradleMargin="15dp"
             app:fabCradleRoundedCornerRadius="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:hideOnScroll="true"
@@ -44,10 +44,11 @@
                 android:id="@+id/bottomNavigationView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
                 android:background="@color/transparent"
                 android:elevation="1dp"
                 app:itemIconTint="@drawable/bottom_nav_item_color_state"
-                app:itemPaddingTop="8dp"
+                app:itemPaddingTop="11dp"
                 app:labelVisibilityMode="labeled"
                 app:menu="@menu/bottom_menu" />
 
@@ -55,8 +56,8 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="40dp"
+            android:layout_height="0.5dp"
+            android:layout_marginBottom="43dp"
             app:layout_constraintBottom_toBottomOf="parent"
             android:background="@color/gray_303030"/>
 
@@ -79,6 +80,7 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imgBtn"
+            android:layout_marginTop="4dp"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:elevation="15dp"

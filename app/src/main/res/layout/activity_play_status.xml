@@ -216,7 +216,7 @@
             android:paddingEnd="15dp"
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
-            android:background="#70000000"
+            android:background="#212328"
             app:layout_constraintBottom_toTopOf="@id/bottomLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">

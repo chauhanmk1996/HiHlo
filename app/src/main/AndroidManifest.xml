@@ -154,7 +154,7 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.HiHloApp"
-            android:launchMode="standard">
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

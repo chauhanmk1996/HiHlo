@@ -63,6 +63,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -126,7 +127,9 @@ class PlayStatusActivity : AppCompatActivity() {
         window.setBackgroundDrawableResource(android.R.color.transparent)
         binding = ActivityPlayStatusBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        RTVariable.IS_STORY_VIEW = true
         RTVariable.IS_STATUS_VIEWER_ACTIVATED = true
+        UserDataManager.postCommentIsShow(this@PlayStatusActivity, false)
         //binding.root.alpha = 0f
         //binding.root.post { startOpenAnimation() }
 
@@ -307,12 +310,7 @@ class PlayStatusActivity : AppCompatActivity() {
 //        })
     }
 
-    private fun handleSideTouch(
-        event: MotionEvent,
-        v: View,
-        isRight: Boolean,
-        holdMovePx: Float
-    ): Boolean {
+    private fun handleSideTouch(event: MotionEvent, v: View, isRight: Boolean, holdMovePx: Float): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 if (isRight) {
@@ -459,7 +457,9 @@ class PlayStatusActivity : AppCompatActivity() {
 
     override fun finish() {
         val root = binding.root
-        RTVariable.IS_STATUS_VIEWER_FINISHED = true
+        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+            RTVariable.IS_STATUS_VIEWER_FINISHED = true
+        }
 //        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
 //            (this as HomeActivity).goBackTOHome()
 //        }
@@ -506,7 +506,7 @@ class PlayStatusActivity : AppCompatActivity() {
         root.pivotY = 0f
 
         ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 300L
+            duration = 100L
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener { animation ->
                 val fraction = animation.animatedFraction
@@ -537,8 +537,8 @@ class PlayStatusActivity : AppCompatActivity() {
                     root.clipToOutline = false
 
                     // Reset transforms
-                    root.scaleX = 1f
-                    root.scaleY = 1f
+                    root.scaleX = 0f
+                    root.scaleY = 0f
                     root.translationX = 0f
                     root.translationY = 0f
 
@@ -616,6 +616,8 @@ class PlayStatusActivity : AppCompatActivity() {
                 binding.captionCollapsed.visibility = View.GONE
                 binding.moreLessText.visibility = View.GONE
                 binding.captionExpanded.visibility = View.VISIBLE
+                binding.captionContainer.setBackgroundColor(Color.parseColor("#212328"))
+                pauseStory()
                 val spannable = SpannableStringBuilder(fullText)
                 val lessText = " Less"
                 spannable.append(lessText)
@@ -636,6 +638,8 @@ class PlayStatusActivity : AppCompatActivity() {
                         binding.captionExpanded.visibility = View.GONE
                         binding.captionCollapsed.visibility = View.VISIBLE
                         binding.moreLessText.visibility = View.VISIBLE
+                        binding.captionContainer.setBackgroundColor(Color.parseColor("#212328"))
+                        resumeStory()
                     }
                     override fun updateDrawState(ds: TextPaint) {
                         super.updateDrawState(ds)
@@ -657,6 +661,8 @@ class PlayStatusActivity : AppCompatActivity() {
                 binding.captionExpanded.visibility = View.GONE
                 binding.captionCollapsed.visibility = View.VISIBLE
                 binding.moreLessText.visibility = View.VISIBLE
+                binding.captionContainer.setBackgroundColor(Color.parseColor("#212328"))
+                resumeStory()
             }
         } else {
             binding.captionCollapsed.text = ""
