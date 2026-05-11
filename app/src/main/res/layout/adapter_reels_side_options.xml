@@ -13,6 +13,7 @@
         android:paddingTop="3dp"
         android:paddingBottom="7dp"
         android:layout_width="65dp"
+        android:translationZ="100dp"
         android:layout_height="wrap_content">
 
         <ImageView
@@ -22,6 +23,7 @@
             android:layout_width="32dp"
             android:scaleType="fitXY"
             android:layout_height="32dp"
+            app:tint="@color/white"
             tools:ignore="MissingConstraints" />
         <TextView
             android:includeFontPadding="false"
@@ -33,6 +35,7 @@
             android:textColor="@color/white"
             android:fontFamily="@font/manrope_semibold"
             android:textSize="13sp"
+            android:translationZ="100dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

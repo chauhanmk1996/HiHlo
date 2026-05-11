@@ -78,6 +78,7 @@
                 app:layout_constraintBottom_toTopOf="@id/muteVolumeButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:orientation="vertical"
+                android:translationZ="100dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
         <ImageView
@@ -88,7 +89,9 @@
             android:layout_marginStart="18dp"
             android:layout_marginBottom="23dp"
             android:layout_width="26dp"
-            android:layout_height="26dp"/>
+            android:layout_height="26dp"
+            app:tint="@color/white"
+            android:translationZ="100dp"/>
 
         <ImageView
             android:id="@+id/sideOptions"
@@ -98,6 +101,8 @@
             android:layout_marginBottom="50dp"
             android:scaleType="fitXY"
             android:src="@drawable/more_option"
+            app:tint="@color/white"
+            android:translationZ="100dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/sideOptionsRecycler"
             app:layout_constraintStart_toStartOf="@id/sideOptionsRecycler" />
@@ -122,13 +127,16 @@
             android:backgroundTint="@color/black_20"/>
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/userDetailsLayout"
-            android:layout_marginBottom="10dp"
-            android:layout_marginStart="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="0dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="5dp"
             android:layout_width="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="#70000000">
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/userImageCardView"
                 android:layout_width="50dp"
@@ -280,6 +288,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope_regular"
                     android:textSize="13sp"
+                    android:maxLines="4"
                     android:textColor="@color/white_FEFEFF"
                     android:visibility="gone"
                     app:layout_constraintTop_toTopOf="parent"

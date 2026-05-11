@@ -143,4 +143,15 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="FullWidthDialog2">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+    <style name="AppTheme.Cursor" parent="Base.Theme.HiHloApp">
+        <item name="colorAccent">@color/theme</item>
+    </style>
+
 </resources>

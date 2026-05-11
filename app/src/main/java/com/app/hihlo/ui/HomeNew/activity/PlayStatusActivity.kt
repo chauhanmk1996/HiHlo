@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -16,6 +17,7 @@ import android.text.Spanned
 import android.text.TextPaint
 import android.text.TextUtils
 import android.text.method.LinkMovementMethod
+import android.text.method.ScrollingMovementMethod
 import android.text.style.ClickableSpan
 import android.util.Log
 import android.view.Gravity
@@ -67,6 +69,9 @@ import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
+import com.google.android.material.shape.CornerFamily
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
@@ -597,76 +602,176 @@ class PlayStatusActivity : AppCompatActivity() {
         binding.userLocation.text = "${item.userDetail?.city ?: ""}, ${item.userDetail?.country ?: "India"}"
         Glide.with(this).load(item.userDetail.profile_image).placeholder(R.drawable.profile_placeholder).into(binding.userImage)
         if (!item.caption.isNullOrEmpty()) {
+
             val fullText = item.caption
+
             binding.captionCollapsed.text = fullText
+
             binding.captionCollapsed.maxLines = 1
             binding.captionCollapsed.ellipsize = TextUtils.TruncateAt.END
+
             binding.captionCollapsed.visibility = View.VISIBLE
             binding.captionExpanded.visibility = View.GONE
             binding.moreLessText.visibility = View.GONE
+
             binding.moreLessText.text = "More"
+
+            // CHECK TEXT TRUNCATED OR NOT
             binding.captionCollapsed.post {
+
                 val layout = binding.captionCollapsed.layout
+
                 if (layout != null) {
-                    val isTruncated = layout.lineCount > 1 || (layout.lineCount == 1 && layout.getEllipsisCount(0) > 0)
-                    binding.moreLessText.visibility = if (isTruncated) View.VISIBLE else View.GONE
+
+                    val isTruncated =
+                        layout.lineCount > 1 ||
+                                (layout.lineCount == 1 &&
+                                        layout.getEllipsisCount(0) > 0)
+
+                    binding.moreLessText.visibility =
+                        if (isTruncated) View.VISIBLE else View.GONE
                 }
             }
+
+            // MORE CLICK
             binding.moreLessText.setOnClickListener {
+
+                pauseStory()
+
                 binding.captionCollapsed.visibility = View.GONE
                 binding.moreLessText.visibility = View.GONE
                 binding.captionExpanded.visibility = View.VISIBLE
-                binding.captionContainer.setBackgroundColor(Color.parseColor("#212328"))
-                pauseStory()
+
                 val spannable = SpannableStringBuilder(fullText)
+
                 val lessText = " Less"
+
                 spannable.append(lessText)
+
+                val start = fullText.length
+                val end = spannable.length
+
+                // BOLD FONT
                 val typeface = ResourcesCompat.getFont(
                     binding.root.context,
                     R.font.manrope_bold
                 )
+
                 typeface?.let {
+
                     spannable.setSpan(
                         CustomTypefaceSpan(it),
-                        fullText.length,
-                        spannable.length,
+                        start,
+                        end,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 }
+
+                // LESS CLICKABLE
                 val clickableSpan = object : ClickableSpan() {
+
                     override fun onClick(widget: View) {
+
                         binding.captionExpanded.visibility = View.GONE
                         binding.captionCollapsed.visibility = View.VISIBLE
                         binding.moreLessText.visibility = View.VISIBLE
-                        binding.captionContainer.setBackgroundColor(Color.parseColor("#212328"))
+
                         resumeStory()
                     }
+
                     override fun updateDrawState(ds: TextPaint) {
                         super.updateDrawState(ds)
+
                         ds.isUnderlineText = false
                         ds.color = binding.root.context.getColor(R.color.theme)
-                        ds.bgColor = 0
+                        ds.bgColor = Color.TRANSPARENT
                     }
                 }
+
                 spannable.setSpan(
                     clickableSpan,
-                    fullText.length,
-                    spannable.length,
+                    start,
+                    end,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
+
                 binding.captionExpanded.text = spannable
-                binding.captionExpanded.movementMethod = LinkMovementMethod.getInstance()
+
+                binding.captionExpanded.movementMethod =
+                    ScrollingMovementMethod()
+
+                binding.captionExpanded.highlightColor =
+                    Color.TRANSPARENT
             }
-            binding.captionExpanded.setOnClickListener {
-                binding.captionExpanded.visibility = View.GONE
-                binding.captionCollapsed.visibility = View.VISIBLE
-                binding.moreLessText.visibility = View.VISIBLE
-                binding.captionContainer.setBackgroundColor(Color.parseColor("#212328"))
-                resumeStory()
+
+            // =========================================
+            // FIX CLICK + SCROLL CONFLICT
+            // =========================================
+
+            var isScrolling = false
+            var downY = 0f
+
+            binding.captionExpanded.setOnTouchListener { v, event ->
+
+                when (event.action) {
+
+                    MotionEvent.ACTION_DOWN -> {
+
+                        isScrolling = false
+                        downY = event.rawY
+                    }
+
+                    MotionEvent.ACTION_MOVE -> {
+
+                        val diff = kotlin.math.abs(event.rawY - downY)
+
+                        // finger moved => scrolling
+                        if (diff > 20) {
+                            isScrolling = true
+                        }
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+
+                        // ONLY CLICK IF NOT SCROLLING
+                        if (!isScrolling) {
+
+                            binding.captionExpanded.visibility = View.GONE
+                            binding.captionCollapsed.visibility = View.VISIBLE
+                            binding.moreLessText.visibility = View.VISIBLE
+
+                            resumeStory()
+                        }
+                    }
+                }
+
+                false
             }
+
+            // ROUNDED BACKGROUND
+            val cornerRadius = 25f.toPx(this@PlayStatusActivity)
+
+            val shapeDrawable = MaterialShapeDrawable(
+                ShapeAppearanceModel.Builder()
+                    .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
+                    .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
+                    .build()
+            )
+
+            shapeDrawable.fillColor = ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    this@PlayStatusActivity,
+                    R.color.bottom_sheet_color
+                )
+            )
+
+            binding.captionContainer.background = shapeDrawable
+
         } else {
+
             binding.captionCollapsed.text = ""
             binding.captionExpanded.text = ""
+
             binding.moreLessText.visibility = View.GONE
         }
         releasePlayer()
@@ -697,6 +802,13 @@ class PlayStatusActivity : AppCompatActivity() {
                 }
             })
         }
+    }
+
+    fun Context.dpToPx(dp: Int): Int =
+        (dp * resources.displayMetrics.density).toInt()
+
+    private fun Float.toPx(context: Context): Float {
+        return this * context.resources.displayMetrics.density
     }
 
     private fun pauseStory() {

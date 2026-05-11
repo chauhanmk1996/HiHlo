@@ -214,12 +214,36 @@
             android:layout_height="wrap_content"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
-            android:paddingTop="15dp"
+            android:paddingTop="2dp"
             android:paddingBottom="15dp"
             android:background="#212328"
             app:layout_constraintBottom_toTopOf="@id/bottomLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
+
+            <View
+                android:id="@+id/closeLine"
+                android:layout_width="40dp"
+                android:layout_height="3dp"
+                android:background="@drawable/grey_background_edittext"
+                android:backgroundTint="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/titleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/manrope_bold"
+                android:gravity="center_horizontal"
+                android:text="Caption"
+                android:textColor="@color/theme"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/closeLine" />
 
             <!-- Collapsed version -->
             <TextView
@@ -232,8 +256,8 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:visibility="visible"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/titleTextView"
                 app:layout_constraintEnd_toStartOf="@+id/moreLessText" />
 
             <!-- "More" button -->
@@ -265,9 +289,10 @@
                 android:textSize="13sp"
                 android:textColor="@color/white_FEFEFF"
                 android:visibility="gone"
-                app:layout_constraintTop_toTopOf="parent"
+                android:maxLines="10"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/titleTextView"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
