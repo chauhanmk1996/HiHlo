@@ -1,5 +1,6 @@
 package com.app.hihlo.ImageVideoConverter
 
+
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
@@ -36,6 +37,16 @@ import java.nio.ByteBuffer
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
+import android.text.Editable
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.TextWatcher
+import androidx.core.content.res.ResourcesCompat
+
+import android.text.InputFilter
+import android.text.Spanned
+import android.util.TypedValue
 
 class ImageVideoConverter : AppCompatActivity() {
 
@@ -108,6 +119,15 @@ class ImageVideoConverter : AppCompatActivity() {
         setupListeners()
         setupEditor()
         setupBackPress()
+        etInput2.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                headline_caption = s.toString()
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun initViews() {
@@ -157,6 +177,7 @@ class ImageVideoConverter : AppCompatActivity() {
         }
 
         btnDone.setOnClickListener {
+            headline_caption = etInput2.text.toString().trim()
             if (isVideoMedia) {
                 if (!isRecording) startRecordingWithTrimRange()
             } else {
@@ -209,10 +230,13 @@ class ImageVideoConverter : AppCompatActivity() {
                 videoTrimmerView.visibility = View.GONE
                 inputLayout2.visibility = View.VISIBLE
                 btnDone2.isVisible = false
-                btnDone.isVisible = true
+                btnDone.isVisible = false
                 btnText.isVisible = false
 
-                etInput2.setText(headline_caption)
+                if (etInput2.text.toString() != headline_caption) {
+                    etInput2.setText(headline_caption)
+                    etInput2.setSelection(etInput2.text.length)
+                }
                 etInput2.requestFocus()
             }
         }
@@ -319,150 +343,242 @@ class ImageVideoConverter : AppCompatActivity() {
             showFullscreenTextDialog()
         }
 
+//        tvDone2.setOnClickListener {
+//            headline_caption = etInput2.text.toString().trim()
+//            //etInput2.setText("")
+//            // Step change handled by btnDone2
+//        }
         tvDone2.setOnClickListener {
             headline_caption = etInput2.text.toString().trim()
-            etInput2.setText("")
-            // Step change handled by btnDone2
+            if (isVideoMedia) {
+                if (!isRecording) startRecordingWithTrimRange()
+            } else {
+                saveFinalImage()
+            }
         }
     }
 
-    // ==================== FULLSCREEN TEXT DIALOG (Instagram Style) ====================
-    // ==================== FIXED FULLSCREEN TEXT DIALOG ====================
+
+    // ================= showFullscreenTextDialog (Keep as is) =================
     private fun showFullscreenTextDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fullscreen_text, null)
-
-        val dialog = Dialog(this, R.style.FullWidthDialog2)
-        dialog.setContentView(dialogView)
-
-        val barColor = Color.parseColor("#212328")
-
-        dialog.window?.let { window ->
-            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            window.setBackgroundDrawableResource(android.R.color.transparent)
-
-            // Force colors
+        val dialog = Dialog(this, R.style.FullWidthDialog2).apply {
+            setContentView(dialogView)
+        }
+        val window = dialog.window
+        window?.apply {
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            setBackgroundDrawableResource(android.R.color.transparent)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.statusBarColor = barColor
-                window.navigationBarColor = barColor
-            }
-
-            // Strong fix for Android 11+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.apply {
-                    show(WindowInsets.Type.statusBars())
-                    show(WindowInsets.Type.navigationBars())
-
-                    // White icons
-                    setSystemBarsAppearance(
-                        0,
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
-                                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                    )
-
-                    systemBarsBehavior = WindowInsetsController.BEHAVIOR_DEFAULT
-                }
-            } else {
-                // Old Android
-                var flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                flags = flags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
-                flags = flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
-                window.decorView.systemUiVisibility = flags
+                statusBarColor = Color.parseColor("#000000")
+                navigationBarColor = Color.parseColor("#000000")
             }
         }
-
+        val mainRoot = dialogView.findViewById<RelativeLayout>(R.id.main_root)
         val etText = dialogView.findViewById<EditText>(R.id.etFullscreenText)
         val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
         val tvDoneDialog = dialogView.findViewById<Button>(R.id.tvDoneDialog)
-
-        editingTextView?.let {
-            etText.setText(it.text.toString())
-            etText.setSelection(it.text.length)
+        etText.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+        etText.setPadding(40, 0, 40, 0) // This keeps the cursor inside the center-drawn pills
+        etText.setTextColor(Color.WHITE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            etText.textCursorDrawable = null // Makes cursor white
         }
+        etText.setSelection(0)
+        etText.background = ContextCompat.getDrawable(this, R.drawable.status_edittext_bg)
+        etText.setTextColor(Color.WHITE)
+        etText.includeFontPadding = false
+        etText.filters = arrayOf(PillInputFilter())
+        var isEditingExisting = false
+        editingTextView?.let { originalTv ->
+            isEditingExisting = true
+            val plainText = originalTv.text.toString()
 
-        // Keyboard
+            // SETUP BEFORE SETTING TEXT
+            etText.background = null // Default background remove karein
+            etText.gravity = Gravity.CENTER // Gravity center rakhein editing ke liye
+
+            etText.setText(plainText)
+            applyRoundedSpansToEditText(etText)
+            etText.setSelection(plainText.length)
+        }
+        // Inside showFullscreenTextDialog
+        etText.addTextChangedListener(object : TextWatcher {
+            private var lastText = ""
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                lastText = s.toString()
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s == null) return
+
+                // New line handle karne ke liye: agar user ne Enter dabaya
+                if (s.length > lastText.length && s.endsWith("\n")) {
+                    etText.append("\u200B") // Temporary char for pill visibility
+                    etText.setSelection(etText.length())
+                }
+
+                // Background update karein
+                if (s.isEmpty()) {
+                    etText.background = ContextCompat.getDrawable(this@ImageVideoConverter, R.drawable.status_edittext_bg)
+                    etText.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                } else {
+                    etText.background = null
+                    etText.gravity = Gravity.CENTER
+                    applyRoundedSpansToEditText(etText)
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Agar user backspace dabakar \u200B delete kar raha hai, toh natural feel hoga
+            }
+        })
+        if (isEditingExisting) {
+            etText.post {
+                applyRoundedSpansToEditText(etText)
+            }
+        }
         dialog.setOnShowListener {
             etText.postDelayed({
                 etText.requestFocus()
-                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                if (!imm.showSoftInput(etText, InputMethodManager.SHOW_IMPLICIT)) {
-                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+                // Force selection to start ONLY if it's new text
+                if (etText.text.isEmpty()) {
+                    etText.setSelection(0)
                 }
-            }, 300)
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(etText, InputMethodManager.SHOW_IMPLICIT)
+            }, 250)
         }
-
         tvDoneDialog.setOnClickListener {
             hideKeyboard(etText)
             etText.postDelayed({
-                val text = etText.text.toString().trim()
-                if (text.isNotEmpty()) {
+                val text = etText.text
+                if (!text.isNullOrEmpty()) {
                     if (editingTextView != null) {
                         editingTextView?.text = text
                     } else {
-                        addTextOverlay(text)
+                        addTextOverlay(text.toString())
                     }
                 }
                 editingTextView = null
                 dialog.dismiss()
-            }, 100)
+            }, 150)
         }
-
+        mainRoot.setOnClickListener {
+            hideKeyboard(etText)
+            etText.postDelayed({
+                val text = etText.text
+                if (!text.isNullOrEmpty()) {
+                    if (editingTextView != null) {
+                        editingTextView?.text = text
+                    } else {
+                        addTextOverlay(text.toString())
+                    }
+                }
+                editingTextView = null
+                dialog.dismiss()
+            }, 150)
+        }
         btnClose.setOnClickListener {
             hideKeyboard(etText)
             dialog.dismiss()
         }
-
         dialog.show()
-
-        // Final Force (Most Important)
-        dialog.window?.let { window ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.statusBarColor = barColor
-                window.navigationBarColor = barColor
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.show(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-            }
-        }
     }
 
-    // Helper
-    private fun hideKeyboard(view: View) {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
+    private fun applyRoundedSpansToEditText(editText: EditText) {
+        val content = editText.text ?: return
+
+        // 1. Clear existing spans
+        val existingSpans = content.getSpans(0, content.length, RoundedBackgroundSpan::class.java)
+        for (span in existingSpans) {
+            content.removeSpan(span)
+        }
+
+        val textString = content.toString()
+        val lines = textString.split("\n")
+        var currentPos = 0
+
+        lines.forEachIndexed { index, line ->
+            val start = currentPos
+            val end = currentPos + line.length
+
+            // Agar line empty hai (sirf newline hai), toh background draw nahi hota.
+            // Hum sirf valid characters par hi span lagayenge.
+            if (start < content.length) {
+                val spanEnd = if (end > start) end else start + 1 // Kam se kam 1 char length
+
+                if (spanEnd <= content.length) {
+                    content.setSpan(
+                        RoundedBackgroundSpan(Color.parseColor("#212328"), 32f, 38f, 12f),
+                        start,
+                        spanEnd,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE // Backspace fix ke liye
+                    )
+                }
+            }
+            currentPos += line.length + 1
+        }
     }
 
     private fun addTextOverlay(text: String) {
+        val spannable = SpannableStringBuilder(text)
+        val lines = text.split("\n")
+        var currentIndex = 0
+        for (line in lines) {
+            if (line.isNotEmpty()) {
+                val start = currentIndex
+                val end = start + line.length
+                spannable.setSpan(
+                    RoundedBackgroundSpan(
+                        backgroundColor = Color.parseColor("#212328"),
+                        cornerRadius = 32f,
+                        paddingHorizontal = 38f,
+                        paddingVertical = 12f
+                    ),
+                    start,
+                    end,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            currentIndex += line.length + 1
+        }
+        val tv = TextView(this).apply {
+            this.text = spannable
+            typeface = ResourcesCompat.getFont(context, R.font.manrope_regular)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f)
+            gravity = Gravity.CENTER
+            setTextColor(Color.WHITE)
+            background = null
+            includeFontPadding = false
+            setLineSpacing(15f, 1f)
+            setPadding(0, 25, 0, 25)
+        }
         val container = FrameLayout(this).apply {
-            setPadding(40, 20, 40, 20)
+            setPadding(40, 0, 40, 0)
             isClickable = true
             isLongClickable = true
         }
-
-        val tv = TextView(this).apply {
-            this.text = text
-            typeface = androidx.core.content.res.ResourcesCompat.getFont(this@ImageVideoConverter, R.font.manrope_regular)
-            setTextColor(Color.WHITE)
-            textSize = 32f
-            gravity = Gravity.CENTER
-            background = ContextCompat.getDrawable(this@ImageVideoConverter, R.drawable.status_text_bg)
-            setPadding(48, 24, 48, 24)
-        }
-
         container.addView(tv)
-
         val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.WRAP_CONTENT
         ).apply {
             gravity = Gravity.CENTER
         }
-
         overlayContainer.addView(container, params)
         attachGesturesToView(container, isText = true)
     }
 
-    // Rest of the code (gestures, recording, etc.) remains same as your last version
-    // ... [All gesture, recording, muxing, save functions remain unchanged] ...
+    private fun hideKeyboard(view: View) {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun attachGesturesToView(view: View, isText: Boolean) {
@@ -541,12 +657,14 @@ class ImageVideoConverter : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NewApi")
     private fun getRawDistance(event: MotionEvent): Float {
         val dx = event.getRawX(0) - event.getRawX(1)
         val dy = event.getRawY(0) - event.getRawY(1)
         return hypot(dx.toDouble(), dy.toDouble()).toFloat()
     }
 
+    @SuppressLint("NewApi")
     private fun getRawAngle(event: MotionEvent): Float {
         val dx = (event.getRawX(1) - event.getRawX(0)).toDouble()
         val dy = (event.getRawY(1) - event.getRawY(0)).toDouble()
@@ -667,8 +785,8 @@ class ImageVideoConverter : AppCompatActivity() {
         }
 
         isRecording = true
-        btnDone.isEnabled = false
-        btnDone.text = "Converting"
+        tvDone2.isEnabled = false
+        tvDone2.text = "Converting"
 
         val recordingSurface = mediaRecorder!!.surface
         val choreographer = Choreographer.getInstance()
@@ -823,21 +941,21 @@ class ImageVideoConverter : AppCompatActivity() {
             savedUri = contentUri
             mediaType = "video"
 
-            btnDone.text = "Done!"
+            tvDone2.text = "Done!"
             ProcessDialog.dismissDialog(true)
             Handler(Looper.getMainLooper()).postDelayed({ finalize_data() }, 500)
         } catch (e: Exception) {
             Log.e("ImageVideoConverter", "File provider error", e)
             ProcessDialog.dismissDialog(true)
-            btnDone.isEnabled = true
-            btnDone.text = "Send"
+            tvDone2.isEnabled = true
+            tvDone2.text = "Send"
             Toast.makeText(this, "Failed to save video", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun saveFinalImage() {
         ProcessDialog.showDialog(this, true)
-        btnDone.text = "Converting"
+        tvDone2.text = "Converting"
 
         val bitmap = Bitmap.createBitmap(mediaContainer.width, mediaContainer.height, Bitmap.Config.ARGB_8888)
         Canvas(bitmap).apply {
@@ -846,13 +964,13 @@ class ImageVideoConverter : AppCompatActivity() {
         }
 
         val imageFile = File(cacheDir, "HiHlo_${System.currentTimeMillis()}.jpg")
-        FileOutputStream(imageFile).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+        FileOutputStream(imageFile).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
 
         val contentUri = FileProvider.getUriForFile(this, "${packageName}.provider", imageFile)
         savedUri = contentUri
         mediaType = "image"
 
-        btnDone.text = "Done!"
+        tvDone2.text = "Done!"
         ProcessDialog.dismissDialog(true)
         finalize_data()
     }
@@ -877,11 +995,34 @@ class ImageVideoConverter : AppCompatActivity() {
         wasPlayingBeforeBackground = false
     }
 
+    // ... your existing code ...
+
+    override fun onStop() {
+        super.onStop()
+        player?.let { wasPlayingBeforeBackground = it.isPlaying; if (it.isPlaying) it.pause() }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         progressHandler.removeCallbacksAndMessages(null)
         autoHideHandler.removeCallbacksAndMessages(null)
         player?.release()
         cleanupRecorder()
+    }
+}
+
+// ====================== INPUT FILTER FOR BETTER DELETION ======================
+
+
+class PillInputFilter : InputFilter {
+    override fun filter(
+        source: CharSequence?,
+        start: Int,
+        end: Int,
+        dest: Spanned?,
+        dstart: Int,
+        dend: Int
+    ): CharSequence? {
+        return null
     }
 }

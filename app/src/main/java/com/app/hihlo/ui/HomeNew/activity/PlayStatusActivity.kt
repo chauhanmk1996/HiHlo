@@ -556,6 +556,7 @@ class PlayStatusActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun playStory() {
         if (currentPosition !in storyList.indices) {
             finish()
@@ -605,6 +606,39 @@ class PlayStatusActivity : AppCompatActivity() {
 
             val fullText = item.caption
 
+            // =========================================
+            // BACKGROUND FUNCTION
+            // =========================================
+
+            fun setCaptionBackground(isExpanded: Boolean) {
+
+                if (isExpanded) {
+
+                    val cornerRadius = 25f.toPx(this@PlayStatusActivity)
+
+                    val shapeDrawable = MaterialShapeDrawable(
+                        ShapeAppearanceModel.Builder()
+                            .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
+                            .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
+                            .build()
+                    )
+
+                    shapeDrawable.fillColor = ColorStateList.valueOf(
+                        Color.parseColor("#70000000")
+                    )
+
+                    binding.captionContainer.background = shapeDrawable
+
+                } else {
+
+                    binding.captionContainer.setBackgroundColor(Color.TRANSPARENT)
+                }
+            }
+
+            // =========================================
+            // DEFAULT COLLAPSED STATE
+            // =========================================
+
             binding.captionCollapsed.text = fullText
 
             binding.captionCollapsed.maxLines = 1
@@ -616,7 +650,13 @@ class PlayStatusActivity : AppCompatActivity() {
 
             binding.moreLessText.text = "More"
 
+            // TRANSPARENT BACKGROUND IN COLLAPSED
+            setCaptionBackground(false)
+
+            // =========================================
             // CHECK TEXT TRUNCATED OR NOT
+            // =========================================
+
             binding.captionCollapsed.post {
 
                 val layout = binding.captionCollapsed.layout
@@ -633,10 +673,16 @@ class PlayStatusActivity : AppCompatActivity() {
                 }
             }
 
+            // =========================================
             // MORE CLICK
+            // =========================================
+
             binding.moreLessText.setOnClickListener {
 
                 pauseStory()
+
+                // EXPANDED BACKGROUND
+                setCaptionBackground(true)
 
                 binding.captionCollapsed.visibility = View.GONE
                 binding.moreLessText.visibility = View.GONE
@@ -675,6 +721,9 @@ class PlayStatusActivity : AppCompatActivity() {
                         binding.captionExpanded.visibility = View.GONE
                         binding.captionCollapsed.visibility = View.VISIBLE
                         binding.moreLessText.visibility = View.VISIBLE
+
+                        // COLLAPSED BACKGROUND
+                        setCaptionBackground(false)
 
                         resumeStory()
                     }
@@ -740,6 +789,9 @@ class PlayStatusActivity : AppCompatActivity() {
                             binding.captionCollapsed.visibility = View.VISIBLE
                             binding.moreLessText.visibility = View.VISIBLE
 
+                            // COLLAPSED BACKGROUND
+                            setCaptionBackground(false)
+
                             resumeStory()
                         }
                     }
@@ -748,31 +800,14 @@ class PlayStatusActivity : AppCompatActivity() {
                 false
             }
 
-            // ROUNDED BACKGROUND
-            val cornerRadius = 25f.toPx(this@PlayStatusActivity)
-
-            val shapeDrawable = MaterialShapeDrawable(
-                ShapeAppearanceModel.Builder()
-                    .setTopLeftCorner(CornerFamily.ROUNDED, cornerRadius)
-                    .setTopRightCorner(CornerFamily.ROUNDED, cornerRadius)
-                    .build()
-            )
-
-            shapeDrawable.fillColor = ColorStateList.valueOf(
-                ContextCompat.getColor(
-                    this@PlayStatusActivity,
-                    R.color.bottom_sheet_color
-                )
-            )
-
-            binding.captionContainer.background = shapeDrawable
-
         } else {
 
             binding.captionCollapsed.text = ""
             binding.captionExpanded.text = ""
 
             binding.moreLessText.visibility = View.GONE
+
+            binding.captionContainer.setBackgroundColor(Color.TRANSPARENT)
         }
         releasePlayer()
         handler.removeCallbacks(imageRunnable)

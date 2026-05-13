@@ -46,6 +46,14 @@ class PostsAdapter(
 //        setHasStableIds(true)
 //    }
 
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun getItemId(position: Int): Long {
+        return postsList.getOrNull(position)?.id?.toLong() ?: RecyclerView.NO_ID
+    }
+
     enum class PostClickAction {
         LIKE,
         UNLIKE,

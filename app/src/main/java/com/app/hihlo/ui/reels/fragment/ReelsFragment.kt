@@ -275,10 +275,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 hitGetReelsApi(currentPage)
                 setReelsAdapterPagination()
             }
-        }
-        if (from == "profile") {
-
-        }else{
             Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
             if(RTVariable.IS_REELS_LOADED){
                 Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
@@ -294,6 +290,9 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 //binding.viewPager.currentItem = reelPosition.toInt()
             }
         }
+//        if (from != "profile") {
+//
+//        }
         viewModel.hitCoinDetailsApi(
             "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                 requireContext(),

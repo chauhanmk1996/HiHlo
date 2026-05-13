@@ -1,23 +1,24 @@
 <!-- dialog_fullscreen_text.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingTop="10dp"
-    android:background="@color/bottom_sheet_color">
+    android:id="@+id/main_root"
+    android:background="#20000000"
+    android:fitsSystemWindows="true"
+    android:paddingTop="10dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/btnClose"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
             android:padding="20dp"
             android:src="@drawable/back_button_pink" />
 
@@ -25,20 +26,19 @@
             android:id="@+id/tvDoneDialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:layout_margin="16dp"
-            android:background="@drawable/btn_background"
+            android:background="@drawable/btn_status_bk"
             android:backgroundTint="#008000"
             android:text="Done"
-            android:textSize="15sp"
             android:textAllCaps="false"
-            android:fontFamily="@font/manrope_semibold"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:fontFamily="@font/manrope_semibold" />
 
     </RelativeLayout>
 
-    <!-- Centered EditText Area -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -46,20 +46,25 @@
         <EditText
             android:id="@+id/etFullscreenText"
             android:theme="@style/AppTheme.Cursor"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@null"
-            android:textColor="@android:color/white"
-            android:textSize="32sp"
-            android:fontFamily="@font/manrope_regular"
+            android:background="@drawable/status_edittext_bg"
             android:gravity="center"
             android:hint="Type something..."
-            android:textColorHint="#88FFFFFF"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
             android:inputType="textCapSentences|textMultiLine"
-            android:maxLines="12"
-            android:padding="40dp"
-            android:lineSpacingExtra="12dp" />
+            android:minHeight="0dp"
+            android:paddingStart="48px"
+            android:paddingTop="24px"
+            android:paddingEnd="48px"
+            android:paddingBottom="24px"
+            android:textColor="@android:color/white"
+            android:textColorHint="#88FFFFFF"
+            android:textSize="25sp"
+            android:fontFamily="@font/manrope_regular"
+            tools:ignore="PxUsage" />
 
     </RelativeLayout>
 

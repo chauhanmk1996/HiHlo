@@ -48,7 +48,7 @@
         android:layout_gravity="bottom"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="80dp"
         android:layout_marginTop="8dp" />
 
     <!-- Removed inputLayout (bottom text input) -->
@@ -58,17 +58,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="#CC000000"
-        android:orientation="horizontal"
-        android:padding="10dp"
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
         android:visibility="gone">
 
         <EditText
             android:id="@+id/etInput2"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:theme="@style/AppTheme.Cursor"
+            android:background="#50000000"
             android:hint="Write Caption..."
             android:textColor="@android:color/white"
             android:textColorHint="#AAAAAA"
@@ -76,18 +75,26 @@
             android:textSize="15sp"
             android:fontFamily="@font/manrope_regular"
             android:inputType="textCapSentences|textMultiLine"
-            android:padding="10dp" />
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
 
         <TextView
             android:id="@+id/tvDone2"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:gravity="center"
             android:padding="10dp"
-            android:text="↑ Caption"
+            android:text="Share"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:textSize="15sp"
             android:fontFamily="@font/manrope_semibold"
-            android:background="@drawable/btn_background"
+            android:background="@drawable/btn_status_bk"
+            android:backgroundTint="#008000"
             android:textColor="@color/white"
             android:textStyle="bold" />
 
@@ -97,18 +104,19 @@
         android:id="@+id/btnText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="12dp"
-        android:layout_marginEnd="20dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
         android:text="&#xFF0B; Text"
         android:textAllCaps="false"
         android:textSize="15sp"
-        android:background="@drawable/btn_background"
+        android:background="@drawable/btn_status_bk"
+        android:backgroundTint="#3D6BFF"
         android:fontFamily="@font/manrope_semibold"
         android:textColor="@android:color/white"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnDone"
@@ -116,7 +124,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_margin="16dp"
-        android:background="@drawable/btn_background"
+        android:background="@drawable/btn_status_bk"
         android:backgroundTint="#008000"
         android:text="Done"
         android:paddingStart="10dp"
@@ -131,9 +139,9 @@
         android:id="@+id/btnDone2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:background="@drawable/btn_background"
+        android:background="@drawable/btn_status_bk"
         android:backgroundTint="#008000"
         android:text="Next"
         android:textSize="15sp"

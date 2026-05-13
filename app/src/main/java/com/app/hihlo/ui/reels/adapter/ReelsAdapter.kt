@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.reels.adapter
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextPaint
@@ -221,6 +222,8 @@ class ReelAdapter(
                     }
                 }
                 moreLessText.setOnClickListener {
+                    //userDetailsLayout.setBackgroundColor(Color.parseColor("#70000000"))
+                    shadowLayerLayout.isVisible = true
                     captionCollapsed.visibility = View.GONE
                     moreLessText.visibility = View.GONE
                     captionExpanded.visibility = View.VISIBLE
@@ -241,6 +244,8 @@ class ReelAdapter(
                     }
                     val clickableSpan = object : ClickableSpan() {
                         override fun onClick(widget: View) {
+                            //userDetailsLayout.setBackgroundColor(Color.TRANSPARENT)
+                            shadowLayerLayout.isVisible = false
                             captionExpanded.visibility = View.GONE
                             captionCollapsed.visibility = View.VISIBLE
                             moreLessText.visibility = View.VISIBLE
@@ -262,6 +267,8 @@ class ReelAdapter(
                     captionExpanded.movementMethod = LinkMovementMethod.getInstance()
                 }
                 captionExpanded.setOnClickListener {
+                    //userDetailsLayout.setBackgroundColor(Color.TRANSPARENT)
+                    shadowLayerLayout.isVisible = false
                     captionExpanded.visibility = View.GONE
                     captionCollapsed.visibility = View.VISIBLE
                     moreLessText.visibility = View.VISIBLE

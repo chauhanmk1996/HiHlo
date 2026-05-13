@@ -667,6 +667,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                 }
                 R.id.homeNewFragment -> {
                     binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_selected)
+                    binding.bottomNavigationView.menu.findItem(R.id.chat).icon = ContextCompat.getDrawable(this, R.drawable.chat_icon)
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     showNavigationView()
                     setBottomBarPadding()
