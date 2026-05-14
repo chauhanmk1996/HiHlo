@@ -29,6 +29,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -116,6 +117,7 @@ class PlayStatusActivity : AppCompatActivity() {
     private val HOLD_MOVE_THRESHOLD_DP = 50f
     private var isHoldPause = false   // 🔥 NEW: distinguishes hold pause from other pauses
     private var isDismissing = false
+    private var wasMutedBeforeBackground = false
 
     private val imageRunnable = Runnable { playNext() }
     private val progressRunnable = object : Runnable {
@@ -211,6 +213,9 @@ class PlayStatusActivity : AppCompatActivity() {
                 resumeStory()
             }
             true
+        }
+        binding.btnMuteUnmute.setOnClickListener {
+            player?.let { exoPlayer -> checkVolume(exoPlayer, binding.btnMuteUnmute) }
         }
         playStory()
         setObserver()
@@ -313,6 +318,19 @@ class PlayStatusActivity : AppCompatActivity() {
 //                finish()
 //            }
 //        })
+    }
+
+    private fun checkVolume(exoPlayer: ExoPlayer, muteVolumeButton: ImageView) {
+        val isCurrentlyMuted = exoPlayer.volume == 0f
+        if (isCurrentlyMuted) {
+            exoPlayer.volume = 1f
+            wasMutedBeforeBackground = false
+            muteVolumeButton.setImageResource(R.drawable.volume_mute)
+        } else {
+            exoPlayer.volume = 0f
+            wasMutedBeforeBackground = true
+            muteVolumeButton.setImageResource(R.drawable.volume_unmute)
+        }
     }
 
     private fun handleSideTouch(event: MotionEvent, v: View, isRight: Boolean, holdMovePx: Float): Boolean {
@@ -596,6 +614,11 @@ class PlayStatusActivity : AppCompatActivity() {
             FTIME = CommonUtils.getTimeAgo(item.created_at)
         }else{
             FTIME = CommonUtils.getTimeAgo(item.created_at) + " ago"
+        }
+        if(item.asset_type.equals("V")){
+            binding.btnMuteUnmute.isVisible = true
+        }else{
+            binding.btnMuteUnmute.isVisible = false
         }
         //Log.e("TIMER", "TIMER>>> CONVERTED TIME "+CommonUtils.getTimeAgo(item.created_at))
         binding.statusTime.text = if (!item.created_at.isNullOrEmpty()) FTIME else ""
@@ -882,6 +905,13 @@ class PlayStatusActivity : AppCompatActivity() {
             currentPosition = storyList.size - 1
             finish()
         } else playStory()
+        if (wasMutedBeforeBackground) {
+            player?.volume = 0f
+            binding.btnMuteUnmute.setImageResource(R.drawable.volume_unmute)
+        } else {
+            player?.volume = 1f
+            binding.btnMuteUnmute.setImageResource(R.drawable.volume_mute)
+        }
     }
 
     private fun playPrevious() {
@@ -895,6 +925,13 @@ class PlayStatusActivity : AppCompatActivity() {
         else {
             currentPosition--
             playStory()
+        }
+        if (wasMutedBeforeBackground) {
+            player?.volume = 0f
+            binding.btnMuteUnmute.setImageResource(R.drawable.volume_unmute)
+        } else {
+            player?.volume = 1f
+            binding.btnMuteUnmute.setImageResource(R.drawable.volume_mute)
         }
     }
 
@@ -920,16 +957,28 @@ class PlayStatusActivity : AppCompatActivity() {
     }
     private fun releasePlayer() { player?.release(); player = null }
 
-    override fun onPause() { super.onPause(); player?.pause() }
+    override fun onPause() {
+        super.onPause();
+        player?.pause()
+        wasMutedBeforeBackground = player?.volume == 0f
+    }
     override fun onStop() {
         super.onStop()
         player?.pause()
+        wasMutedBeforeBackground = player?.volume == 0f
     }
     override fun onResume() {
         super.onResume()
 //        RTVariable.IS_STATUS_VIEWER_FINISHED = true
 //        RTVariable.IS_STATUS_PROFILE_CLICKED = true
         player?.play()
+        if (wasMutedBeforeBackground) {
+            player?.volume = 0f
+            binding.btnMuteUnmute.setImageResource(R.drawable.volume_unmute)
+        } else {
+            player?.volume = 1f
+            binding.btnMuteUnmute.setImageResource(R.drawable.volume_mute)
+        }
     }
     override fun onDestroy() {
         super.onDestroy()

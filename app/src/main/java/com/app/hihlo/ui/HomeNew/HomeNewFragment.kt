@@ -6,7 +6,10 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -17,15 +20,21 @@ import android.os.Looper
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -82,10 +91,12 @@ import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
+import com.app.hihlo.utils.Utils
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.model.AspectRatio
@@ -1711,11 +1722,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             requireActivity().overridePendingTransition(R.anim.slide_up, 0)
         }
         if(option==3){
-            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-                ReusablePopup(
-                    context = requireContext(),
-                    anchorView = itemView,
-                    onOption1Click = {
+            ReusablePopup(
+                context = requireContext(),
+                anchorView = itemView,
+                onOption1Click = {
+                    if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                         RTVariable.SELECT_OPTION = true
 //                        checkGalleryPermissionAndPick()
 //                        val intent = Intent(requireContext(), FilePickerStatus::class.java)
@@ -1741,8 +1752,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             parentFragmentManager,   // or childFragmentManager, depending on where you are
                             "FilePickerBottomSheet"
                         )
-                    },
-                    onOption2Click = {
+                    }else{
+                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                        //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onOption2Click = {
+                    if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                         RTVariable.SELECT_OPTION = false
                         selectedBottomSheetType = "Image"   // still needed for title/API logic
 
@@ -1762,8 +1778,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         }
                         bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
                         //checkGalleryPermissionAndPick2("I")
-                    },
-                    onOption3Click = {
+                    }else{
+                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                        //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onOption3Click = {
+                    if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
                         RTVariable.SELECT_OPTION = false
                         selectedBottomSheetType = "Video"   // must match what AddReelFragment expects
 
@@ -1777,20 +1798,21 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         }
                         bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                         //checkGalleryPermissionAndPick2("V")
-                    },
-                    //onOption4Click = {},
-                    option1Text = "Upload Status",
-                    option2Text = "Upload Photo",
-                    option3Text = "Upload Video",
-                    //option4Text = "Cancel",
-                    option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
-                    option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-                    option3ImageRes = R.drawable.icon_over_video,
-                    //option4ImageRes = R.drawable.ic_cancel_red
-                ).show()
-            }else{
-                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
-            }
+                    }else{
+                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                        //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                //onOption4Click = {},
+                option1Text = "Upload Status",
+                option2Text = "Upload Post",
+                option3Text = "Upload Video",
+                //option4Text = "Cancel",
+                option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
+                option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
+                option3ImageRes = R.drawable.icon_over_video,
+                //option4ImageRes = R.drawable.ic_cancel_red
+            ).show()
         }
     }
 

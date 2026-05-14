@@ -230,6 +230,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         targetPosition = UserDataManager.getReelsPosition(requireContext())
         Log.e("TAG", "initView: reelPosition " + targetPosition)
         from = args?.from ?: "home"
+        RTVariable.REELS_FROM = from
         Log.i("TAG", "initView: reelPosition " + reelPosition)
         Log.i("TAG", "updatedreelsize: " + targetPosition)
 
@@ -243,14 +244,14 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
         //reelPosition = targetPosition.toString()
         Log.i("TAG", "initView: reelPosition A " + reelPosition)
-        if (from == "profile") {
+        if (RTVariable.REELS_FROM == "profile") {
             RTVariable.reelsCache = args?.reels?.reels ?: mutableListOf()
         }
         viewModel2.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
         exoPlayer = ExoPlayer.Builder(requireContext()).build()
         Log.i("TAG", "initView: " + RTVariable.reelsCache)
-        Log.i("TAG", "initView: " + from)
-        if (from == "profile") {
+        Log.i("TAG", "initView: " + RTVariable.REELS_FROM)
+        if (RTVariable.REELS_FROM == "profile") {
             binding.swipeRefresh.isEnabled = false
             viewPagerAdapter(mutableListOf())
             adapter.updateList(RTVariable.reelsCache)

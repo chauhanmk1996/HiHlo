@@ -83,7 +83,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.titleTextView.text = "Choose Video"
+        binding.titleTextView.text = "New Video"
         recyclerView = binding.recyclerView
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 

@@ -33,7 +33,7 @@
             android:layout_marginTop="5dp"
             android:fontFamily="@font/manrope_bold"
             android:gravity="center_horizontal"
-            android:text="Choose Media"
+            android:text="New Status"
             android:textColor="@color/theme"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"

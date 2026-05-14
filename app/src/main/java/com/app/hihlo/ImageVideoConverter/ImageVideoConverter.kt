@@ -1,6 +1,5 @@
 package com.app.hihlo.ImageVideoConverter
 
-
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
@@ -12,22 +11,25 @@ import android.graphics.SurfaceTexture
 import android.media.*
 import android.net.Uri
 import android.os.*
+import android.text.*
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.app.hihlo.R
+import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.bumptech.glide.Glide
 import ja.burhanrashid52.photoeditor.PhotoEditorView
@@ -37,16 +39,6 @@ import java.nio.ByteBuffer
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
-import android.text.Editable
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.TextWatcher
-import androidx.core.content.res.ResourcesCompat
-
-import android.text.InputFilter
-import android.text.Spanned
-import android.util.TypedValue
 
 class ImageVideoConverter : AppCompatActivity() {
 
@@ -65,6 +57,7 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var ivBack: ImageView
     private lateinit var videoTrimmerView: VideoTrimmerView
     private lateinit var btnPlayPause: ImageView
+    private lateinit var btnMuteUnmute: ImageView
     private lateinit var rotationTooltip: TextView
 
     private var player: ExoPlayer? = null
@@ -94,6 +87,14 @@ class ImageVideoConverter : AppCompatActivity() {
     private val autoHideRunnable = Runnable { hidePlayPauseButton() }
     private val autoHideDelayMs = 5000L
     private var wasPlayingBeforeBackground = false
+    private var wasMutedBeforeBackground = false
+
+    private var defaultMuteButtonMarginDp = 125
+    private var currentLineCount = 1
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+
+    // Flag to avoid starting recording multiple times
+    private var recordingTriggered = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,11 +122,9 @@ class ImageVideoConverter : AppCompatActivity() {
         setupBackPress()
         etInput2.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 headline_caption = s.toString()
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }
@@ -145,8 +144,8 @@ class ImageVideoConverter : AppCompatActivity() {
         ivBack = findViewById(R.id.ivBack)
         videoTrimmerView = findViewById(R.id.videoTrimmerView)
         btnPlayPause = findViewById(R.id.btnPlayPause)
-
-        //mediaContainer.addView(videoTextureView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        btnMuteUnmute = findViewById(R.id.btnMuteUnmute)
+        mediaContainer.addView(videoTextureView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
     }
 
     private fun setupRotationTooltip() {
@@ -155,7 +154,7 @@ class ImageVideoConverter : AppCompatActivity() {
             setTextColor(Color.BLACK)
             textSize = 14f
             gravity = Gravity.CENTER
-            typeface = androidx.core.content.res.ResourcesCompat.getFont(this@ImageVideoConverter, R.font.manrope_semibold)
+            typeface = ResourcesCompat.getFont(this@ImageVideoConverter, R.font.manrope_semibold)
             visibility = View.GONE
             setPadding(32, 8, 32, 8)
             layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
@@ -179,7 +178,7 @@ class ImageVideoConverter : AppCompatActivity() {
         btnDone.setOnClickListener {
             headline_caption = etInput2.text.toString().trim()
             if (isVideoMedia) {
-                if (!isRecording) startRecordingWithTrimRange()
+                if (!isRecording && !recordingTriggered) startRecordingWithTrimRange()
             } else {
                 saveFinalImage()
             }
@@ -188,6 +187,9 @@ class ImageVideoConverter : AppCompatActivity() {
         ivBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         btnPlayPause.setOnClickListener { togglePlayback() }
         playerView.setOnClickListener { togglePlayback() }
+        btnMuteUnmute.setOnClickListener {
+            player?.let { exoPlayer -> checkVolume(exoPlayer, btnMuteUnmute) }
+        }
     }
 
     private fun togglePlayback() {
@@ -218,6 +220,11 @@ class ImageVideoConverter : AppCompatActivity() {
                 btnDone2.isVisible = true
                 btnDone.isVisible = false
                 btnText.isVisible = false
+                val params = btnMuteUnmute.layoutParams as ViewGroup.MarginLayoutParams
+                val marginBottomDp = 170
+                val marginBottomPx = (marginBottomDp * resources.displayMetrics.density).toInt()
+                params.bottomMargin = marginBottomPx
+                btnMuteUnmute.layoutParams = params
             }
             MediaStep.TEXT_OVERLAY -> {
                 videoTrimmerView.visibility = View.GONE
@@ -225,6 +232,11 @@ class ImageVideoConverter : AppCompatActivity() {
                 btnDone2.isVisible = true
                 btnDone.isVisible = false
                 btnText.isVisible = true
+                val params = btnMuteUnmute.layoutParams as ViewGroup.MarginLayoutParams
+                val marginBottomDp = 80
+                val marginBottomPx = (marginBottomDp * resources.displayMetrics.density).toInt()
+                params.bottomMargin = marginBottomPx
+                btnMuteUnmute.layoutParams = params
             }
             MediaStep.HEADLINE -> {
                 videoTrimmerView.visibility = View.GONE
@@ -232,15 +244,38 @@ class ImageVideoConverter : AppCompatActivity() {
                 btnDone2.isVisible = false
                 btnDone.isVisible = false
                 btnText.isVisible = false
-
                 if (etInput2.text.toString() != headline_caption) {
                     etInput2.setText(headline_caption)
                     etInput2.setSelection(etInput2.text.length)
                 }
                 etInput2.requestFocus()
+                updateMuteButtonMargin(defaultMuteButtonMarginDp)
+                setupEtInput2HeightListener()
             }
         }
         showPlayPauseButton()
+    }
+
+    private fun setupEtInput2HeightListener() {
+        etInput2.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+
+        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val newLineCount = etInput2.lineCount
+            if (newLineCount != currentLineCount && currentStep == MediaStep.HEADLINE) {
+                currentLineCount = newLineCount.coerceIn(1, 3)
+                val extraMarginDp = (currentLineCount - 1) * 25
+                val newMarginDp = defaultMuteButtonMarginDp + extraMarginDp
+                updateMuteButtonMargin(newMarginDp)
+            }
+        }
+        etInput2.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+    }
+
+    private fun updateMuteButtonMargin(marginDp: Int) {
+        val params = btnMuteUnmute.layoutParams as ViewGroup.MarginLayoutParams
+        val marginPx = (marginDp * resources.displayMetrics.density).toInt()
+        params.bottomMargin = marginPx
+        btnMuteUnmute.layoutParams = params
     }
 
     private fun showPlayPauseButton() {
@@ -259,6 +294,7 @@ class ImageVideoConverter : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupVideo(uri: String) {
+        btnMuteUnmute.isVisible = true
         photoEditorView.visibility = View.GONE
         playerView.visibility = View.VISIBLE
         player = ExoPlayer.Builder(this).build()
@@ -267,12 +303,6 @@ class ImageVideoConverter : AppCompatActivity() {
         player?.setMediaItem(MediaItem.fromUri(Uri.parse(uri)))
         player?.prepare()
         player?.play()
-//        playerView.setOnTouchListener { _, event ->
-//            if (event.action == MotionEvent.ACTION_DOWN && isVideoMedia) {
-//                showPlayPauseButton()
-//            }
-//            false   // let the player handle the touch normally
-//        }
         originalVideoDurationMs = getVideoDuration(uri)
         videoTrimmerView.setVideoUri(Uri.parse(uri), originalVideoDurationMs)
         trimStartMs = 0L
@@ -294,7 +324,6 @@ class ImageVideoConverter : AppCompatActivity() {
                 }
             }
         })
-
         startProgressLoop()
         attachGesturesToView(playerView, isText = false)
     }
@@ -328,13 +357,26 @@ class ImageVideoConverter : AppCompatActivity() {
     }
 
     private fun setupImage(uri: String) {
+        btnMuteUnmute.isVisible = false
         photoEditorView.visibility = View.VISIBLE
         playerView.visibility = View.GONE
         videoTextureView.visibility = View.GONE
         videoTrimmerView.visibility = View.GONE
-
         Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
         attachGesturesToView(photoEditorView, isText = false)
+    }
+
+    private fun checkVolume(exoPlayer: ExoPlayer, muteVolumeButton: ImageView) {
+        val isCurrentlyMuted = exoPlayer.volume == 0f
+        if (isCurrentlyMuted) {
+            exoPlayer.volume = 1f
+            wasMutedBeforeBackground = false
+            muteVolumeButton.setImageResource(R.drawable.volume_mute)
+        } else {
+            exoPlayer.volume = 0f
+            wasMutedBeforeBackground = true
+            muteVolumeButton.setImageResource(R.drawable.volume_unmute)
+        }
     }
 
     private fun setupEditor() {
@@ -342,24 +384,16 @@ class ImageVideoConverter : AppCompatActivity() {
             editingTextView = null
             showFullscreenTextDialog()
         }
-
-//        tvDone2.setOnClickListener {
-//            headline_caption = etInput2.text.toString().trim()
-//            //etInput2.setText("")
-//            // Step change handled by btnDone2
-//        }
         tvDone2.setOnClickListener {
             headline_caption = etInput2.text.toString().trim()
             if (isVideoMedia) {
-                if (!isRecording) startRecordingWithTrimRange()
+                if (!isRecording && !recordingTriggered) startRecordingWithTrimRange()
             } else {
                 saveFinalImage()
             }
         }
     }
 
-
-    // ================= showFullscreenTextDialog (Keep as is) =================
     private fun showFullscreenTextDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fullscreen_text, null)
         val dialog = Dialog(this, R.style.FullWidthDialog2).apply {
@@ -379,10 +413,10 @@ class ImageVideoConverter : AppCompatActivity() {
         val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
         val tvDoneDialog = dialogView.findViewById<Button>(R.id.tvDoneDialog)
         etText.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-        etText.setPadding(40, 0, 40, 0) // This keeps the cursor inside the center-drawn pills
+        etText.setPadding(40, 0, 40, 0)
         etText.setTextColor(Color.WHITE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            etText.textCursorDrawable = null // Makes cursor white
+            etText.textCursorDrawable = null
         }
         etText.setSelection(0)
         etText.background = ContextCompat.getDrawable(this, R.drawable.status_edittext_bg)
@@ -393,33 +427,23 @@ class ImageVideoConverter : AppCompatActivity() {
         editingTextView?.let { originalTv ->
             isEditingExisting = true
             val plainText = originalTv.text.toString()
-
-            // SETUP BEFORE SETTING TEXT
-            etText.background = null // Default background remove karein
-            etText.gravity = Gravity.CENTER // Gravity center rakhein editing ke liye
-
+            etText.background = null
+            etText.gravity = Gravity.CENTER
             etText.setText(plainText)
             applyRoundedSpansToEditText(etText)
             etText.setSelection(plainText.length)
         }
-        // Inside showFullscreenTextDialog
         etText.addTextChangedListener(object : TextWatcher {
             private var lastText = ""
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 lastText = s.toString()
             }
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s == null) return
-
-                // New line handle karne ke liye: agar user ne Enter dabaya
                 if (s.length > lastText.length && s.endsWith("\n")) {
-                    etText.append("\u200B") // Temporary char for pill visibility
+                    etText.append("\u200B")
                     etText.setSelection(etText.length())
                 }
-
-                // Background update karein
                 if (s.isEmpty()) {
                     etText.background = ContextCompat.getDrawable(this@ImageVideoConverter, R.drawable.status_edittext_bg)
                     etText.gravity = Gravity.START or Gravity.CENTER_VERTICAL
@@ -429,20 +453,14 @@ class ImageVideoConverter : AppCompatActivity() {
                     applyRoundedSpansToEditText(etText)
                 }
             }
-
-            override fun afterTextChanged(s: Editable?) {
-                // Agar user backspace dabakar \u200B delete kar raha hai, toh natural feel hoga
-            }
+            override fun afterTextChanged(s: Editable?) {}
         })
         if (isEditingExisting) {
-            etText.post {
-                applyRoundedSpansToEditText(etText)
-            }
+            etText.post { applyRoundedSpansToEditText(etText) }
         }
         dialog.setOnShowListener {
             etText.postDelayed({
                 etText.requestFocus()
-                // Force selection to start ONLY if it's new text
                 if (etText.text.isEmpty()) {
                     etText.setSelection(0)
                 }
@@ -493,32 +511,24 @@ class ImageVideoConverter : AppCompatActivity() {
 
     private fun applyRoundedSpansToEditText(editText: EditText) {
         val content = editText.text ?: return
-
-        // 1. Clear existing spans
         val existingSpans = content.getSpans(0, content.length, RoundedBackgroundSpan::class.java)
         for (span in existingSpans) {
             content.removeSpan(span)
         }
-
         val textString = content.toString()
         val lines = textString.split("\n")
         var currentPos = 0
-
         lines.forEachIndexed { index, line ->
             val start = currentPos
             val end = currentPos + line.length
-
-            // Agar line empty hai (sirf newline hai), toh background draw nahi hota.
-            // Hum sirf valid characters par hi span lagayenge.
             if (start < content.length) {
-                val spanEnd = if (end > start) end else start + 1 // Kam se kam 1 char length
-
+                val spanEnd = if (end > start) end else start + 1
                 if (spanEnd <= content.length) {
                     content.setSpan(
                         RoundedBackgroundSpan(Color.parseColor("#212328"), 32f, 38f, 12f),
                         start,
                         spanEnd,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE // Backspace fix ke liye
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 }
             }
@@ -592,15 +602,15 @@ class ImageVideoConverter : AppCompatActivity() {
         var initialRotation = 0f
         var initialDistance = 0f
         var initialAngle = 0f
-
-        val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onLongPress(e: MotionEvent) {
-                if (isText) showDeleteMenu(view)
-            }
-        })
-
+        var potentialLongClick: Runnable? = null
+        val longPressHandler = Handler(Looper.getMainLooper())
+        val longPressDelay = ViewConfiguration.getLongPressTimeout().toLong()
+        val touchSlop = ViewConfiguration.get(this@ImageVideoConverter).scaledTouchSlop
+        var downTime = 0L
+        var downX = 0f
+        var downY = 0f
+        var longClickTriggered = false
         view.setOnTouchListener { v, event ->
-            gestureDetector.onTouchEvent(event)
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     if (!isText) showPlayPauseButton()
@@ -609,22 +619,34 @@ class ImageVideoConverter : AppCompatActivity() {
                     initialY = event.rawY
                     initialTranslationX = v.translationX
                     initialTranslationY = v.translationY
-                    if (isText) v.bringToFront()
+                    if (isText) {
+                        v.bringToFront()
+                        downTime = SystemClock.uptimeMillis()
+                        downX = event.rawX
+                        downY = event.rawY
+                        longClickTriggered = false
+                        // Schedule a long-press check
+                        potentialLongClick = Runnable {
+                            if (!longClickTriggered) {
+                                longClickTriggered = true
+                                showDeleteMenu(v)
+                            }
+                        }
+                        longPressHandler.postDelayed(potentialLongClick!!, longPressDelay)
+                    }
                     hideRotationTooltip()
                     true
                 }
-                MotionEvent.ACTION_POINTER_DOWN -> {
-                    if (event.pointerCount == 2) {
-                        mode = 2
-                        initialDistance = getRawDistance(event)
-                        initialAngle = getRawAngle(event)
-                        initialScaleX = v.scaleX
-                        initialScaleY = v.scaleY
-                        initialRotation = v.rotation
-                    }
-                    true
-                }
                 MotionEvent.ACTION_MOVE -> {
+                    if (isText && !longClickTriggered && potentialLongClick != null) {
+                        val dx = abs(event.rawX - downX)
+                        val dy = abs(event.rawY - downY)
+                        if (dx > touchSlop || dy > touchSlop) {
+                            // Movement exceeded slop → cancel long press
+                            longPressHandler.removeCallbacks(potentialLongClick!!)
+                            potentialLongClick = null
+                        }
+                    }
                     when (mode) {
                         1 -> {
                             v.translationX = initialTranslationX + (event.rawX - initialX)
@@ -638,7 +660,6 @@ class ImageVideoConverter : AppCompatActivity() {
                                 v.scaleX = initialScaleX * scaleFactor
                                 v.scaleY = initialScaleY * scaleFactor
                                 v.rotation = initialRotation + (currentAngle - initialAngle)
-
                                 if (abs(currentAngle - initialAngle) > 0.5f) {
                                     showRotationTooltip(v, v.rotation)
                                 }
@@ -647,7 +668,36 @@ class ImageVideoConverter : AppCompatActivity() {
                     }
                     true
                 }
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    if (isText) {
+                        // Cancel long press on second finger
+                        longPressHandler.removeCallbacks(potentialLongClick ?: return@setOnTouchListener true)
+                        potentialLongClick = null
+                    }
+                    if (event.pointerCount == 2) {
+                        mode = 2
+                        initialDistance = getRawDistance(event)
+                        initialAngle = getRawAngle(event)
+                        initialScaleX = v.scaleX
+                        initialScaleY = v.scaleY
+                        initialRotation = v.rotation
+                    }
+                    true
+                }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                    if (isText) {
+                        longPressHandler.removeCallbacks(potentialLongClick ?: return@setOnTouchListener true)
+                        potentialLongClick = null
+                    }
+                    mode = 0
+                    hideRotationTooltip()
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    if (isText) {
+                        longPressHandler.removeCallbacks(potentialLongClick ?: return@setOnTouchListener true)
+                        potentialLongClick = null
+                    }
                     mode = 0
                     hideRotationTooltip()
                     true
@@ -679,11 +729,11 @@ class ImageVideoConverter : AppCompatActivity() {
             setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.BLACK))
             setAdapter(MenuAdapter(this@ImageVideoConverter, items))
             setOnItemClickListener { _, _, position, _ ->
-                if (position == 0) { // Edit
+                if (position == 0) {
                     val tv = (view as? ViewGroup)?.getChildAt(0) as? TextView
                     editingTextView = tv
                     showFullscreenTextDialog()
-                } else { // Delete
+                } else {
                     overlayContainer.removeView(view)
                 }
                 dismiss()
@@ -693,21 +743,16 @@ class ImageVideoConverter : AppCompatActivity() {
     }
 
     class MenuAdapter(context: Context, private val items: Array<String>) : ArrayAdapter<String>(context, 0, items) {
-
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.menu_item_layout, parent, false)
             val icon = view.findViewById<ImageView>(R.id.menuIcon)
             val text = view.findViewById<TextView>(R.id.menuText)
-
             text.text = items[position]
-
-            // Optionally set icons based on item name (use your own drawables if needed)
             when (items[position]) {
                 "Edit" -> icon.setImageResource(android.R.drawable.ic_menu_edit)
                 "Delete" -> icon.setImageResource(android.R.drawable.ic_menu_delete)
                 else -> icon.visibility = View.GONE
             }
-
             return view
         }
     }
@@ -723,29 +768,24 @@ class ImageVideoConverter : AppCompatActivity() {
         rotationTooltip.visibility = View.GONE
     }
 
-    // ====================== Recording Functions ======================
-    // ====================== Recording Functions ======================
-
     private fun startRecordingWithTrimRange() {
+        if (recordingTriggered) return
+        recordingTriggered = true
         var segmentDurationMs = trimEndMs - trimStartMs
         if (segmentDurationMs <= 0L) {
             trimStartMs = 0L
             trimEndMs = originalVideoDurationMs
             segmentDurationMs = originalVideoDurationMs
         }
-
         player?.seekTo(trimStartMs)
         player?.playWhenReady = true
-
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
                     val currentPos = player?.currentPosition ?: 0L
                     if (abs(currentPos - trimStartMs) < 100) {
                         player?.removeListener(this)
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            startAndAutoSaveVideo(segmentDurationMs)
-                        }, 50)
+                        waitForValidDimensions(segmentDurationMs)
                     }
                 }
             }
@@ -753,18 +793,32 @@ class ImageVideoConverter : AppCompatActivity() {
         player?.addListener(listener)
     }
 
+    private fun waitForValidDimensions(durationMs: Long) {
+        if (mediaContainer.width > 0 && mediaContainer.height > 0 &&
+            overlayContainer.width > 0 && overlayContainer.height > 0) {
+            startAndAutoSaveVideo(durationMs)
+        } else {
+            mediaContainer.post {
+                waitForValidDimensions(durationMs)
+            }
+        }
+    }
+
     private fun startAndAutoSaveVideo(durationMs: Long) {
         ProcessDialog.showDialog(this, true)
-
         val width = (mediaContainer.width / 2) * 2
         val height = (mediaContainer.height / 2) * 2
+        if (width <= 0 || height <= 0) {
+            ProcessDialog.dismissDialog(true)
+            Toast.makeText(this, "Invalid view size. Please try again.", Toast.LENGTH_SHORT).show()
+            recordingTriggered = false
+            return
+        }
         val videoFile = File(cacheDir, "HiHlo_${System.currentTimeMillis()}.mp4")
-
         try {
             mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 MediaRecorder(this)
             } else MediaRecorder()
-
             mediaRecorder?.apply {
                 setVideoSource(MediaRecorder.VideoSource.SURFACE)
                 setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
@@ -781,16 +835,14 @@ class ImageVideoConverter : AppCompatActivity() {
             ProcessDialog.dismissDialog(true)
             Toast.makeText(this, "Cannot start recording: ${e.message}", Toast.LENGTH_LONG).show()
             cleanupRecorder()
+            recordingTriggered = false
             return
         }
-
         isRecording = true
         tvDone2.isEnabled = false
         tvDone2.text = "Converting"
-
         val recordingSurface = mediaRecorder!!.surface
         val choreographer = Choreographer.getInstance()
-
         val frameCallback = object : Choreographer.FrameCallback {
             override fun doFrame(frameTimeNanos: Long) {
                 if (!isRecording) return
@@ -800,19 +852,26 @@ class ImageVideoConverter : AppCompatActivity() {
                     } else {
                         recordingSurface.lockCanvas(null)
                     }
-                    canvas.drawColor(Color.BLACK)
-                    mediaContainer.draw(canvas)
-                    overlayContainer.draw(canvas)
-                    recordingSurface.unlockCanvasAndPost(canvas)
+                    canvas?.let {
+                        it.drawColor(Color.BLACK)
+                        mediaContainer.draw(it)
+                        overlayContainer.draw(it)
+                        recordingSurface.unlockCanvasAndPost(it)
+                    }
                 } catch (e: Exception) {
-                    Log.e("ImageVideoConverter", "Frame drawing error", e)
+                    isRecording = false
                 }
-                choreographer.postFrameCallback(this)
+                if (isRecording) choreographer.postFrameCallback(this)
             }
         }
-
-        choreographer.postFrameCallback(frameCallback)
-
+        val preDrawListener = object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                mediaContainer.viewTreeObserver.removeOnPreDrawListener(this)
+                choreographer.postFrameCallback(frameCallback)
+                return true
+            }
+        }
+        mediaContainer.viewTreeObserver.addOnPreDrawListener(preDrawListener)
         Handler(Looper.getMainLooper()).postDelayed({
             stopVideoRecording(videoFile, durationMs)
         }, durationMs)
@@ -821,12 +880,9 @@ class ImageVideoConverter : AppCompatActivity() {
     private fun stopVideoRecording(videoFile: File, originalDurationMs: Long) {
         if (!isRecording) return
         isRecording = false
-
         try { mediaRecorder?.stop() } catch (_: Exception) {}
         cleanupRecorder()
-
         player?.playWhenReady = false
-
         ProcessDialog.showDialog(this, true)
         Handler(Looper.getMainLooper()).postDelayed({
             muxVideoWithOriginalAudio(videoFile, originalDurationMs)
@@ -843,45 +899,33 @@ class ImageVideoConverter : AppCompatActivity() {
         var muxer: MediaMuxer? = null
         var videoExtractor: MediaExtractor? = null
         var audioExtractor: MediaExtractor? = null
-
         try {
             if (originalVideoUri == null) throw Exception("Original video URI is null")
-
             videoExtractor = MediaExtractor()
             videoExtractor.setDataSource(silentVideoFile.absolutePath)
-
             val videoTrackIndex = (0 until videoExtractor.trackCount).firstOrNull { index ->
                 val format = videoExtractor.getTrackFormat(index)
                 format.getString(MediaFormat.KEY_MIME)?.startsWith("video/") == true
             } ?: throw Exception("No video track found in recorded file")
-
             audioExtractor = MediaExtractor()
             audioExtractor.setDataSource(this@ImageVideoConverter, originalVideoUri!!, null)
-
             val audioTrackIndex = (0 until audioExtractor.trackCount).firstOrNull { index ->
                 val format = audioExtractor.getTrackFormat(index)
                 format.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
             }
-
             muxer = MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-
             val videoFormat = videoExtractor.getTrackFormat(videoTrackIndex)
             val videoTrack = muxer.addTrack(videoFormat)
             videoExtractor.selectTrack(videoTrackIndex)
-
             var audioTrack = -1
             if (audioTrackIndex != null) {
                 val audioFormat = audioExtractor.getTrackFormat(audioTrackIndex)
                 audioTrack = muxer.addTrack(audioFormat)
                 audioExtractor.selectTrack(audioTrackIndex)
             }
-
             muxer.start()
-
             val buffer = ByteBuffer.allocate(1024 * 1024)
             val bufferInfo = MediaCodec.BufferInfo()
-
-            // Copy Video
             while (true) {
                 bufferInfo.size = videoExtractor.readSampleData(buffer, 0)
                 if (bufferInfo.size < 0) break
@@ -890,13 +934,10 @@ class ImageVideoConverter : AppCompatActivity() {
                 muxer.writeSampleData(videoTrack, buffer, bufferInfo)
                 videoExtractor.advance()
             }
-
-            // Copy Trimmed Audio
             if (audioTrack != -1) {
                 val startUs = trimStartMs * 1000L
                 val endUs = trimEndMs * 1000L
                 audioExtractor.seekTo(startUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
-
                 while (true) {
                     bufferInfo.size = audioExtractor.readSampleData(buffer, 0)
                     if (bufferInfo.size < 0) break
@@ -907,10 +948,8 @@ class ImageVideoConverter : AppCompatActivity() {
                     audioExtractor.advance()
                 }
             }
-
             muxer.stop()
             useFinalFile(outputFile)
-
         } catch (e: Exception) {
             Log.e("ImageVideoConverter", "Muxing failed", e)
             Toast.makeText(this, "Failed to add audio: ${e.message}", Toast.LENGTH_LONG).show()
@@ -940,7 +979,6 @@ class ImageVideoConverter : AppCompatActivity() {
             val contentUri = FileProvider.getUriForFile(this, authority, videoFile)
             savedUri = contentUri
             mediaType = "video"
-
             tvDone2.text = "Done!"
             ProcessDialog.dismissDialog(true)
             Handler(Looper.getMainLooper()).postDelayed({ finalize_data() }, 500)
@@ -956,20 +994,16 @@ class ImageVideoConverter : AppCompatActivity() {
     private fun saveFinalImage() {
         ProcessDialog.showDialog(this, true)
         tvDone2.text = "Converting"
-
         val bitmap = Bitmap.createBitmap(mediaContainer.width, mediaContainer.height, Bitmap.Config.ARGB_8888)
         Canvas(bitmap).apply {
             mediaContainer.draw(this)
             overlayContainer.draw(this)
         }
-
         val imageFile = File(cacheDir, "HiHlo_${System.currentTimeMillis()}.jpg")
         FileOutputStream(imageFile).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
-
         val contentUri = FileProvider.getUriForFile(this, "${packageName}.provider", imageFile)
         savedUri = contentUri
         mediaType = "image"
-
         tvDone2.text = "Done!"
         ProcessDialog.dismissDialog(true)
         finalize_data()
@@ -986,33 +1020,48 @@ class ImageVideoConverter : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        player?.let { wasPlayingBeforeBackground = it.isPlaying; if (it.isPlaying) it.pause() }
+        player?.let {
+            wasPlayingBeforeBackground = it.isPlaying
+            wasMutedBeforeBackground = it.volume == 0f
+            if (it.isPlaying) it.pause()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        if (isVideoMedia && wasPlayingBeforeBackground && !isRecording) player?.play()
+        player?.let {
+            if (wasMutedBeforeBackground) {
+                it.volume = 0f
+                btnMuteUnmute.setImageResource(R.drawable.volume_unmute)
+            } else {
+                it.volume = 1f
+                btnMuteUnmute.setImageResource(R.drawable.volume_mute)
+            }
+            if (isVideoMedia && wasPlayingBeforeBackground && !isRecording) {
+                it.play()
+            }
+        }
         wasPlayingBeforeBackground = false
     }
 
-    // ... your existing code ...
-
     override fun onStop() {
         super.onStop()
-        player?.let { wasPlayingBeforeBackground = it.isPlaying; if (it.isPlaying) it.pause() }
+        player?.let {
+            wasPlayingBeforeBackground = it.isPlaying
+            wasMutedBeforeBackground = it.volume == 0f
+            if (it.isPlaying) it.pause()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         progressHandler.removeCallbacksAndMessages(null)
         autoHideHandler.removeCallbacksAndMessages(null)
+        etInput2.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
         player?.release()
         cleanupRecorder()
     }
 }
-
-// ====================== INPUT FILTER FOR BETTER DELETION ======================
-
 
 class PillInputFilter : InputFilter {
     override fun filter(

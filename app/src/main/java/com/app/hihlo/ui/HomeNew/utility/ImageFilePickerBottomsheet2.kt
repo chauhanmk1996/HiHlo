@@ -102,7 +102,7 @@ class ImageFilePickerBottomsheet2 : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.titleTextView.text = "Choose Image"
+        binding.titleTextView.text = "New Post"
         recyclerView = binding.recyclerView
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 

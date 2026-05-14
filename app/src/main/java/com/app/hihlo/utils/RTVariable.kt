@@ -99,6 +99,8 @@ object RTVariable {
     var HEADLINE_CAPTION: String = ""
     var IS_STORY_VIEW: Boolean = false
 
+    var REELS_FROM: String = ""
+
     fun formatCount(count: Int): String {
         return when {
             count >= 1_000_000 -> {

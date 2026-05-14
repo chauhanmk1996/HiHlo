@@ -82,6 +82,7 @@ import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
+import com.app.hihlo.utils.Utils
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -665,11 +666,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             context = requireContext(),
             anchorView = binding.addReel,
             onOption1Click = {
-                if (Preferences.getCustomModelPreference<LoginResponse>(
-                        requireContext(),
-                        LOGIN_DATA
-                    )?.payload?.isCreator == 1
-                ) {
+                if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(),LOGIN_DATA)?.payload?.isCreator == 1) {
                     RTVariable.SELECT_OPTION = true
                     //checkGalleryPermissionAndPick2()
                     val bottomSheet = FilePickerBottomsheet()
@@ -690,40 +687,40 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         "FilePickerBottomSheet"
                     )
                 } else {
-                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT)
-                        .show()
+                    Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                 }
             },
             onOption2Click = {
-                //selectedBottomSheetType = "post"
+                if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
+                    //selectedBottomSheetType = "post"
 //                        openUploadBottomSheet("post")
-                //RTVariable.SELECT_OPTION = false
-                //checkGalleryPermissionAndPick("I")
-                RTVariable.SELECT_OPTION = false
-                selectedBottomSheetType = "post"   // still needed for title/API logic
+                    //RTVariable.SELECT_OPTION = false
+                    //checkGalleryPermissionAndPick("I")
+                    RTVariable.SELECT_OPTION = false
+                    selectedBottomSheetType = "post"   // still needed for title/API logic
 
-                val bottomSheet = ImageFilePickerBottomsheet2()
-                bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
-                    val resultUri = Uri.parse(uri)
-                    if (resultUri.scheme == null || resultUri.path == null) {
-                        Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT).show()
-                        return@setOnMediaSelectedListener
+                    val bottomSheet = ImageFilePickerBottomsheet2()
+                    bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
+                        val resultUri = Uri.parse(uri)
+                        if (resultUri.scheme == null || resultUri.path == null) {
+                            Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT).show()
+                            return@setOnMediaSelectedListener
+                        }
+                        UserPreference.seletedUri = resultUri
+                        UserPreference.selectedMediaToUpload = selectedBottomSheetType
+                        UserPreference.selectedCropRatio = ratio
+                        UserPreference.selectedMediaType = "I"   // 🔥 ADD THIS LINE
+                        Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
+                        findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
                     }
-                    UserPreference.seletedUri = resultUri
-                    UserPreference.selectedMediaToUpload = selectedBottomSheetType
-                    UserPreference.selectedCropRatio = ratio
-                    UserPreference.selectedMediaType = "I"   // 🔥 ADD THIS LINE
-                    Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
-                    findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
+                    bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
+                }else{
+                    Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
                 }
-                bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
             },
             onOption3Click = {
-                if (Preferences.getCustomModelPreference<LoginResponse>(
-                        requireContext(),
-                        LOGIN_DATA
-                    )?.payload?.isCreator == 1
-                ) {
+                if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
                     //selectedBottomSheetType = "reel"
 //                            openUploadBottomSheet("reel")
                     //RTVariable.SELECT_OPTION = false
@@ -741,12 +738,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     }
                     bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                 } else {
-                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT)
-                        .show()
+                    Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                 }
             },
             option1Text = "Upload Status",
-            option2Text = "Upload Photo",
+            option2Text = "Upload Post",
             option3Text = "Upload Video",
             option4Text = "Cancel",
             option1ImageRes = R.drawable.btn_status_icon,
