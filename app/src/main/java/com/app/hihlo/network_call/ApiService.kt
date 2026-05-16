@@ -6,6 +6,7 @@ import com.app.hihlo.model.common_response.CommonResponse
 import com.app.hihlo.model.add_coins.AddCoinsRequest
 import com.app.hihlo.model.add_post.request.AddPostRequest
 import com.app.hihlo.model.add_story.request.AddStoryRequest
+import com.app.hihlo.model.add_story_model.AddStoryResponse
 import com.app.hihlo.model.ads_list.GetAdsListResponse
 import com.app.hihlo.model.block_reasons.response.BlockReasonsResponse
 import com.app.hihlo.model.block_user.request.BlockUserRequest
@@ -58,6 +59,8 @@ import com.app.hihlo.model.save_call.SaveCallRequest
 import com.app.hihlo.model.save_call.SaveCallResponse
 import com.app.hihlo.model.send_gift.SendGiftResponse
 import com.app.hihlo.model.set_notification.SetNotificationRequest
+import com.app.hihlo.model.story_response.StoryResponse
+import com.app.hihlo.model.story_upload_status_model.StoryUploadStatusResponse
 import com.app.hihlo.model.update_call_charge.UpdateCallChargeResponse
 import com.app.hihlo.model.update_call_status.UpdateCallStatusRequest
 import com.app.hihlo.model.update_call_status.UpdateCallStatusResponse
@@ -128,10 +131,10 @@ interface ApiService {
                            @Query("genderId") genderId: String? = null
     ): HomeResponse
 
-    @GET("get-all-status")
+    @GET("get-all-status-temp")
     suspend fun getStatusData(@Header("Authorization") token: String,
                               @Query("genderId") genderId: String? = null
-    ): StatusResponse
+    ): StoryResponse
 
     @GET("reels")
     suspend fun getReels(@Header("Authorization") token: String,
@@ -182,10 +185,13 @@ interface ApiService {
                                     @Query("limit") limit: String? = null): GetProfileResponse
 
     @POST("add-story")
-    suspend fun addStory(@Header("Authorization") token: String, @Body request:AddStoryRequest): CommonResponse
+    suspend fun addStory(@Header("Authorization") token: String, @Body request:AddStoryRequest): AddStoryResponse
 
     @POST("story-seen")
     suspend fun storySeen(@Header("Authorization") token: String, @Body request:StorySeen): CommonResponse
+
+    @GET("story-upload-status")
+    suspend fun getStoryUploadStatus(@Header("Authorization") token: String): StoryUploadStatusResponse
 
     @POST("delete-story")
     suspend fun deleteStory(@Header("Authorization") token: String, @Body request:StoryDeleteRequest): CommonResponse

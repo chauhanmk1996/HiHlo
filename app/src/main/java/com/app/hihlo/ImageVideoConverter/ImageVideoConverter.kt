@@ -106,9 +106,7 @@ class ImageVideoConverter : AppCompatActivity() {
         val uri = intent.getStringExtra("uri") ?: ""
         originalVideoUri = Uri.parse(uri)
         isVideoMedia = intent.getBooleanExtra("isVideo", false)
-
         setupRotationTooltip()
-
         if (isVideoMedia) {
             setupVideo(uri)
             goToStep(MediaStep.TRIM)
@@ -116,7 +114,6 @@ class ImageVideoConverter : AppCompatActivity() {
             setupImage(uri)
             goToStep(MediaStep.TEXT_OVERLAY)
         }
-
         setupListeners()
         setupEditor()
         setupBackPress()
@@ -642,7 +639,6 @@ class ImageVideoConverter : AppCompatActivity() {
                         val dx = abs(event.rawX - downX)
                         val dy = abs(event.rawY - downY)
                         if (dx > touchSlop || dy > touchSlop) {
-                            // Movement exceeded slop → cancel long press
                             longPressHandler.removeCallbacks(potentialLongClick!!)
                             potentialLongClick = null
                         }
@@ -838,9 +834,11 @@ class ImageVideoConverter : AppCompatActivity() {
             recordingTriggered = false
             return
         }
+
         isRecording = true
         tvDone2.isEnabled = false
         tvDone2.text = "Converting"
+
         val recordingSurface = mediaRecorder!!.surface
         val choreographer = Choreographer.getInstance()
         val frameCallback = object : Choreographer.FrameCallback {
@@ -852,26 +850,21 @@ class ImageVideoConverter : AppCompatActivity() {
                     } else {
                         recordingSurface.lockCanvas(null)
                     }
-                    canvas?.let {
-                        it.drawColor(Color.BLACK)
-                        mediaContainer.draw(it)
-                        overlayContainer.draw(it)
-                        recordingSurface.unlockCanvasAndPost(it)
+                    // If canvas is null, just skip this frame – don't stop recording.
+                    if (canvas != null) {
+                        canvas.drawColor(Color.BLACK)
+                        mediaContainer.draw(canvas)
+                        overlayContainer.draw(canvas)
+                        recordingSurface.unlockCanvasAndPost(canvas)
                     }
                 } catch (e: Exception) {
-                    isRecording = false
+                    Log.e("ImageVideoConverter", "Frame drawing error", e)
                 }
-                if (isRecording) choreographer.postFrameCallback(this)
+                choreographer.postFrameCallback(this)
             }
         }
-        val preDrawListener = object : ViewTreeObserver.OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                mediaContainer.viewTreeObserver.removeOnPreDrawListener(this)
-                choreographer.postFrameCallback(frameCallback)
-                return true
-            }
-        }
-        mediaContainer.viewTreeObserver.addOnPreDrawListener(preDrawListener)
+        choreographer.postFrameCallback(frameCallback)
+
         Handler(Looper.getMainLooper()).postDelayed({
             stopVideoRecording(videoFile, durationMs)
         }, durationMs)
@@ -908,7 +901,16 @@ class ImageVideoConverter : AppCompatActivity() {
                 format.getString(MediaFormat.KEY_MIME)?.startsWith("video/") == true
             } ?: throw Exception("No video track found in recorded file")
             audioExtractor = MediaExtractor()
-            audioExtractor.setDataSource(this@ImageVideoConverter, originalVideoUri!!, null)
+            try {
+                val fd = contentResolver.openFileDescriptor(originalVideoUri!!, "r")
+                if (fd != null) {
+                    audioExtractor.setDataSource(fd.fileDescriptor)
+                } else {
+                    audioExtractor.setDataSource(this@ImageVideoConverter, originalVideoUri!!, null)
+                }
+            } catch (e: Exception) {
+                audioExtractor.setDataSource(this@ImageVideoConverter, originalVideoUri!!, null)
+            }
             val audioTrackIndex = (0 until audioExtractor.trackCount).firstOrNull { index ->
                 val format = audioExtractor.getTrackFormat(index)
                 format.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
@@ -953,7 +955,7 @@ class ImageVideoConverter : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("ImageVideoConverter", "Muxing failed", e)
             Toast.makeText(this, "Failed to add audio: ${e.message}", Toast.LENGTH_LONG).show()
-            useFinalFile(silentVideoFile)
+            useFinalFile(silentVideoFile)   // fallback to silent video
         } finally {
             videoExtractor?.release()
             audioExtractor?.release()

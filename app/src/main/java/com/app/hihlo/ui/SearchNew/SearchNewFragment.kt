@@ -96,6 +96,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
@@ -130,7 +131,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private var searchJob: Job? = null
 
     private val viewModel6: StatusViewModel by activityViewModels()
-    private lateinit var statusListGlobal: List<StatusItem>
+    private lateinit var statusListGlobal: List<StoryUser>
 
     override fun getLayoutId(): Int = R.layout.fragment_search_new
 

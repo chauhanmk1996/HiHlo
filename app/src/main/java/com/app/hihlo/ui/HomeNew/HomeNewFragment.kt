@@ -62,6 +62,7 @@ import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.model.send_gift.SendGiftRequest
+import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
@@ -147,7 +148,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private var selectedBottomSheetType = ""
 
     private val viewModel5: StatusViewModel by activityViewModels()
-    private lateinit var statusListGlobal: List<StatusItem>
+    private lateinit var statusListGlobal: List<StoryUser>
     private lateinit var statusAdapter: StatusAdapter
 
     override fun getLayoutId(): Int {return R.layout.fragment_home_new}
@@ -1212,6 +1213,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     Log.e("TAG", "Add story success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         if (it.data.code == 200){
+                            val uploadedStoryCount = it.data.payload?.uploadedStoryCount
                             hitServiceListApi(viewModel.currentPage, selectedGender)
                         }else{
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
@@ -1691,7 +1693,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    fun getSelectedTheStory(option: Int, value: StatusItem, position: Int, itemView:View){
+    fun getSelectedTheStory(option: Int, value: StoryUser, position: Int, itemView:View){
         if(option==2){
             val imageView: View = if (position == 0) {
                 itemView.findViewById<View>(R.id.myStoryImageView)
@@ -1727,7 +1729,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 anchorView = itemView,
                 onOption1Click = {
                     if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-                        RTVariable.SELECT_OPTION = true
+                        viewLifecycleOwner.lifecycleScope.launch {
+
+                            val canUploadStory = isStoryLimitReached()
+
+                            if (canUploadStory) {
+
+                                RTVariable.SELECT_OPTION = true
 //                        checkGalleryPermissionAndPick()
 //                        val intent = Intent(requireContext(), FilePickerStatus::class.java)
 //                        filePickerLauncher.launch(intent)
@@ -1735,23 +1743,34 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                            R.anim.slide_up_2,
 //                            0
 //                        )
-                        val bottomSheet = FilePickerBottomsheet()
-                        bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
-                            // uri and type are already returned as strings, no Intent parsing needed
-                            val mediaType = type          // "image" or "video"
-                            val contentUri = Uri.parse(uri)
-                            RTVariable.HEADLINE_CAPTION = headline
-                            Handler(Looper.getMainLooper()).post {
-                                // Ensure your fragment/activity is still attached if needed
-                                val file = getCacheFileFromContentUri(contentUri)
-                                val typeCode = if (mediaType == "video") "V" else "I"
-                                file?.let { uploadImage(it, typeCode) }
+                                val bottomSheet = FilePickerBottomsheet()
+                                bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
+                                    // uri and type are already returned as strings, no Intent parsing needed
+                                    val mediaType = type          // "image" or "video"
+                                    val contentUri = Uri.parse(uri)
+                                    RTVariable.HEADLINE_CAPTION = headline
+                                    Handler(Looper.getMainLooper()).post {
+                                        // Ensure your fragment/activity is still attached if needed
+                                        val file = getCacheFileFromContentUri(contentUri)
+                                        val typeCode = if (mediaType == "video") "V" else "I"
+                                        file?.let { uploadImage(it, typeCode) }
+                                    }
+                                }
+                                bottomSheet.show(
+                                    parentFragmentManager,   // or childFragmentManager, depending on where you are
+                                    "FilePickerBottomSheet"
+                                )
+
+                            } else {
+
+                                Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You can upload 4 stories in 24 hours")
                             }
                         }
-                        bottomSheet.show(
-                            parentFragmentManager,   // or childFragmentManager, depending on where you are
-                            "FilePickerBottomSheet"
-                        )
+//                        if (RTVariable.STORY_UPLOAD_LIMIT <= 0) {
+//                            Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You can upload maximum 4 stories in 24 hours")
+//                        }else{
+//
+//                        }
                     }else{
                         Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
                         //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
@@ -1813,6 +1832,37 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 option3ImageRes = R.drawable.icon_over_video,
                 //option4ImageRes = R.drawable.ic_cancel_red
             ).show()
+        }
+    }
+
+    private suspend fun isStoryLimitReached(): Boolean {
+        return try {
+
+            val response = RetrofitBuilder.apiService.getStoryUploadStatus(
+                token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken
+            )
+
+            if (response.status == 1 && response.code == 200) {
+
+                val remainingStories = response.payload?.remainingStories ?: 0
+
+                RTVariable.STORY_UPLOAD_LIMIT = remainingStories
+
+                Log.e("STORY LIMIT", "STORY LIMIT >>> $remainingStories")
+
+                // true when user can upload more stories
+                remainingStories > 0
+
+            } else {
+                false
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 

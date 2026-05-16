@@ -55,7 +55,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
+import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
@@ -856,6 +858,14 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                 }
             }
         }
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                while (true) {
+//                    delay(1000)
+//                    getStoryCountUnder24Hour()
+//                }
+//            }
+//        }
 //        if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
 //            if(RTVariable.IS_STATUS_PROFILE_CLICKED){
 //                RTVariable.IS_STATUS_PROFILE_CLICKED = false
@@ -865,8 +875,26 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
 //        }
     }
 
+    private fun getStoryCountUnder24Hour(){
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitBuilder.apiService.getStoryUploadStatus(
+                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(this@HomeActivity, LOGIN_DATA)?.payload?.authToken,
+                )
+                if (response.status == 1 && response.code == 200) {
+                    val remainingStories = response.payload?.remainingStories ?: 0
+                    RTVariable.STORY_UPLOAD_LIMIT = remainingStories
+                    Log.e("STORY LIMIT", "STORY LIMIT>>> "+remainingStories)
+                } else {
+                }
+            }catch (e: Exception) {
+            }
+        }
+    }
+
     override fun onStop() {
         super.onStop()
+        RTVariable.IS_APP_IN_BACKGROUND = true
         Log.e("TTTTT","APP IN BACKGROUND")
         if(RTVariable.FRAG_POSITION==0){
             RTVariable.ISHOMECLICKED = true

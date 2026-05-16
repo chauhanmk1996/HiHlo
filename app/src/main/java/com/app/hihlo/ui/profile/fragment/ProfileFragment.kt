@@ -667,25 +667,29 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             anchorView = binding.addReel,
             onOption1Click = {
                 if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(),LOGIN_DATA)?.payload?.isCreator == 1) {
-                    RTVariable.SELECT_OPTION = true
-                    //checkGalleryPermissionAndPick2()
-                    val bottomSheet = FilePickerBottomsheet()
-                    bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
-                        // uri and type are already returned as strings, no Intent parsing needed
-                        val mediaType = type          // "image" or "video"
-                        val contentUri = Uri.parse(uri)
-                        RTVariable.HEADLINE_CAPTION = headline
-                        Handler(Looper.getMainLooper()).post {
-                            // Ensure your fragment/activity is still attached if needed
-                            val file = getCacheFileFromContentUri(contentUri)
-                            val typeCode = if (mediaType == "video") "V" else "I"
-                            file?.let { uploadImage(it, typeCode) }
+                    if (RTVariable.STORY_UPLOAD_LIMIT <= 0) {
+                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You can upload maximum 4 stories in 24 hours")
+                    }else{
+                        RTVariable.SELECT_OPTION = true
+                        //checkGalleryPermissionAndPick2()
+                        val bottomSheet = FilePickerBottomsheet()
+                        bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
+                            // uri and type are already returned as strings, no Intent parsing needed
+                            val mediaType = type          // "image" or "video"
+                            val contentUri = Uri.parse(uri)
+                            RTVariable.HEADLINE_CAPTION = headline
+                            Handler(Looper.getMainLooper()).post {
+                                // Ensure your fragment/activity is still attached if needed
+                                val file = getCacheFileFromContentUri(contentUri)
+                                val typeCode = if (mediaType == "video") "V" else "I"
+                                file?.let { uploadImage(it, typeCode) }
+                            }
                         }
+                        bottomSheet.show(
+                            parentFragmentManager,   // or childFragmentManager, depending on where you are
+                            "FilePickerBottomSheet"
+                        )
                     }
-                    bottomSheet.show(
-                        parentFragmentManager,   // or childFragmentManager, depending on where you are
-                        "FilePickerBottomSheet"
-                    )
                 } else {
                     Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
                     //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()

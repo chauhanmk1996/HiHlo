@@ -1,5 +1,6 @@
 package com.app.hihlo.ui.HomeNew.adapter
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,38 +10,52 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
 import com.app.hihlo.databinding.AdapterStoriesRecyclerBinding
-import com.app.hihlo.ui.HomeNew.model.StatusItem
+import com.app.hihlo.model.story_response.StoryUser
 import com.bumptech.glide.Glide
 
 class StatusAdapter(
-    private val list: MutableList<StatusItem>,
-    private val getSelectedTheStory: (Int, StatusItem, Int, view: View) -> Unit
+    private val list: MutableList<StoryUser>,
+    private val getSelectedTheStory: (
+        type: Int,
+        item: StoryUser,
+        position: Int,
+        view: View
+    ) -> Unit
 ) : RecyclerView.Adapter<StatusAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: AdapterStoriesRecyclerBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+
         val binding = AdapterStoriesRecyclerBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
+
         return ViewHolder(binding)
     }
 
     override fun getItemCount(): Int = list.size
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val item = list[position]
 
+        // =========================================================
+        // MY STORY
+        // =========================================================
         if (position == 0) {
 
             holder.binding.plusBottomRight.isVisible = true
             holder.binding.uploadLayout.isVisible = true
+
             holder.binding.otherStoryCardview.isVisible = false
+
             holder.binding.myStoryGradient.isVisible = true
+
             holder.binding.name.visibility = View.INVISIBLE
 
             Glide.with(holder.binding.root.context)
@@ -49,30 +64,39 @@ class StatusAdapter(
                 .error(R.drawable.profile_placeholder)
                 .into(holder.binding.myStoryImageView)
 
+            // MY STORY BORDER
             holder.binding.myStoryGradient.background =
                 if (item.isStoriesUploaded) {
+
                     holder.binding.root.resources.getDrawable(
                         R.drawable.story_gradient_border,
                         null
                     )
+
                 } else {
+
                     holder.binding.root.resources.getDrawable(
                         R.color.transparent,
                         null
                     )
                 }
 
-        } else {
+        }
+
+        // =========================================================
+        // OTHER USER STORIES
+        // =========================================================
+        else {
 
             holder.binding.plusBottomRight.isVisible = false
             holder.binding.uploadLayout.isVisible = false
+
             holder.binding.otherStoryCardview.isVisible = true
+
             holder.binding.myStoryGradient.isVisible = false
 
             holder.binding.name.visibility = View.VISIBLE
             holder.binding.name.text = item.userDetail.name
-
-            Log.e("ISSEEN", "ISSEEN>>> ${item.is_seen}")
 
             Glide.with(holder.binding.root.context)
                 .load(item.userDetail.profile_image)
@@ -80,65 +104,144 @@ class StatusAdapter(
                 .error(R.drawable.profile_placeholder)
                 .into(holder.binding.otherStoryImageview)
 
+            // =====================================================
+            // STORY SEEN CHECK
+            // =====================================================
+
+            // TRUE = ALL STORIES SEEN
+            // FALSE = AT LEAST ONE STORY UNSEEN
+
+            val isAllStoriesSeen =
+                item.stories.all { story ->
+                    story.is_seen == 1
+                }
+
+            Log.e(
+                "IS_SEEN",
+                "User: ${item.userDetail.name} | ALL_SEEN = $isAllStoriesSeen"
+            )
+
+            // =====================================================
+            // BORDER SET
+            // =====================================================
+
             holder.binding.otherStoryCardview.background =
-                if (item.is_seen == 0) {
-                    holder.binding.root.resources.getDrawable(
-                        R.drawable.story_gradient_border,
-                        null
-                    )
-                } else {
+                if (isAllStoriesSeen) {
+
+                    // ALL STORIES SEEN -> GRAY BORDER
                     holder.binding.root.resources.getDrawable(
                         R.drawable.story_gray_border,
+                        null
+                    )
+
+                } else {
+
+                    // ANY STORY UNSEEN -> GRADIENT BORDER
+                    holder.binding.root.resources.getDrawable(
+                        R.drawable.story_gradient_border,
                         null
                     )
                 }
         }
 
-        // Story Click
+        // =========================================================
+        // STORY CLICK
+        // =========================================================
         holder.itemView.setOnClickListener {
 
             if (position == 0) {
 
                 if (item.isStoriesUploaded) {
-                    getSelectedTheStory(2, item, position, holder.binding.root)
-                    holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
+
+                    getSelectedTheStory(
+                        2,
+                        item,
+                        position,
+                        holder.binding.root
+                    )
+
+                    holder.binding.storyLayout.setBackgroundColor(
+                        Color.TRANSPARENT
+                    )
                 }
 
             } else {
 
-                getSelectedTheStory(2, item, position, holder.binding.root)
-                holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
+                getSelectedTheStory(
+                    2,
+                    item,
+                    position,
+                    holder.binding.root
+                )
+
+                holder.binding.storyLayout.setBackgroundColor(
+                    Color.TRANSPARENT
+                )
             }
         }
 
-        // Plus Button Click
+        // =========================================================
+        // PLUS BUTTON CLICK
+        // =========================================================
         holder.binding.plusBottomRight.setOnClickListener {
 
-            getSelectedTheStory(3, item, position, holder.binding.root)
-            holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
+            getSelectedTheStory(
+                3,
+                item,
+                position,
+                holder.binding.root
+            )
+
+            holder.binding.storyLayout.setBackgroundColor(
+                Color.TRANSPARENT
+            )
         }
 
-        // Name Click
+        // =========================================================
+        // NAME CLICK
+        // =========================================================
         holder.binding.name.setOnClickListener {
 
-            getSelectedTheStory(3, item, position, holder.binding.root)
-            holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
+            getSelectedTheStory(
+                3,
+                item,
+                position,
+                holder.binding.root
+            )
+
+            holder.binding.storyLayout.setBackgroundColor(
+                Color.TRANSPARENT
+            )
         }
 
-        // Upload Layout Click
+        // =========================================================
+        // UPLOAD LAYOUT CLICK
+        // =========================================================
         holder.binding.uploadLayout.setOnClickListener {
 
-            getSelectedTheStory(3, item, position, holder.binding.root)
-            holder.binding.storyLayout.setBackgroundColor(Color.TRANSPARENT)
+            getSelectedTheStory(
+                3,
+                item,
+                position,
+                holder.binding.root
+            )
+
+            holder.binding.storyLayout.setBackgroundColor(
+                Color.TRANSPARENT
+            )
         }
     }
 
-    // =========================================================
-    // UPDATE COMPLETE LIST
-    // =========================================================
-    fun updateStories(storiesList: List<StatusItem>) {
+    // =============================================================
+    // UPDATE STORIES
+    // =============================================================
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateStories(storiesList: List<StoryUser>) {
 
-        Log.e("TAG", "updateStories size = ${storiesList.size}")
+        Log.e(
+            "STATUS_ADAPTER",
+            "updateStories size = ${storiesList.size}"
+        )
 
         list.clear()
         list.addAll(storiesList)

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.common_response.CommonResponse
 import com.app.hihlo.model.add_story.request.AddStoryRequest
+import com.app.hihlo.model.add_story_model.AddStoryResponse
 import com.app.hihlo.model.gender_list.GenderListResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -94,9 +95,10 @@ class HomeViewModel @Inject constructor():ViewModel() {
             ex.printStackTrace()
         }
     }
-    private val addStoryLiveDate = SingleLiveEvent<Resources<CommonResponse>>()
+    private val addStoryLiveDate =
+        SingleLiveEvent<Resources<AddStoryResponse>>()
 
-    fun addStoryLiveData(): LiveData<Resources<CommonResponse>> {
+    fun addStoryLiveData(): LiveData<Resources<AddStoryResponse>> {
         return addStoryLiveDate
     }
     fun hitAddStoryDataApi(token: String, request:AddStoryRequest) {

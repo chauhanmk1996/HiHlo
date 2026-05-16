@@ -46,9 +46,11 @@
             android:layout_marginTop="10dp"
             android:layout_height="wrap_content"
             android:minHeight="300dp"
+            android:scrollbars="none"
             app:layout_constraintTop_toBottomOf="@id/titleTextView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

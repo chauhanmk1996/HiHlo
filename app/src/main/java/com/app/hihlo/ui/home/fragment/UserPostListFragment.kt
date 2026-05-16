@@ -37,6 +37,7 @@ import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.model.send_gift.SendGiftRequest
+import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
@@ -91,7 +92,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     private var allStory: List<Story>? = null
     private var currentVisiblePosition = 0
     private val viewModel6: StatusViewModel by activityViewModels()
-    private lateinit var statusListGlobal: List<StatusItem>
+    private lateinit var statusListGlobal: List<StoryUser>
     override fun initView(savedInstanceState: Bundle?) {
         homePosts = args.homePosts.toMutableList()
         from = args.from

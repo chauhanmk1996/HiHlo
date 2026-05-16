@@ -44,6 +44,7 @@ import com.app.hihlo.model.reel.response.Reel
 import com.app.hihlo.model.send_gift.SendGiftRequest
 import com.app.hihlo.model.static.MIN_COINS_FOR_AUDIO
 import com.app.hihlo.model.static.MIN_COINS_FOR_VIDEO
+import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
@@ -139,7 +140,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private var targetPosition = 0
     private var isRestored = false
     private val viewModel6: StatusViewModel by activityViewModels()
-    private lateinit var statusListGlobal: List<StatusItem>
+    private lateinit var statusListGlobal: List<StoryUser>
     /*override fun initView(savedInstanceState: Bundle?) {
         if (!isFirstTime) return
         isFirstTime = false
@@ -253,14 +254,15 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         Log.i("TAG", "initView: " + RTVariable.REELS_FROM)
         if (RTVariable.REELS_FROM == "profile") {
             binding.swipeRefresh.isEnabled = false
+            RTVariable.IS_REELS_LOADED = false
             viewPagerAdapter(mutableListOf())
             adapter.updateList(RTVariable.reelsCache)
             lifecycleScope.launch {
                 delay(300) // delay in milliseconds
                 binding.viewPager.currentItem = reelPosition.toInt()
             }
-            viewPagerAdapter(mutableListOf())
-            adapter.updateList(RTVariable.reelsCache)
+            //viewPagerAdapter(mutableListOf())
+            //adapter.updateList(RTVariable.reelsCache)
 //            lifecycleScope.launch {
 //                delay(300) // delay in milliseconds
 //                binding.viewPager.currentItem = reelPosition.toInt()
@@ -276,24 +278,25 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 hitGetReelsApi(currentPage)
                 setReelsAdapterPagination()
             }
-            Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
-            if(RTVariable.IS_REELS_LOADED){
-                Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
-                Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
-                viewPagerAdapter(mutableListOf())
-                currentPage = RTVariable.REELS_LAST_POSITION
-                adapter.updateList(RTVariable.reelsCache)
-                isLoading = true
-                //adapter.notifyDataSetChanged()
-                binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
-                //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
-                //recyclerView?.scrollToPosition(reelPosition.toInt())
-                //binding.viewPager.currentItem = reelPosition.toInt()
-            }
+
         }
 //        if (from != "profile") {
 //
 //        }
+        Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
+        if(RTVariable.IS_REELS_LOADED){
+            Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
+            Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
+            viewPagerAdapter(mutableListOf())
+            currentPage = RTVariable.REELS_LAST_POSITION
+            adapter.updateList(RTVariable.reelsCache)
+            isLoading = true
+            //adapter.notifyDataSetChanged()
+            binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
+            //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
+            //recyclerView?.scrollToPosition(reelPosition.toInt())
+            //binding.viewPager.currentItem = reelPosition.toInt()
+        }
         viewModel.hitCoinDetailsApi(
             "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                 requireContext(),
@@ -313,8 +316,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                             RTVariable.COMMENT_COUNT
                         )
                     } else {
-                        //Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_ID)
-                        getReels(currentPage, 6)
+                        Log.e("RRRRR", "RRRRR>>>" + RTVariable.REELS_CURRENT_PAGE)
+                        getReels(RTVariable.REELS_CURRENT_PAGE, 6)
                     }
                 }
             }
@@ -343,6 +346,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                         RTVariable.IS_STORY_CLICKED_FRON_REELS = true
                         exoPlayer.play()
                     }
+                    Log.e("ISAPP", "ISAPP>>> "+RTVariable.IS_APP_IN_BACKGROUND)
+                    Log.e("ISAPP", "ISAPP>>> "+RTVariable.reelsCache.size)
                 }
             }
         }

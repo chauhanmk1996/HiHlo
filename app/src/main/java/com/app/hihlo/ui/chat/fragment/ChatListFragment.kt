@@ -31,6 +31,7 @@ import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.home.response.UserDetails
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
+import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
@@ -80,7 +81,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
     private val viewModel6: StatusViewModel by activityViewModels()
     private var myStoryData: MyStory = MyStory()
     private var allStory: List<Story>? = null
-    private lateinit var statusListGlobal: List<StatusItem>
+    private lateinit var statusListGlobal: List<StoryUser>
 
 
     companion object {
