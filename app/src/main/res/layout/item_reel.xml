@@ -8,9 +8,9 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@color/screen_background_black"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/screen_background_black">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -20,21 +20,23 @@
                 android:id="@+id/playerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:use_controller="true"
                 app:controller_layout_id="@layout/exo_custom_controller"
-                app:show_timeout="0"
                 app:resize_mode="fit"
-                app:surface_type="surface_view" />
-            <ImageView
+                app:show_timeout="0"
+                app:surface_type="surface_view"
+                app:use_controller="true" />
+
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/muteUnmuteIcon"
-                android:layout_gravity="center"
                 android:layout_width="50dp"
-                android:layout_height="50dp"/>
-            <ImageView
-                android:visibility="gone"
+                android:layout_height="50dp"
+                android:layout_gravity="center" />
+
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/reelImageView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:visibility="gone" />
 
             <ProgressBar
                 android:id="@+id/videoLoader"
@@ -42,16 +44,17 @@
                 android:layout_height="48dp"
                 android:layout_gravity="center"
                 android:visibility="gone" />
-<!--            <TextView-->
-<!--                android:id="@+id/title"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:textColor="#FFFFFF"-->
-<!--                android:textSize="18sp"-->
-<!--                android:layout_gravity="bottom|start"-->
-<!--                android:layout_margin="16dp" />-->
+            <!--            <TextView-->
+            <!--                android:id="@+id/title"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:textColor="#FFFFFF"-->
+            <!--                android:textSize="18sp"-->
+            <!--                android:layout_gravity="bottom|start"-->
+            <!--                android:layout_margin="16dp" />-->
 
         </FrameLayout>
+
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guidelineHalf"
             android:layout_width="0dp"
@@ -59,38 +62,38 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.5" />
 
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:layout_marginBottom="90dp"-->
-<!--            android:paddingVertical="20dp"-->
-<!--            android:background="@drawable/reel_side_options_background"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="0dp"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/guidelineHalf"-->
-<!--            app:layout_constraintEnd_toEndOf="parent">-->
-            <androidx.recyclerview.widget.RecyclerView
-                android:nestedScrollingEnabled="false"
-                android:id="@+id/sideOptionsRecycler"
-                android:paddingTop="10dp"
-                android:layout_marginBottom="15dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@id/muteVolumeButton"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-        <ImageView
+        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+        <!--            android:layout_marginBottom="90dp"-->
+        <!--            android:paddingVertical="20dp"-->
+        <!--            android:background="@drawable/reel_side_options_background"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/guidelineHalf"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent">-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sideOptionsRecycler"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:nestedScrollingEnabled="false"
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@id/muteVolumeButton"
+            app:layout_constraintEnd_toEndOf="parent" />
+        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/muteVolumeButton"
-            app:layout_constraintBottom_toTopOf="@id/sideOptions"
-            app:layout_constraintStart_toStartOf="@id/sideOptionsRecycler"
-            app:layout_constraintEnd_toEndOf="@id/sideOptionsRecycler"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:layout_marginStart="18dp"
             android:layout_marginBottom="23dp"
-            android:layout_width="26dp"
-            android:layout_height="26dp"/>
+            app:layout_constraintBottom_toTopOf="@id/sideOptions"
+            app:layout_constraintEnd_toEndOf="@id/sideOptionsRecycler"
+            app:layout_constraintStart_toStartOf="@id/sideOptionsRecycler" />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/sideOptions"
             android:layout_width="28dp"
             android:layout_height="28dp"
@@ -101,61 +104,63 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/sideOptionsRecycler"
             app:layout_constraintStart_toStartOf="@id/sideOptionsRecycler" />
-        <ImageView
+
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/shareReel"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/share_icon_white"
             app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/share_icon_white"/>
+            app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:visibility="gone"
             android:id="@+id/shadowLayerLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:paddingTop="10dp"
-            app:layout_constraintTop_toTopOf="@id/userDetailsLayout"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:background="@drawable/background_10dp_corner_round"
-            android:backgroundTint="@color/black_20"/>
+            android:backgroundTint="@color/black_20"
+            android:paddingTop="10dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@id/userDetailsLayout" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/userDetailsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:paddingStart="10dp"
+            android:paddingTop="0dp"
             android:paddingEnd="0dp"
             android:paddingBottom="10dp"
-            android:paddingTop="0dp"
-            android:layout_width="0dp"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintStart_toStartOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/userImageCardView"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/gredient_circle"
-                app:cardCornerRadius="80dp"
                 android:padding="4dp"
+                app:cardCornerRadius="80dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.card.MaterialCardView
 
+                    android:id="@+id/inner_card"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center"
                     app:cardCornerRadius="50dp"
-                    android:id="@+id/inner_card"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent">
+                    app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/userImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -165,68 +170,72 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/onlineStatusImage"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="2dp"
                 android:layout_marginBottom="6.5dp"
-                app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
-                app:layout_constraintEnd_toEndOf="@id/userImageCardView"
-                android:id="@+id/onlineStatusImage"
                 android:src="@drawable/online_status_green"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
+                app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
+                app:layout_constraintEnd_toEndOf="@id/userImageCardView" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/nameLayout"
                 android:layout_width="0dp"
-                android:layout_marginTop="8dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toStartOf="@+id/followButtonLayout"
-                app:layout_constraintStart_toEndOf="@+id/userImageCardView">
-                <TextView
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:includeFontPadding="false"
+                app:layout_constraintStart_toEndOf="@+id/userImageCardView"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/userName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="11dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:fontFamily="@font/manrope_semibold"
-                    android:textSize="12sp"
-                    android:textColor="@color/white"
-                    android:text="Isha_00"
-                    android:shadowColor="#000000"
-                    android:shadowDx="0"
-                    android:shadowDy="0"
-                    android:shadowRadius="4"/>
-                <ImageView
-                    android:id="@+id/verifiedNameTick"
-                    android:layout_marginStart="2dp"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:src="@drawable/verified_tick"
-                    app:layout_constraintStart_toEndOf="@+id/userName"
-                    app:layout_constraintTop_toTopOf="@+id/userName"
-                    app:layout_constraintBottom_toBottomOf="@id/userName"/>
-                <TextView
-                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:id="@+id/userLocation"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="11dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/userName"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:fontFamily="@font/manrope_regular"
-                    android:textSize="10sp"
-                    android:textColor="@color/white"
+                    android:fontFamily="@font/manrope_semibold"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
                     android:shadowColor="#000000"
                     android:shadowDx="0"
                     android:shadowDy="0"
                     android:shadowRadius="4"
-                    android:text="Jaipur, India"/>
+                    android:text="Isha_00"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/verifiedNameTick"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginStart="2dp"
+                    android:src="@drawable/verified_tick"
+                    app:layout_constraintBottom_toBottomOf="@id/userName"
+                    app:layout_constraintStart_toEndOf="@+id/userName"
+                    app:layout_constraintTop_toTopOf="@+id/userName" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/userLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="11dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/manrope_regular"
+                    android:maxLines="1"
+                    android:shadowColor="#000000"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="4"
+                    android:text="Jaipur, India"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/userName" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -234,80 +243,80 @@
                 android:id="@+id/captionContainer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="7dp"
+                android:orientation="vertical"
                 android:paddingEnd="10dp"
                 android:paddingBottom="5dp"
-                app:layout_constraintTop_toBottomOf="@+id/userImageCardView"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/userImageCardView">
 
                 <!-- Collapsed version -->
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/captionCollapsed"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/manrope_regular"
-                    android:textSize="13sp"
-                    android:textColor="@color/white_FEFEFF"
-                    android:maxLines="1"
                     android:ellipsize="end"
+                    android:fontFamily="@font/manrope_regular"
+                    android:maxLines="1"
+                    android:textColor="@color/white_FEFEFF"
+                    android:textSize="13sp"
                     android:visibility="visible"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/moreLessText"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/moreLessText" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <!-- "More" button -->
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/moreLessText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
+                    android:layout_marginTop="0dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/manrope_bold"
                     android:paddingHorizontal="0dp"
                     android:paddingVertical="0dp"
-                    android:layout_marginTop="0dp"
                     android:text="More"
                     android:textColor="@color/theme"
                     android:textSize="13sp"
-                    android:clickable="true"
-                    android:focusable="true"
                     android:visibility="gone"
-                    android:fontFamily="@font/manrope_bold"
                     app:layout_constraintBottom_toBottomOf="@id/captionCollapsed"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/captionCollapsed" />
 
                 <!-- Expanded version (single TextView) -->
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/captionExpanded"
                     android:layout_width="0dp"
-                    android:layout_marginEnd="33dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="33dp"
                     android:fontFamily="@font/manrope_regular"
-                    android:textSize="13sp"
                     android:textColor="@color/white_FEFEFF"
+                    android:textSize="13sp"
                     android:visibility="gone"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
-                android:visibility="visible"
                 android:id="@+id/followButtonLayout"
-                android:gravity="end"
-                android:layout_marginTop="7dp"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="55dp"
-                app:layout_constraintStart_toEndOf="@id/nameLayout"
-                app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:layout_marginEnd="55dp"
+                android:gravity="end"
+                android:orientation="vertical"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/nameLayout"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/followButtonImage"
                     android:layout_width="63dp"
                     android:layout_height="32dp"

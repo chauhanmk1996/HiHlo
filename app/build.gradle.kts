@@ -20,9 +20,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        /*ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
-        }*/
+        resValue(
+            "string",
+            "server_client_id",
+            project.findProperty("SERVER_CLIENT_ID")?.toString() ?: ""
+        )
 
         lint {
             baseline = file("lint-baseline.xml")
@@ -162,7 +164,10 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.burhanrashid52:photoeditor:3.1.0")
 
-
+    //Google SignIn
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play)
+    implementation(libs.google.identity)
 }
 configurations.all {
     resolutionStrategy {

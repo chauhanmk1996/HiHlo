@@ -19,9 +19,11 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -373,6 +375,25 @@ class StoryFragment : BaseFragment<FragmentStoryBinding>() {
     private fun setupPlayer(videoUrl: String) {
         exoPlayer = ExoPlayer.Builder(requireContext()).build()
         binding.playerView.player = exoPlayer
+
+        /*exoPlayer.addListener(object : Player.Listener {
+
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                val width = videoSize.width
+                val height = videoSize.height
+
+                if (width > height) {
+                    // Landscape video
+                    binding.playerView.resizeMode =
+                        AspectRatioFrameLayout.RESIZE_MODE_FIT
+                } else {
+                    // Portrait video
+                    binding.playerView.resizeMode =
+                        AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                }
+            }
+        })
+        binding.playerView.setEnableComposeSurfaceSyncWorkaround(true)*/
 
         // Required settings
 //        binding.playerView.controllerAutoShow = true

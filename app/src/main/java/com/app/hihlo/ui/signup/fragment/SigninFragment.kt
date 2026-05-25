@@ -14,7 +14,13 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
@@ -32,172 +38,46 @@ import com.app.hihlo.ui.signup.model.SocialSignUpRequest
 import com.app.hihlo.ui.signup.view_model.SigninViewModel
 import com.app.hihlo.utils.ChatUtils.getUidLoggedIn
 import com.app.hihlo.utils.CommonUtils
+import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     private var isPassHidden = true
     private val viewModel: SigninViewModel by viewModels()
+    private lateinit var auth: FirebaseAuth
+    private lateinit var credentialManager: CredentialManager
     lateinit var firestore : FirebaseFirestore
-    private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var firebaseAuth: FirebaseAuth
-    private val RC_SIGN_IN = 1001
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        firebaseAuth.signInWithCredential(credential)
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    val socialId = firebaseAuth.currentUser?.uid
-                    val deviceToken = Preferences.getStringPreference(requireActivity(),FCM_TOKEN)
-                    Log.e("google", "firebaseAuthWithGoogle: ${firebaseAuth.currentUser?.photoUrl}", )
-                    hitSocialLoginApi(socialId.toString(),deviceToken, firebaseAuth.currentUser)
-                } else {
-                    //ProcessDialog.dismissDialog(true)
-                    Toast.makeText(requireActivity(), "Authentication Failed", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
-    private fun hitSocialLoginApi(
-        socialId: String,
-        deviceToken: String?,
-        currentUser: FirebaseUser?
-    ){
-        /*val model = SocialLoginRequest(
-            socialId = socialId,
-            socialType = "G",
-            deviceToken = deviceToken,
-            deviceType = "A"
-        )*/
-        val model=SocialSignUpRequest(
-            name = currentUser?.displayName,
-            email = currentUser?.email,
-            profile_image = currentUser?.photoUrl.toString(),
-            social_id = currentUser?.uid,
-            social_type = "G",
-            deviceToken =Preferences.getStringPreference(requireContext(), FCM_TOKEN),
-            deviceType = "A"
-        )
-        Log.e("modelSocial", "hitSocialLoginApi: $model", )
-        viewModel.hitSocialApi(model)
-    }
 
-
-
-    override fun initView(savedInstanceState: Bundle?) {
-        setPasswordToggle()
-        onClick()
-        Log.e("GoogleSignIn", "Web Client ID used: ${getString(R.string.default_web_client_id)}")
-//        auth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id)) // Get this from firebase console
-            .requestEmail()
-            .build()
-
-        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-        firebaseAuth = FirebaseAuth.getInstance()
-
-        binding.passwordToggle.setColorFilter(ContextCompat.getColor(requireContext(), R.color.white), PorterDuff.Mode.SRC_IN)
-        clickTermsConditions()
-        clickDontHaveAccount()
-        binding.clGoogleLogin.setOnClickListener {
-            googleSignInClient.signOut()
-            ProcessDialog.showDialog(requireActivity(),true)
-            val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
-        }
-    }
-    private fun clickDontHaveAccount(){
-        val fullText = "Don’t have an account ?  Sign Up"
-        val spannableString = SpannableString(fullText)
-        val signUpClick = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                findNavController().navigate(R.id.registrationFragment)
-            }
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme) // your link color
-                ds.isUnderlineText = false
-            }
-        }
-
-        val signUpStart = fullText.indexOf("Sign Up")
-        val signUpEnd = signUpStart + "Sign Up".length
-
-        spannableString.setSpan(signUpClick, signUpStart, signUpEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        binding.tvDontHaveAccount.text = spannableString
-        binding.tvDontHaveAccount.movementMethod = LinkMovementMethod.getInstance()
-        binding.tvDontHaveAccount.highlightColor = Color.TRANSPARENT
-
-    }
-    private fun clickTermsConditions(){
-        val fullText = "I agree to Terms & Conditions and Privacy Policy of the App"
-        val spannableString = SpannableString(fullText)
-        val termsClickable = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                // Handle Terms & Conditions click
-                //Toast.makeText(widget.context, "Terms & Conditions clicked", Toast.LENGTH_SHORT).show()
-                val bundle = Bundle()
-                bundle.putString("screen","termsCondition")
-                findNavController().navigate(R.id.termsConditionsFragment,bundle)
-            }
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme) // your link color
-                ds.isUnderlineText = false
-            }
-        }
-
-        // Privacy Policy click span
-        val privacyClickable = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                // Handle Privacy Policy click
-                //Toast.makeText(widget.context, "Privacy Policy clicked", Toast.LENGTH_SHORT).show()
-                val bundle = Bundle()
-                bundle.putString("screen","privacy")
-                findNavController().navigate(R.id.termsConditionsFragment,bundle)
-            }
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme)
-                ds.isUnderlineText = false
-            }
-        }
-
-        // Apply spans
-        val termsStart = fullText.indexOf("Terms & Conditions")
-        val termsEnd = termsStart + "Terms & Conditions".length
-
-        val privacyStart = fullText.indexOf("Privacy Policy")
-        val privacyEnd = privacyStart + " Privacy Policy".length
-
-        spannableString.setSpan(termsClickable, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannableString.setSpan(privacyClickable, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        binding.tvTermsConditions.text = spannableString
-        binding.tvTermsConditions.movementMethod = LinkMovementMethod.getInstance()
-        binding.tvTermsConditions.highlightColor = Color.TRANSPARENT
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_signin
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         CommonUtils.touchHideKeyBoard(view,requireActivity())
-        setObserver()
     }
+
+    override fun initView(savedInstanceState: Bundle?) {
+        setObserver()
+        setUpGoogleSignUp()
+        clickTermsConditions()
+        clickDoNotHaveAccount()
+        setPasswordToggle()
+        onClick()
+        firestore = FirebaseFirestore.getInstance()
+    }
+
     private fun setObserver() {
         viewModel.getLoginLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
@@ -283,6 +163,26 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         }
     }
 
+    fun updateUserOnFirebase(payload: Payload?) {
+        val dataHashMap = hashMapOf(
+            "userId" to payload?.userId,
+            "name" to payload?.fullName,
+            "email" to payload?.email,
+            "status" to "online",
+            "mobileNumber" to "",
+            "device_platform" to "android",
+            "fcm_token" to Preferences.getStringPreference(requireContext(), FCM_TOKEN),
+            "createdAt" to getUidLoggedIn(),
+            "profilePicture" to ""
+        )
+
+        firestore.collection("Users").document(payload?.userId.toString()).set(dataHashMap).addOnSuccessListener {
+            logD("Google Login Success: $it")
+        }.addOnFailureListener { error ->
+            logD("Google Login Error: $error")
+        }
+    }
+
     fun Payload.toUserDetailsX(): UserDetailsX {
         return UserDetailsX(
             id = this.userId,
@@ -321,21 +221,79 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         )
     }
 
+    private fun setUpGoogleSignUp() {
+        auth = FirebaseAuth.getInstance()
+        credentialManager = CredentialManager.create(requireContext())
+    }
 
-    private fun onClick() {
-        binding.apply {
-            tvForgotPassword.setOnClickListener {
+    private fun clickTermsConditions(){
+        val fullText = "I agree to Terms & Conditions and Privacy Policy of the App"
+        val spannableString = SpannableString(fullText)
+        val termsClickable = object : ClickableSpan() {
+            override fun onClick(widget: View) {
                 val bundle = Bundle()
-                bundle.putString("from","login")
-                findNavController().navigate(R.id.emailFragment,bundle)
+                bundle.putString("screen","termsCondition")
+                findNavController().navigate(R.id.termsConditionsFragment,bundle)
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme) // your link color
+                ds.isUnderlineText = false
             }
         }
+
+        val privacyClickable = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                val bundle = Bundle()
+                bundle.putString("screen","privacy")
+                findNavController().navigate(R.id.termsConditionsFragment,bundle)
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme)
+                ds.isUnderlineText = false
+            }
+        }
+        val termsStart = fullText.indexOf("Terms & Conditions")
+        val termsEnd = termsStart + "Terms & Conditions".length
+        val privacyStart = fullText.indexOf("Privacy Policy")
+        val privacyEnd = privacyStart + " Privacy Policy".length
+
+        spannableString.setSpan(termsClickable, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(privacyClickable, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        binding.tvTermsConditions.text = spannableString
+        binding.tvTermsConditions.movementMethod = LinkMovementMethod.getInstance()
+        binding.tvTermsConditions.highlightColor = Color.TRANSPARENT
     }
 
-    override fun getLayoutId(): Int {
-        return R.layout.fragment_signin
+    private fun clickDoNotHaveAccount(){
+        val fullText = "Don’t have an account ?  Sign Up"
+        val spannableString = SpannableString(fullText)
+        val signUpClick = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                findNavController().navigate(R.id.registrationFragment)
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme)
+                ds.isUnderlineText = false
+            }
+        }
+
+        val signUpStart = fullText.indexOf("Sign Up")
+        val signUpEnd = signUpStart + "Sign Up".length
+
+        spannableString.setSpan(signUpClick, signUpStart, signUpEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        binding.tvDontHaveAccount.text = spannableString
+        binding.tvDontHaveAccount.movementMethod = LinkMovementMethod.getInstance()
+        binding.tvDontHaveAccount.highlightColor = Color.TRANSPARENT
     }
+
     private fun setPasswordToggle() {
+        binding.passwordToggle.setColorFilter(ContextCompat.getColor(requireContext(), R.color.white), PorterDuff.Mode.SRC_IN)
         binding.password.transformationMethod = CommonUtils.DotPasswordTransformationMethod
         binding.passwordToggle.setOnClickListener {
             isPassHidden = if (isPassHidden) {
@@ -350,55 +308,87 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             binding.password.setSelection(binding.password.text.toString().length)
         }
     }
-    fun updateUserOnFirebase(payload: Payload?) {
-        val dataHashMap = hashMapOf(
-            "userId" to payload?.userId,
-            "name" to payload?.fullName,
-            "email" to payload?.email,
-            "status" to "online",
-            "mobileNumber" to "",
-            "device_platform" to "android",
-            "fcm_token" to Preferences.getStringPreference(requireContext(), FCM_TOKEN),
-            "createdAt" to getUidLoggedIn(),
-            "profilePicture" to ""
-        )
 
-        firestore.collection("Users").document(payload?.userId.toString()).set(dataHashMap).addOnSuccessListener {
-            Log.i("TAG", "firebase signup: "+it)
-//            Toast.makeText(requireContext(), "Registration successful!", Toast.LENGTH_SHORT).show()
-//            startActivity(Intent(this, SignInActivity::class.java))
-        }.addOnFailureListener { error ->
-            Log.i("TAG", "firebase signup: "+error)
-//            Toast.makeText(requireContext(), "Registration failed, try again!", Toast.LENGTH_SHORT).show()
-        }
-    }
+    private fun onClick() {
+        binding.apply {
+            tvForgotPassword.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putString("from","login")
+                findNavController().navigate(R.id.emailFragment,bundle)
+            }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN) {
-            Log.e("GoogleSignIn", "resultCode = $resultCode, data = $data")
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                Log.e("GoogleSignIn", "Success! ID Token prefix: ${account.idToken?.substring(0, 20)}")
-                if (account != null) {
-                    Log.e("TTTT", "TTTTT>>> "+account.idToken!!)
-                    firebaseAuthWithGoogle(account.idToken!!)
-                } else {
-                    //ProcessDialog.dismissDialog(true)
-                    Log.w("LoginActivity", "Sign-in canceled")
-                    // Dismiss your dialog or take fallback action here
-                }
-            } catch (e: ApiException) {
-                Log.e("GoogleSignIn", "Failed - code: ${e.statusCode}, msg: ${e.message}, details: ${e.localizedMessage}", e)
-                ProcessDialog.dismissDialog(true)
+            clGoogleLogin.setOnClickListener {
+                signInWithGoogle()
             }
         }
     }
 
+    private fun signInWithGoogle() {
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setServerClientId(getString(R.string.server_client_id))
+            .setFilterByAuthorizedAccounts(false)
+            .build()
 
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
 
+        lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    requireContext(),
+                    request
+                )
+                handleSignIn(result)
 
+            } catch (e: GetCredentialException) {
+                logD("GoogleSignIn -> Credential Error: ${e.message}")
+                showToast("Sign-In Failed")
+            } catch (e: Exception) {
+                logD("GoogleSignIn -> Unknown Error: ${e.message}")
+            }
+        }
+    }
+
+    private fun handleSignIn(result: GetCredentialResponse) {
+        val credential = result.credential
+        if (credential is CustomCredential &&
+            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+        ) {
+            val googleIdTokenCredential =
+                GoogleIdTokenCredential.createFrom(credential.data)
+
+            val idToken = googleIdTokenCredential.idToken
+            firebaseAuthWithGoogle(idToken)
+        } else {
+            logD("GoogleSignIn -> Unexpected credential type")
+            showToast("Google Sign-In Failed")
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(firebaseCredential)
+            .addOnCompleteListener(requireActivity()) { task ->
+
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    logD("GoogleSignIn-> Success: ${user?.email}")
+                    val model=SocialSignUpRequest(
+                        name = user?.displayName?:"",
+                        email = user?.email?:"",
+                        profile_image = user?.photoUrl.toString(),
+                        social_id = user?.uid?:"",
+                        social_type = "G",
+                        deviceToken =Preferences.getStringPreference(requireContext(), FCM_TOKEN),
+                        deviceType = "A"
+                    )
+                    logD("hitSocialLoginApi: $model")
+                    viewModel.hitSocialApi(model)
+                } else {
+                    logD("GoogleSignIn-> Firebase Auth Failed: ${task.exception ?: ""}")
+                    showToast("Authentication Failed")
+                }
+            }
+    }
 }

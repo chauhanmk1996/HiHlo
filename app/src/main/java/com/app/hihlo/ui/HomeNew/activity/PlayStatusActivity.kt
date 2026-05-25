@@ -123,6 +123,7 @@ class PlayStatusActivity : AppCompatActivity() {
     private var isHoldPause = false
     private var isDismissing = false
     private var wasMutedBeforeBackground = false
+    private var isUserMuteStory = false
 
     private val imageRunnable = Runnable { playNext() }
     private val progressRunnable = object : Runnable {
@@ -228,7 +229,17 @@ class PlayStatusActivity : AppCompatActivity() {
             true
         }
         binding.btnMuteUnmute.setOnClickListener {
-            player?.let { checkVolume(it, binding.btnMuteUnmute) }
+            if (isUserMuteStory) {
+                isUserMuteStory = false
+                player?.volume = 1f
+                wasMutedBeforeBackground = false
+                binding.btnMuteUnmute.setImageResource(R.drawable.volume_mute)
+            } else {
+                isUserMuteStory = true
+                player?.volume = 0f
+                wasMutedBeforeBackground = true
+                binding.btnMuteUnmute.setImageResource(R.drawable.volume_unmute)
+            }
         }
 
         setupSwipeToDismiss()
@@ -270,6 +281,7 @@ class PlayStatusActivity : AppCompatActivity() {
                     startHoldTimer()
                     true
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     val diff = event.rawY - downY
                     if (kotlin.math.abs(diff) > 20) {
@@ -288,6 +300,7 @@ class PlayStatusActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     cancelHold()
                     val diff = event.rawY - downY
@@ -318,6 +331,7 @@ class PlayStatusActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 else -> false
             }
         }
@@ -343,7 +357,11 @@ class PlayStatusActivity : AppCompatActivity() {
             val track = View(this).apply {
                 setBackgroundColor(Color.parseColor("#55212328"))
             }
-            progressWrapper.addView(track, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            progressWrapper.addView(
+                track,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
 
             // Progress fill (foreground)
             val fill = View(this).apply {
@@ -360,7 +378,8 @@ class PlayStatusActivity : AppCompatActivity() {
 
             // Set initial progress for already watched stories
             if (i < currentStoryIndex) {
-                (fill.layoutParams as FrameLayout.LayoutParams).width = ViewGroup.LayoutParams.MATCH_PARENT
+                (fill.layoutParams as FrameLayout.LayoutParams).width =
+                    ViewGroup.LayoutParams.MATCH_PARENT
                 fill.requestLayout()
             }
         }
@@ -410,6 +429,17 @@ class PlayStatusActivity : AppCompatActivity() {
             val mediaItem = MediaItem.fromUri(Uri.parse(story.asset_url))
             player?.setMediaItem(mediaItem)
             player?.prepare()
+
+            if (isUserMuteStory) {
+                player?.volume = 0f
+                wasMutedBeforeBackground = true
+                binding.btnMuteUnmute.setImageResource(R.drawable.volume_unmute)
+            } else {
+                player?.volume = 1f
+                wasMutedBeforeBackground = false
+                binding.btnMuteUnmute.setImageResource(R.drawable.volume_mute)
+            }
+
             player?.play()
             startVideoProgress()
             player?.addListener(object : Player.Listener {
@@ -423,8 +453,10 @@ class PlayStatusActivity : AppCompatActivity() {
     private fun updateUIForStory(story: Story) {
         val user = getCurrentUser()
         binding.userName.text = user.userDetail.name
-        binding.userLocation.text = "${user.userDetail?.city ?: ""}, ${user.userDetail?.country ?: "India"}"
-        Glide.with(this).load(user.userDetail.profile_image).placeholder(R.drawable.profile_placeholder).into(binding.userImage)
+        binding.userLocation.text =
+            "${user.userDetail?.city ?: ""}, ${user.userDetail?.country ?: "India"}"
+        Glide.with(this).load(user.userDetail.profile_image)
+            .placeholder(R.drawable.profile_placeholder).into(binding.userImage)
 
         val TIME = CommonUtils.getTimeAgo(story.created_at)
         binding.statusTime.text = if (TIME.equals("Just now")) TIME else "$TIME ago"
@@ -444,7 +476,6 @@ class PlayStatusActivity : AppCompatActivity() {
             binding.sendEditText.visibility = if (isFirst) View.GONE else View.VISIBLE
             if (isFirst) binding.seenCount.text = story.seen_count.toString()
         }
-
         setupCaption(story.caption)
     }
 
@@ -465,7 +496,9 @@ class PlayStatusActivity : AppCompatActivity() {
     }
 
     private fun playPrevious() {
-        if (isSinglePlayMode) { finish(); return }
+        if (isSinglePlayMode) {
+            finish(); return
+        }
         if (currentStoryIndex > 0) {
             currentStoryIndex--
         } else if (currentUserIndex > 0) {
@@ -540,7 +573,12 @@ class PlayStatusActivity : AppCompatActivity() {
 
             val typeface = ResourcesCompat.getFont(this, R.font.manrope_bold)
             typeface?.let {
-                spannable.setSpan(PostsAdapter.CustomTypefaceSpan(it), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                spannable.setSpan(
+                    PostsAdapter.CustomTypefaceSpan(it),
+                    start,
+                    end,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
             }
 
             val clickableSpan = object : ClickableSpan() {
@@ -573,9 +611,11 @@ class PlayStatusActivity : AppCompatActivity() {
                     isScrolling = false
                     downY = event.rawY
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     if (kotlin.math.abs(event.rawY - downY) > 20) isScrolling = true
                 }
+
                 MotionEvent.ACTION_UP -> {
                     if (!isScrolling) {
                         binding.captionExpanded.visibility = View.GONE
@@ -597,7 +637,8 @@ class PlayStatusActivity : AppCompatActivity() {
                 if (isPaused) return
                 val elapsed = System.currentTimeMillis() - imageStartTime
                 val progressFraction = (elapsed.toFloat() / imageDuration).coerceAtMost(1f)
-                val wrapper = binding.storyProgressContainer.getChildAt(currentStoryIndex) as? FrameLayout
+                val wrapper =
+                    binding.storyProgressContainer.getChildAt(currentStoryIndex) as? FrameLayout
                 val fill = wrapper?.tag as? View
                 fill?.let {
                     val totalWidth = wrapper.width
@@ -625,7 +666,8 @@ class PlayStatusActivity : AppCompatActivity() {
             val cur = it.currentPosition
             if (dur > 0) {
                 val progressFraction = (cur.toFloat() / dur).coerceAtMost(1f)
-                val wrapper = binding.storyProgressContainer.getChildAt(currentStoryIndex) as? FrameLayout
+                val wrapper =
+                    binding.storyProgressContainer.getChildAt(currentStoryIndex) as? FrameLayout
                 val fill = wrapper?.tag as? View
                 fill?.let {
                     val totalWidth = wrapper.width
@@ -668,20 +710,12 @@ class PlayStatusActivity : AppCompatActivity() {
         player = null
     }
 
-    private fun checkVolume(exoPlayer: ExoPlayer, muteVolumeButton: ImageView) {
-        val isCurrentlyMuted = exoPlayer.volume == 0f
-        if (isCurrentlyMuted) {
-            exoPlayer.volume = 1f
-            wasMutedBeforeBackground = false
-            muteVolumeButton.setImageResource(R.drawable.volume_mute)
-        } else {
-            exoPlayer.volume = 0f
-            wasMutedBeforeBackground = true
-            muteVolumeButton.setImageResource(R.drawable.volume_unmute)
-        }
-    }
-
-    private fun handleSideTouch(event: MotionEvent, v: View, isRight: Boolean, holdMovePx: Float): Boolean {
+    private fun handleSideTouch(
+        event: MotionEvent,
+        v: View,
+        isRight: Boolean,
+        holdMovePx: Float,
+    ): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 if (isRight) {
@@ -696,6 +730,7 @@ class PlayStatusActivity : AppCompatActivity() {
                 startHoldTimer()
                 return true
             }
+
             MotionEvent.ACTION_MOVE -> {
                 val downX = if (isRight) downXRight else downXLeft
                 val downY = if (isRight) downYRight else downYLeft
@@ -717,6 +752,7 @@ class PlayStatusActivity : AppCompatActivity() {
                 }
                 return true
             }
+
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 cancelHold()
                 val downX = if (isRight) downXRight else downXLeft
@@ -740,6 +776,7 @@ class PlayStatusActivity : AppCompatActivity() {
                 }
                 return true
             }
+
             else -> return false
         }
     }
@@ -779,6 +816,7 @@ class PlayStatusActivity : AppCompatActivity() {
                 }
                 return true
             }
+
             else -> return false
         }
     }
@@ -834,12 +872,17 @@ class PlayStatusActivity : AppCompatActivity() {
                 val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                     this@PlayStatusActivity, LOGIN_DATA
                 )?.payload?.authToken
-                val response = RetrofitBuilder.apiService.deleteStory(token, StoryDeleteRequest(storyId = storyId.toString()))
+                val response = RetrofitBuilder.apiService.deleteStory(
+                    token,
+                    StoryDeleteRequest(storyId = storyId.toString())
+                )
                 if (response.status == 1) {
                     RTVariable.IS_STATUS_DELETED = true
                     finish()
                 }
-            } catch (e: Exception) { e.printStackTrace() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -848,7 +891,12 @@ class PlayStatusActivity : AppCompatActivity() {
         val popBinding = PopupChatSideOptionsBinding.inflate(inflater)
         popBinding.title1.text = "Block"
         popBinding.title2.text = "Report"
-        val popup = PopupWindow(popBinding.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+        val popup = PopupWindow(
+            popBinding.root,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        ).apply {
             setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             elevation = 20f
             showAtLocation(view, Gravity.CENTER, 0, 0)
@@ -876,7 +924,10 @@ class PlayStatusActivity : AppCompatActivity() {
 
     private fun sendMessage(other: Story, message: String) {
         viewModel.hitSaveRecentChatDataApi(
-            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(this, LOGIN_DATA)?.payload?.authToken,
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                this,
+                LOGIN_DATA
+            )?.payload?.authToken,
             SaveRecentChatRequest(toUserId = getCurrentUser().user_id.toString(), message = message)
         )
     }
@@ -887,9 +938,11 @@ class PlayStatusActivity : AppCompatActivity() {
                 Status.SUCCESS -> {
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(this, true)
                 }
+
                 Status.ERROR -> {
                     //Log.e("TAG", "Error: ${res.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -918,7 +971,7 @@ class PlayStatusActivity : AppCompatActivity() {
 
     override fun finish() {
         val root = binding.root
-        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
+        if (RTVariable.IS_STATUS_PROFILE_CLICKED) {
             RTVariable.IS_STATUS_VIEWER_FINISHED = true
         }
 
@@ -933,7 +986,7 @@ class PlayStatusActivity : AppCompatActivity() {
         root.alpha = 1f
 
         val bubbleLeft = centerX - bubbleW / 2f
-        val bubbleTop  = centerY - bubbleH / 2f
+        val bubbleTop = centerY - bubbleH / 2f
 
         val screenW = root.width.toFloat()
         val screenH = root.height.toFloat()
@@ -946,7 +999,7 @@ class PlayStatusActivity : AppCompatActivity() {
         val viewScreenY = location[1].toFloat()
 
         val targetTransX = bubbleLeft - viewScreenX
-        val targetTransY = bubbleTop  - viewScreenY
+        val targetTransY = bubbleTop - viewScreenY
 
         val maxRadius = maxOf(
             hypot(centerX - viewScreenX, centerY - viewScreenY),

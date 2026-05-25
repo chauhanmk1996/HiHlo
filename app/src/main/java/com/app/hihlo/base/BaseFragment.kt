@@ -3,9 +3,14 @@ package com.app.hihlo.base
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import com.app.hihlo.R
 
 abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
     var _binding: DB? = null
@@ -39,6 +44,21 @@ abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun showToast(message: String?) {
+        val inflater = layoutInflater
+        val parent =
+            requireActivity().window.decorView.findViewById<ViewGroup>(android.R.id.content)
+
+        val layout: View = inflater.inflate(R.layout.long_toast, parent, false)
+        layout.findViewById<TextView>(R.id.tv_toast).text = message
+
+        Toast(requireContext()).apply {
+            duration = Toast.LENGTH_SHORT
+            view = layout
+            show()
+        }
     }
 
 }
