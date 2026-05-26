@@ -22,13 +22,13 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_gravity="center_horizontal"
                 android:layout_width="29dp"
                 android:layout_height="29dp"
                 android:src="@drawable/coin_icon" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
                 android:id="@+id/noOfCoins"

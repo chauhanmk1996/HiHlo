@@ -24,6 +24,7 @@ import com.app.hihlo.ui.chat.view_model.PredefinedChatViewModel
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -42,7 +43,7 @@ class PredefinedChatFragment : Fragment() {
         viewModel.hitPredefinedChatsOfUserApi(token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
         binding.apply {
             chatEdittext.doAfterTextChanged {
-                addButton.isVisible = chatEdittext.text.isNotEmpty()
+                addButton.isVisible = chatEdittext.getString().isNotEmpty()
             }
         }
         (requireActivity() as? HomeActivity)?.setOnlineStatusVisibility(false)
@@ -64,7 +65,7 @@ class PredefinedChatFragment : Fragment() {
             findNavController().popBackStack()
         }
         binding.addButton.setOnClickListener {
-            if (binding.chatEdittext.text.isEmpty()){
+            if (binding.chatEdittext.getString().isEmpty()){
                 Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
             }else{
                 viewModel.hitAddPredefinedChatApi(token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, binding.chatEdittext.text.toString())

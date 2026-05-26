@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
@@ -30,7 +30,7 @@
                 android:fontFamily="@font/manrope_semibold"
                 android:textColor="@color/white"
                 android:textSize="22sp"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +58,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvGeneralNotification"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -95,7 +95,7 @@
                     app:layout_constraintTop_toBottomOf="@id/clGeneralNotification"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvAudioCall"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -132,7 +132,7 @@
                     app:layout_constraintTop_toBottomOf="@id/clAudioCall"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvVideoCall"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
                     app:layout_constraintTop_toBottomOf="@id/clVideoCall"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvPayments"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -207,7 +207,7 @@
                     app:layout_constraintTop_toBottomOf="@id/clPayments"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvFollowing"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -245,7 +245,7 @@
                     app:layout_constraintTop_toBottomOf="@id/clFollowing"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvFollowers"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

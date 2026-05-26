@@ -41,13 +41,13 @@
                 app:layout_constraintEnd_toEndOf="@id/myStoryGradient"
                 app:layout_constraintStart_toStartOf="@id/myStoryGradient">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/userImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop" />
             </androidx.cardview.widget.CardView>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 app:layout_constraintBottom_toBottomOf="@+id/myStoryGradient"
                 app:layout_constraintEnd_toEndOf="@id/myStoryGradient"
                 android:id="@+id/onlineStatusImage"
@@ -67,7 +67,7 @@
                 app:layout_constraintStart_toEndOf="@id/myStoryGradient"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/name"
                     android:ellipsize="end"
                     android:maxLines="1"
@@ -81,7 +81,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="20dp"
                     android:layout_marginStart="10dp" />
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="-17dp"
                     android:layout_width="10dp"
@@ -93,7 +93,7 @@
                     app:layout_constraintBottom_toBottomOf="@+id/name"
                     app:layout_constraintStart_toEndOf="@id/name"/>
             </LinearLayout>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/outgoing_message_status"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
@@ -102,7 +102,7 @@
                 app:layout_constraintStart_toEndOf="@id/myStoryGradient"
                 app:layout_constraintTop_toBottomOf="@id/verifiedLayout"
                 app:layout_constraintBottom_toBottomOf="parent"/>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/userId"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -118,7 +118,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp" />
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_marginStart="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/verifiedLayout"
@@ -127,7 +127,7 @@
                 android:layout_height="12dp"
                 android:id="@+id/incoming_message_status"/>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_marginStart="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/verifiedLayout"
@@ -138,7 +138,7 @@
                 android:textColor="@color/white_DADADA"
                 android:id="@+id/lastMessageTime"/>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:visibility="gone"
                 android:id="@+id/userLocation"
                 android:ellipsize="end"

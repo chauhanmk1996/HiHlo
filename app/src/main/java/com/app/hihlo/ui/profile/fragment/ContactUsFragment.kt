@@ -41,6 +41,7 @@ import com.app.hihlo.ui.profile.view_model.ContactUsViewModel
 import com.app.hihlo.ui.trim_video.TrimVideoActivity
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.MediaUtils
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -126,9 +127,9 @@ class ContactUsFragment : Fragment() {
                 findNavController().popBackStack()
             }
             submitButton.setOnClickListener {
-                if (etMessage.text.trim().isEmpty()){
+                if (etMessage.getString().isEmpty()){
                     Toast.makeText(requireContext(), "Please Enter a Message!", Toast.LENGTH_SHORT).show()
-                }else if(etCharCount.text.isEmpty()){
+                }else if(etCharCount.getString().isEmpty()){
                     Toast.makeText(requireContext(), "Please Enter a Contact Number!", Toast.LENGTH_SHORT).show()
                 }else if (screenShotUrl.isEmpty()){
                     Toast.makeText(requireContext(), "Attach a screenshot!", Toast.LENGTH_SHORT).show()

@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:gravity="start"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
                 android:fontFamily="@font/manrope_semibold"
                 android:textColor="@color/white"
                 android:textSize="22sp"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -64,13 +64,13 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:scaleType="centerCrop"
                         android:id="@+id/ivUserImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
                 </com.google.android.material.card.MaterialCardView>
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:elevation="1dp"
                     app:layout_constraintBottom_toBottomOf="@+id/profileCardView"
                     app:layout_constraintEnd_toEndOf="@id/profileCardView"
@@ -90,7 +90,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginTop="6dp">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvName"
                         android:gravity="center_horizontal"
                         android:layout_width="wrap_content"
@@ -99,7 +99,7 @@
                         android:fontFamily="@font/manrope_medium"
                         android:textColor="@color/white"
                         android:textSize="18sp"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:visibility="gone"
                         android:id="@+id/tvUserName"
                         android:layout_width="wrap_content"
@@ -109,7 +109,7 @@
                         android:textSize="13sp"
                         android:textColor="@color/white"
                         android:fontFamily="@font/manrope_light"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvLocation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -154,7 +154,7 @@
                                 android:background="@null"
                                 app:track="@drawable/custom_track"
                                 android:thumb="@drawable/custom_thumb"/>
-                            <TextView
+                            <androidx.appcompat.widget.AppCompatTextView
                                 android:id="@+id/onlineStatusText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -181,13 +181,13 @@
                             android:orientation="horizontal"
                             android:gravity="center"
                             android:padding="8dp">
-                            <ImageView
+                            <androidx.appcompat.widget.AppCompatImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:padding="0dp"
                                 android:layout_marginEnd="5dp"
                                 android:src="@drawable/star_amount"/>
-                            <TextView
+                            <androidx.appcompat.widget.AppCompatTextView
                                 android:id="@+id/totalCoins"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -217,7 +217,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivVerificationArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivVerification"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
@@ -226,7 +226,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvVerification"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -240,7 +240,7 @@
                             app:layout_constraintBottom_toBottomOf="@id/ivVerification"
                             app:layout_constraintTop_toTopOf="@id/ivVerification"/>
 
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_marginStart="10dp"
@@ -251,7 +251,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivVerificationArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -278,7 +278,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivWalletArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivWallet"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -287,7 +287,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvWallet"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -303,7 +303,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivWalletArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -330,7 +330,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivContactArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivContact"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -339,7 +339,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvContactUs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -355,7 +355,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivContactArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -382,7 +382,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivShareUsArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivShareUs"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -391,7 +391,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvShareUs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -407,7 +407,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivShareUsArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -434,7 +434,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivAboutUsArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivAboutUs"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -443,7 +443,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvAboutUs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -459,7 +459,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivAboutUsArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -486,7 +486,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivivRateUsArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivRateUs"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -495,7 +495,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvRateUs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -511,7 +511,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivivRateUsArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -538,7 +538,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivBlockedArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivBlocked"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -548,7 +548,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
 
                             android:id="@+id/tvBlockedUser"
                             android:layout_width="wrap_content"
@@ -566,7 +566,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivBlockedArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -599,7 +599,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toStartOf="@id/ivCallChargeArrow">
-                            <ImageView
+                            <androidx.appcompat.widget.AppCompatImageView
                                 android:id="@+id/ivCallCharge"
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
@@ -608,7 +608,7 @@
                                 app:layout_constraintTop_toTopOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"/>
 
-                            <TextView
+                            <androidx.appcompat.widget.AppCompatTextView
                                 android:id="@+id/tvCallCharge"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -624,7 +624,7 @@
 
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivCallChargeArrow"
                             android:layout_width="15dp"
                             android:layout_height="15dp"
@@ -645,7 +645,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivCallChargeArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivAudioTen"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -654,7 +654,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvAudioTen"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -670,7 +670,7 @@
                             app:layout_constraintStart_toEndOf="@id/ivAudioTen"
                             app:layout_constraintBottom_toBottomOf="@id/ivAudioTen"
                             app:layout_constraintTop_toTopOf="@id/ivAudioTen"/>
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvUpdate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -698,7 +698,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivCallChargeArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivVideoCall"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -707,7 +707,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvVideoCall"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -742,7 +742,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivNotificationArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivNotification"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -751,7 +751,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvNotification"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -767,7 +767,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivNotificationArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -794,7 +794,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivPasswordArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivPassword"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -803,7 +803,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvPassword"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -819,7 +819,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivPasswordArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -846,7 +846,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivDeleteArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivDelete"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -855,7 +855,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvDeleteAccount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -871,7 +871,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivDeleteArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -898,7 +898,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivFaqArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivFaq"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -907,7 +907,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvFaq"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -923,7 +923,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivFaqArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -950,7 +950,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/ivLogoutArrow">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/ivLogout"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -959,7 +959,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"/>
 
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvLogout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -975,7 +975,7 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/ivLogoutArrow"
                         android:layout_width="15dp"
                         android:layout_height="15dp"

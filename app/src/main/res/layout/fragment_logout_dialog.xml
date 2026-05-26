@@ -13,7 +13,7 @@
         android:paddingBottom="5dp"
         android:background="@color/black_1c1c1c">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvSignOut"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,7 +26,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:fontFamily="@font/manrope_bold"/>
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvSignOutDesc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

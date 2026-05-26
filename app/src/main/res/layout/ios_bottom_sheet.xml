@@ -37,7 +37,7 @@
                 android:background="@drawable/ios_button_blur_background" />
 
             <!-- Clear Text -->
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/btnUploadPost"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -65,7 +65,7 @@
                 android:background="@drawable/ios_button_blur_background" />
 
             <!-- Clear Text -->
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/btnUploadReel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -92,7 +92,7 @@
                 android:background="@drawable/ios_cancel_blur_background" />
 
             <!-- Clear Text -->
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/btnCancel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

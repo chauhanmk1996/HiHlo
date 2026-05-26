@@ -26,6 +26,7 @@ import com.app.hihlo.model.chat.Messages
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.VideoCacheManager
+import com.app.hihlo.utils.getString
 import com.bumptech.glide.Glide
 
 
@@ -124,7 +125,7 @@ class NewStoryPagerAdapter(
                     listener.getClick(0)
                 }
                 sendButton.setOnClickListener {
-                    if (sendEditText.text.isEmpty()){
+                    if (sendEditText.getString().isEmpty()){
                         Toast.makeText(root.context, "Please enter something!", Toast.LENGTH_SHORT).show()
                     }else{
                         listener.sendMessage(otherStoryData, sendEditText.text.toString())

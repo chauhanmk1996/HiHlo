@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -30,7 +30,7 @@
                 android:layout_width="33dp"
                 android:layout_height="28dp"
                 android:src="@drawable/back_button_pink_small"/>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:visibility="visible"
                 android:gravity="center_horizontal"
                 android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/requireCoinImage"
                     android:layout_marginTop="70dp"
                     android:layout_width="187dp"
@@ -62,7 +62,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:src="@drawable/require_coins_image"/>
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     app:layout_constraintTop_toBottomOf="@+id/requireCoinImage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
                     android:text="You Need To Earn 10 Coins First To Unlock Chats"
                     android:textColor="@color/white"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_marginTop="36dp"
                     app:layout_constraintTop_toBottomOf="@+id/requireCoinImage"
                     android:layout_width="match_parent"
@@ -85,7 +85,7 @@
                     android:text="Watch one Ad and earn one coin"
                     android:textColor="@color/white_DADADA"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_marginTop="32dp"
                     app:layout_constraintTop_toBottomOf="@+id/requireCoinImage"
                     android:layout_width="match_parent"
@@ -96,7 +96,7 @@
                     android:textSize="15sp"
                     android:text="Chat with creator 5 coins deducted"
                     android:textColor="@color/white"/>
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_marginTop="10dp"
                     app:layout_constraintTop_toBottomOf="@+id/requireCoinImage"
                     android:layout_width="match_parent"

@@ -14,7 +14,7 @@
         android:background="@color/screen_background_black"
         tools:context=".ui.splash.activity.MainActivity">
 
-<!--        <ImageView-->
+<!--        <androidx.appcompat.widget.AppCompatImageView-->
 <!--            android:layout_width="150dp"-->
 <!--            android:layout_height="150dp"-->
 <!--            android:src="@drawable/splash_logo"-->
@@ -23,7 +23,7 @@
 <!--            app:layout_constraintStart_toStartOf="parent"-->
 <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--        <ImageView-->
+<!--        <androidx.appcompat.widget.AppCompatImageView-->
 <!--            android:layout_width="219dp"-->
 <!--            android:layout_height="100dp"-->
 <!--            android:layout_marginBottom="47dp"-->
@@ -32,7 +32,7 @@
 <!--            app:layout_constraintEnd_toEndOf="parent"-->
 <!--            app:layout_constraintStart_toStartOf="parent" />-->
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_marginStart="20dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

@@ -13,7 +13,7 @@
         android:background="@color/screen_background_black"
         tools:context=".ui.home.fragment.StoryFragment">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/storyImage"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -101,14 +101,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/userImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop" />
             </androidx.cardview.widget.CardView>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/onlineStatusImage"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -126,7 +126,7 @@
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/userName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_width="10dp"
                     android:layout_height="10dp"
@@ -150,7 +150,7 @@
                     app:layout_constraintStart_toEndOf="@+id/userName"
                     app:layout_constraintTop_toTopOf="@+id/userName" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/statusTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -164,7 +164,7 @@
                     app:layout_constraintStart_toEndOf="@+id/verifiedNameTick"
                     app:layout_constraintTop_toTopOf="@+id/userName" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/userLocation"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -180,7 +180,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/userName" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/crossButton"
                 android:layout_width="25dp"
                 android:layout_height="24dp"
@@ -216,13 +216,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:layout_width="14dp"
                     android:layout_height="14dp"
                     android:layout_gravity="center_vertical"
                     android:src="@drawable/seen_views_eye" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/seenCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -233,7 +233,7 @@
 
             </LinearLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/deleteButton"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -243,7 +243,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/sendButton"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -253,7 +253,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/sendEditText" />
 
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/sendEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

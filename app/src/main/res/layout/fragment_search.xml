@@ -21,7 +21,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/searchEdittext"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="8dp"
@@ -37,7 +37,7 @@
                 android:background="@null"
                 android:drawablePadding="8dp"
                 android:drawableStart="@drawable/search_icon"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="gone"
                 android:id="@+id/crossButton"
                 android:layout_width="22dp"

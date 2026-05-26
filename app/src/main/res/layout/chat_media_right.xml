@@ -14,7 +14,7 @@
         android:layout_marginEnd="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:textSize="15sp"
             android:fontFamily="@font/manrope_semibold"
             android:textColor="@color/white_40"
@@ -58,7 +58,7 @@
                     android:layout_marginBottom="25dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:scaleType="fitCenter"
                         android:id="@+id/mediaImage"
                         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
                 </androidx.cardview.widget.CardView>
 
             </androidx.cardview.widget.CardView>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="gone"
                 android:id="@+id/videoIcon"
                 android:elevation="5dp"
@@ -80,7 +80,7 @@
                 app:layout_constraintEnd_toEndOf="@id/imageCardview"
                 app:layout_constraintBottom_toBottomOf="@id/imageCardview"/>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 app:layout_constraintBottom_toBottomOf="@id/imageCardview"
                 android:visibility="visible"
                 android:id="@+id/timeView"
@@ -93,7 +93,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintEnd_toStartOf="@id/statusIcon"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/statusIcon"
                 android:layout_width="11dp"
                 android:layout_height="11dp"
@@ -105,7 +105,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="@id/timeView"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/reaction"
             android:visibility="gone"
             android:layout_width="wrap_content"
@@ -126,7 +126,7 @@
 <!--            android:layout_marginVertical="10dp"-->
 <!--            android:layout_width="250dp"-->
 <!--            android:layout_height="180dp">-->
-<!--            <TextView-->
+<!--            <androidx.appcompat.widget.AppCompatTextView-->
 <!--                android:visibility="visible"-->
 <!--                android:id="@+id/date"-->
 <!--                android:layout_width="wrap_content"-->
@@ -145,7 +145,7 @@
 <!--                android:layout_height="match_parent"-->
 <!--                app:layout_constraintStart_toEndOf="@+id/date"-->
 <!--                app:layout_constraintEnd_toStartOf="@+id/statusIcon">-->
-<!--                <ImageView-->
+<!--                <androidx.appcompat.widget.AppCompatImageView-->
 <!--                    android:scaleType="centerCrop"-->
 <!--                    android:id="@+id/mediaImage"-->
 <!--                    android:layout_width="match_parent"-->
@@ -153,7 +153,7 @@
 <!--                    app:layout_constraintStart_toEndOf="@+id/date"-->
 <!--                    app:layout_constraintEnd_toStartOf="@+id/statusIcon"/>-->
 <!--            </androidx.cardview.widget.CardView>-->
-<!--            <ImageView-->
+<!--            <androidx.appcompat.widget.AppCompatImageView-->
 <!--                android:visibility="gone"-->
 <!--                android:id="@+id/videoIcon"-->
 <!--                android:elevation="5dp"-->
@@ -165,7 +165,7 @@
 <!--                app:layout_constraintEnd_toEndOf="@id/imageCardview"-->
 <!--                app:layout_constraintBottom_toBottomOf="@id/imageCardview"/>-->
 
-<!--            <ImageView-->
+<!--            <androidx.appcompat.widget.AppCompatImageView-->
 <!--                android:id="@+id/statusIcon"-->
 <!--                android:layout_width="24dp"-->
 <!--                android:layout_height="24dp"-->

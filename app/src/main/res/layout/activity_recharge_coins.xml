@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/backButton"
                     android:layout_width="40dp"
                     android:layout_height="30dp"
@@ -33,7 +33,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="10dp"
@@ -55,13 +55,13 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent">
 
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:layout_gravity="center_vertical"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/coin_icon" />
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/coinNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -90,7 +90,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:layout_gravity="center_vertical"
                         android:layout_weight="1"
                         android:id="@+id/tvSelectPackage"
@@ -101,7 +101,7 @@
                         android:fontFamily="@font/manrope_semibold"
                         android:textColor="@color/white"
                         android:textSize="14sp" />
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="5dp"
                         android:layout_gravity="end"
@@ -131,7 +131,7 @@
                     tools:itemCount="6"
                     tools:listitem="@layout/adapter_recharge_coins" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvCoinAmount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -151,14 +151,14 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="15dp"
                     android:background="@drawable/colored_background">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         app:layout_constraintTop_toTopOf="@id/tvContinueWithAd"
                         app:layout_constraintBottom_toBottomOf="@id/tvContinueWithAd"
                         app:layout_constraintEnd_toStartOf="@+id/tvContinueWithAd"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/profile_reel_icon"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -174,7 +174,7 @@
                         android:textColor="@color/white" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvWalletHistory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

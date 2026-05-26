@@ -17,6 +17,7 @@ import com.app.hihlo.ui.signup.model.ResetPasswordRequest
 import com.app.hihlo.ui.signup.model.SignUp
 import com.app.hihlo.ui.signup.view_model.ResetPasswordViewModel
 import com.app.hihlo.utils.CommonUtils
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -66,8 +67,8 @@ class NewPasswordFragment : Fragment() {
     }
 
     private fun checkValidation() {
-        val password = binding.password.text.trim().toString()
-        val cnfPassword = binding.etCnfpassword.text.trim().toString()
+        val password = binding.password.getString()
+        val cnfPassword = binding.etCnfpassword.getString()
         if(password.isEmpty()){
             Toast.makeText(requireActivity(), "Please enter new password", Toast.LENGTH_SHORT).show()
         }else if(cnfPassword.isEmpty()){

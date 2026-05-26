@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="5dp">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:visibility="gone"
             android:paddingBottom="10dp"
             android:layout_width="wrap_content"
@@ -61,7 +61,7 @@
 <!--                    app:layout_constraintStart_toStartOf="parent"-->
 <!--                    app:layout_constraintTop_toTopOf="parent"-->
 <!--                    app:layout_constraintBottom_toBottomOf="parent"/>-->
-<!--                <TextView-->
+<!--                <androidx.appcompat.widget.AppCompatTextView-->
 <!--                    android:visibility="gone"-->
 <!--                    android:layout_marginTop="10dp"-->
 <!--                    android:layout_marginStart="10dp"-->
@@ -77,7 +77,7 @@
 <!--                    app:layout_constraintStart_toStartOf="parent"-->
 <!--                    app:layout_constraintEnd_toEndOf="parent"-->
 <!--                    app:layout_constraintTop_toTopOf="parent" />-->
-<!--                <TextView-->
+<!--                <androidx.appcompat.widget.AppCompatTextView-->
 <!--                    android:layout_marginStart="10dp"-->
 <!--                    android:layout_marginBottom="3dp"-->
 <!--                    android:id="@+id/replyUserMessage"-->
@@ -95,7 +95,7 @@
 <!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
 
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:background="@drawable/background_left_corners_round"
                 android:backgroundTint="@color/white_40"
                 android:visibility="visible"
@@ -124,7 +124,7 @@
                                 app:layout_constraintStart_toStartOf="@id/replyUserMessage"
                                 app:layout_constraintTop_toTopOf="@id/replyUserMessage"
                                 app:layout_constraintBottom_toBottomOf="@id/replyUserMessage"/>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/replyUserMessage"
                 android:maxWidth="270dp"
@@ -138,7 +138,7 @@
                 android:paddingEnd="10dp"
                 android:fontFamily="@font/manrope_regular"
                 android:textSize="14sp" />
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 app:layout_constraintEnd_toStartOf="@id/statusIcon"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/show_message"
@@ -152,7 +152,7 @@
                 android:textColor="#DADADA"
                 android:fontFamily="@font/manrope_light"
                 android:layout_marginStart="5dp" />
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/show_message"
@@ -166,7 +166,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:visibility="gone"
             android:id="@+id/reaction"
             android:layout_width="wrap_content"

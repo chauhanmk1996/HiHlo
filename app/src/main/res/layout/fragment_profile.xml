@@ -27,7 +27,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="parent">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/sideOptions"
                         android:src="@drawable/setting"
                         android:layout_marginEnd="19dp"
@@ -48,19 +48,19 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/sideOptions"
                         app:layout_constraintTop_toTopOf="parent">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:src="@drawable/coin_icon"
                             android:layout_marginEnd="5dp"
                             android:layout_width="19dp"
                             android:layout_height="19dp"
                             android:scaleType="centerCrop"/>
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:src="@drawable/profile_add_media_icon"
                             android:layout_width="19dp"
                             android:layout_height="19dp"
                             android:scaleType="centerCrop"/>
                     </LinearLayout>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:visibility="gone"
                         android:id="@+id/backButton"
                         android:layout_width="wrap_content"
@@ -80,7 +80,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toEndOf="@id/backButton"
                         app:layout_constraintEnd_toStartOf="@id/walletButton">
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
 
                             android:id="@+id/name"
                             android:ellipsize="end"
@@ -94,7 +94,7 @@
                             android:fontFamily="@font/manrope_medium"
                             android:textColor="@color/white"
                             android:textSize="19sp"/>
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:layout_marginStart="-17dp"
                             android:layout_gravity="center_vertical"
                             android:layout_width="14dp"
@@ -133,13 +133,13 @@
                             app:layout_constraintBottom_toTopOf="@id/name"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent" />
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/profileImage"
                             android:scaleType="centerCrop"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
                     </com.google.android.material.card.MaterialCardView>
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:elevation="1dp"
                         app:layout_constraintBottom_toBottomOf="@+id/profileCardView"
                         app:layout_constraintEnd_toEndOf="@id/profileCardView"
@@ -149,7 +149,7 @@
                         android:layout_marginBottom="6dp"
                         android:layout_width="15dp"
                         android:layout_height="15dp"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/username"
                         android:layout_marginTop="5sp"
                         android:layout_marginStart="25dp"
@@ -163,7 +163,7 @@
                         app:layout_constraintTop_toBottomOf="@id/profileCardView"/>
 
 
-                    <!--            <ImageView-->
+                    <!--            <androidx.appcompat.widget.AppCompatImageView-->
                     <!--                android:visibility="gone"-->
                     <!--                android:id="@+id/editProfileButton"-->
                     <!--                android:elevation="2dp"-->
@@ -186,7 +186,7 @@
                         app:layout_constraintTop_toTopOf="@id/profileCardView"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/profileCardView"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/bioTextview"
                         android:layout_marginTop="5dp"
                         android:layout_marginStart="25dp"
@@ -198,7 +198,7 @@
                         android:textSize="12sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/username"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/bioEditText"
                         android:layout_marginTop="5dp"
                         android:layout_marginStart="5dp"
@@ -226,7 +226,7 @@
                         android:layout_width="1dp"
                         android:layout_height="wrap_content"
                         app:layout_constraintGuide_percent="0.5"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guidelineHalfTwo"
@@ -243,7 +243,7 @@
                         android:gravity="center_horizontal"
                         android:fontFamily="@font/manrope_regular"
                         android:textSize="16sp"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toEndOf="@id/guidelineHalfTwo"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -270,7 +270,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@+id/profileDetailsLayout">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guidelineHalf"
@@ -294,7 +294,7 @@
                         android:layout_width="1dp"
                         android:layout_height="wrap_content"
                         app:layout_constraintGuide_percent="0.5"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toEndOf="@id/guidelineHalf"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -320,7 +320,7 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/post"
                         android:textSize="16sp"
                         android:gravity="center_horizontal"
@@ -329,7 +329,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/followers"
                         android:gravity="center_horizontal"
                         android:textSize="16sp"
@@ -338,7 +338,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"/>
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/following"
                         android:gravity="center_horizontal"
                         android:textSize="16sp"
@@ -363,7 +363,7 @@
                         android:orientation="vertical"
                         android:gravity="center">
 
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/gallery"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
@@ -389,7 +389,7 @@
                         android:orientation="vertical"
                         android:gravity="center">
 
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/openReel"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
@@ -419,7 +419,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="20dp"

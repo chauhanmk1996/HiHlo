@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent"
@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/back_button_pink_small"/>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:visibility="visible"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

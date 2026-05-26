@@ -36,7 +36,7 @@ class RateUsFragment : Fragment() {
     private val viewModel: RateUsViewModel by viewModels()
 
     private var currentRating = 0
-    private val stars: List<ImageView> by lazy {
+    private val stars: List<androidx.appcompat.widget.AppCompatImageView> by lazy {
         listOf(
             binding.star1,
             binding.star2,

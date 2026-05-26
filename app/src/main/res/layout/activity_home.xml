@@ -92,7 +92,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:maxImageSize="0dp" />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:elevation="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

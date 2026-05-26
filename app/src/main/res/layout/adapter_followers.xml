@@ -42,7 +42,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent">
 
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/userImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -52,7 +52,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
                 app:layout_constraintEnd_toEndOf="@id/userImageCardView"
                 android:id="@+id/onlineStatusImage"
@@ -71,7 +71,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/followButton"
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:includeFontPadding="false"
@@ -87,7 +87,7 @@
                     android:textColor="@color/white"
                     android:text="Label"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:includeFontPadding="false"
@@ -103,7 +103,7 @@
                     android:text="Label"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="5dp"
                     android:layout_width="10dp"
@@ -113,7 +113,7 @@
                     app:layout_constraintTop_toTopOf="@+id/name"
                     app:layout_constraintBottom_toBottomOf="@id/name" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:id="@+id/userLocation"
@@ -129,7 +129,7 @@
                     android:text="Label" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:visibility="gone"
                 android:background="@drawable/background_7dp_corner_no_stroke"
                 android:backgroundTint="@color/theme"
@@ -160,7 +160,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/followButtonImage2"
                     android:layout_width="63dp"
                     android:layout_height="32dp"
@@ -180,7 +180,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/followButtonImage"
                     android:layout_width="63dp"
                     android:layout_height="32dp"

@@ -21,7 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:gravity="center_horizontal"
                     android:paddingTop="11dp"
                     android:paddingBottom="16dp"
@@ -34,7 +34,7 @@
                     android:textColor="@color/white"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/dialogDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:paddingVertical="10dp"
                         android:gravity="center_horizontal"
                         android:layout_weight="1"
@@ -75,7 +75,7 @@
                         android:layout_height="match_parent"
                         android:background="#DDD" />
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:paddingVertical="10dp"
                         android:gravity="center_horizontal"
                         android:layout_weight="1"

@@ -101,6 +101,8 @@ import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
 import com.app.hihlo.ui.HomeNew.model.StatusItem
+import com.app.hihlo.utils.getLength
+import com.app.hihlo.utils.getString
 import kotlin.getValue
 
 class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
@@ -657,7 +659,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     isFocusable = true
                     isFocusableInTouchMode = true
                     requestFocus()
-                    setSelection(text.length)
+                    setSelection(getLength())
                 }
             }
             false
@@ -671,7 +673,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 isFocusable = true
                 isFocusableInTouchMode = true
                 requestFocus()
-                setSelection(text.length)
+                setSelection(getLength())
             }
         }
         binding.crossButton.setOnClickListener {
@@ -997,8 +999,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         super.onPause()
     }
     fun hitSearchUserApi(){
-        Log.e("TAG", "get search list: ${binding.searchEdittext.text.trim().toString()}")
-        viewModel2.hitSearchUsersList("Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.text.trim().toString())
+        Log.e("TAG", "get search list: ${binding.searchEdittext.getString()}")
+        viewModel2.hitSearchUsersList("Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.getString())
     }
     private fun hitServiceListApi(page: Int, genderId:Int?=null) {
         Log.e("TAG", "Home success: ${Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken}")

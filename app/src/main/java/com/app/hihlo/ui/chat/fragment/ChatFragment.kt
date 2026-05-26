@@ -125,6 +125,8 @@ import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusableAudioVideoPopup
 import com.app.hihlo.utils.ReusablePopup
+import com.app.hihlo.utils.getLength
+import com.app.hihlo.utils.getString
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
@@ -228,7 +230,7 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
         binding.apply {
             chatEdittext.doAfterTextChanged {
                 if (!binding.preLayout.isVisible){
-                    if (chatEdittext.text.isEmpty()){
+                    if (chatEdittext.text?.isEmpty() == true){
                         onEmptyChatBox()
                     }else{
                         onNonEmptyChatBox()
@@ -793,7 +795,7 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
                             lifecycleScope.launch {
                                 delay(1000)
                                 binding.chatEdittext.requestFocus()
-                                binding.chatEdittext.setSelection(binding.chatEdittext.text.length)
+                                binding.chatEdittext.setSelection(binding.chatEdittext.getLength())
                                 val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                                 imm.showSoftInput(binding.chatEdittext, InputMethodManager.SHOW_IMPLICIT)
                             }
@@ -980,7 +982,7 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
     @RequiresApi(Build.VERSION_CODES.S)
     private fun onClick() {
         binding.addPredefinedChat.setOnClickListener {
-            if (binding.chatEdittext.text.isEmpty()){
+            if (binding.chatEdittext.getString().isEmpty()){
                 Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
             }else{
                 if (isEditPredefinedChatSelected){
@@ -2007,11 +2009,11 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
     private fun updateButtonVisibility(activePosition: Int, prevActivePos:Int) {
         if (isAdded){
             val layoutManager = binding.chatRecycler.layoutManager as LinearLayoutManager
-            layoutManager.findViewByPosition(activePosition)?.findViewById<ImageView>(R.id.playIcon)?.visibility = View.GONE
-            layoutManager.findViewByPosition(activePosition)?.findViewById<ImageView>(R.id.pause)?.visibility = View.VISIBLE
+            layoutManager.findViewByPosition(activePosition)?.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.playIcon)?.visibility = View.GONE
+            layoutManager.findViewByPosition(activePosition)?.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.pause)?.visibility = View.VISIBLE
             if (prevActivePos!=-1&&prevActivePos!=activePosition) {
-                layoutManager.findViewByPosition(prevActivePos)?.findViewById<ImageView>(R.id.playIcon)?.visibility = View.VISIBLE
-                layoutManager.findViewByPosition(prevActivePos)?.findViewById<ImageView>(R.id.pause)?.visibility = View.GONE
+                layoutManager.findViewByPosition(prevActivePos)?.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.playIcon)?.visibility = View.VISIBLE
+                layoutManager.findViewByPosition(prevActivePos)?.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.pause)?.visibility = View.GONE
             }
         }
     }

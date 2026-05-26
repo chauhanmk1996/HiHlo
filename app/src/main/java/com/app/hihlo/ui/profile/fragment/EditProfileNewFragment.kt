@@ -82,6 +82,8 @@ import com.app.hihlo.model.gender_list.Gender
 import com.app.hihlo.ui.profile.adapter.InterestAdapter
 import com.app.hihlo.utils.CommonUtils.touchHideKeyBoard
 import com.app.hihlo.utils.UsernameInputFilter
+import com.app.hihlo.utils.getLength
+import com.app.hihlo.utils.getString
 import java.text.BreakIterator
 import kotlin.collections.isNotEmpty
 import kotlin.collections.toMutableList
@@ -231,12 +233,12 @@ class EditProfileNewFragment : Fragment() {
             )
 
             setText("@")
-            setSelection(text.length)
+            setSelection(getLength())
             setOnKeyListener { _, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_DEL &&
                     event.action == KeyEvent.ACTION_DOWN &&
                     selectionStart == 1 &&
-                    text.length == 1
+                    getLength() == 1
                 ) {
                     true // block delete
                 } else {
@@ -672,14 +674,14 @@ class EditProfileNewFragment : Fragment() {
     }
 
     private fun checkValidation(){
-        val etName = binding.etName.text.trim()
-        val etUserName = binding.etUserName.text.trim()
-        val etPhone = binding.etPhoneNumber.text.trim()
-        val dob = binding.etDOB.text.trim()
-        val etEmail = binding.etEmail.text.trim()
-        val aboutMe = binding.etAbout.text.trim()
+        val etName = binding.etName.getString()
+        val etUserName = binding.etUserName.getString()
+        val etPhone = binding.etPhoneNumber.getString()
+        val dob = binding.etDOB.getString()
+        val etEmail = binding.etEmail.getString()
+        val aboutMe = binding.etAbout.getString()
         val city = cityId
-        val country = binding.etCountry.text.trim()
+        val country = binding.etCountry.getString()
         val intrest = intrestName
 
         if(imageUrl==""&&newImageUrl==""){

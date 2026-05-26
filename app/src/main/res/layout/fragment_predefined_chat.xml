@@ -26,7 +26,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent"
@@ -38,7 +38,7 @@
 
 
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/name"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -90,7 +90,7 @@
             app:layout_constraintEnd_toStartOf="@id/addButton">
 
 
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:maxLines="3"
                 android:id="@+id/chatEdittext"
                 android:text="@={viewModel.message}"
@@ -110,7 +110,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/viewMoreOption"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="gone"
                 android:id="@+id/viewMoreOption"
                 android:layout_width="22dp"
@@ -123,7 +123,7 @@
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
 
             android:text="Add"
             android:textColor="@color/theme"

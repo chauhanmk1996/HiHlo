@@ -13,13 +13,13 @@
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:src="@drawable/pin_icon_black"
             android:id="@+id/iconImage"
             android:layout_width="24dp"
             android:layout_height="24dp" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/title"
             android:layout_marginStart="15dp"
             android:layout_width="wrap_content"

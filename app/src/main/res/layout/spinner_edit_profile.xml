@@ -5,7 +5,7 @@
 
     </data>
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/spinnerItem"
         style="?android:attr/spinnerDropDownItemStyle"
         android:singleLine="true"

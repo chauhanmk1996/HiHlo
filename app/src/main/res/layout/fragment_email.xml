@@ -15,7 +15,7 @@
         android:background="@color/screen_background_black"
         tools:context=".ui.signup.fragment.EmailFragment">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvForgotPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvForgotDesc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
                     app:layout_constraintStart_toStartOf="parent"/>
 
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/emailLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
                     app:layout_constraintStart_toStartOf="parent" />
 
                 <!-- Email Input -->
-                <EditText
+                <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/emailInput"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

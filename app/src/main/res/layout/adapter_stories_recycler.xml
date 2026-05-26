@@ -41,7 +41,7 @@
                 app:strokeColor="@color/black"
                 app:strokeWidth="0.5dp">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/otherStoryImageview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -67,7 +67,7 @@
             app:layout_constraintStart_toStartOf="@id/myStoryGradient"
             app:layout_constraintTop_toTopOf="@id/myStoryGradient">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/myStoryImageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -100,7 +100,7 @@
             android:background="@drawable/black_circle"
             android:visibility="gone">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/ivPlusIcon"
                 android:layout_width="19dp"
                 android:layout_height="19dp"
@@ -114,7 +114,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
             android:id="@+id/name"
@@ -151,7 +151,7 @@
             android:background="@drawable/bg_upload_button"
             android:visibility="visible">
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/manrope_semibold"
@@ -160,7 +160,7 @@
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginStart="1dp"
@@ -170,7 +170,7 @@
 
         </LinearLayout>
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/onlineImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

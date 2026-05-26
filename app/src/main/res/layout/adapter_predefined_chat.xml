@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="10dp">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:paddingVertical="4dp"
             android:paddingHorizontal="9dp"
             android:gravity="center"
@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/black">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/show_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

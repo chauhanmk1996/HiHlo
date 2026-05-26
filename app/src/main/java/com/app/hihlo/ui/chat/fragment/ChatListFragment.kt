@@ -54,6 +54,7 @@ import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -93,7 +94,7 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding>() {
 
     private val searchTextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-            binding.crossButton.isVisible = binding.searchEdittext.text.isNotEmpty()
+            binding.crossButton.isVisible = binding.searchEdittext.getString().isNotEmpty()
             val query = s.toString().trim()
             val currentPosition = binding.viewPager.currentItem
             val filteredList = if (currentPosition == 0) {

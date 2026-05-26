@@ -143,6 +143,12 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="Theme.PlayStatus" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="FullWidthDialog2">
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowFullscreen">false</item>

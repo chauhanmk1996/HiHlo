@@ -26,7 +26,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="@id/userImageCardView"
@@ -48,14 +48,14 @@
                 android:background="@color/transparent"
                 android:backgroundTint="@color/transparent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:src="@drawable/sample_profile"
                     android:id="@+id/userImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop" />
             </com.google.android.material.card.MaterialCardView>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
                 app:layout_constraintEnd_toEndOf="@id/userImageCardView"
                 android:id="@+id/onlineStatusImage"
@@ -73,7 +73,7 @@
                 app:layout_constraintBottom_toTopOf="@id/userLocation"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/name"
                     android:ellipsize="end"
                     android:maxLines="1"
@@ -88,7 +88,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="11dp" />
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:layout_gravity="center_vertical"
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="-17dp"
@@ -98,7 +98,7 @@
                     />
             </LinearLayout>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:visibility="gone"
                 android:id="@+id/userId"
                 android:ellipsize="end"
@@ -116,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/userLocation"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -132,7 +132,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="11dp" />
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/callIcon"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -142,7 +142,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/sideOptions"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
@@ -189,7 +189,7 @@
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         app:cardCornerRadius="60dp">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:src="@drawable/sample_profile"
                             android:id="@+id/userImageInner"
                             android:layout_width="match_parent"
@@ -206,7 +206,7 @@
                         app:layout_constraintBottom_toTopOf="@id/userLocation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content">
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/nameInner"
                             android:ellipsize="end"
                             android:maxLines="1"
@@ -217,7 +217,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="11dp" />
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:layout_gravity="center_vertical"
                             android:id="@+id/verifiedNameTickInner"
                             android:layout_width="15dp"
@@ -226,7 +226,7 @@
                             />
                     </LinearLayout>
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:visibility="gone"
                         android:id="@+id/userIdInner"
                         android:ellipsize="end"
@@ -243,7 +243,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp" />
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/userLocationInner"
                         android:ellipsize="end"
                         android:maxLines="1"
@@ -264,7 +264,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:background="@drawable/background_10dp_corner_round"
                             android:backgroundTint="@color/black_303030"
                             android:layout_marginEnd="8dp"
@@ -287,7 +287,7 @@
                             android:layout_marginEnd="8dp"
                             android:paddingVertical="6dp"
                             android:paddingEnd="15dp">
-                            <ImageView
+                            <androidx.appcompat.widget.AppCompatImageView
                                 android:id="@+id/liveStatusImage"
                                 android:layout_width="18dp"
                                 android:layout_height="18dp"
@@ -296,7 +296,7 @@
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent"
                                 app:layout_constraintBottom_toBottomOf="parent"/>
-                            <TextView
+                            <androidx.appcompat.widget.AppCompatTextView
                                 android:layout_marginStart="10dp"
                                 app:layout_constraintStart_toEndOf="@id/liveStatusImage"
                                 app:layout_constraintTop_toTopOf="parent"
@@ -318,7 +318,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp">
-                        <ImageView
+                        <androidx.appcompat.widget.AppCompatImageView
                             android:layout_marginEnd="-20dp"
                             android:id="@+id/idCoinToDeduct"
                             app:layout_constraintTop_toTopOf="parent"
@@ -326,7 +326,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/coin_icon"/>
-                        <TextView
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:gravity="center_horizontal"
                             android:layout_marginStart="30dp"
                             android:visibility="visible"
@@ -374,7 +374,7 @@
         app:layout_constraintBottom_toTopOf="@id/bottomLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/sendButton">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/waveImageview"
             app:layout_constraintBottom_toBottomOf="@id/waveImageview"
@@ -387,7 +387,7 @@
             android:gravity="center_horizontal"
             android:fontFamily="@font/manrope_regular"
             android:textSize="16sp"/>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:paddingStart="12dp"
             android:scaleType="fitXY"
             app:layout_constraintTop_toTopOf="parent"
@@ -396,7 +396,7 @@
             android:id="@+id/waveImageview"
             android:layout_width="0dp"
             android:layout_height="45dp"/>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/deleteAudio"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/sendAudioButton"
@@ -405,7 +405,7 @@
             android:layout_height="25dp"
             android:src="@drawable/voice_delete"/>
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             app:tint="@color/white"
             android:visibility="visible"
             android:id="@+id/playPauseAudio"
@@ -420,7 +420,7 @@
             app:layout_constraintTop_toTopOf="@id/waveImageview"
             app:layout_constraintBottom_toBottomOf="@id/waveImageview"
             />
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:visibility="visible"
             android:id="@+id/sendAudioButton"
             android:layout_width="46dp"
@@ -464,7 +464,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:background="@drawable/background_15dp_white_no_stroke"/>
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/preLayoutText"
                     android:gravity="start"
                     android:layout_width="wrap_content"
@@ -496,7 +496,7 @@
                     app:layout_constraintEnd_toStartOf="@id/closePredefined"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/closePredefined"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
@@ -541,7 +541,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:background="@color/theme"/>
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_marginTop="10dp"
                     android:layout_marginStart="15dp"
                     android:id="@+id/replyUserName"
@@ -558,7 +558,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/closeReply"
                     app:layout_constraintTop_toTopOf="parent" />
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_marginStart="15dp"
                     android:layout_marginBottom="8dp"
                     android:ellipsize="end"
@@ -575,7 +575,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/closeReply"
                     app:layout_constraintTop_toBottomOf="@id/replyUserName"/>
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/closeReply"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
@@ -585,7 +585,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="gone"
                 android:id="@+id/emojiButton"
                 android:src="@drawable/emoji_icon"
@@ -597,11 +597,9 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:background="@color/transparent"
-                android:backgroundTint="@color/transparent">
+                android:backgroundTint="@color/transparent"/>
 
-            </ImageView>
-
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:maxLines="4"
                 android:id="@+id/chatEdittext"
                 android:text="@={viewModel.message}"
@@ -622,7 +620,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/addPredefinedChat"
                 app:layout_constraintTop_toBottomOf="@+id/replyLayout" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="gone"
                 android:id="@+id/viewMoreOption"
                 android:layout_width="22dp"
@@ -632,7 +630,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:src="@drawable/plus_icon_round" />
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:visibility="gone"
                 android:background="@drawable/background_theme_color_border"
                 android:id="@+id/addPredefinedChat"
@@ -648,7 +646,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/openGallery"
                 app:layout_constraintTop_toTopOf="@id/chatEdittext"
                 app:layout_constraintBottom_toBottomOf="@id/chatEdittext"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/openGallery"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
@@ -659,7 +657,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/openPredefinedChatScreen"
                 app:layout_constraintTop_toTopOf="@id/chatEdittext"
                 app:layout_constraintBottom_toBottomOf="@id/chatEdittext"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:src="@drawable/open_predefined_chat"
                 android:visibility="visible"
                 android:layout_gravity="end"
@@ -673,7 +671,7 @@
                 app:layout_constraintTop_toTopOf="@id/chatEdittext"
                 app:layout_constraintBottom_toBottomOf="@id/chatEdittext"
                 android:id="@+id/openPredefinedChatScreen"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/giftButton"
                 android:layout_width="23dp"
                 android:layout_height="22dp"
@@ -684,7 +682,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/chatEdittext" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:visibility="gone"
             android:id="@+id/sendButton"
             android:layout_width="46dp"
@@ -693,7 +691,7 @@
             android:src="@drawable/send_button_chat"
             app:layout_constraintEnd_toStartOf="@id/recordAudioButton"
             app:layout_constraintBottom_toBottomOf="@id/bottomLayout"/>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/recordAudioButton"
             android:layout_width="46dp"
             android:layout_height="46dp"
@@ -704,7 +702,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/bottomLayout"
             app:layout_constraintBottom_toBottomOf="@id/bottomLayout"/>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:visibility="gone"
             android:id="@+id/blockedStatusText"
             android:ellipsize="end"
@@ -723,7 +721,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
 
-<!--        <ImageView-->
+<!--        <androidx.appcompat.widget.AppCompatImageView-->
 <!--            android:id="@+id/recordAudioButton"-->
 <!--            android:layout_width="27dp"-->
 <!--            android:layout_height="27dp"-->

@@ -5,7 +5,7 @@
 
     </data>
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:layout_marginStart="10dp"
         android:id="@+id/predefinedText"
         android:paddingVertical="4dp"
@@ -19,5 +19,5 @@
         android:fontFamily="@font/manrope_regular"
         android:text="How are you?">
 
-    </TextView>
+    </androidx.appcompat.widget.AppCompatTextView>
 </layout>

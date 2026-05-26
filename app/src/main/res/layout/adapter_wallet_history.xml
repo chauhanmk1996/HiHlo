@@ -35,7 +35,7 @@
                 app:cardCornerRadius="50dp"
                 app:cardElevation="0dp">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:scaleType="centerCrop"
                     android:src="@drawable/profile_placeholder"
                     android:id="@+id/userImage"
@@ -53,7 +53,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/transactionStatusLayout"
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:includeFontPadding="false"
@@ -69,7 +69,7 @@
                     android:text="Label"
                     />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:visibility="gone"
                     android:maxLines="1"
                     android:ellipsize="end"
@@ -86,7 +86,7 @@
                     android:text="Label"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:visibility="gone"
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="2dp"
@@ -97,7 +97,7 @@
                     app:layout_constraintTop_toTopOf="@+id/name"
                     app:layout_constraintBottom_toBottomOf="@id/userName" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:id="@+id/time"
@@ -120,13 +120,13 @@
                 android:layout_height="match_parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/transactionStatusIcon"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/noOfCoins"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -136,7 +136,7 @@
                     app:layout_constraintTop_toBottomOf="@id/transactionStatusIcon"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginTop="10dp"/>
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/minusPlusIcon"
                     android:layout_width="15dp"
                     android:layout_height="15dp"

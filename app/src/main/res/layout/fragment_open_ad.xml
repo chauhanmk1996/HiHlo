@@ -23,7 +23,7 @@
             android:layout_marginHorizontal="-15dp"
             android:progressDrawable="@drawable/story_seekbar_progress_drawable" />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/idSeekBar"
             android:layout_width="match_parent"

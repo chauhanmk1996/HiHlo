@@ -33,6 +33,7 @@ import com.app.hihlo.ui.home.view_model.UserPostListViewModel
 import com.app.hihlo.ui.reels.adapter.AdapterComments
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.toPx
+import com.app.hihlo.utils.getString
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -197,7 +198,7 @@ class RoundedBottomSheet : BottomSheetDialogFragment() {
         Glide.with(requireContext()).load(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.profileImage).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(binding.userImage)
         binding.commentsRecycler.adapter = adapter
         binding.sendButton.setOnClickListener {
-            if (binding.commentReplyEdittext.text.isEmpty()) {
+            if (binding.commentReplyEdittext.getString().isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter something!", Toast.LENGTH_SHORT).show()
             }else{
                 if (isReplySelected) {

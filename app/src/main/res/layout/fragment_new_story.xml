@@ -37,7 +37,7 @@
             android:layout_height="1dp"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.8"/>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:visibility="gone"
             android:id="@+id/sideOptions"
             app:layout_constraintTop_toTopOf="parent"
@@ -47,7 +47,7 @@
             android:layout_marginTop="50dp"
             android:layout_marginHorizontal="16dp"
             android:src="@drawable/side_options_white"/>
-<!--        <ImageView-->
+<!--        <androidx.appcompat.widget.AppCompatImageView-->
 <!--            android:id="@+id/sideOptions"-->
 <!--            app:layout_constraintEnd_toEndOf="parent"-->
 <!--            app:layout_constraintTop_toTopOf="@id/userDetailsLayout"-->

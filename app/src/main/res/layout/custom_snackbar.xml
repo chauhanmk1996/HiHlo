@@ -9,12 +9,12 @@
     android:paddingVertical="10dp"
     android:background="@drawable/bg_custom_snackbar">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="18dp"
         android:layout_height="18dp"
         android:src="@drawable/splash_logo"/>
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/txtMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

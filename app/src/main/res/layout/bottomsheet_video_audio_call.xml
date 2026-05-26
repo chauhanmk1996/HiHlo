@@ -15,7 +15,7 @@
         android:padding="16dp">
 
         <!-- Title -->
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvBottomSheetTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,14 +41,14 @@
                 android:orientation="vertical"
                 android:gravity="center">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvOption1Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Option 1"
                     android:textStyle="bold" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvOption1Subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -63,14 +63,14 @@
                 android:orientation="vertical"
                 android:gravity="center">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvOption2Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Audio Call"
                     android:textStyle="bold" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvOption2Subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

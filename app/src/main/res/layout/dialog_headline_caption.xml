@@ -7,7 +7,7 @@
     android:padding="16dp"
     android:background="@color/black_1c1c1c">
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvSignOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +17,7 @@
         android:layout_marginHorizontal="16dp"
         android:fontFamily="@font/manrope_bold"/>
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enter headline caption"
@@ -28,7 +28,7 @@
         android:fontFamily="@font/manrope_semibold"
         android:layout_marginBottom="12dp"/>
 
-    <EditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/etHeadlineInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

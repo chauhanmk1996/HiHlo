@@ -11,7 +11,7 @@
         android:layout_margin="5dp"
         android:background="@drawable/background_15dp_white_no_stroke">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -21,7 +21,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:src="@drawable/add_image"/>
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivDelete"
             android:layout_width="24dp"
             android:layout_height="24dp"

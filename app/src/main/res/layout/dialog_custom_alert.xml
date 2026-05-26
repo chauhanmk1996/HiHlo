@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:backgroundTint="#4D4A4A"
     android:padding="20dp">
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
         android:layout_width="130dp"
         android:layout_height="150dp"
         android:layout_gravity="center_horizontal"/>
-    <EditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:visibility="gone"
         android:id="@+id/tvMessage"
         android:inputType="number"
@@ -67,7 +67,7 @@
         android:textColorHint="@color/white_40"
         android:hint="Enter Coins"
         android:textSize="18sp" />
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvVideoCall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:layout_width="match_parent"
@@ -116,7 +116,7 @@
         android:layout_width="130dp"
         android:layout_height="150dp"
         android:layout_gravity="center_horizontal"/>
-    <EditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:visibility="gone"
         android:id="@+id/etVideoCoin"
         android:inputType="number"

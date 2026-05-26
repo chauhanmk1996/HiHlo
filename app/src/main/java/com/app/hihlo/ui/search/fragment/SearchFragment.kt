@@ -25,6 +25,7 @@ import com.app.hihlo.ui.chat.fragment.ChatListFragmentDirections
 import com.app.hihlo.ui.home.fragment.HomeFragmentDirections
 import com.app.hihlo.ui.search.adapter.SearchAdapter
 import com.app.hihlo.ui.search.view_model.SearchViewModel
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -67,7 +68,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         binding.searchRecycler.adapter = adapter
         onClick()
         binding.searchEdittext.doAfterTextChanged {
-            binding.crossButton.isVisible = binding.searchEdittext.text.isNotEmpty()
+            binding.crossButton.isVisible = binding.searchEdittext.getString().isNotEmpty()
             hitSearchUserApi()
         }
     }
@@ -130,7 +131,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     }
 
     fun hitSearchUserApi(){
-        viewModel.hitSearchUsersList("Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.text.trim().toString())
+        viewModel.hitSearchUsersList("Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.getString())
     }
     override fun getLayoutId(): Int {
         return R.layout.fragment_search

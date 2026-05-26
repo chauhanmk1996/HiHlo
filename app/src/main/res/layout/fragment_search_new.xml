@@ -27,7 +27,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backBtn"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
@@ -52,7 +52,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
 
-                <EditText
+                <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/searchEdittext"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <!-- Clear (cross) button -->
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/crossButton"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
@@ -102,7 +102,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/allButton"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

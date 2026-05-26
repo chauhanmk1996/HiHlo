@@ -46,7 +46,7 @@
             app:cardCornerRadius="30dp"
             android:layout_width="40dp"
             android:layout_height="40dp">
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:id="@+id/minimiseIcon"
@@ -55,7 +55,7 @@
                 android:src="@drawable/minimise"/>
 
         </androidx.cardview.widget.CardView>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_marginTop="40dp"
             android:gravity="center_horizontal"
             android:layout_marginHorizontal="50dp"
@@ -69,7 +69,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:gravity="center_horizontal"
             android:layout_marginHorizontal="20dp"
             android:id="@+id/tvUserName"
@@ -111,13 +111,13 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:scaleType="centerCrop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/userImage"/>
             </com.google.android.material.card.MaterialCardView>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:gravity="center_horizontal"
                 android:layout_marginTop="8dp"
                 android:layout_marginHorizontal="20dp"
@@ -162,7 +162,7 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginHorizontal="10dp">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/videoIcon"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
@@ -178,7 +178,7 @@
                     app:cardCornerRadius="30dp"
                     android:layout_width="50dp"
                     android:layout_height="50dp">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/speaker"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
@@ -196,7 +196,7 @@
                     app:cardCornerRadius="30dp"
                     android:layout_width="50dp"
                     android:layout_height="50dp">
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/mute"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
@@ -206,7 +206,7 @@
 
                 <!-- End Call Button -->
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:visibility="gone"
                     android:id="@+id/switchCamera"
                     android:layout_width="50dp"
@@ -214,7 +214,7 @@
                     android:src="@drawable/switch_camera"
                     android:scaleType="centerCrop"
                     android:layout_marginHorizontal="10dp" />
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/idJoinId"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
@@ -224,7 +224,7 @@
                     android:textColor="@color/white"
                     android:scaleType="centerCrop"
                     android:layout_marginHorizontal="10dp"/>
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/leaveBtn"
                     android:layout_width="50dp"
                     android:layout_height="50dp"

@@ -407,7 +407,7 @@ class ImageVideoConverter : AppCompatActivity() {
         }
         val mainRoot = dialogView.findViewById<RelativeLayout>(R.id.main_root)
         val etText = dialogView.findViewById<EditText>(R.id.etFullscreenText)
-        val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
+        val btnClose = dialogView.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.btnClose)
         val tvDoneDialog = dialogView.findViewById<Button>(R.id.tvDoneDialog)
         etText.gravity = Gravity.START or Gravity.CENTER_VERTICAL
         etText.setPadding(40, 0, 40, 0)
@@ -741,7 +741,7 @@ class ImageVideoConverter : AppCompatActivity() {
     class MenuAdapter(context: Context, private val items: Array<String>) : ArrayAdapter<String>(context, 0, items) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.menu_item_layout, parent, false)
-            val icon = view.findViewById<ImageView>(R.id.menuIcon)
+            val icon = view.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.menuIcon)
             val text = view.findViewById<TextView>(R.id.menuText)
             text.text = items[position]
             when (items[position]) {

@@ -40,6 +40,7 @@ import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.dpToPx
 import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.RTVariable
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -156,7 +157,7 @@ class AddReelFragment : Fragment() {
                 findNavController().popBackStack()
             }
             binding.uploadButton.setOnClickListener {
-                if (caption.text.isEmpty()){
+                if (caption.getString().isEmpty()){
                     Toast.makeText(requireContext(), "Please enter a caption", Toast.LENGTH_SHORT).show()
                 }else{
                     if (UserPreference.selectedMediaType == "I") {

@@ -21,7 +21,7 @@
             tools:context=".ui.signup.fragment.SigninFragment">
 
             <!-- Logo -->
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/appNameLogo"
                 android:layout_width="100dp"
                 android:layout_height="35dp"
@@ -32,7 +32,7 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <!-- Welcome Text -->
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/welcomeText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- Email Label -->
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/emailLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <!-- Email Input -->
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/emailInput"
                 android:maxLines="1"
                 android:layout_width="0dp"
@@ -83,7 +83,7 @@
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- Password Label -->
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/passwordLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <EditText
+                <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/password_toggle" />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/password_toggle"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
@@ -162,7 +162,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvTermsConditions"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -195,7 +195,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvForgotPassword"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -210,7 +210,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/loginButton"/>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvOrWith"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -238,7 +238,7 @@
                 android:background="@drawable/background_login_edittext"
                 app:layout_constraintTop_toBottomOf="@id/tvOrWith">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/ivGoogle"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
@@ -247,7 +247,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/login_with_google"
@@ -262,7 +262,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvDontHaveAccount"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

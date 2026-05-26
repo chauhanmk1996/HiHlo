@@ -46,7 +46,7 @@
                     app:strokeColor="@color/black"
                     app:strokeWidth="0dp">
 
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/userImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -56,7 +56,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/onlineStatusImage"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -75,7 +75,7 @@
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/userName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -90,7 +90,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_width="10dp"
                     android:layout_height="10dp"
@@ -100,7 +100,7 @@
                     app:layout_constraintStart_toEndOf="@+id/userName"
                     app:layout_constraintTop_toTopOf="@+id/userName" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/userLocation"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -127,7 +127,7 @@
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <!-- Collapsed version -->
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/captionCollapsed"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -142,7 +142,7 @@
                     app:layout_constraintEnd_toStartOf="@+id/moreLessText" />
 
                 <!-- "More" button -->
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/moreLessText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -162,7 +162,7 @@
                     app:layout_constraintTop_toTopOf="@id/captionCollapsed" />
 
                 <!-- Expanded version (single TextView) -->
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/captionExpanded"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -189,14 +189,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/followButtonImage"
                     android:layout_width="63dp"
                     android:layout_height="32dp"
                     android:src="@drawable/follow_button_reel" />
             </LinearLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/sideOptions"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -219,7 +219,7 @@
         <!--            app:layout_constraintTop_toBottomOf="@id/userDetailsLayout">-->
         <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/postImage"
             android:layout_width="match_parent"
             android:layout_height="550dp"
@@ -258,7 +258,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/likeImage"
                         android:layout_width="28dp"
                         android:layout_height="32dp"
@@ -266,7 +266,7 @@
 
                 </LinearLayout>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/likesCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -282,7 +282,7 @@
                     android:layout_marginStart="20dp"
                     android:gravity="center_vertical">
 
-                    <ImageView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/commentImage"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
@@ -290,7 +290,7 @@
 
                 </LinearLayout>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/commentsCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -298,7 +298,7 @@
                     android:text="0"
                     android:textColor="@color/white" />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/shareImage"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
@@ -307,7 +307,7 @@
                     android:src="@drawable/share_icon_white" />
             </LinearLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/giftImage"
                 android:layout_width="24dp"
                 android:layout_height="24dp"

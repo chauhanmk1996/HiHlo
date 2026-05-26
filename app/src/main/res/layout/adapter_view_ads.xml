@@ -10,7 +10,7 @@
         android:layout_height="172dp"
         android:layout_marginBottom="10dp">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/adImage"
             android:scaleType="centerCrop"
             android:src="@drawable/sample_computer_image"

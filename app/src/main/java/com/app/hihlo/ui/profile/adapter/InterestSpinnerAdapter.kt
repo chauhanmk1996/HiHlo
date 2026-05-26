@@ -29,7 +29,7 @@ class InterestSpinnerAdapter(
             .inflate(R.layout.spinner_item_with_image, parent, false)
 
         val interest = interests[position]
-        val icon = view.findViewById<ImageView>(R.id.imageViewIcon)
+        val icon = view.findViewById<androidx.appcompat.widget.AppCompatImageView>(R.id.imageViewIcon)
         val text = view.findViewById<TextView>(R.id.textViewName)
 
         text.text = interest.name

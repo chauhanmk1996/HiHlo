@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -29,7 +29,7 @@
                 android:layout_width="15dp"
                 android:layout_height="28dp"
                 android:src="@drawable/back_button_pink"/>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:gravity="center_horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -53,19 +53,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headerLayout">
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/sample_profile"/>
         </com.google.android.material.card.MaterialCardView>
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:elevation="2dp"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/edit_profile"
             app:layout_constraintBottom_toBottomOf="@+id/profileCardView"
             app:layout_constraintEnd_toEndOf="@id/profileCardView"/>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/changeProfilePicture"
             android:gravity="center_horizontal"
             android:layout_width="wrap_content"

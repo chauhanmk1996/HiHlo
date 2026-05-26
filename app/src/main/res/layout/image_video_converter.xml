@@ -65,7 +65,7 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <EditText
+        <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/etInput2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"/>
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvDone2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -159,7 +159,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivBack"
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -169,7 +169,7 @@
 
     </LinearLayout>
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/btnPlayPause"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -179,7 +179,7 @@
         android:visibility="visible"
         android:contentDescription="Play/Pause" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/btnMuteUnmute"
         android:layout_width="40dp"
         android:layout_height="40dp"

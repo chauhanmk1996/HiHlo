@@ -37,7 +37,7 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:gravity="center_horizontal"
             android:layout_marginHorizontal="20dp"
             android:id="@+id/personName"

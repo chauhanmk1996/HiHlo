@@ -14,7 +14,7 @@
         android:layout_marginTop="15dp"
         android:layout_marginBottom="10dp">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/title"
             android:layout_width="0dp"
             android:fontFamily="@font/manrope_semibold"
@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/expand_button" />
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_marginEnd="20dp"
             android:id="@+id/expand_button"
             android:layout_width="20dp"
@@ -37,7 +37,7 @@
             app:layout_constraintTop_toTopOf="@id/title"
             app:layout_constraintBottom_toBottomOf="@id/title"/>
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:padding="15dp"
             android:background="@drawable/background_10dp_corner_round"
             android:backgroundTint="@color/gray_646464"

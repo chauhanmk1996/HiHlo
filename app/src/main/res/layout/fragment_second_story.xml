@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/storyImage"
             android:scaleType="centerCrop"
             app:layout_constraintTop_toTopOf="parent"
@@ -90,14 +90,14 @@
                 app:cardCornerRadius="50dp"
                 app:cardElevation="0dp">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/userImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
 
             </androidx.cardview.widget.CardView>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
                 app:layout_constraintEnd_toEndOf="@id/userImageCardView"
                 android:id="@+id/onlineStatusImage"
@@ -112,7 +112,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:includeFontPadding="false"
@@ -126,7 +126,7 @@
                     android:textSize="12sp"
                     android:textColor="@color/white"/>
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
                     android:layout_marginStart="2dp"
                     android:layout_width="10dp"
@@ -136,7 +136,7 @@
                     app:layout_constraintTop_toTopOf="@+id/userName"
                     app:layout_constraintBottom_toBottomOf="@id/userName"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/statusTime"
                     android:layout_marginStart="6dp"
                     android:layout_width="wrap_content"
@@ -150,7 +150,7 @@
                     app:layout_constraintTop_toTopOf="@+id/userName"
                     app:layout_constraintBottom_toBottomOf="@id/userName"/>
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:id="@+id/userLocation"
@@ -167,7 +167,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/sideOptions"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -220,12 +220,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:layout_gravity="center_vertical"
                     android:src="@drawable/seen_views_eye"
                     android:layout_width="14dp"
                     android:layout_height="14dp"/>
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/seenCount"
                     android:layout_marginStart="5dp"
                     android:text="65"
@@ -235,7 +235,7 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/deleteButton"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -244,7 +244,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:src="@drawable/delete_icon"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:focusable="true"
                 android:elevation="2dp"
                 android:id="@+id/sendButton"
@@ -258,7 +258,7 @@
                 android:paddingBottom="10dp"
                 android:paddingEnd="-5dp"
                 android:src="@drawable/fluent_send_filled"/>
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:maxLines="3"
                 app:layout_constraintTop_toTopOf="parent"
                 android:id="@+id/sendEditText"

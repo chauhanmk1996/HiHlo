@@ -21,6 +21,7 @@ import com.app.hihlo.ui.signup.model.ChangePasswordRequest
 import com.app.hihlo.ui.signup.view_model.ResetPasswordViewModel
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.setupUIToHideKeyboard
+import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -62,9 +63,9 @@ class ChangePasswordFragment : Fragment() {
     }
 
     private fun checkValidation() {
-        val oldPassword = binding.oldPassword.text.trim().toString()
-        val newPassword = binding.password.text.trim().toString()
-        val cnfNewPassword = binding.etCnfpassword.text.trim().toString()
+        val oldPassword = binding.oldPassword.getString()
+        val newPassword = binding.password.getString()
+        val cnfNewPassword = binding.etCnfpassword.getString()
         if (oldPassword.isEmpty()) {
             Toast.makeText(requireActivity(), "Please enter old password", Toast.LENGTH_SHORT)
                 .show()

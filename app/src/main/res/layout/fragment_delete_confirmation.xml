@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
@@ -30,7 +30,7 @@
                 android:fontFamily="@font/manrope_semibold"
                 android:textColor="@color/white"
                 android:textSize="22sp"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fillViewport="true">
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/deleteAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
                 android:text="Delete Account"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:src="@drawable/delete_icon_pink"
                 app:tint="@color/white"
                 android:layout_width="20dp"
@@ -71,7 +71,7 @@
                 android:text="Delete Account"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_marginTop="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
