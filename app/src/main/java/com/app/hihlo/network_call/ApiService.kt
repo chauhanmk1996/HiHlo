@@ -104,53 +104,70 @@ interface ApiService {
     suspend fun resetPassword(@Body requestBody: ResetPasswordRequest): LoginResponse
 
     @POST("change-password")
-    suspend fun changePassword(@Header("Authorization") token: String,@Body requestBody: ChangePasswordRequest): LoginResponse
+    suspend fun changePassword(
+        @Header("Authorization") token: String,
+        @Body requestBody: ChangePasswordRequest,
+    ): LoginResponse
 
     @FormUrlEncoded
     @POST("verify-mail-otp")
     suspend fun verifyEmailOtp(
         @Field("email") email: String,
-        @Field("otp") type: String
+        @Field("otp") type: String,
     ): LoginResponse
 
     @POST("signup")
     suspend fun registerUser(
-        @Body model: SignUp
+        @Body model: SignUp,
     ): LoginResponse
 
     @POST("social-signup")
     suspend fun socialSignUp(
-        @Body model: SocialSignUpRequest
+        @Body model: SocialSignUpRequest,
     ): LoginResponse
 
 
     @GET("home")
-    suspend fun getHomeData(@Header("Authorization") token: String,
-                           @Query("page") page: String? = null,
-                           @Query("pageSize") limit: String? = null ,
-                           @Query("genderId") genderId: String? = null
+    suspend fun getHomeData(
+        @Header("Authorization") token: String,
+        @Query("page") page: String? = null,
+        @Query("pageSize") limit: String? = null,
+        @Query("genderId") genderId: String? = null,
     ): HomeResponse
 
     @GET("get-all-status-temp")
-    suspend fun getStatusData(@Header("Authorization") token: String,
-                              @Query("genderId") genderId: String? = null
+    suspend fun getStatusData(
+        @Header("Authorization") token: String,
+        @Query("genderId") genderId: String? = null,
     ): StoryResponse
 
     @GET("reels")
-    suspend fun getReels(@Header("Authorization") token: String,
-                            @Query("page") page: String? = null,
-                            @Query("limit") limit: String? = null ): ReelsResponse
+    suspend fun getReels(
+        @Header("Authorization") token: String,
+        @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): ReelsResponse
 
     @GET("reel-comments/{reelId}")
-    suspend fun getReelComments(@Header("Authorization") token: String, @Path("reelId") reelId:String,
-                                @Query("page") page: String? = null,
-                                @Query("limit") limit: String? = null ): ReelCommentsResponse
+    suspend fun getReelComments(
+        @Header("Authorization") token: String, @Path("reelId") reelId: String,
+        @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): ReelCommentsResponse
 
     @POST("post-comments/{reelId}")
-    suspend fun postComments(@Header("Authorization") token: String, @Body requestBody: PostCommentsRequest, @Path("reelId") reelId:String ): PostCommentsResponse
+    suspend fun postComments(
+        @Header("Authorization") token: String,
+        @Body requestBody: PostCommentsRequest,
+        @Path("reelId") reelId: String,
+    ): PostCommentsResponse
 
     @POST("reply-on-comments/{reelId}")
-    suspend fun replyToComment(@Header("Authorization") token: String, @Body requestBody: ReplyToCommentRequest, @Path("reelId") reelId:String ): ReplyToCommentResponse
+    suspend fun replyToComment(
+        @Header("Authorization") token: String,
+        @Body requestBody: ReplyToCommentRequest,
+        @Path("reelId") reelId: String,
+    ): ReplyToCommentResponse
 
     @GET("block-reasons")
     suspend fun getBlockReasons(): BlockReasonsResponse
@@ -159,102 +176,156 @@ interface ApiService {
     suspend fun getFlagReasons(): BlockReasonsResponse
 
     @POST("block-user")
-    suspend fun blockUser(@Header("Authorization") token: String, @Body requestBody: BlockUserRequest): PostCommentsResponse
+    suspend fun blockUser(
+        @Header("Authorization") token: String,
+        @Body requestBody: BlockUserRequest,
+    ): PostCommentsResponse
 
     @POST("unblock-user")
-    suspend fun unblockUser(@Header("Authorization") token: String, @Body requestBody: UnblockUserRequest): PostCommentsResponse
+    suspend fun unblockUser(
+        @Header("Authorization") token: String,
+        @Body requestBody: UnblockUserRequest,
+    ): PostCommentsResponse
 
     @POST("flag-user")
-    suspend fun flagUser(@Header("Authorization") token: String, @Body requestBody: FlagUserRequest): PostCommentsResponse
+    suspend fun flagUser(
+        @Header("Authorization") token: String,
+        @Body requestBody: FlagUserRequest,
+    ): PostCommentsResponse
 
     @POST("like-reels/{reelId}")
-    suspend fun likeReel(@Header("Authorization") token: String, @Path("reelId") reelId:String): PostCommentsResponse
+    suspend fun likeReel(
+        @Header("Authorization") token: String,
+        @Path("reelId") reelId: String,
+    ): PostCommentsResponse
 
     @GET("profile")
-    suspend fun getProfile(@Header("Authorization") token: String,
-                           @Query("page") page: String? = null,
-                           @Query("limit") limit: String? = null): GetProfileResponse
+    suspend fun getProfile(
+        @Header("Authorization") token: String,
+        @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): GetProfileResponse
 
     @POST("edit-profile")
-    suspend fun getEditProfile(@Header("Authorization") token: String, @Body request:EditProfileRequest): EditProfileResponse
+    suspend fun getEditProfile(
+        @Header("Authorization") token: String,
+        @Body request: EditProfileRequest,
+    ): EditProfileResponse
 
     @GET("profile-detail/{userId}")
-    suspend fun getOtherUserProfile(@Header("Authorization") token: String,
-                                    @Path("userId") userId:String,
-                                    @Query("page") page: String? = null,
-                                    @Query("limit") limit: String? = null): GetProfileResponse
+    suspend fun getOtherUserProfile(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: String,
+        @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): GetProfileResponse
 
     @POST("add-story")
-    suspend fun addStory(@Header("Authorization") token: String, @Body request:AddStoryRequest): AddStoryResponse
+    suspend fun addStory(
+        @Header("Authorization") token: String,
+        @Body request: AddStoryRequest,
+    ): AddStoryResponse
 
     @POST("story-seen")
-    suspend fun storySeen(@Header("Authorization") token: String, @Body request:StorySeen): CommonResponse
+    suspend fun storySeen(
+        @Header("Authorization") token: String,
+        @Body request: StorySeen,
+    ): CommonResponse
 
     @GET("story-upload-status")
     suspend fun getStoryUploadStatus(@Header("Authorization") token: String): StoryUploadStatusResponse
 
     @POST("delete-story")
-    suspend fun deleteStory(@Header("Authorization") token: String, @Body request:StoryDeleteRequest): CommonResponse
+    suspend fun deleteStory(
+        @Header("Authorization") token: String,
+        @Body request: StoryDeleteRequest,
+    ): CommonResponse
 
     @GET("followings-list")
-    suspend fun getFollowingList(@Header("Authorization") token: String,
-                                 @Query("self") self: String? = null,
-                                 @Query("other") other: String? = null,
-                                 @Query("otherUserId") otherUserId: String? = null,
-                                 ): FollowingListResponse
+    suspend fun getFollowingList(
+        @Header("Authorization") token: String,
+        @Query("self") self: String? = null,
+        @Query("other") other: String? = null,
+        @Query("otherUserId") otherUserId: String? = null,
+    ): FollowingListResponse
 
     @GET("followers-list")
-    suspend fun getFollowersList(@Header("Authorization") token: String,
-                                 @Query("self") self: String? = null,
-                                 @Query("other") other: String? = null,
-                                 @Query("otherUserId") otherUserId: String? = null,
-                                 ): FollowingListResponse
+    suspend fun getFollowersList(
+        @Header("Authorization") token: String,
+        @Query("self") self: String? = null,
+        @Query("other") other: String? = null,
+        @Query("otherUserId") otherUserId: String? = null,
+    ): FollowingListResponse
 
     @POST("follow")
-    suspend fun followUser(@Header("Authorization") token: String, @Body request: FollowRequest): CommonResponse
+    suspend fun followUser(
+        @Header("Authorization") token: String,
+        @Body request: FollowRequest,
+    ): CommonResponse
 
     @POST("unfollow")
-    suspend fun unfollowUser(@Header("Authorization") token: String, @Body request: FollowRequest): CommonResponse
+    suspend fun unfollowUser(
+        @Header("Authorization") token: String,
+        @Body request: FollowRequest,
+    ): CommonResponse
 
     @GET("interests")
     suspend fun interestsList(): InterestListResponse
 
     @GET("cities")
-    suspend fun citiesList(@Query("search") search: String? = null, @Query("limit") limit: String? = null, @Query("page") page: String? = null,): CityListResponse
+    suspend fun citiesList(
+        @Query("search") search: String? = null,
+        @Query("limit") limit: String? = null,
+        @Query("page") page: String? = null,
+    ): CityListResponse
 
     @POST("add-post")
-    suspend fun addPost(@Header("Authorization") token: String, @Body request: AddPostRequest): CommonResponse
+    suspend fun addPost(
+        @Header("Authorization") token: String,
+        @Body request: AddPostRequest,
+    ): CommonResponse
 
     @POST("post-reels")
-    suspend fun addReel(@Header("Authorization") token: String, @Body request: AddPostRequest): CommonResponse
+    suspend fun addReel(
+        @Header("Authorization") token: String,
+        @Body request: AddPostRequest,
+    ): CommonResponse
 
     @GET("rtc-token")
-    suspend fun generateAgoraToken(@Header("Authorization") token: String,
-                            @Query("channelName") channelName: String? = null,
-                            @Query("calleeId") calleeId: String? = null ,
-                            @Query("callerId") uid: String? = null,
-                            @Query("callType") callType: String? = null,
-                            @Query("sender_id") sender_id: String? = null,
+    suspend fun generateAgoraToken(
+        @Header("Authorization") token: String,
+        @Query("channelName") channelName: String? = null,
+        @Query("calleeId") calleeId: String? = null,
+        @Query("callerId") uid: String? = null,
+        @Query("callType") callType: String? = null,
+        @Query("sender_id") sender_id: String? = null,
     ): AgoraTokenResponse
 
     @GET("delete-reasons")
     suspend fun deleteAccountReasons(): BlockReasonsResponse
 
     @POST("delete-account")
-    suspend fun deleteAccount(@Header("Authorization") token: String, @Body request: DeleteAccountRequest): CommonResponse
+    suspend fun deleteAccount(
+        @Header("Authorization") token: String,
+        @Body request: DeleteAccountRequest,
+    ): CommonResponse
 
     @GET("logout")
     suspend fun logoutUser(@Header("Authorization") token: String): CommonResponse
 
     @GET("recent-chats")
-    suspend fun getRecentChats(@Header("Authorization") token: String,
-                               @Query("fromUserId") fromUserId: String? = null,
-                               @Query("toUserId") toUserId: String? = null,
-                               @Query("type") type: String? = null,
-                               ): GetRecentChatResponse
+    suspend fun getRecentChats(
+        @Header("Authorization") token: String,
+        @Query("fromUserId") fromUserId: String? = null,
+        @Query("toUserId") toUserId: String? = null,
+        @Query("type") type: String? = null,
+    ): GetRecentChatResponse
 
     @POST("save-recent-chat")
-    suspend fun saveRecentChat(@Header("Authorization") token: String, @Body request: SaveRecentChatRequest): SaveRecentChatResponse
+    suspend fun saveRecentChat(
+        @Header("Authorization") token: String,
+        @Body request: SaveRecentChatRequest,
+    ): SaveRecentChatResponse
 
     @GET("predefined-chats")
     suspend fun getPredefinedChats(@Header("Authorization") token: String): PredefinedChatsResponse
@@ -263,69 +334,108 @@ interface ApiService {
     suspend fun getCreatorBenefits(): CreatorsBenefitsResponse
 
     @POST("send-otp")
-    suspend fun sendOtpPhone(@Header("Authorization") token: String, @Body request: SendOtpPhoneRequest): CreatorsBenefitsResponse
+    suspend fun sendOtpPhone(
+        @Header("Authorization") token: String,
+        @Body request: SendOtpPhoneRequest,
+    ): CreatorsBenefitsResponse
 
     @POST("verify-otp")
-    suspend fun verifyPhoneOtp(@Header("Authorization") token: String, @Body request: VerifyPhoneOtpRequest): CreatorsBenefitsResponse
+    suspend fun verifyPhoneOtp(
+        @Header("Authorization") token: String,
+        @Body request: VerifyPhoneOtpRequest,
+    ): CreatorsBenefitsResponse
 
     @POST("user-to-creator")
-    suspend fun userToCreator(@Header("Authorization") token: String, @Body request: UserToCreatorRequest): CreatorsBenefitsResponse
+    suspend fun userToCreator(
+        @Header("Authorization") token: String,
+        @Body request: UserToCreatorRequest,
+    ): CreatorsBenefitsResponse
 
     @POST("end-call")
-    suspend fun endCall(@Header("Authorization") token: String, @Body request: EndCallRequest): CommonResponse
+    suspend fun endCall(
+        @Header("Authorization") token: String,
+        @Body request: EndCallRequest,
+    ): CommonResponse
 
     @GET("blocked-users")
     suspend fun getBlockedUsers(@Header("Authorization") token: String): BlockedUsersResponse
 
     @GET("search-users")
-    suspend fun getSearchUserList(@Header("Authorization") token: String,
-                                  @Query("searchKey") searchKey: String? = null,
-                                  @Query("page") page: String? = null,
-                                  @Query("limit") limit: String? = null,
-                                  ): SearchUserListResponse
+    suspend fun getSearchUserList(
+        @Header("Authorization") token: String,
+        @Query("searchKey") searchKey: String? = null,
+        @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): SearchUserListResponse
 
     @GET("faqs")
     suspend fun getFaqList(): FaqResponse
 
     @FormUrlEncoded
     @POST("delete-post")
-    suspend fun deletePost(@Header("Authorization") token: String, @Field("postId") postId: String): CommonResponse
+    suspend fun deletePost(
+        @Header("Authorization") token: String,
+        @Field("postId") postId: String,
+    ): CommonResponse
 
     @POST("check-username")
     suspend fun checkUsername(@Body request: CheckUsernameRequest): CheckUsernameResponse
 
     @FormUrlEncoded
     @POST("live-status")
-    suspend fun updateLiveStatus(@Header("Authorization") token: String, @Field("liveStatusId") liveStatusId: Int): CommonResponse
+    suspend fun updateLiveStatus(
+        @Header("Authorization") token: String,
+        @Field("liveStatusId") liveStatusId: Int,
+    ): CommonResponse
 
     @GET("notification-list")
-    suspend fun getNotificationList(@Header("Authorization") token: String, @Query("page") page: String? = null,
-                                    @Query("limit") limit: String? = null): GetNotificationListResponse
+    suspend fun getNotificationList(
+        @Header("Authorization") token: String, @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): GetNotificationListResponse
 
     @POST("delete-chats")
-    suspend fun deleteRecentChat(@Header("Authorization") token: String, @Body request: SaveRecentChatRequest): CommonResponse
+    suspend fun deleteRecentChat(
+        @Header("Authorization") token: String,
+        @Body request: SaveRecentChatRequest,
+    ): CommonResponse
 
     @GET("recharge-packages")
     suspend fun rechargeCoinsList(): RechargePackageListResponse
 
     @POST("contact-us")
-    suspend fun contactUs(@Header("Authorization") token: String, @Body request: ContactUsRequest): CommonResponse
+    suspend fun contactUs(
+        @Header("Authorization") token: String,
+        @Body request: ContactUsRequest,
+    ): CommonResponse
 
     @POST("feedback")
-    suspend fun ratingReview(@Header("Authorization") token: String, @Body request: RatingReviewRequest): CommonResponse
+    suspend fun ratingReview(
+        @Header("Authorization") token: String,
+        @Body request: RatingReviewRequest,
+    ): CommonResponse
 
     @POST("send-gift")
-    suspend fun sendGift(@Header("Authorization") token: String, @Body request: SendGiftRequest): SendGiftResponse
+    suspend fun sendGift(
+        @Header("Authorization") token: String,
+        @Body request: SendGiftRequest,
+    ): SendGiftResponse
 
     @GET("wallet-history")
     suspend fun walletHistory(@Header("Authorization") token: String): WalletHistoryResponse
 
     @POST("add-wallet-coins")
-    suspend fun addWalletCoins(@Header("Authorization") token: String, @Body request: AddCoinsRequest): CommonResponse
+    suspend fun addWalletCoins(
+        @Header("Authorization") token: String,
+        @Body request: AddCoinsRequest,
+    ): CommonResponse
 
     @FormUrlEncoded
     @POST("user-withdrawal-coins")
-    suspend fun withdrawCoins(@Header("Authorization") token: String, @Field("coins") coins: String): CommonResponse
+    suspend fun withdrawCoins(
+        @Header("Authorization") token: String,
+        @Field("coins") coins: String,
+    ): CommonResponse
 
 //    @POST("deduct-call-coin")
 //    suspend fun deductCallCoins(@Header("Authorization") token: String, @Body request: DeductCoinRequest): CommonResponse
@@ -338,16 +448,26 @@ interface ApiService {
 
     @FormUrlEncoded
     @POST("add-predefined-chat")
-    suspend fun addPredefinedChat(@Header("Authorization") token: String, @Field("preDefinedChat") preDefinedChat: String): CommonResponse
+    suspend fun addPredefinedChat(
+        @Header("Authorization") token: String,
+        @Field("preDefinedChat") preDefinedChat: String,
+    ): CommonResponse
 
     @FormUrlEncoded
     @POST("edit-predefined-chat")
-    suspend fun editPredefinedChat(@Header("Authorization") token: String, @Field("preDefinedChatId") preDefinedChatId: String, @Field("preDefinedChat") preDefinedChat: String): CommonResponse
+    suspend fun editPredefinedChat(
+        @Header("Authorization") token: String,
+        @Field("preDefinedChatId") preDefinedChatId: String,
+        @Field("preDefinedChat") preDefinedChat: String,
+    ): CommonResponse
 
 
     @FormUrlEncoded
     @POST("delete-predefined-chat")
-    suspend fun deletePredefinedChat(@Header("Authorization") token: String, @Field("preDefinedChatId") preDefinedChatId: String): CommonResponse
+    suspend fun deletePredefinedChat(
+        @Header("Authorization") token: String,
+        @Field("preDefinedChatId") preDefinedChatId: String,
+    ): CommonResponse
 
     @GET("notification-read")
     suspend fun notificationRead(@Header("Authorization") token: String): CommonResponse
@@ -356,65 +476,114 @@ interface ApiService {
     suspend fun notificationDelete(@Header("Authorization") token: String): CommonResponse
 
     @POST("save-call-details")
-    suspend fun saveCallDetails(@Header("Authorization") token: String, @Body request: SaveCallRequest): SaveCallResponse
+    suspend fun saveCallDetails(
+        @Header("Authorization") token: String,
+        @Body request: SaveCallRequest,
+    ): SaveCallResponse
 
     @POST("update-call-status")
-    suspend fun updateCallStatus(@Header("Authorization") token: String, @Body request: UpdateCallStatusRequest): UpdateCallStatusResponse
+    suspend fun updateCallStatus(
+        @Header("Authorization") token: String,
+        @Body request: UpdateCallStatusRequest,
+    ): UpdateCallStatusResponse
 
     @POST("deduct-call-coin")
-    suspend fun deductCallCoin(@Header("Authorization") token: String, @Body request: DeductCallCoinRequest): DeductCallCoinResponse
+    suspend fun deductCallCoin(
+        @Header("Authorization") token: String,
+        @Body request: DeductCallCoinRequest,
+    ): DeductCallCoinResponse
 
     @POST("deduct-coins-on-chat")
-    suspend fun deductCallCoinOnChat(@Header("Authorization") token: String, @Body request: DeductChatCoinRequest): CommonResponse
+    suspend fun deductCallCoinOnChat(
+        @Header("Authorization") token: String,
+        @Body request: DeductChatCoinRequest,
+    ): CommonResponse
 
     @GET("get-ads")
     suspend fun getAds(@Header("Authorization") token: String): GetAdsListResponse
 
     @FormUrlEncoded
     @POST("chat-history")
-    suspend fun checkChatHistory(@Header("Authorization") token: String, @Field("toUserId") toUserId: String): ChatHistoryResponse
+    suspend fun checkChatHistory(
+        @Header("Authorization") token: String,
+        @Field("toUserId") toUserId: String,
+    ): ChatHistoryResponse
 
     @FormUrlEncoded
     @POST("view-ads")
-    suspend fun viewAds(@Header("Authorization") token: String, @Field("adId") adId: String): CommonResponse
+    suspend fun viewAds(
+        @Header("Authorization") token: String,
+        @Field("adId") adId: String,
+    ): CommonResponse
 
     @FormUrlEncoded
     @POST("delete-reel")
-    suspend fun deleteReel(@Header("Authorization") token: String, @Field("reelId") reelId: String): CommonResponse
+    suspend fun deleteReel(
+        @Header("Authorization") token: String,
+        @Field("reelId") reelId: String,
+    ): CommonResponse
 
     @FormUrlEncoded
     @POST("handle-message-request")
-    suspend fun handleMessageRequest(@Header("Authorization") token: String, @Field("chatId") chatId: String, @Field("action") action: String): CommonResponse
+    suspend fun handleMessageRequest(
+        @Header("Authorization") token: String,
+        @Field("chatId") chatId: String,
+        @Field("action") action: String,
+    ): CommonResponse
 
     @FormUrlEncoded
     @POST("update-charges")
-    suspend fun updateCoinsRequest(@Header("Authorization") token: String, @Field("audioCallPrice") chatId: String, @Field("videoCallPrice") action: String): UpdateCallChargeResponse
+    suspend fun updateCoinsRequest(
+        @Header("Authorization") token: String,
+        @Field("audioCallPrice") chatId: String,
+        @Field("videoCallPrice") action: String,
+    ): UpdateCallChargeResponse
 
     @GET("gender-list")
     suspend fun getGenderListApi(@Query("type") login: String? = null): GenderListResponse
 
     @POST("notification-settings")
-    suspend fun setNotifications(@Header("Authorization") token: String, @Body request: SetNotificationRequest): CommonResponse
+    suspend fun setNotifications(
+        @Header("Authorization") token: String,
+        @Body request: SetNotificationRequest,
+    ): CommonResponse
 
     @POST("read-messages/{chatId}")
-    suspend fun readMessages(@Header("Authorization") token: String, @Path("chatId") chatId:String?=null, @Query("anotherUserId") anotherUserId: String? = null): CommonResponse
+    suspend fun readMessages(
+        @Header("Authorization") token: String,
+        @Path("chatId") chatId: String? = null,
+        @Query("anotherUserId") anotherUserId: String? = null,
+    ): CommonResponse
 
     @GET("get-notification-settings")
     suspend fun getNotificationSettings(@Header("Authorization") token: String): GetNotificationSettingResponse
 
     @GET("get-post-comments/{postId}")
-    suspend fun getPostComments(@Header("Authorization") token: String, @Path("postId") postId:String,
-                                @Query("page") page: String? = null,
-                                @Query("limit") limit: String? = null): ReelCommentsResponse
+    suspend fun getPostComments(
+        @Header("Authorization") token: String, @Path("postId") postId: String,
+        @Query("page") page: String? = null,
+        @Query("limit") limit: String? = null,
+    ): ReelCommentsResponse
 
     @POST("comment-on-post/{postId}")
-    suspend fun postCommentToPost(@Header("Authorization") token: String, @Body requestBody: PostCommentsRequest, @Path("postId") postId:String ): PostCommentsResponse
+    suspend fun postCommentToPost(
+        @Header("Authorization") token: String,
+        @Body requestBody: PostCommentsRequest,
+        @Path("postId") postId: String,
+    ): PostCommentsResponse
 
     @POST("reply-on-post-comments/{postId}")
-    suspend fun replyToPostComment(@Header("Authorization") token: String, @Body requestBody: ReplyToCommentRequest, @Path("postId") postId:String ): ReplyToCommentResponse
+    suspend fun replyToPostComment(
+        @Header("Authorization") token: String,
+        @Body requestBody: ReplyToCommentRequest,
+        @Path("postId") postId: String,
+    ): ReplyToCommentResponse
 
     @POST("like-posts/{postId}")
-    suspend fun likePost(@Header("Authorization") token: String, @Path("postId") postId:String): PostCommentsResponse
+    suspend fun likePost(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String,
+    ): PostCommentsResponse
 
     @FormUrlEncoded
     @POST("delete-post-comment")
@@ -422,7 +591,7 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Field("comment_id") commentId: String,
         @Field("mode") mode: String,
-        @Field("post_id") post_id: String
+        @Field("post_id") post_id: String,
     ): DeleteResponse
 
     @FormUrlEncoded
@@ -431,14 +600,14 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Field("comment_id") commentId: String,
         @Field("mode") mode: String,
-        @Field("post_id") post_id: String
+        @Field("post_id") post_id: String,
     ): DeleteResponse
 
     @FormUrlEncoded
     @POST("get-userid-by-username")
     suspend fun getUserIdByUserName(
         @Header("Authorization") token: String,
-        @Field("user_name") user_name: String
+        @Field("user_name") user_name: String,
     ): GetUserIdByUserNameResponse
 
 }

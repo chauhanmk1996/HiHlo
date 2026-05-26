@@ -112,21 +112,23 @@ import kotlin.getValue
 class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private var myStoryData: MyStory = MyStory()
+
     //private var currentPage=1
     private var isMediaUploaded: Int = -1
     private val viewModel: HomeViewModel by activityViewModels()
     private val viewModel2: UserPostListViewModel by viewModels()
+
     //private val viewModel3: GetProfileViewModel by viewModels()
     private lateinit var postAdapter: PostsAdapter
     private var allStory: List<Story>? = null
-    private var isRefreshedFromMenu=false
+    private var isRefreshedFromMenu = false
     private var isHomeDataLoaded = false
     var isCommentPosted = false
     private var isLoadMore = false
     lateinit var commentsBottomSheetFragment: CommentReelBottomSheet
     var postId = ""
-    var positionToComment: Int=0
-    var adapter: AdapterUserPostList?=null
+    var positionToComment: Int = 0
+    var adapter: AdapterUserPostList? = null
     var post_position: Int = 0
 
     // ────────────────────────────────────────
@@ -136,7 +138,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private var isLoadingMore = false
     private val viewModel3: ReelsViewModel by viewModels()
     private val viewModel4: ReelsViewModel by viewModels()
-    var totalAvailableCoins: Int?=null
+    var totalAvailableCoins: Int? = null
     var FIRSTVisiblePosition = -1
     var offsetY = 0
     var isRestoringScroll = false
@@ -151,7 +153,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private lateinit var statusListGlobal: List<StoryUser>
     private lateinit var statusAdapter: StatusAdapter
 
-    override fun getLayoutId(): Int {return R.layout.fragment_home_new}
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_home_new
+    }
 
     override fun initView(savedInstanceState: Bundle?) {
         viewModel.hitGenderListApi()
@@ -188,6 +192,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //        }
         //setupScrollListener()  // ← Replaced setPagination with this
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         RTVariable.bottom_page = 0
         super.onViewCreated(view, savedInstanceState)
@@ -250,18 +255,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                ::getSelectedStory,
 //                viewModel.profileImage
 //            )
-            if(!UserDataManager.isGetBackToHome(requireContext())){
+            if (!UserDataManager.isGetBackToHome(requireContext())) {
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
                 binding.nestedScrollView.post {
                     binding.nestedScrollView.scrollTo(0, scrollYp)
                 }
-            }else{
+            } else {
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
                 binding.nestedScrollView.post {
                     binding.nestedScrollView.scrollTo(0, scrollYp)
                 }
             }
-        }else {
+        } else {
             Log.e("HIT", "HIT>>> Initial load (process death / fresh open)")
             viewModel.currentPage = 1
             viewModel.isRefreshing = false
@@ -288,7 +293,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             binding.progressBar.isVisible = false
             refreshData()
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "home_click",
+            viewLifecycleOwner
+        ) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
 //            isRefreshedFromMenu = true
 //            allStory?.toMutableList()?.clear()
@@ -345,7 +353,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             hitServiceListApi(viewModel.currentPage, 0)
                         }
                     }
-                }else{
+                } else {
                     binding.nestedScrollView.smoothScrollTo(0, 0)
 //                    binding.nestedScrollView.setOnScrollChangeListener(
 //                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
@@ -433,11 +441,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     delay(1000)
-                    if(RTVariable.COMMENT_DELETED){
+                    if (RTVariable.COMMENT_DELETED) {
                         RTVariable.COMMENT_DELETED = false
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
-                    if(RTVariable.ISHOMECLICKED){
+                    if (RTVariable.ISHOMECLICKED) {
                         RTVariable.ISHOMECLICKED = false
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
@@ -445,7 +453,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.swipeRefresh.isRefreshing = true
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
-                    if(RTVariable.IS_MEDIA_UPLOADED){
+                    if (RTVariable.IS_MEDIA_UPLOADED) {
                         RTVariable.IS_MEDIA_UPLOADED = false
                         binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
@@ -453,12 +461,20 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.swipeRefresh.isRefreshing = true
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
-                    if(RTVariable.IS_STATUS_DELETED){
+                    if (RTVariable.IS_STATUS_DELETED) {
                         RTVariable.IS_STATUS_DELETED = false
-                        viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+                        viewModel5.hitStatusDataApi(
+                            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.authToken, "0"
+                        )
                     }
-                    Log.e("RTVariable.IS_STATUS_VIEWER_ACTIVATED", "RTVariable.IS_STATUS_VIEWER_ACTIVATED>>> "+RTVariable.IS_STATUS_VIEWER_ACTIVATED)
-                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                    Log.e(
+                        "RTVariable.IS_STATUS_VIEWER_ACTIVATED",
+                        "RTVariable.IS_STATUS_VIEWER_ACTIVATED>>> " + RTVariable.IS_STATUS_VIEWER_ACTIVATED
+                    )
+                    if (RTVariable.IS_STATUS_VIEWER_ACTIVATED) {
                         RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
                         //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
                         getRefreshStory(1, 0)
@@ -591,8 +607,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             )
         }
     }
+
     fun retainCommentBoxData(context: Context, postId: String, page: String, limit: String) {
-        Log.e("RETAIN", "RETAIN>>> "+postId+" "+page+" "+limit)
+        Log.e("RETAIN", "RETAIN>>> " + postId + " " + page + " " + limit)
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val token = Preferences
@@ -690,6 +707,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }
         }
     }
+
     private fun hideHeaderAndStories() {
         isHeaderVisible = false
 
@@ -703,7 +721,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             .start()
 
         binding.storiesLayout.animate()
-            .translationY(- (binding.storiesLayout.height + 24).toFloat())  // + extra margin if needed
+            .translationY(-(binding.storiesLayout.height + 24).toFloat())  // + extra margin if needed
             .alpha(0f)
             .setDuration(220)
             .setInterpolator(android.view.animation.AccelerateInterpolator())
@@ -712,6 +730,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
         //scrollListener?.hideBottomElements()  // your bottom nav / bar
     }
+
     private fun showHeaderAndStories() {
         isHeaderVisible = true
 
@@ -745,26 +764,38 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         post: Post,
                         action: PostsAdapter.PostClickAction,
                         position: Int,
-                        view: View
+                        view: View,
                     ) {
                         when (action) {
                             PostsAdapter.PostClickAction.LIKE -> {
                                 getSendLikeStatus(post.id.toString(), true, position)
                             }
+
                             PostsAdapter.PostClickAction.UNLIKE -> {
                                 getSendLikeStatus(post.id.toString(), false, position)
                             }
+
                             PostsAdapter.PostClickAction.OPTIONS_MENU -> {
-                                if (post.user_id.toString()==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){
-                                    profileOptions( view, post.id.toString(), post.user_id.toString())
-                                }else{
+                                if (post.user_id.toString() == Preferences.getCustomModelPreference<LoginResponse>(
+                                        requireContext(),
+                                        LOGIN_DATA
+                                    )?.payload?.userId.toString()
+                                ) {
+                                    profileOptions(
+                                        view,
+                                        post.id.toString(),
+                                        post.user_id.toString()
+                                    )
+                                } else {
                                     openSideOptionsPopup(view, post.id.toString())
                                 }
                             }
+
                             PostsAdapter.PostClickAction.SHARE -> {
                                 //Toast.makeText(requireContext(), "Share at position $position", Toast.LENGTH_SHORT).show()
                                 sharePost(post.asset_url.toString())
                             }
+
                             PostsAdapter.PostClickAction.COMMENT -> {
                                 postId = post.id.toString()
                                 post_position = position
@@ -772,42 +803,75 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 viewModel.scroll_position = position
                                 RTVariable.P_PID = post.id.toString()
                                 UserDataManager.postCommentExpandState(requireContext(), false)
-                                UserDataManager.postCommentSP(requireContext(), viewModel.currentPage, post_position, postId.toString())
+                                UserDataManager.postCommentSP(
+                                    requireContext(),
+                                    viewModel.currentPage,
+                                    post_position,
+                                    postId.toString()
+                                )
                                 //Toast.makeText(requireContext(), "Comment at position $position", Toast.LENGTH_SHORT).show()
-                                viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString(), "1", "10")
+                                viewModel2.hitGetReelCommentsApi(
+                                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                        requireContext(),
+                                        LOGIN_DATA
+                                    )?.payload?.authToken, post.id.toString(), "1", "10"
+                                )
                             }
+
                             PostsAdapter.PostClickAction.POST_BODY -> {
                                 //Toast.makeText(requireContext(), "Open post at position $position", Toast.LENGTH_SHORT).show()
                             }
+
                             PostsAdapter.PostClickAction.POST_PROFILE -> {
                                 post_position = position
                                 //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
                                 //UserDataManager.postMainSP(requireContext(), currentPage, post_position)
                                 UserDataManager.postMainIsSetShow(requireContext(), true)
                                 viewModel.scroll_position = position
-                                findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", post.user_id.toString()))
+                                findNavController().navigate(
+                                    HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment(
+                                        "0",
+                                        post.user_id.toString()
+                                    )
+                                )
                             }
+
                             PostsAdapter.PostClickAction.POST_PROFILE_NAME -> {
                                 post_position = position
                                 viewModel.scroll_position = position
                                 //Toast.makeText(requireContext(), "Open post profile at position $position", Toast.LENGTH_SHORT).show()
                                 //UserDataManager.postMainSP(requireContext(), currentPage, post_position)
                                 UserDataManager.postMainIsSetShow(requireContext(), true)
-                                findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment("0", post.user_id.toString()))
+                                findNavController().navigate(
+                                    HomeNewFragmentDirections.actionHomeNewFragmentToProfileFragment(
+                                        "0",
+                                        post.user_id.toString()
+                                    )
+                                )
                             }
+
                             PostsAdapter.PostClickAction.POST_FOLLOW -> {
                                 //Toast.makeText(requireContext(), "Open follow at position $position", Toast.LENGTH_SHORT).show()
                                 //viewModel3.hitFollowUserDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, FollowRequest(following_id = post.user_id.toString()))
                                 getSendFollow(post.user_id.toString(), position)
                             }
+
                             PostsAdapter.PostClickAction.POST_UNFOLLOW -> {
                                 //Toast.makeText(requireContext(), "Open unfollow at position $position", Toast.LENGTH_SHORT).show()
                                 //viewModel3.hitUnfollowUserDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, FollowRequest(following_id = post.user_id.toString()))
                                 getSendUnFollow(post.user_id.toString(), position)
                             }
+
                             PostsAdapter.PostClickAction.GIFT -> {
-                                post.user_id?.let { openCoinsBottomSheet(it, it, post.creatorDetail?.name.toString()) }
+                                post.user_id?.let {
+                                    openCoinsBottomSheet(
+                                        it,
+                                        it,
+                                        post.creatorDetail?.name.toString()
+                                    )
+                                }
                             }
+
                             PostsAdapter.PostClickAction.TOWARDS_STORY -> {
 //                                val targetUserId = post.user_id.toString()
 //                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
@@ -831,7 +895,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 view.getLocationOnScreen(location)
                                 val centerX = location[0] + view.width / 2
                                 val centerY = location[1] + view.height / 2
-                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                                val intent =
+                                    Intent(requireContext(), PlayStatusActivity::class.java)
 
                                 // normal data
                                 intent.putExtra("play_position", position)
@@ -890,14 +955,26 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "")
     }
-    fun openSendCoinsDialog(data: RechargePackageListResponse.Payload, reelId: Int, creatorId: Int, name: String) {
-        showCustomDialogWithBinding(requireContext(), "Do you want to send ${data.coins} coins to ${name}",
+
+    fun openSendCoinsDialog(
+        data: RechargePackageListResponse.Payload,
+        reelId: Int,
+        creatorId: Int,
+        name: String,
+    ) {
+        showCustomDialogWithBinding(
+            requireContext(), "Do you want to send ${data.coins} coins to ${name}",
             onYes = {
                 viewModel4.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                         MyApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
-                    SendGiftRequest(coins = data.coins.toString(), recipientId = creatorId.toString(), type = "reel", reelId = reelId.toString())
+                    SendGiftRequest(
+                        coins = data.coins.toString(),
+                        recipientId = creatorId.toString(),
+                        type = "reel",
+                        reelId = reelId.toString()
+                    )
                 )
             },
             onNo = {
@@ -906,11 +983,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
     }
 
-    private fun getSendLikeStatus(post_id: String, isLike: Boolean, position: Int){
+    private fun getSendLikeStatus(post_id: String, isLike: Boolean, position: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.likePost(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     postId = post_id
                 )
                 if (response.status == 1 && response.code == 200) {
@@ -921,18 +1001,25 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                    ).show()
                     //postAdapter.notifyItemChanged(position)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getSendFollow(user_id: String, position: Int){
+    private fun getSendFollow(user_id: String, position: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.followUser(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     FollowRequest(following_id = user_id.toString())
 
                 )
@@ -944,18 +1031,25 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                    ).show()
                     postAdapter.updateFollow(position, 1)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getSendUnFollow(user_id: String, position: Int){
+    private fun getSendUnFollow(user_id: String, position: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.unfollowUser(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     FollowRequest(unfollowId = user_id)
 
                 )
@@ -967,18 +1061,25 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                    ).show()
                     postAdapter.updateFollow(position, 2)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getRefreshStory(page: Int, gender_id: Int){
+    private fun getRefreshStory(page: Int, gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getHomeData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     page.toString(),
                     10.toString(),
                     gender_id.toString()
@@ -987,18 +1088,25 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     viewModel.stories = response.payload.stories
                     postAdapter.updateStories(viewModel.stories)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getRefreshMainStory(gender_id: Int){
+    private fun getRefreshMainStory(gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getStatusData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     gender_id.toString()
                 )
                 if (response.status == 1 && response.code == 200) {
@@ -1013,9 +1121,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         binding.storiesLayout.visibility = View.VISIBLE
                     }
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
@@ -1040,7 +1152,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     "${requireContext().packageName}.provider",
                     imageFile
                 )
-                val appLink = "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
+                val appLink =
+                    "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_STREAM, uri) // image file
@@ -1062,14 +1175,37 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    private fun hitServiceListApi(page: Int, genderId:Int?=null) {
-        Log.e("TAG", "Home success: ${Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken}")
-        viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "10", "0")
-        viewModel4.hitCoinDetailsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
-        viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+    private fun hitServiceListApi(page: Int, genderId: Int? = null) {
+        Log.e(
+            "TAG",
+            "Home success: ${
+                Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken
+            }"
+        )
+        viewModel.hitHomeDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, page.toString(), "10", "0"
+        )
+        viewModel4.hitCoinDetailsApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken
+        )
+        viewModel5.hitStatusDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "0"
+        )
     }
 
-    private fun profileOptions( view:View, postId: String, userId: String) {
+    private fun profileOptions(view: View, postId: String, userId: String) {
         val popup = ReusablePopup(
             context = requireContext(),
             anchorView = view,
@@ -1086,9 +1222,15 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     fun openDeletePostConfirmationDialog(postId: String) {
-        showCustomDialogWithBinding(requireContext(), "Are you sure you want to delete this post?",
+        showCustomDialogWithBinding(
+            requireContext(), "Are you sure you want to delete this post?",
             onYes = {
-                viewModel2.hitDeletePostDataApi(token = "Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken.toString(), postId = postId)
+                viewModel2.hitDeletePostDataApi(
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken.toString(), postId = postId
+                )
             },
             onNo = {
                 //dismiss()
@@ -1096,7 +1238,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
     }
 
-    private fun openSideOptionsPopup(view:View, userId: String) {
+    private fun openSideOptionsPopup(view: View, userId: String) {
         val popup = ReusablePopup(
             context = requireContext(),
             anchorView = view,
@@ -1111,7 +1253,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     bottomSheetFragment.dismiss()
                     findNavController().popBackStack()
                 }
-                bottomSheetFragment.show(requireActivity().supportFragmentManager, "BlockBottomSheet")
+                bottomSheetFragment.show(
+                    requireActivity().supportFragmentManager,
+                    "BlockBottomSheet"
+                )
             },
             onOption2Click = {
                 val bottomSheetFragment = BlockFlagBottomSheet()
@@ -1124,7 +1269,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     bottomSheetFragment.dismiss()
                     findNavController().popBackStack()
                 }
-                bottomSheetFragment.show(requireActivity().supportFragmentManager, "FlagBottomSheet")
+                bottomSheetFragment.show(
+                    requireActivity().supportFragmentManager,
+                    "FlagBottomSheet"
+                )
             },
             option1Text = "Block",
             option2Text = "Report",
@@ -1147,7 +1295,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     binding.swipeRefresh.isRefreshing = false
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         if (it.data.code == 200) {
                             viewModel.myStory = it.data.payload.my_story ?: MyStory()
                             viewModel.stories = it.data.payload.stories
@@ -1158,7 +1306,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 if (viewModel.isRefreshing) {
                                     viewModel.postsCache.clear()
                                     viewModel.isRefreshing = false
-                                }else{
+                                } else {
                                     viewModel.postsCache.clear()
                                     viewModel.isRefreshing = false
                                 }
@@ -1189,20 +1337,22 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 RTVariable.ISHOMECLICKED = false
                                 binding.nestedScrollView.smoothScrollTo(0, 0)
                             }
-                        }else{
+                        } else {
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                             isLoadingMore = false  // ← Reset on error too
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                         isLoadingMore = false
                     }
-                    binding.progressBar.isVisible=false
+                    binding.progressBar.isVisible = false
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
-                    binding.progressBar.isVisible=false
+                    binding.progressBar.isVisible = false
                     isLoadingMore = false
                 }
             }
@@ -1211,21 +1361,23 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Add story success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             val uploadedStoryCount = it.data.payload?.uploadedStoryCount
                             hitServiceListApi(viewModel.currentPage, selectedGender)
-                        }else{
+                        } else {
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //if (currentPage==1) ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -1236,20 +1388,22 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Post like success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }else{
+                        } else {
 //                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
 //                    ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
 //                    ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
 //                    ProcessDialog.dismissDialog(true)
@@ -1368,23 +1522,30 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel home post comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             isCommentPosted = true
                             adapter?.updateCommentCount(positionToComment)
-                            viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
+                            viewModel2.hitGetReelCommentsApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, postId, "1", "10"
+                            ) // Initial call with page 1, limit 10
                             hitServiceListApi(viewModel.currentPage, 0)
-                        }else{
+                        } else {
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -1395,21 +1556,28 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel reply to comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            isCommentPosted=true
-                            viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
-                        }else{
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            isCommentPosted = true
+                            viewModel2.hitGetReelCommentsApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, postId, "1", "10"
+                            ) // Initial call with page 1, limit 10
+                        } else {
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -1420,20 +1588,22 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "delete post success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             //findNavController().popBackStack()
-                        }else{
+                        } else {
                             //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -1444,15 +1614,17 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                        }else{
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                        } else {
                         }
-                    }else{
+                    } else {
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
@@ -1461,15 +1633,17 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                        }else{
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                        } else {
                         }
-                    }else{
+                    } else {
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
@@ -1478,16 +1652,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "coins details success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         totalAvailableCoins = it.data.payload.coins
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -1498,22 +1674,25 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "sent coins user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        showCustomDialogWithBinding(requireContext(), "Send Successfully!",
+                    if (it.data?.status == 1) {
+                        showCustomDialogWithBinding(
+                            requireContext(), "Send Successfully!",
                             onYes = {},
                             onNo = {},
                             showButtons = false,
                             autoDismissInMillis = 1000
                         )
 //                        Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                    }else{
+                    } else {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -1524,7 +1703,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Status success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
@@ -1539,13 +1718,15 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 binding.storiesRecycler.adapter = statusAdapter
                                 binding.storiesLayout.visibility = View.VISIBLE
                             }
-                        }else{
+                        } else {
                         }
-                    }else{
+                    } else {
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
@@ -1606,13 +1787,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                UserDataManager.postMainIsSetShow(requireContext(), false)
 //            }
 //        }
-        if(UserDataManager.isGetBackToHome(requireContext())){
+        if (UserDataManager.isGetBackToHome(requireContext())) {
             val position = UserDataManager.getHomeScrollPosition(requireContext())
             scrollToRecyclerPosition(position)
-        }else{
+        } else {
             scrollToRecyclerPosition(viewModel.scroll_position)
         }
-        if(UserDataManager.get_postCommentShow(requireContext())){
+        if (UserDataManager.get_postCommentShow(requireContext())) {
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postCommentIsShow(requireContext(), false)
             //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
@@ -1625,11 +1806,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 openCommentsBottomSheet(cached)
             }
         }
-        if(UserDataManager.get_postMainIsShow(requireContext())){
+        if (UserDataManager.get_postMainIsShow(requireContext())) {
             binding.swipeRefresh.isRefreshing = false
             UserDataManager.postMainIsSetShow(requireContext(), false)
         }
-        if(RTVariable.IS_STORY_UPDATED_FROM_PROFILE){
+        if (RTVariable.IS_STORY_UPDATED_FROM_PROFILE) {
             refreshData()
         }
 
@@ -1647,28 +1828,47 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }
             onCommentAction = { result ->
                 isCommentPosted = true // Set flag before post
-                viewModel2.hitPostCommentApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, postId)
+                viewModel2.hitPostCommentApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, result, postId
+                )
             }
             onReplyAction = { result ->
                 isCommentPosted = true // Assuming same flag for reply, adjust if separate
-                viewModel2.hitReplyToCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, postId)
+                viewModel2.hitReplyToCommentsApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, result, postId
+                )
             }
             onLoadMore = { page, limit ->
                 isLoadMore = true // Set flag before load more API call
-                viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, page.toString(), limit.toString())
+                viewModel2.hitGetReelCommentsApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, postId, page.toString(), limit.toString()
+                )
             }
         }
-        commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
+        commentsBottomSheetFragment.show(
+            requireActivity().supportFragmentManager,
+            "RoundedBottomSheet"
+        )
     }
 
-    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.getStringExtra("uri") ?: ""
-            val type = result.data?.getStringExtra("type") ?: ""
-            Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $type")
-            // TODO: use the returned data here (upload, display, etc.)
-            val mediaType = type
-            val contentUri = Uri.parse(uri)
+    private val filePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri = result.data?.getStringExtra("uri") ?: ""
+                val type = result.data?.getStringExtra("type") ?: ""
+                Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $type")
+                // TODO: use the returned data here (upload, display, etc.)
+                val mediaType = type
+                val contentUri = Uri.parse(uri)
 
 //            val file = getCacheFileFromContentUri(contentUri)
 //            Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $file")
@@ -1683,18 +1883,18 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                // Optional: delete after successful upload
 //                // file.delete()
 //            }
-            Handler(Looper.getMainLooper()).post {
-                // now the fragment is safely attached
-                val file = getCacheFileFromContentUri(contentUri)
-                // ...
-                val typeCode = if (mediaType == "video") "V" else "I"
-                file?.let { uploadImage(it, typeCode) }
+                Handler(Looper.getMainLooper()).post {
+                    // now the fragment is safely attached
+                    val file = getCacheFileFromContentUri(contentUri)
+                    // ...
+                    val typeCode = if (mediaType == "video") "V" else "I"
+                    file?.let { uploadImage(it, typeCode) }
+                }
             }
         }
-    }
 
-    fun getSelectedTheStory(option: Int, value: StoryUser, position: Int, itemView:View){
-        if(option==2){
+    fun getSelectedTheStory(option: Int, value: StoryUser, position: Int, itemView: View) {
+        if (option == 2) {
             val imageView: View = if (position == 0) {
                 itemView.findViewById<View>(R.id.myStoryImageView)
             } else {
@@ -1723,26 +1923,22 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 // Keep this as per your requirement
             requireActivity().overridePendingTransition(R.anim.slide_up, 0)
         }
-        if(option==3){
+        if (option == 3) {
             ReusablePopup(
                 context = requireContext(),
                 anchorView = itemView,
                 onOption1Click = {
-                    if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                    if (Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.isCreator == 1
+                    ) {
                         viewLifecycleOwner.lifecycleScope.launch {
 
                             val canUploadStory = isStoryLimitReached()
 
                             if (canUploadStory) {
-
                                 RTVariable.SELECT_OPTION = true
-//                        checkGalleryPermissionAndPick()
-//                        val intent = Intent(requireContext(), FilePickerStatus::class.java)
-//                        filePickerLauncher.launch(intent)
-//                        requireActivity().overridePendingTransition(
-//                            R.anim.slide_up_2,
-//                            0
-//                        )
                                 val bottomSheet = FilePickerBottomsheet()
                                 bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
                                     // uri and type are already returned as strings, no Intent parsing needed
@@ -1763,7 +1959,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                             } else {
 
-                                Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You can upload 4 stories in 24 hours")
+                                Utils.showCustom_Snackbar(
+                                    requireActivity().findViewById(android.R.id.content),
+                                    "You can upload 4 stories in 24 hours"
+                                )
                             }
                         }
 //                        if (RTVariable.STORY_UPLOAD_LIMIT <= 0) {
@@ -1771,13 +1970,20 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //                        }else{
 //
 //                        }
-                    }else{
-                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    } else {
+                        Utils.showCustom_Snackbar(
+                            requireActivity().findViewById(android.R.id.content),
+                            "You are not a creator"
+                        )
                         //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                     }
                 },
                 onOption2Click = {
-                    if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                    if (Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.isCreator == 1
+                    ) {
                         RTVariable.SELECT_OPTION = false
                         selectedBottomSheetType = "Image"   // still needed for title/API logic
 
@@ -1785,7 +1991,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
                             val resultUri = Uri.parse(uri)
                             if (resultUri.scheme == null || resultUri.path == null) {
-                                Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Invalid image",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 return@setOnMediaSelectedListener
                             }
                             UserPreference.seletedUri = resultUri
@@ -1797,15 +2007,23 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         }
                         bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
                         //checkGalleryPermissionAndPick2("I")
-                    }else{
-                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    } else {
+                        Utils.showCustom_Snackbar(
+                            requireActivity().findViewById(android.R.id.content),
+                            "You are not a creator"
+                        )
                         //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                     }
                 },
                 onOption3Click = {
-                    if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+                    if (Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.isCreator == 1
+                    ) {
                         RTVariable.SELECT_OPTION = false
-                        selectedBottomSheetType = "Video"   // must match what AddReelFragment expects
+                        selectedBottomSheetType =
+                            "Video"   // must match what AddReelFragment expects
 
                         val bottomSheet = VideoFilePickerBottomsheet()
                         bottomSheet.setOnVideoPickedListener { uri, _ ->
@@ -1817,8 +2035,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         }
                         bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                         //checkGalleryPermissionAndPick2("V")
-                    }else{
-                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    } else {
+                        Utils.showCustom_Snackbar(
+                            requireActivity().findViewById(android.R.id.content),
+                            "You are not a creator"
+                        )
                         //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                     }
                 },
@@ -1866,16 +2087,26 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    fun getSelectedStory(position:Int, story:Story, view:View, intVal: Int){
-        Log.e("TTTT", "TTTT "+isMediaUploaded+" | "+position+ " | "+intVal)
-        if(intVal == 1){
-            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-                if (isMediaUploaded==1){
+    fun getSelectedStory(position: Int, story: Story, view: View, intVal: Int) {
+        Log.e("TTTT", "TTTT " + isMediaUploaded + " | " + position + " | " + intVal)
+        if (intVal == 1) {
+            if (Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.isCreator == 1
+            ) {
+                if (isMediaUploaded == 1) {
                     RTVariable.IS_FROM_PROFILE = false
-                    findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(isMyStory = "1", myStoryData = viewModel.myStory ?: MyStory(), otherStoryData = viewModel.stories?.toTypedArray() ?: emptyArray()))
+                    findNavController().navigate(
+                        HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(
+                            isMyStory = "1",
+                            myStoryData = viewModel.myStory ?: MyStory(),
+                            otherStoryData = viewModel.stories?.toTypedArray() ?: emptyArray()
+                        )
+                    )
                 }
             }
-        }else if(intVal == 2){
+        } else if (intVal == 2) {
             RTVariable.IS_FROM_PROFILE = false
             val bundle = Bundle().apply {
                 putParcelableArrayList("storyList", ArrayList(viewModel.stories ?: emptyList()))
@@ -1888,8 +2119,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
                 Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
             }
-        }else if(intVal == 3){
-            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
+        } else if (intVal == 3) {
+            if (Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.isCreator == 1
+            ) {
                 ReusablePopup(
                     context = requireContext(),
                     anchorView = view,
@@ -1915,7 +2150,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     option3ImageRes = R.drawable.icon_over_video,
                     //option4ImageRes = R.drawable.ic_cancel_red
                 ).show()
-            }else{
+            } else {
                 Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
             }
         }
@@ -1978,7 +2213,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             requestMultiplePermissionsLauncher.launch(requiredPermissions)
         } else {
             val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 launchMediaPicker()
             } else {
                 requestSinglePermissionLauncher.launch(permission)
@@ -1986,33 +2225,41 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    private val requestMultiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val hasImagePermission = permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
-            val hasVideoPermission = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
+    private val requestMultiplePermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val hasImagePermission = permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
+                val hasVideoPermission = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
 
-            // For Android 13+, if any permission was requested but denied,
-            // it might still be limited access which works with media picker
-            val wasImageRequested = permissions.containsKey(Manifest.permission.READ_MEDIA_IMAGES)
-            val wasVideoRequested = permissions.containsKey(Manifest.permission.READ_MEDIA_VIDEO)
+                // For Android 13+, if any permission was requested but denied,
+                // it might still be limited access which works with media picker
+                val wasImageRequested =
+                    permissions.containsKey(Manifest.permission.READ_MEDIA_IMAGES)
+                val wasVideoRequested =
+                    permissions.containsKey(Manifest.permission.READ_MEDIA_VIDEO)
 
-            val canProceed = when (selectedMediaType) {
-                "I" -> hasImagePermission || wasImageRequested
-                "V" -> hasVideoPermission || wasVideoRequested
-                else -> hasImagePermission || hasVideoPermission || wasImageRequested || wasVideoRequested
-            }
+                val canProceed = when (selectedMediaType) {
+                    "I" -> hasImagePermission || wasImageRequested
+                    "V" -> hasVideoPermission || wasVideoRequested
+                    else -> hasImagePermission || hasVideoPermission || wasImageRequested || wasVideoRequested
+                }
 
-            if (canProceed) {
-                launchMediaPicker2()
+                if (canProceed) {
+                    launchMediaPicker2()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Required permissions not granted",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             } else {
-                Toast.makeText(requireContext(), "Required permissions not granted", Toast.LENGTH_SHORT).show()
+                val granted = permissions.values.all { it }
+                if (granted) launchMediaPicker2()
+                else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT)
+                    .show()
             }
-        } else {
-            val granted = permissions.values.all { it }
-            if (granted) launchMediaPicker2()
-            else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
         }
-    }
 
     private fun launchMediaPicker2() {
         val mediaType = when (selectedMediaType) {
@@ -2029,31 +2276,33 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         mediaPickerLauncher2.launch(request)
     }
 
-    private val mediaPickerLauncher2 = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            val mimeType = requireContext().contentResolver.getType(uri)
-            UserPreference.selectedMediaType = selectedMediaType
-            if (mimeType?.startsWith("video") == true) {
+    private val mediaPickerLauncher2 =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                val mimeType = requireContext().contentResolver.getType(uri)
+                UserPreference.selectedMediaType = selectedMediaType
+                if (mimeType?.startsWith("video") == true) {
 //                UserPreference.seletedUri = uri
-                if (uri != null) {
-                    val mimeType = requireContext().contentResolver.getType(uri)
-                    Log.e("TAG", "mimeType $mimeType")
-                    if (mimeType?.startsWith("video") == true) {
-                        UserPreference.seletedUri = Uri.EMPTY
-                        val intent = Intent(requireActivity(),TrimVideoActivity::class.java)
-                        intent.putExtra("videoUrl",uri.toString())
-                        startActivityForResult(intent,REQUEST_CODE_CROP_VIDEO)
+                    if (uri != null) {
+                        val mimeType = requireContext().contentResolver.getType(uri)
+                        Log.e("TAG", "mimeType $mimeType")
+                        if (mimeType?.startsWith("video") == true) {
+                            UserPreference.seletedUri = Uri.EMPTY
+                            val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+                            intent.putExtra("videoUrl", uri.toString())
+                            startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+                    openCropActivity2(uri)
                 }
             } else {
-                openCropActivity2(uri)
+                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }
-    }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun clearPhotoPickerSelections() {
@@ -2070,17 +2319,22 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    private val requestSinglePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) launchMediaPicker()
-        else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-    }
+    private val requestSinglePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) launchMediaPicker()
+            else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+        }
 
     private fun checkGalleryPermissionAndPick() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             launchMediaPicker()
         } else {
             val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 launchMediaPicker()
             } else {
                 requestSinglePermissionLauncher.launch(permission)
@@ -2096,11 +2350,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
     }
 
-    private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val pickMedia =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { openPreview(it) }
         }
 
-    private val previewResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val previewResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
                 val savedUriString = data?.getStringExtra("uri")
@@ -2134,7 +2390,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }
             val cacheDir = requireContext().cacheDir
             // Fallback: copy to a temporary file (if DATA column not available)
-            val tempFile = File(cacheDir, "temp_${System.currentTimeMillis()}.${contentUri.lastPathSegment?.substringAfterLast('.') ?: "file"}")
+            val tempFile = File(
+                cacheDir,
+                "temp_${System.currentTimeMillis()}.${
+                    contentUri.lastPathSegment?.substringAfterLast(
+                        '.'
+                    ) ?: "file"
+                }"
+            )
             requireContext().contentResolver.openInputStream(contentUri)?.use { input ->
                 tempFile.outputStream().use { output ->
                     input.copyTo(output)
@@ -2172,8 +2435,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         previewResultLauncher.launch(intent)
     }
 
-    private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
+    private val mediaPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
 //            val mimeType = requireContext().contentResolver.getType(uri)
 //            if (mimeType?.startsWith("video") == true) {
 //                val durationInMillis = getVideoDuration(requireContext(), uri)
@@ -2186,11 +2450,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 //            } else {
 //                openCropActivity(uri)
 //            }
-            openPreview(uri)
-        } else {
-            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+                openPreview(uri)
+            } else {
+                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
+            }
         }
-    }
 
     private fun openCropActivity2(imageUri: Uri) {
         val options = UCrop.Options().apply {
@@ -2218,32 +2482,39 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         val options = UCrop.Options().apply {
             setFreeStyleCropEnabled(true)
         }
-        val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        val destinationUri = Uri.fromFile(
+            File(
+                requireActivity().cacheDir,
+                "cropped_${System.currentTimeMillis()}.jpg"
+            )
+        )
         UCrop.of(imageUri, destinationUri)
             .withOptions(options)
             .start(requireContext(), this)
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(RTVariable.SELECT_OPTION){
+        if (RTVariable.SELECT_OPTION) {
             RTVariable.SELECT_OPTION = false
-            if (resultCode==RESULT_OK){
-                when(requestCode){
-                    REQUEST_CODE_CROP_VIDEO->{
+            if (resultCode == RESULT_OK) {
+                when (requestCode) {
+                    REQUEST_CODE_CROP_VIDEO -> {
                         val file = File(UserPreference.seletedUri.path)
                         uploadImage(file, "V")
                     }
+
                     UCrop.REQUEST_CROP -> {
                         val resultUri = UCrop.getOutput(data!!)
-                        Log.i("TAG", "onActivityResult: "+resultUri)
+                        Log.i("TAG", "onActivityResult: " + resultUri)
                         val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
                         uploadImage(file, "I")
                     }
                 }
-            }else {
+            } else {
                 Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
             }
-        }else{
+        } else {
             if (resultCode == RESULT_OK) {
                 if (requestCode == REQUEST_CODE_CROP_VIDEO) {
                     UserPreference.selectedMediaToUpload = selectedBottomSheetType
@@ -2289,6 +2560,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private fun isCloseTo(value: Float, target: Float, tolerance: Float = 0.05f): Boolean {
         return kotlin.math.abs(value - target) <= tolerance
     }
+
     private fun getVideoDuration(context: Context, uri: Uri): Long {
         val retriever = MediaMetadataRetriever()
         return try {
@@ -2310,27 +2582,51 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         clientConfig.maxErrorRetry = 5 // Retry in case of network issues
         return AmazonS3Client(credentials)
     }
-    fun uploadImageToS3(context: Context, file: File, bucketName: String, objectKey: String, accessKey: String, secretKey: String, assetType:String) {
+
+    fun uploadImageToS3(
+        context: Context,
+        file: File,
+        bucketName: String,
+        objectKey: String,
+        accessKey: String,
+        secretKey: String,
+        assetType: String,
+    ) {
         // Initialize S3 client
         val s3Client = initializeS3Client(accessKey, secretKey)
         val transferUtility = TransferUtility.builder()
             .context(context)
             .s3Client(s3Client)
             .build()
-        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(context)
+        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(
+            context
+        )
         val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
         ProcessDialog.showDialog(requireContext(), true)
         uploadObserver.setTransferListener(object : TransferListener {
             override fun onStateChanged(id: Int, state: TransferState) {
                 if (state == TransferState.COMPLETED) {
                     ProcessDialog.dismissDialog(true)
-                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.AWS_CDN_URL
+                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.AWS_CDN_URL
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
                     println("Image URL: $mediaUrl")
                     val caption = RTVariable.HEADLINE_CAPTION
                     RTVariable.HEADLINE_CAPTION = ""
-                    viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType, caption = caption))
+                    viewModel.hitAddStoryDataApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken,
+                        AddStoryRequest(
+                            assetUrl = mediaUrl,
+                            assetType = assetType,
+                            caption = caption
+                        )
+                    )
                 } else if (state == TransferState.FAILED) {
                     println("Upload failed")
                 }
@@ -2347,11 +2643,23 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             }
         })
     }
-    private fun uploadImage(imageFile: File, assetType:String) {
-        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+
+    private fun uploadImage(imageFile: File, assetType: String) {
+        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(
+            requireContext(),
+            LOGIN_DATA
+        )?.payload?.S3Details
         val bucketName = s3Data?.BUCKET_NAME
         val objectKey = "${System.currentTimeMillis()}"
-        uploadImageToS3(requireContext(), imageFile, bucketName ?: "", objectKey, s3Data?.ACCESS_KEY ?: "", s3Data?.SECRET_KEY ?: "", assetType)
+        uploadImageToS3(
+            requireContext(),
+            imageFile,
+            bucketName ?: "",
+            objectKey,
+            s3Data?.ACCESS_KEY ?: "",
+            s3Data?.SECRET_KEY ?: "",
+            assetType
+        )
     }
 
 }

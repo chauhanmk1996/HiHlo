@@ -413,13 +413,9 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 )
                 if (response.status == 1 && response.code == 200) {
                     if (response.payload.reels?.isNotEmpty() == true) {
-                        val commentsCount =
-                            response.payload.reels?.find { reel -> reel.id == RTVariable.REELS_ID.toInt() }
-                                ?.commentsCount ?: 0
+                        val commentsCount = response.payload.reels.find { reel -> reel.id == RTVariable.REELS_ID.toInt() }?.commentsCount ?: 0
                         Log.e("TTTTT", "TTTTT>>>" + commentsCount)
                         adapter.updateCommentCount(RTVariable.POST_POSITION, commentsCount)
-                    } else {
-
                     }
                 }
             } catch (e: Exception) {
@@ -1302,10 +1298,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                         } else {
                             // No more data
                             isLoading = false
-                            //Toast.makeText(requireContext(), "No more reels", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        //Toast.makeText(requireContext(), data?.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -1313,80 +1306,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     isLoading = false
                     binding.swipeRefresh.isRefreshing = false
                     ProcessDialog.dismissDialog(true)
-
-                    Log.e("TAG", "Reels Error: ${response.message}")
-                    //Toast.makeText(requireContext(), response.message ?: "Error occurred", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-//        viewModel.getReelsLiveData().observe(viewLifecycleOwner) {
-//            when (it.status) {
-//                Status.SUCCESS -> {
-//                    Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-//                    if (it.data?.status == 1) {
-//                        if (it.data.code == 200) {
-//                            binding.swipeRefresh.isRefreshing = false
-//                            if (it.data.payload.reels?.isNotEmpty() == true) {
-//
-//                                reelsList.addAll(it.data.payload.reels)
-//                                adapter.updateList(it.data.payload.reels.toMutableList())
-//
-//                                val currentSize = it.data.payload.reels.size
-//
-//                                // ✅ CASE 1: Target position is already loaded
-//                                if (!isRestored && targetPosition < currentSize) {
-//
-//                                    binding.viewPager.post {
-//                                        binding.viewPager.setCurrentItem(targetPosition, false)
-//
-//                                        adapter.currentPlayingPosition = targetPosition
-//
-//                                        playVideo(
-//                                            it.data.payload.reels[targetPosition].assetUrl,
-//                                            it.data.payload.reels[targetPosition].lastPlaybackPosition
-//                                        )
-//                                    }
-//
-//                                    isRestored = true
-//                                }
-//
-//                                // ✅ CASE 2: Target position NOT loaded yet → load more
-//                                else if (!isRestored && targetPosition >= currentSize) {
-//
-//                                    currentPage++
-//                                    hitGetReelsApi(currentPage)
-//                                }
-//
-//                                // ✅ Normal flow after restore
-//                                else if (currentPage == 1 && isRestored.not()) {
-//                                    binding.viewPager.setCurrentItem(0, false)
-//                                } else {
-//                                    adapter.updateList(
-//                                        it.data.payload.reels?.toMutableList() ?: mutableListOf()
-//                                    )
-//                                }
-//                            }
-//                        } else {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                    } else {
-//                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-//                            .show()
-//                    }
-//                    ProcessDialog.dismissDialog(true)
-//                }
-//
-//                Status.LOADING -> {
-//                    ProcessDialog.showDialog(requireContext(), true)
-//                }
-//
-//                Status.ERROR -> {
-//                    Log.e("TAG", "Login Failed: ${it.message}")
-//                    ProcessDialog.dismissDialog(true)
-//                }
-//            }
-//        }
+
         viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
 
@@ -1494,37 +1417,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
-        /*viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
-//                    if (it.data?.status==1){
-                        if (it.data?.code == 200){
-                            if (isCommentPosted){
-                                isCommentPosted=false
-                                if (::commentsBottomSheetFragment.isInitialized){
-                                    commentsBottomSheetFragment.updateComments(it.data.payload)
-                                }
-                            }else {
-                                openCommentsBottomSheet(it.data.payload ?: Payload())
-                            }
-//                        }else{
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-//                        }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
-                    }
-                    ProcessDialog.dismissDialog(true)
-                }
-                Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
-                }
-                Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
-                }
-            }
-        }*/
+
         viewModel.getPostCommentLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1599,16 +1492,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel reply to comment success: ${Gson().toJson(it)}")
                     if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        } else {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
                     } else {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
                             .show()
                     }
-//                    ProcessDialog.dismissDialog(true)
                 }
 
                 Status.LOADING -> {
