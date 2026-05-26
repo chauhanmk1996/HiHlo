@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:layout_marginBottom="-10dp"
-    android:background="@color/black">
+    android:background="@android:color/black">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="28dp"
+        android:elevation="10dp"
+        android:padding="10dp"
+        android:src="@drawable/back_button_pink"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/mediaContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="65dp">
+        android:layout_height="0dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginBottom="92dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <View
             android:id="@+id/bgView"
@@ -30,165 +40,158 @@
             android:id="@+id/playerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:use_controller="false"
+            android:visibility="gone"
             app:resize_mode="fit"
             app:surface_type="texture_view"
-            android:visibility="gone" />
+            app:use_controller="false" />
 
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/overlayContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginBottom="92dp"
         android:clipChildren="false"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="65dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.app.hihlo.ImageVideoConverter.VideoTrimmerView
         android:id="@+id/videoTrimmerView"
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:layout_gravity="bottom"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="80dp"
-        android:layout_marginTop="8dp" />
-
-    <LinearLayout
-        android:id="@+id/inputLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="10dp"
-        android:background="@android:color/transparent"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/etInput2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.Cursor"
-            android:background="#50000000"
-            android:hint="Write Caption..."
-            android:textColor="@android:color/white"
-            android:textColorHint="#AAAAAA"
-            android:maxLines="3"
-            android:textSize="15sp"
-            android:fontFamily="@font/manrope_regular"
-            android:inputType="textCapSentences|textMultiLine"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"/>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvDone2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:gravity="center"
-            android:padding="10dp"
-            android:text="Share"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:textSize="15sp"
-            android:fontFamily="@font/manrope_semibold"
-            android:background="@drawable/btn_status_bk"
-            android:backgroundTint="#008000"
-            android:textColor="@color/white"
-            android:textStyle="bold" />
-
-    </LinearLayout>
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnText"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="40dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="16dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:text="&#xFF0B; Text"
-        android:textAllCaps="false"
-        android:textSize="15sp"
         android:background="@drawable/btn_status_bk"
         android:backgroundTint="#3D6BFF"
         android:fontFamily="@font/manrope_semibold"
+        android:text="&#xFF0B; Text"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:visibility="gone" />
+        android:textSize="15sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnDone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="16dp"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/btn_status_bk"
         android:backgroundTint="#008000"
-        android:text="Done"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:textSize="15sp"
-        android:textAllCaps="false"
         android:fontFamily="@font/manrope_semibold"
+        android:text="Done"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:visibility="gone"/>
+        android:textSize="15sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnDone2"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="40dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="48dp"
         android:background="@drawable/btn_status_bk"
         android:backgroundTint="#008000"
-        android:text="Next"
-        android:textSize="15sp"
-        android:textAllCaps="false"
         android:fontFamily="@font/manrope_semibold"
+        android:text="Next"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:visibility="gone"/>
-
-    <LinearLayout
-        android:id="@+id/llBack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="10dp"
-            android:layout_marginTop="7dp"
-            android:src="@drawable/back_button_pink" />
-
-    </LinearLayout>
+        android:textSize="15sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/btnPlayPause"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:src="@drawable/pause_icon"
+        android:layout_marginTop="28dp"
+        android:layout_marginBottom="48dp"
+        android:contentDescription="Play/Pause"
         android:padding="8dp"
-        android:visibility="visible"
-        android:contentDescription="Play/Pause" />
+        android:src="@drawable/pause_icon"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/btnMuteUnmute"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginEnd="20dp"
-        android:layout_gravity="bottom|end"
-        android:src="@drawable/volume_mute"
-        android:padding="10dp"
-        android:visibility="visible"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/circle_background"
-        android:contentDescription="Mute/Unmute" />
+        android:contentDescription="Mute/Unmute"
+        android:padding="10dp"
+        android:src="@drawable/volume_mute"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/videoTrimmerView"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</FrameLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/tvDone2">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etInput2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#50000000"
+            android:elevation="4dp"
+            android:fontFamily="@font/manrope_regular"
+            android:hint="Write Caption..."
+            android:inputType="textMultiLine"
+            android:maxLines="7"
+            android:minHeight="48dp"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="#AAAAAA"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvDone2"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/btn_status_bk"
+        android:backgroundTint="#008000"
+        android:fontFamily="@font/manrope_semibold"
+        android:gravity="center"
+        android:text="Share"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

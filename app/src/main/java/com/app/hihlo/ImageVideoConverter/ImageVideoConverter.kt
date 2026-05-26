@@ -20,6 +20,7 @@ import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
@@ -44,6 +45,7 @@ class ImageVideoConverter : AppCompatActivity() {
 
     // Views
     private lateinit var mediaContainer: FrameLayout
+    private lateinit var bottomLayout: ConstraintLayout
     private lateinit var overlayContainer: FrameLayout
     private lateinit var photoEditorView: PhotoEditorView
     private lateinit var playerView: PlayerView
@@ -51,7 +53,6 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var btnText: Button
     private lateinit var btnDone: Button
     private lateinit var btnDone2: Button
-    private lateinit var inputLayout2: LinearLayout
     private lateinit var etInput2: EditText
     private lateinit var tvDone2: TextView
     private lateinit var ivBack: ImageView
@@ -98,7 +99,7 @@ class ImageVideoConverter : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         setContentView(R.layout.image_video_converter)
         initViews()
         mediaContainer.isDrawingCacheEnabled = true
@@ -124,6 +125,19 @@ class ImageVideoConverter : AppCompatActivity() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+
+
+        window.decorView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = android.graphics.Rect()
+            window.decorView.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = window.decorView.height
+            val keyboardHeight = screenHeight - rect.bottom
+            if (keyboardHeight > screenHeight * 0.15) {
+                bottomLayout.translationY = -(keyboardHeight - 220).toFloat()
+            } else {
+                bottomLayout.translationY = 0f
+            }
+        }
     }
 
     private fun initViews() {
@@ -135,7 +149,6 @@ class ImageVideoConverter : AppCompatActivity() {
         btnText = findViewById(R.id.btnText)
         btnDone = findViewById(R.id.btnDone)
         btnDone2 = findViewById(R.id.btnDone2)
-        inputLayout2 = findViewById(R.id.inputLayout2)
         etInput2 = findViewById(R.id.etInput2)
         tvDone2 = findViewById(R.id.tvDone2)
         ivBack = findViewById(R.id.ivBack)
@@ -143,6 +156,7 @@ class ImageVideoConverter : AppCompatActivity() {
         btnPlayPause = findViewById(R.id.btnPlayPause)
         btnMuteUnmute = findViewById(R.id.btnMuteUnmute)
         mediaContainer.addView(videoTextureView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        bottomLayout = findViewById(R.id.bottomLayout)
     }
 
     private fun setupRotationTooltip() {
@@ -213,7 +227,8 @@ class ImageVideoConverter : AppCompatActivity() {
         when (step) {
             MediaStep.TRIM -> {
                 videoTrimmerView.visibility = View.VISIBLE
-                inputLayout2.visibility = View.GONE
+                etInput2.visibility = View.GONE
+                tvDone2.visibility = View.GONE
                 btnDone2.isVisible = true
                 btnDone.isVisible = false
                 btnText.isVisible = false
@@ -225,7 +240,8 @@ class ImageVideoConverter : AppCompatActivity() {
             }
             MediaStep.TEXT_OVERLAY -> {
                 videoTrimmerView.visibility = View.GONE
-                inputLayout2.visibility = View.GONE
+                etInput2.visibility = View.GONE
+                tvDone2.visibility = View.GONE
                 btnDone2.isVisible = true
                 btnDone.isVisible = false
                 btnText.isVisible = true
@@ -237,7 +253,8 @@ class ImageVideoConverter : AppCompatActivity() {
             }
             MediaStep.HEADLINE -> {
                 videoTrimmerView.visibility = View.GONE
-                inputLayout2.visibility = View.VISIBLE
+                etInput2.visibility = View.VISIBLE
+                tvDone2.visibility = View.VISIBLE
                 btnDone2.isVisible = false
                 btnDone.isVisible = false
                 btnText.isVisible = false

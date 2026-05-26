@@ -90,6 +90,18 @@ class AddReelFragment : Fragment() {
             insets
         }
         (requireActivity() as HomeActivity).setOnlineStatusVisibility(true)
+
+        requireActivity().window.decorView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = android.graphics.Rect()
+            requireActivity().window.decorView.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = requireActivity().window.decorView.height
+            val keyboardHeight = screenHeight - rect.bottom
+            if (keyboardHeight > screenHeight * 0.15) {
+                binding.captionLayout.translationY = -(keyboardHeight - 750).toFloat()
+            } else {
+                binding.captionLayout.translationY = 0f
+            }
+        }
     }
     fun isGestureNavigation(): Boolean {
         val resId = resources.getIdentifier("config_navBarInteractionMode", "integer", "android")

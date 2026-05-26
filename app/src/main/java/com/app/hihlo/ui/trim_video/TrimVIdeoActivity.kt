@@ -116,12 +116,26 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         releaseTrimmerPlayer()
     }
 
+    override fun onStop() {
+        super.onStop()
+        releaseTrimmerPlayer()
+    }
+
     private fun releaseTrimmerPlayer() {
         try {
+
             val field = binding.videoTrimmer.javaClass.getDeclaredField("mPlayer")
             field.isAccessible = true
+
             val exoPlayer = field.get(binding.videoTrimmer) as? ExoPlayer
-            exoPlayer?.release()
+
+            exoPlayer?.apply {
+                pause()
+                stop()
+                clearMediaItems()
+                release()
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }

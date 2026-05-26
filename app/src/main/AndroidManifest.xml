@@ -145,7 +145,9 @@
         <activity
             android:name=".ImageVideoConverter.ImageVideoConverter"
             android:exported="true"
+            android:theme="@style/Theme.TransparentStory"
             android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
