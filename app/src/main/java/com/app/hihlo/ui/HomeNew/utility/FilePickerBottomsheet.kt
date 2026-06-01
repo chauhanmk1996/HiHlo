@@ -9,10 +9,13 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -73,7 +76,7 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FilePickerForStatusBinding.inflate(inflater, container, false)
         return binding.root
@@ -98,12 +101,139 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
             ColorDrawable(Color.TRANSPARENT)
         )
         checkPermission()
+        fastScrollerHandle()
+    }
+
+    private var dY = 0f
+
+    private fun fastScrollerHandle() {
+
+        binding.ivFastScroller.setOnTouchListener { view, event ->
+
+            when (event.action) {
+
+                MotionEvent.ACTION_DOWN -> {
+
+                    dY = view.y - event.rawY
+
+                    true
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+
+                    val recyclerTop =
+                        binding.recyclerView.top.toFloat()
+
+                    val recyclerBottom =
+                        binding.recyclerView.bottom.toFloat()
+
+                    val newY =
+                        event.rawY + dY
+
+                    val minY = recyclerTop
+
+                    val maxY =
+                        recyclerBottom - view.height
+
+                    val finalY =
+                        newY.coerceIn(minY, maxY)
+
+                    view.y = finalY
+
+                    val proportion =
+                        (finalY - recyclerTop) /
+                                (maxY - minY)
+
+                    val verticalRange =
+                        binding.recyclerView.computeVerticalScrollRange()
+
+                    val verticalExtent =
+                        binding.recyclerView.computeVerticalScrollExtent()
+
+                    val scrollRange =
+                        verticalRange - verticalExtent
+
+                    val targetScroll =
+                        (proportion * scrollRange).toInt()
+
+                    binding.recyclerView.scrollBy(
+                        0,
+                        targetScroll -
+                                binding.recyclerView.computeVerticalScrollOffset()
+                    )
+
+                    true
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+
+                    view.performClick()
+
+                    true
+                }
+
+                else -> false
+            }
+        }
+
+        binding.recyclerView.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    updateFastScrollerPosition()
+                }
+            }
+        )
+    }
+
+    private fun updateFastScrollerPosition() {
+
+        val verticalRange =
+            binding.recyclerView.computeVerticalScrollRange()
+
+        val verticalOffset =
+            binding.recyclerView.computeVerticalScrollOffset()
+
+        val verticalExtent =
+            binding.recyclerView.computeVerticalScrollExtent()
+
+        val scrollRange =
+            verticalRange - verticalExtent
+
+        if (scrollRange <= 0) return
+
+        val proportion =
+            verticalOffset.toFloat() / scrollRange
+
+        val recyclerTop =
+            binding.recyclerView.top.toFloat()
+
+        val recyclerBottom =
+            binding.recyclerView.bottom.toFloat()
+
+        val maxY =
+            recyclerBottom -
+                    binding.ivFastScroller.height
+
+        val finalY =
+            recyclerTop +
+                    ((maxY - recyclerTop) * proportion)
+
+        binding.ivFastScroller.y = finalY
     }
 
     override fun onStart() {
         super.onStart()
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val bottomSheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        val bottomSheet =
+            dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
         bottomSheet?.apply {
             setBackgroundColor(Color.TRANSPARENT)
             background = null
@@ -115,7 +245,11 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
     }
 
     fun Float.toPx(context: android.content.Context): Float =
-        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics)
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            this,
+            context.resources.displayMetrics
+        )
 
     // ─── Permissions ────────────────────────────────────────────────
     private fun checkPermission() {
@@ -137,14 +271,18 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 loadAllMedia()
             } else {
-                Toast.makeText(requireContext(), "Permissions required to show media", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Permissions required to show media",
+                    Toast.LENGTH_SHORT
+                ).show()
                 dismiss()
             }
         }
@@ -191,11 +329,13 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
                 val contentUri = when (type) {
                     MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE ->
                         ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+
                     else ->
                         ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
                 }
 
-                val mediaType = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) "image" else "video"
+                val mediaType =
+                    if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) "image" else "video"
 
                 mediaList.add(
                     MediaModel(
@@ -239,10 +379,10 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
 
             holder.txtType.text =
                 item.mediaType.replaceFirstChar { it.uppercase() }
-            if (item.mediaType == "video"){
+            if (item.mediaType == "video") {
                 holder.txtDuration.text = formatDuration(item.duration)
                 holder.txtDuration.isVisible = true
-            }else{
+            } else {
                 holder.txtDuration.isVisible = false
             }
 //            holder.txtDuration.text =

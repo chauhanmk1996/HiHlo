@@ -7,5 +7,6 @@ data class MediaModel(
     val actualPath: String,
     val mediaType: String,
     val fileSize: Long,
-    val duration: Long
+    val duration: Long,
+    val monthName: String?=null
 )

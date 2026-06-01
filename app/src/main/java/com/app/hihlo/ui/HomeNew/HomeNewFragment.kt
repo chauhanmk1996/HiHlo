@@ -1917,10 +1917,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 putExtra("start_width", imageView.width)
                 putExtra("start_height", imageView.height)
             }
-
             startActivity(intent)
-
-// Keep this as per your requirement
             requireActivity().overridePendingTransition(R.anim.slide_up, 0)
         }
         if (option == 3) {

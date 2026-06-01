@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ROUND BACKGROUND -->
+
+    <item>
+        <shape android:shape="oval">
+
+            <solid android:color="#4A4A4A"/>
+
+            <size
+                android:width="56dp"
+                android:height="56dp"/>
+
+        </shape>
+    </item>
+
+    <!-- UP ARROW -->
+
+    <item
+        android:gravity="top|center_horizontal"
+        android:top="12dp">
+
+        <vector
+            android:width="20dp"
+            android:height="20dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M7,14L12,9L17,14Z"/>
+
+        </vector>
+
+    </item>
+
+    <!-- DOWN ARROW -->
+
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="12dp">
+
+        <vector
+            android:width="20dp"
+            android:height="20dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M7,10L12,15L17,10Z"/>
+
+        </vector>
+
+    </item>
+
+</layer-list>

@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.app.hihlo"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.app.hihlo"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = 29
+        targetSdk = 36
         versionCode = 8
         versionName = "1.8"
 
@@ -168,6 +168,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play)
     implementation(libs.google.identity)
+
 }
 configurations.all {
     resolutionStrategy {
