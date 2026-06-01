@@ -45,6 +45,7 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
     private lateinit var recyclerView: RecyclerView
     private val mediaList = ArrayList<MediaModel>()
     private var listener: OnMediaSelectedListener? = null
+    private var dY = 0f
 
     override fun getTheme(): Int = R.style.FilePickerTheme
 
@@ -103,8 +104,6 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
         checkPermission()
         fastScrollerHandle()
     }
-
-    private var dY = 0f
 
     private fun fastScrollerHandle() {
 

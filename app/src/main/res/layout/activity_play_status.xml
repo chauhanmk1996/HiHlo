@@ -211,58 +211,34 @@
             android:id="@+id/captionContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="112dp"
             android:background="@android:color/transparent"
-            android:padding="16dp"
-            app:layout_constraintBottom_toTopOf="@id/bottomLayout">
-
-            <View
-                android:id="@+id/closeLine"
-                android:layout_width="40dp"
-                android:layout_height="3dp"
-                android:background="@drawable/grey_background_edittext"
-                android:backgroundTint="@color/white"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/titleTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/manrope_bold"
-                android:gravity="center_horizontal"
-                android:text="Caption"
-                android:textColor="@color/theme"
-                android:textSize="15sp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/closeLine" />
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <!-- Collapsed version -->
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/captionCollapsed"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="12dp"
                 android:ellipsize="end"
                 android:fontFamily="@font/manrope_regular"
                 android:maxLines="1"
                 android:textColor="@color/white_FEFEFF"
                 android:textSize="13sp"
-                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/moreLessText"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/titleTextView" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="captionCollapsed" />
 
             <!-- "More" button -->
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/moreLessText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="0dp"
+                android:layout_marginStart="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:fontFamily="@font/manrope_bold"
@@ -272,21 +248,26 @@
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/captionCollapsed"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/captionCollapsed" />
+                app:layout_constraintTop_toTopOf="@id/captionCollapsed"
+                tools:text="moreLessText" />
 
             <!-- Expanded version (single TextView) -->
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/captionExpanded"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="12dp"
                 android:fontFamily="@font/manrope_regular"
                 android:maxLines="10"
                 android:textColor="@color/white_FEFEFF"
                 android:textSize="13sp"
                 android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/titleTextView" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/choose_photos_that_capture_your_personality_and_the_things_you_love_to_do" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

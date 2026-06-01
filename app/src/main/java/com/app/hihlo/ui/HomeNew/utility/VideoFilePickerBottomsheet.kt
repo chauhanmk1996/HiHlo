@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -45,6 +46,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
     private lateinit var recyclerView: RecyclerView
     private val mediaList = ArrayList<MediaModel>()
+    private var dY = 0f
 
     override fun getTheme(): Int = R.style.FilePickerTheme
 
@@ -103,6 +105,130 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         checkPermission()
+        fastScrollerHandle()
+    }
+
+    private fun fastScrollerHandle() {
+
+        binding.ivFastScroller.setOnTouchListener { view, event ->
+
+            when (event.action) {
+
+                MotionEvent.ACTION_DOWN -> {
+
+                    dY = view.y - event.rawY
+
+                    true
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+
+                    val recyclerTop =
+                        binding.recyclerView.top.toFloat()
+
+                    val recyclerBottom =
+                        binding.recyclerView.bottom.toFloat()
+
+                    val newY =
+                        event.rawY + dY
+
+                    val minY = recyclerTop
+
+                    val maxY =
+                        recyclerBottom - view.height
+
+                    val finalY =
+                        newY.coerceIn(minY, maxY)
+
+                    view.y = finalY
+
+                    val proportion =
+                        (finalY - recyclerTop) /
+                                (maxY - minY)
+
+                    val verticalRange =
+                        binding.recyclerView.computeVerticalScrollRange()
+
+                    val verticalExtent =
+                        binding.recyclerView.computeVerticalScrollExtent()
+
+                    val scrollRange =
+                        verticalRange - verticalExtent
+
+                    val targetScroll =
+                        (proportion * scrollRange).toInt()
+
+                    binding.recyclerView.scrollBy(
+                        0,
+                        targetScroll -
+                                binding.recyclerView.computeVerticalScrollOffset()
+                    )
+
+                    true
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+
+                    view.performClick()
+
+                    true
+                }
+
+                else -> false
+            }
+        }
+
+        binding.recyclerView.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    updateFastScrollerPosition()
+                }
+            }
+        )
+    }
+
+    private fun updateFastScrollerPosition() {
+
+        val verticalRange =
+            binding.recyclerView.computeVerticalScrollRange()
+
+        val verticalOffset =
+            binding.recyclerView.computeVerticalScrollOffset()
+
+        val verticalExtent =
+            binding.recyclerView.computeVerticalScrollExtent()
+
+        val scrollRange =
+            verticalRange - verticalExtent
+
+        if (scrollRange <= 0) return
+
+        val proportion =
+            verticalOffset.toFloat() / scrollRange
+
+        val recyclerTop =
+            binding.recyclerView.top.toFloat()
+
+        val recyclerBottom =
+            binding.recyclerView.bottom.toFloat()
+
+        val maxY =
+            recyclerBottom -
+                    binding.ivFastScroller.height
+
+        val finalY =
+            recyclerTop +
+                    ((maxY - recyclerTop) * proportion)
+
+        binding.ivFastScroller.y = finalY
     }
 
     override fun onStart() {
