@@ -396,12 +396,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                             setOnlineStatus(it.data.payload.userDetails.user_live_status ?: "2")
 
                         } else {
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
+                            //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-                            .show()
+                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
@@ -460,6 +458,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
             }
         }
+
         viewModel.getFollowUserLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -495,6 +494,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
             }
         }
+
         viewModel.getUnfollowUserLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -530,6 +530,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
             }
         }
+
         viewModel2.addStoryLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {

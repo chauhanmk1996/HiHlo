@@ -48,11 +48,12 @@ import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Locale
 import java.util.UUID
+import androidx.core.net.toUri
 
 class CustomVideoEditor @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private lateinit var mPlayer: ExoPlayer
@@ -390,34 +391,25 @@ class CustomVideoEditor @JvmOverloads constructor(
             return
         }
         val filePath = "$destinationPath/${UUID.randomUUID()}.mp4"
-
-//        val transformation = TransformationRequest.Builder()
-//            .setVideoMimeType(MimeTypes.VIDEO_H264)
-//            .setAudioMimeType(MimeTypes.AUDIO_AAC)
-//            //.setHdrMode()
-//            .build()
         val transformer = androidx.media3.transformer.Transformer.Builder(context)
             .setVideoMimeType(MimeTypes.VIDEO_H264)
             .setAudioMimeType(MimeTypes.AUDIO_AAC)
-//            .setTransformationRequest(transformation)
             .addListener(object : androidx.media3.transformer.Transformer.Listener {
                 override fun onCompleted(composition: Composition, exportResult: ExportResult) {
-                    mOnVideoEditedListener?.getResult(Uri.parse(filePath))
+                    mOnVideoEditedListener?.getResult(filePath.toUri())
                 }
 
                 override fun onError(
                     composition: Composition,
                     exportResult: ExportResult,
-                    exportException: ExportException
+                    exportException: ExportException,
                 ) {
                     exportException.localizedMessage?.let { mOnVideoEditedListener?.onError(it) }
                 }
             })
             .build()
-
         val startMilliseconds = timeToMilliseconds(timeList[0])
         val endMilliseconds = timeToMilliseconds(timeList[1])
-
 
         val inputMediaItem = MediaItem.Builder()
             .setUri(mSrc)
@@ -429,9 +421,6 @@ class CustomVideoEditor @JvmOverloads constructor(
             )
             .build()
 
-        /**
-         * set effects
-         */
         val editedMediaItem = EditedMediaItem.Builder(inputMediaItem)
             .setFrameRate(30)
             .setEffects(Effects.EMPTY)

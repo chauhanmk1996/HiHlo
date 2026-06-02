@@ -56,7 +56,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     private val viewModel: SigninViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
     private lateinit var credentialManager: CredentialManager
-    lateinit var firestore : FirebaseFirestore
+    lateinit var firestore: FirebaseFirestore
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_signin
@@ -65,7 +65,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
-        CommonUtils.touchHideKeyBoard(view,requireActivity())
+        CommonUtils.touchHideKeyBoard(view, requireActivity())
     }
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -83,35 +83,49 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Login success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             Preferences.setStringPreference(requireContext(), IS_LOGIN, "2")
-                            Preferences.setCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA, it.data)
+                            Preferences.setCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA,
+                                it.data
+                            )
                             CommonUtils.hideKeyboard(requireActivity())
-                            Log.i("TAG", "setObserver: "+Preferences.getStringPreference(requireContext(), FCM_TOKEN))
+                            Log.i(
+                                "TAG",
+                                "setObserver: " + Preferences.getStringPreference(
+                                    requireContext(),
+                                    FCM_TOKEN
+                                )
+                            )
                             updateUserOnFirebase(it.data.payload)
 
-                            if(it.data.payload?.city.isNullOrBlank()|| it.data.payload.profileImage.isNullOrEmpty()){
+                            if (it.data.payload?.city.isNullOrBlank() || it.data.payload.profileImage.isNullOrEmpty()) {
                                 val bundle = Bundle()
                                 val userDetails = it.data.payload?.toUserDetailsX()
-                                bundle.putString("from","normal")
-                                bundle.putParcelable("userDetail",userDetails)
-                                findNavController().navigate(R.id.editProfileNewFragment,bundle)
-                            }else{
+                                bundle.putString("from", "normal")
+                                bundle.putParcelable("userDetail", userDetails)
+                                findNavController().navigate(R.id.editProfileNewFragment, bundle)
+                            } else {
                                 startActivity(Intent(requireActivity(), HomeActivity::class.java))
                                 requireActivity().finish()
                             }
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -126,35 +140,49 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Login success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             Preferences.setStringPreference(requireContext(), IS_LOGIN, "2")
                             Preferences.setStringPreference(requireContext(), LOGIN_TYPE, "G")
-                            Preferences.setCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA, it.data)
+                            Preferences.setCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA,
+                                it.data
+                            )
                             CommonUtils.hideKeyboard(requireActivity())
-                            Log.i("TAG", "setObserver: "+Preferences.getStringPreference(requireContext(), FCM_TOKEN))
+                            Log.i(
+                                "TAG",
+                                "setObserver: " + Preferences.getStringPreference(
+                                    requireContext(),
+                                    FCM_TOKEN
+                                )
+                            )
                             updateUserOnFirebase(it.data.payload)
-                            if(it.data.payload?.city.isNullOrBlank()|| it.data.payload.profileImage.isNullOrEmpty()){
+                            if (it.data.payload?.city.isNullOrBlank() || it.data.payload.profileImage.isNullOrEmpty()) {
                                 val bundle = Bundle()
                                 val userDetails = it.data.payload?.toUserDetailsX()
-                                bundle.putString("from","social")
-                                bundle.putParcelable("userDetail",userDetails)
-                                findNavController().navigate(R.id.editProfileNewFragment,bundle)
-                            }else{
+                                bundle.putString("from", "social")
+                                bundle.putParcelable("userDetail", userDetails)
+                                findNavController().navigate(R.id.editProfileNewFragment, bundle)
+                            } else {
                                 startActivity(Intent(requireActivity(), HomeActivity::class.java))
                                 requireActivity().finish()
                             }
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -176,9 +204,10 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             "profilePicture" to ""
         )
 
-        firestore.collection("Users").document(payload?.userId.toString()).set(dataHashMap).addOnSuccessListener {
-            logD("Google Login Success: $it")
-        }.addOnFailureListener { error ->
+        firestore.collection("Users").document(payload?.userId.toString()).set(dataHashMap)
+            .addOnSuccessListener {
+                logD("Google Login Success: $it")
+            }.addOnFailureListener { error ->
             logD("Google Login Error: $error")
         }
     }
@@ -186,7 +215,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     fun Payload.toUserDetailsX(): UserDetailsX {
         return UserDetailsX(
             id = this.userId,
-            name = if(this.name?.isNotEmpty() == true && this.name!="") this.name else this.fullName,
+            name = if (this.name?.isNotEmpty() == true && this.name != "") this.name else this.fullName,
             username = this.username,
             email = this.email,
             phone = this.phone,
@@ -226,19 +255,20 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         credentialManager = CredentialManager.create(requireContext())
     }
 
-    private fun clickTermsConditions(){
+    private fun clickTermsConditions() {
         val fullText = "I agree to Terms & Conditions and Privacy Policy of the App"
         val spannableString = SpannableString(fullText)
         val termsClickable = object : ClickableSpan() {
             override fun onClick(widget: View) {
                 val bundle = Bundle()
-                bundle.putString("screen","termsCondition")
-                findNavController().navigate(R.id.termsConditionsFragment,bundle)
+                bundle.putString("screen", "termsCondition")
+                findNavController().navigate(R.id.termsConditionsFragment, bundle)
             }
 
             override fun updateDrawState(ds: TextPaint) {
                 super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme) // your link color
+                ds.color =
+                    ContextCompat.getColor(requireActivity(), R.color.theme) // your link color
                 ds.isUnderlineText = false
             }
         }
@@ -246,13 +276,13 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         val privacyClickable = object : ClickableSpan() {
             override fun onClick(widget: View) {
                 val bundle = Bundle()
-                bundle.putString("screen","privacy")
-                findNavController().navigate(R.id.termsConditionsFragment,bundle)
+                bundle.putString("screen", "privacy")
+                findNavController().navigate(R.id.termsConditionsFragment, bundle)
             }
 
             override fun updateDrawState(ds: TextPaint) {
                 super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme)
+                ds.color = ContextCompat.getColor(requireActivity(), R.color.theme)
                 ds.isUnderlineText = false
             }
         }
@@ -261,14 +291,24 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         val privacyStart = fullText.indexOf("Privacy Policy")
         val privacyEnd = privacyStart + " Privacy Policy".length
 
-        spannableString.setSpan(termsClickable, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannableString.setSpan(privacyClickable, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(
+            termsClickable,
+            termsStart,
+            termsEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannableString.setSpan(
+            privacyClickable,
+            privacyStart,
+            privacyEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
         binding.tvTermsConditions.text = spannableString
         binding.tvTermsConditions.movementMethod = LinkMovementMethod.getInstance()
         binding.tvTermsConditions.highlightColor = Color.TRANSPARENT
     }
 
-    private fun clickDoNotHaveAccount(){
+    private fun clickDoNotHaveAccount() {
         val fullText = "Don’t have an account ?  Sign Up"
         val spannableString = SpannableString(fullText)
         val signUpClick = object : ClickableSpan() {
@@ -278,7 +318,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
 
             override fun updateDrawState(ds: TextPaint) {
                 super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(requireActivity(),R.color.theme)
+                ds.color = ContextCompat.getColor(requireActivity(), R.color.theme)
                 ds.isUnderlineText = false
             }
         }
@@ -286,19 +326,30 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         val signUpStart = fullText.indexOf("Sign Up")
         val signUpEnd = signUpStart + "Sign Up".length
 
-        spannableString.setSpan(signUpClick, signUpStart, signUpEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(
+            signUpClick,
+            signUpStart,
+            signUpEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
         binding.tvDontHaveAccount.text = spannableString
         binding.tvDontHaveAccount.movementMethod = LinkMovementMethod.getInstance()
         binding.tvDontHaveAccount.highlightColor = Color.TRANSPARENT
     }
 
     private fun setPasswordToggle() {
-        binding.passwordToggle.setColorFilter(ContextCompat.getColor(requireContext(), R.color.white), PorterDuff.Mode.SRC_IN)
+        binding.passwordToggle.setColorFilter(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.white
+            ), PorterDuff.Mode.SRC_IN
+        )
         binding.password.transformationMethod = CommonUtils.DotPasswordTransformationMethod
         binding.passwordToggle.setOnClickListener {
             isPassHidden = if (isPassHidden) {
                 binding.passwordToggle.setImageResource(R.drawable.open_eye_2)
-                binding.password.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                binding.password.transformationMethod =
+                    HideReturnsTransformationMethod.getInstance()
                 false
             } else {
                 binding.passwordToggle.setImageResource(R.drawable.close_eye_2)
@@ -313,8 +364,8 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         binding.apply {
             tvForgotPassword.setOnClickListener {
                 val bundle = Bundle()
-                bundle.putString("from","login")
-                findNavController().navigate(R.id.emailFragment,bundle)
+                bundle.putString("from", "login")
+                findNavController().navigate(R.id.emailFragment, bundle)
             }
 
             clGoogleLogin.setOnClickListener {
@@ -340,12 +391,13 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
                     request
                 )
                 handleSignIn(result)
-
             } catch (e: GetCredentialException) {
-                logD("GoogleSignIn -> Credential Error: ${e.message}")
-                showToast("Sign-In Failed")
+                logD("GoogleSignIn ERROR CLASS: ${e::class.java.simpleName}")
+                logD("MESSAGE: ${e.message}")
+                showToast(e.message ?: "")
             } catch (e: Exception) {
                 logD("GoogleSignIn -> Unknown Error: ${e.message}")
+                showToast(e.message ?: "")
             }
         }
     }
@@ -374,13 +426,13 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     logD("GoogleSignIn-> Success: ${user?.email}")
-                    val model=SocialSignUpRequest(
-                        name = user?.displayName?:"",
-                        email = user?.email?:"",
+                    val model = SocialSignUpRequest(
+                        name = user?.displayName ?: "",
+                        email = user?.email ?: "",
                         profile_image = user?.photoUrl.toString(),
-                        social_id = user?.uid?:"",
+                        social_id = user?.uid ?: "",
                         social_type = "G",
-                        deviceToken =Preferences.getStringPreference(requireContext(), FCM_TOKEN),
+                        deviceToken = Preferences.getStringPreference(requireContext(), FCM_TOKEN),
                         deviceType = "A"
                     )
                     logD("hitSocialLoginApi: $model")

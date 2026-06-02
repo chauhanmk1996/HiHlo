@@ -1184,8 +1184,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                         )
 //                        Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
@@ -1200,18 +1199,45 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel.getDeleteReelLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "delete reel success: ${Gson().toJson(it)}")
+
                     if (it.data?.status == 1) {
-                        reelsList.removeAt(binding.viewPager.currentItem)
-                        viewPagerAdapter(mutableListOf())
-                        adapter.updateList(reelsList)
+
+                        val currentPosition = binding.viewPager.currentItem
+
+                        if (currentPosition in reelsList.indices) {
+                            reelsList.removeAt(currentPosition)
+                        }
+
+                        if (reelsList.isNotEmpty()) {
+                            adapter.updateList(reelsList)
+
+                            // Ensure ViewPager position remains valid
+                            val newPosition =
+                                currentPosition.coerceAtMost(reelsList.lastIndex)
+
+                            binding.viewPager.setCurrentItem(newPosition, false)
+                        } else {
+                            // No reels left
+                            adapter.updateList(mutableListOf())
+
+                            // Optional: close screen or show empty state
+                            // findNavController().popBackStack()
+                            // showEmptyState()
+                        }
+
                     } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(
+                            requireContext(),
+                            it.data?.message ?: "",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+
                     ProcessDialog.dismissDialog(true)
                 }
 
@@ -1220,11 +1246,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
 
                 Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
+                    Log.e("TAG", "Delete Reel Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel.getCoinDetailsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {

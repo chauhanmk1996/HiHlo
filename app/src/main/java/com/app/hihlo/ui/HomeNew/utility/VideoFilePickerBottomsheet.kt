@@ -1,6 +1,7 @@
 package com.app.hihlo.ui.HomeNew.utility
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentUris
 import android.content.Intent
@@ -38,6 +39,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import java.io.File
+import androidx.core.net.toUri
 
 class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
@@ -66,7 +68,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
             val data = result.data
             val trimmedUriString = data?.getStringExtra(ProfileFragment.EXTRA_CROPPED_URI) // same as image
             if (!trimmedUriString.isNullOrEmpty()) {
-                val uri = Uri.parse(trimmedUriString)
+                val uri = trimmedUriString.toUri()
                 listener?.onVideoPicked(uri, 0) // 0 = no ratio for video
             }
         }
@@ -76,7 +78,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FilePickerForStatusBinding.inflate(inflater, container, false)
         return binding.root
@@ -108,70 +110,40 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
         fastScrollerHandle()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun fastScrollerHandle() {
-
         binding.ivFastScroller.setOnTouchListener { view, event ->
-
             when (event.action) {
-
                 MotionEvent.ACTION_DOWN -> {
-
                     dY = view.y - event.rawY
-
                     true
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-
-                    val recyclerTop =
-                        binding.recyclerView.top.toFloat()
-
-                    val recyclerBottom =
-                        binding.recyclerView.bottom.toFloat()
-
-                    val newY =
-                        event.rawY + dY
-
+                    val recyclerTop = binding.recyclerView.top.toFloat()
+                    val recyclerBottom = binding.recyclerView.bottom.toFloat()
+                    val newY = event.rawY + dY
                     val minY = recyclerTop
-
-                    val maxY =
-                        recyclerBottom - view.height
-
-                    val finalY =
-                        newY.coerceIn(minY, maxY)
-
+                    val maxY = recyclerBottom - view.height
+                    val finalY = newY.coerceIn(minY, maxY)
                     view.y = finalY
-
-                    val proportion =
-                        (finalY - recyclerTop) /
-                                (maxY - minY)
-
-                    val verticalRange =
-                        binding.recyclerView.computeVerticalScrollRange()
-
-                    val verticalExtent =
-                        binding.recyclerView.computeVerticalScrollExtent()
-
-                    val scrollRange =
-                        verticalRange - verticalExtent
-
-                    val targetScroll =
-                        (proportion * scrollRange).toInt()
+                    val proportion = (finalY - recyclerTop) / (maxY - minY)
+                    val verticalRange = binding.recyclerView.computeVerticalScrollRange()
+                    val verticalExtent = binding.recyclerView.computeVerticalScrollExtent()
+                    val scrollRange = verticalRange - verticalExtent
+                    val targetScroll = (proportion * scrollRange).toInt()
 
                     binding.recyclerView.scrollBy(
                         0,
-                        targetScroll -
-                                binding.recyclerView.computeVerticalScrollOffset()
+                        targetScroll - binding.recyclerView.computeVerticalScrollOffset()
                     )
-
                     true
                 }
 
                 MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> {
-
+                MotionEvent.ACTION_CANCEL,
+                    -> {
                     view.performClick()
-
                     true
                 }
 
@@ -181,14 +153,8 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
         binding.recyclerView.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
-
-                override fun onScrolled(
-                    recyclerView: RecyclerView,
-                    dx: Int,
-                    dy: Int
-                ) {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-
                     updateFastScrollerPosition()
                 }
             }
@@ -196,38 +162,16 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
     }
 
     private fun updateFastScrollerPosition() {
-
-        val verticalRange =
-            binding.recyclerView.computeVerticalScrollRange()
-
-        val verticalOffset =
-            binding.recyclerView.computeVerticalScrollOffset()
-
-        val verticalExtent =
-            binding.recyclerView.computeVerticalScrollExtent()
-
-        val scrollRange =
-            verticalRange - verticalExtent
-
+        val verticalRange = binding.recyclerView.computeVerticalScrollRange()
+        val verticalOffset = binding.recyclerView.computeVerticalScrollOffset()
+        val verticalExtent = binding.recyclerView.computeVerticalScrollExtent()
+        val scrollRange = verticalRange - verticalExtent
         if (scrollRange <= 0) return
-
-        val proportion =
-            verticalOffset.toFloat() / scrollRange
-
-        val recyclerTop =
-            binding.recyclerView.top.toFloat()
-
-        val recyclerBottom =
-            binding.recyclerView.bottom.toFloat()
-
-        val maxY =
-            recyclerBottom -
-                    binding.ivFastScroller.height
-
-        val finalY =
-            recyclerTop +
-                    ((maxY - recyclerTop) * proportion)
-
+        val proportion = verticalOffset.toFloat() / scrollRange
+        val recyclerTop = binding.recyclerView.top.toFloat()
+        val recyclerBottom = binding.recyclerView.bottom.toFloat()
+        val maxY = recyclerBottom - binding.ivFastScroller.height
+        val finalY = recyclerTop + ((maxY - recyclerTop) * proportion)
         binding.ivFastScroller.y = finalY
     }
 
@@ -270,7 +214,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 

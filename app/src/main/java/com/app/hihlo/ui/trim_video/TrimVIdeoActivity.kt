@@ -70,10 +70,10 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
                 override fun getResult(uri: Uri) {
                     ProcessDialog.dismissDialog(true)
                     Log.e("VideoCroppingActivity", "Trim result received")
-
+//TODO /storage/emulated/0/Download/42ae60aa-1c60-4bd4-bff4-6eef8a5033c0.mp4
                     UserPreference.seletedUri = uri
                     val resultIntent = Intent().apply {
-                        putExtra(EXTRA_CROPPED_URI, uri.toString())   // ✅ FIXED: sends the real trimmed URI
+                        putExtra(EXTRA_CROPPED_URI, uri.toString())
                     }
                     setResult(RESULT_OK, resultIntent)
                     finish()
@@ -95,7 +95,10 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
             setMinDuration(0)
         }
 
-        binding.backButton.setOnClickListener { onBackPressed() }
+        binding.backButton.setOnClickListener {
+            finish()
+        }
+
         binding.btnDone.setOnClickListener {
             ProcessDialog.showDialog(this, true)
             binding.videoTrimmer.saveVideo()
@@ -104,7 +107,7 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
 
     override fun onResume() {
         super.onResume()
-        this?.window?.let { window ->
+        this.window?.let { window ->
             window.navigationBarColor = ContextCompat.getColor(this, R.color.black_1c1c1c)
             WindowInsetsControllerCompat(window, window.decorView)
                 .isAppearanceLightNavigationBars = false
@@ -123,19 +126,15 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
 
     private fun releaseTrimmerPlayer() {
         try {
-
             val field = binding.videoTrimmer.javaClass.getDeclaredField("mPlayer")
             field.isAccessible = true
-
             val exoPlayer = field.get(binding.videoTrimmer) as? ExoPlayer
-
             exoPlayer?.apply {
                 pause()
                 stop()
                 clearMediaItems()
                 release()
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }

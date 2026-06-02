@@ -116,7 +116,9 @@ class AddReelFragment : Fragment() {
                         if (it.data.code == 200){
                             RTVariable.IS_MEDIA_UPLOADED = true
                             Toast.makeText(requireContext(), "Your Reel Uploaded Successfully", Toast.LENGTH_SHORT).show()
-                            findNavController().popBackStack()
+                            (context as HomeActivity).profileSelect()
+
+                            //findNavController().popBackStack()
                         }else{
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
@@ -142,7 +144,7 @@ class AddReelFragment : Fragment() {
                         if (it.data.code == 200){
                             RTVariable.IS_MEDIA_UPLOADED = true
                             Toast.makeText(requireContext(), "Your Post Uploaded Successfully", Toast.LENGTH_SHORT).show()
-                            findNavController().popBackStack()
+                            (context as HomeActivity).profileSelect()
                         }else{
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }

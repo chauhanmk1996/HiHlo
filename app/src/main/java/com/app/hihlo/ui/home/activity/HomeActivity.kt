@@ -619,22 +619,28 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     true
                 }
                 R.id.profile -> {
-                    UserDataManager.setGetBackToHome(binding.root.context, true)
-                    UserDataManager.setHomeLoaded(this, false)
-                    RTVariable.ISOTHERCLICKED = true
-                    RTVariable.ISHOMECLICKED = false
-                    RTVariable.IS_CHAT_OTHER = true
-                    RTVariable.CHAT_INSTANCE_KEY_ID = 1
-                    RTVariable.REELS_INSTANCE_KEY_ID = 1
-                    RTVariable.SEARCH_SELF_CLICKED = 1
-                    Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
-                    showNavigationView()
-                    navigateToProfile(currentDestId, userImageUrl)
+                    profileSelect()
                     true
                 }
                 else -> false
             }
         }
+
+    }
+
+    fun profileSelect(){
+        val currentDestId = navController.currentDestination?.id
+        UserDataManager.setGetBackToHome(binding.root.context, true)
+        UserDataManager.setHomeLoaded(this, false)
+        RTVariable.ISOTHERCLICKED = true
+        RTVariable.ISHOMECLICKED = false
+        RTVariable.IS_CHAT_OTHER = true
+        RTVariable.CHAT_INSTANCE_KEY_ID = 1
+        RTVariable.REELS_INSTANCE_KEY_ID = 1
+        RTVariable.SEARCH_SELF_CLICKED = 1
+        Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
+        showNavigationView()
+        navigateToProfile(currentDestId, userImageUrl)
 
     }
 
