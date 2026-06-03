@@ -989,35 +989,6 @@ class EditProfileNewFragment : Fragment() {
         }
     }
 
-
-    /* private fun initGenderSpinner(preSelectedGender: String) {
-        val genderArray = resources.getStringArray(R.array.Gender)
-
-        val adapter = ArrayAdapter(
-            requireActivity(),
-            R.layout.spinner_item_selected,
-            genderArray
-        )
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-
-        binding.spinGender.adapter = adapter
-
-        // ✅ Set pre-selected value if it exists in array
-        val selectedIndex = genderArray.indexOfFirst { it.equals(preSelectedGender, ignoreCase = true) }
-        if (selectedIndex >= 0) {
-            binding.spinGender.setSelection(selectedIndex)
-        }
-
-        binding.spinGender.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedGender = parent?.getItemAtPosition(position).toString()
-                // Do something with selectedGender
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-    }
-*/
     fun Int.dpToPx(context: Context): Int {
         return (this * context.resources.displayMetrics.density).toInt()
     }

@@ -13,11 +13,11 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" /> <!-- Required permissions -->
+        android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> <!-- Optional permissions -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -56,116 +56,78 @@
         <activity
             android:name=".ui.profile.activity.ViewAdsActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.profile.activity.RechargeCoinsActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".utils.SoundService"
-            android:enabled="true"
-            android:stopWithTask="true" />
-
-        <!--        <activity-->
-        <!--            android:name=".ui.calling.activity.SingleVideoCallActivity"-->
-        <!--            android:excludeFromRecents="false"-->
-        <!--            android:exported="true"-->
-        <!--            android:launchMode="singleTask"-->
-        <!--            android:screenOrientation="portrait"-->
-        <!--            android:supportsPictureInPicture="true"-->
-        <!--            android:taskAffinity=".ui.calling.activity.SingleVideoCallActivity"-->
-        <!--            android:windowSoftInputMode="adjustResize" />-->
-        <!--        <activity-->
-        <!--            android:name=".ui.calling.activity.OutgoingVideoCallActivity"-->
-        <!--            android:excludeFromRecents="false"-->
-        <!--            android:exported="true"-->
-        <!--            android:launchMode="singleTask"-->
-        <!--            android:screenOrientation="portrait"-->
-        <!--            android:supportsPictureInPicture="true"-->
-        <!--            android:taskAffinity=".ui.calling.activity.OutgoingVideoCallActivity"-->
-        <!--            android:windowSoftInputMode="adjustResize" />-->
-
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.calling.activity.SingleVideoCallActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density"
             android:exported="false"
             android:resizeableActivity="true"
             android:screenOrientation="portrait"
-            android:supportsPictureInPicture="true" />
+            android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.calling.activity.OutgoingVideoCallActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|density"
             android:exported="false"
             android:resizeableActivity="true"
             android:screenOrientation="portrait"
-            android:supportsPictureInPicture="true" />
+            android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/UCropCustomTheme" />
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
+            android:theme="@style/UCropCustomTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.trim_video.TrimVideoActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.HomeNew.activity.FilePickerStatus"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.signup.activity.SignupFlowActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ui.home.activity.HomeActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ImageVideoConverter.ImageVideoConverter"
             android:exported="true"
-            android:theme="@style/Theme.TransparentStory"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"
-            android:windowSoftInputMode="adjustResize" />
-
+            android:theme="@style/Theme.TransparentStory"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".ui.HomeNew.activity.PlayStatusActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.TransparentStory"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".ui.splash.activity.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:theme="@style/Base.Theme.HiHloApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -185,8 +147,20 @@
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
 
-        <!-- InCallService (UI for calls) -->
-        <!--        <service>-->
+        <service
+            android:name=".utils.SoundService"
+            android:enabled="true"
+            android:stopWithTask="true" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

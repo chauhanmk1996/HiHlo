@@ -12,7 +12,7 @@
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.app.hihlo.ui.chat.fragment.ChatFragment"
-        android:label="ChatFragment" >
+        android:label="ChatFragment">
 
         <action
             android:id="@+id/action_chatFragment_to_openImageFragment"
@@ -48,7 +48,7 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.app.hihlo.ui.home.fragment.HomeFragment"
-        android:label="HomeFragment" >
+        android:label="HomeFragment">
         <action
             android:id="@+id/action_homeFragment_to_storyFragment"
             app:destination="@id/storyFragment" />
@@ -71,7 +71,7 @@
     <fragment
         android:id="@+id/reelsFragment"
         android:name="com.app.hihlo.ui.reels.fragment.ReelsFragment"
-        android:label="ReelsFragment" >
+        android:label="ReelsFragment">
         <action
             android:id="@+id/action_reelsFragment_to_addReelFragment"
             app:destination="@id/addReelFragment" />
@@ -82,14 +82,14 @@
 
         <argument
             android:name="from"
+            android:defaultValue="home"
             app:argType="string"
-            app:nullable="false"
-            android:defaultValue="home" />
+            app:nullable="false" />
         <argument
             android:name="reelPosition"
+            android:defaultValue="0"
             app:argType="string"
-            app:nullable="false"
-            android:defaultValue="0" />
+            app:nullable="false" />
         <action
             android:id="@+id/action_reelsFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -97,7 +97,7 @@
     <fragment
         android:id="@+id/searchNewFragment"
         android:name="com.app.hihlo.ui.SearchNew.SearchNewFragment"
-        android:label="SearchFragment" >
+        android:label="SearchFragment">
         <action
             android:id="@+id/action_searchNewFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -114,7 +114,7 @@
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.app.hihlo.ui.search.fragment.SearchFragment"
-        android:label="SearchFragment" >
+        android:label="SearchFragment">
         <action
             android:id="@+id/action_searchFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -128,13 +128,25 @@
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.app.hihlo.ui.profile.fragment.ProfileFragment"
-        android:label="ProfileFragment" >
+        android:label="ProfileFragment">
         <action
             android:id="@+id/action_profileFragment_to_editProfileFragment"
             app:destination="@id/editProfileFragment" />
-        <argument android:name="isMyProfile" app:nullable="false" app:argType="string" android:defaultValue="1"/>
-        <argument android:name="userId" app:nullable="false" app:argType="string" android:defaultValue=""/>
-        <argument android:name="from" app:nullable="false" app:argType="string" android:defaultValue=""/>
+        <argument
+            android:name="isMyProfile"
+            android:defaultValue="1"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="userId"
+            android:defaultValue=""
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="from"
+            android:defaultValue=""
+            app:argType="string"
+            app:nullable="false" />
         <action
             android:id="@+id/action_profileFragment_to_followersFragment"
             app:destination="@id/followersFragment" />
@@ -157,13 +169,16 @@
     <fragment
         android:id="@+id/editProfileFragment"
         android:name="com.app.hihlo.ui.profile.fragment.EditProfileFragment"
-        android:label="EditProfileFragment" >
-        <argument android:name="userDetails" app:nullable="false" app:argType="com.app.hihlo.model.get_profile.UserDetailsX"/>
+        android:label="EditProfileFragment">
+        <argument
+            android:name="userDetails"
+            app:argType="com.app.hihlo.model.get_profile.UserDetailsX"
+            app:nullable="false" />
     </fragment>
     <fragment
         android:id="@+id/chatListFragment"
         android:name="com.app.hihlo.ui.chat.fragment.ChatListFragment"
-        android:label="ChatListFragment" >
+        android:label="ChatListFragment">
         <action
             android:id="@+id/action_chatListFragment_to_chatFragment"
             app:destination="@id/chatFragment" />
@@ -177,10 +192,17 @@
     <fragment
         android:id="@+id/storyFragment"
         android:name="com.app.hihlo.ui.home.fragment.StoryFragment"
-        android:label="StoryFragment" >
-        <argument android:name="isMyStory" android:defaultValue="true" app:argType="string"/>
-        <argument android:name="myStoryData" app:argType="com.app.hihlo.model.home.response.MyStory"/>
-        <argument android:name="otherStoryData" app:argType="com.app.hihlo.model.home.response.Story[]"/>
+        android:label="StoryFragment">
+        <argument
+            android:name="isMyStory"
+            android:defaultValue="true"
+            app:argType="string" />
+        <argument
+            android:name="myStoryData"
+            app:argType="com.app.hihlo.model.home.response.MyStory" />
+        <argument
+            android:name="otherStoryData"
+            app:argType="com.app.hihlo.model.home.response.Story[]" />
         <action
             android:id="@+id/action_storyFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -189,9 +211,18 @@
         android:id="@+id/followersFragment"
         android:name="com.app.hihlo.ui.profile.fragment.FollowersFragment"
         android:label="FollowersFragment">
-        <argument android:name="screenCheck" android:defaultValue="true" app:argType="string"/>
-        <argument android:name="isMyProfile" android:defaultValue="true" app:argType="string"/>
-        <argument android:name="userId" android:defaultValue="true" app:argType="string"/>
+        <argument
+            android:name="screenCheck"
+            android:defaultValue="true"
+            app:argType="string" />
+        <argument
+            android:name="isMyProfile"
+            android:defaultValue="true"
+            app:argType="string" />
+        <argument
+            android:name="userId"
+            android:defaultValue="true"
+            app:argType="string" />
         <action
             android:id="@+id/action_followersFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -199,8 +230,11 @@
     <fragment
         android:id="@+id/addReelFragment"
         android:name="com.app.hihlo.ui.reels.fragment.AddReelFragment"
-        android:label="AddReelFragment" >
-        <argument android:name="screenCheck" android:defaultValue="true" app:argType="string"/>
+        android:label="AddReelFragment">
+        <argument
+            android:name="screenCheck"
+            android:defaultValue="true"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/profileSettingFragment"
@@ -215,72 +249,72 @@
         android:id="@+id/editProfileNewFragment"
         android:name="com.app.hihlo.ui.profile.fragment.EditProfileNewFragment"
         android:label="EditProfileNewFragment"
-        tools:layout="@layout/fragment_edit_profile_new"/>
+        tools:layout="@layout/fragment_edit_profile_new" />
     <dialog
         android:id="@+id/logoutDialogFragment"
         android:name="com.app.hihlo.ui.profile.fragment.LogoutDialogFragment"
         android:label="LogoutDialogFragment"
-        tools:layout="@layout/fragment_logout_dialog"/>
+        tools:layout="@layout/fragment_logout_dialog" />
     <fragment
         android:id="@+id/blockedUserFragment"
         android:name="com.app.hihlo.ui.profile.fragment.BlockedUserFragment"
         android:label="BlockedUserFragment"
-        tools:layout="@layout/fragment_blocked_user"/>
+        tools:layout="@layout/fragment_blocked_user" />
     <fragment
         android:id="@+id/notificationSettingFragment"
         android:name="com.app.hihlo.ui.profile.fragment.NotificationSettingFragment"
         android:label="NotificationSettingFragment"
-        tools:layout="@layout/fragment_notification_setting"/>
+        tools:layout="@layout/fragment_notification_setting" />
     <fragment
         android:id="@+id/addYourPhotoFragment"
         android:name="com.app.hihlo.ui.profile.become_creater.AddYourPhotoFragment"
         android:label="AddYourPhotoFragment"
-        tools:layout="@layout/fragment_add_your_photo"/>
+        tools:layout="@layout/fragment_add_your_photo" />
     <fragment
         android:id="@+id/benifitsOfCreatersFragment"
         android:name="com.app.hihlo.ui.profile.become_creater.BenifitsOfCreatersFragment"
         android:label="BenifitsOfCreatersFragment"
-        tools:layout="@layout/fragment_benifits_of_creaters"/>
+        tools:layout="@layout/fragment_benifits_of_creaters" />
     <fragment
         android:id="@+id/captureVideoFragment"
         android:name="com.app.hihlo.ui.profile.become_creater.CaptureVideoFragment"
         android:label="CaptureVideoFragment"
-        tools:layout="@layout/fragment_capture_video"/>
+        tools:layout="@layout/fragment_capture_video" />
     <fragment
         android:id="@+id/addPhoneNumberFragment"
         android:name="com.app.hihlo.ui.profile.become_creater.AddPhoneNumberFragment"
         android:label="AddPhoneNumberFragment"
-        tools:layout="@layout/fragment_add_phone_number"/>
+        tools:layout="@layout/fragment_add_phone_number" />
     <fragment
         android:id="@+id/phoneOtpFragment"
         android:name="com.app.hihlo.ui.profile.become_creater.PhoneOtpFragment"
         android:label="PhoneOtpFragment"
-        tools:layout="@layout/fragment_phone_otp"/>
+        tools:layout="@layout/fragment_phone_otp" />
     <fragment
         android:id="@+id/verificationStatusFragment"
         android:name="com.app.hihlo.ui.profile.become_creater.VerificationStatusFragment"
         android:label="VerificationStatusFragment"
-        tools:layout="@layout/fragment_verification_status"/>
+        tools:layout="@layout/fragment_verification_status" />
     <fragment
         android:id="@+id/changePasswordFragment"
         android:name="com.app.hihlo.ui.profile.fragment.ChangePasswordFragment"
         android:label="ChangePasswordFragment"
-        tools:layout="@layout/fragment_change_password"/>
+        tools:layout="@layout/fragment_change_password" />
     <fragment
         android:id="@+id/rateUsFragment"
         android:name="com.app.hihlo.ui.profile.fragment.RateUsFragment"
         android:label="RateUsFragment"
-        tools:layout="@layout/fragment_rate_us"/>
+        tools:layout="@layout/fragment_rate_us" />
     <fragment
         android:id="@+id/contactUsFragment"
         android:name="com.app.hihlo.ui.profile.fragment.ContactUsFragment"
         android:label="ContactUsFragment"
-        tools:layout="@layout/fragment_contact_us"/>
+        tools:layout="@layout/fragment_contact_us" />
     <fragment
         android:id="@+id/termsConditionsFragment"
         android:name="com.app.hihlo.ui.profile.terms_conditions.TermsConditionsFragment"
         android:label="TermsConditionsFragment"
-        tools:layout="@layout/fragment_terms_conditions"/>
+        tools:layout="@layout/fragment_terms_conditions" />
     <fragment
         android:id="@+id/newStoryFragment"
         android:name="com.app.hihlo.ui.home.fragment.NewStoryFragment"
@@ -297,11 +331,21 @@
     <fragment
         android:id="@+id/userPostListFragment"
         android:name="com.app.hihlo.ui.home.fragment.UserPostListFragment"
-        android:label="UserPostListFragment" >
-        <argument android:name="homePosts" app:argType="com.app.hihlo.model.home.response.Post[]" />
-        <argument android:name="profilePosts" app:argType="com.app.hihlo.model.get_profile.Posts" />
-        <argument android:name="from" app:argType="string" app:nullable="false" />
-        <argument android:name="position" app:argType="string" app:nullable="false" />
+        android:label="UserPostListFragment">
+        <argument
+            android:name="homePosts"
+            app:argType="com.app.hihlo.model.home.response.Post[]" />
+        <argument
+            android:name="profilePosts"
+            app:argType="com.app.hihlo.model.get_profile.Posts" />
+        <argument
+            android:name="from"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="position"
+            app:argType="string"
+            app:nullable="false" />
         <action
             android:id="@+id/action_userPostListFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
@@ -322,8 +366,11 @@
     <fragment
         android:id="@+id/becomeCreatorStatusFragment"
         android:name="com.app.hihlo.ui.profile.fragment.BecomeCreatorStatusFragment"
-        android:label="BecomeCreatorStatusFragment" >
-        <argument android:name="status" app:argType="string" app:nullable="false" />
+        android:label="BecomeCreatorStatusFragment">
+        <argument
+            android:name="status"
+            app:argType="string"
+            app:nullable="false" />
     </fragment>
 
     <fragment
@@ -345,13 +392,16 @@
     <fragment
         android:id="@+id/openImageFragment"
         android:name="com.app.hihlo.ui.chat.fragment.OpenImageFragment"
-        android:label="OpenImageFragment" >
-        <argument android:name="imageUrl" app:argType="string" app:nullable="false" />
+        android:label="OpenImageFragment">
+        <argument
+            android:name="imageUrl"
+            app:argType="string"
+            app:nullable="false" />
     </fragment>
     <fragment
         android:id="@+id/secondStoryFragment"
         android:name="com.app.hihlo.ui.home.fragment.SecondStoryFragment"
-        android:label="SecondStoryFragment" >
+        android:label="SecondStoryFragment">
         <action
             android:id="@+id/action_secondStoryFragment_to_profileFragment"
             app:destination="@id/profileFragment" />

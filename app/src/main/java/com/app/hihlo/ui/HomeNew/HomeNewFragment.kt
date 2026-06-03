@@ -1625,18 +1625,15 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             UserPreference.seletedUri = resultUri
                             UserPreference.selectedMediaToUpload = selectedBottomSheetType
                             UserPreference.selectedCropRatio = ratio
-                            UserPreference.selectedMediaType = "I"   // 🔥 ADD THIS LINE
-                            Log.i("TAG", "postratio: ${UserPreference.selectedCropRatio}")
-                            findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
+                            UserPreference.selectedMediaType = "I"
+                            findNavController().navigate(R.id.addReelFragment)
                         }
                         bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
-                        //checkGalleryPermissionAndPick2("I")
                     } else {
                         Utils.showCustom_Snackbar(
                             requireActivity().findViewById(android.R.id.content),
                             "You are not a creator"
                         )
-                        //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                     }
                 },
                 onOption3Click = {
@@ -1653,7 +1650,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             UserPreference.selectedMediaToUpload = selectedBottomSheetType
                             UserPreference.selectedMediaType = "V"
                             UserPreference.selectedCropRatio = 1
-                            findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
+                            findNavController().navigate(R.id.addReelFragment)
                         }
                         bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                     } else {

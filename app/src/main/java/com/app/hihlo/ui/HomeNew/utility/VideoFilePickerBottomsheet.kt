@@ -38,7 +38,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
-import java.io.File
 import androidx.core.net.toUri
 
 class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
@@ -52,7 +51,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
     override fun getTheme(): Int = R.style.FilePickerTheme
 
-    fun interface OnVideoPickedListener {
+    fun interface OnVideoPickedListener{
         fun onVideoPicked(uri: Uri, ratio: Int) // ratio can be ignored or default
     }
 
@@ -66,13 +65,13 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
-            val trimmedUriString = data?.getStringExtra(ProfileFragment.EXTRA_CROPPED_URI) // same as image
+            val trimmedUriString = data?.getStringExtra(ProfileFragment.EXTRA_CROPPED_URI)
             if (!trimmedUriString.isNullOrEmpty()) {
                 val uri = trimmedUriString.toUri()
-                listener?.onVideoPicked(uri, 0) // 0 = no ratio for video
+                listener?.onVideoPicked(uri, 0)
+                dismiss()
             }
         }
-        dismiss()
     }
 
     override fun onCreateView(
@@ -236,9 +235,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
     // ─── Load only videos ───────────────────────────────────────────
     private fun loadVideos() {
-
         mediaList.clear()
-
         val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
         val projection = arrayOf(
@@ -247,9 +244,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
             MediaStore.Video.Media.DURATION
         )
 
-        val sortOrder =
-            "${MediaStore.Video.Media.DATE_ADDED} DESC"
-
+        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
         val cursor = requireContext().contentResolver.query(
             collection,
             projection,
@@ -259,25 +254,13 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
         )
 
         cursor?.use {
-
-            val idCol = it.getColumnIndexOrThrow(
-                MediaStore.Video.Media._ID
-            )
-
-            val sizeCol = it.getColumnIndexOrThrow(
-                MediaStore.Video.Media.SIZE
-            )
-
-            val durationCol = it.getColumnIndexOrThrow(
-                MediaStore.Video.Media.DURATION
-            )
+            val idCol = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+            val sizeCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
+            val durationCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
 
             while (it.moveToNext()) {
-
                 val id = it.getLong(idCol)
-
                 val size = it.getLong(sizeCol)
-
                 val duration = it.getLong(durationCol)
 
                 // Skip invalid files
@@ -285,11 +268,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
                 // Remove 0–1 second videos
                 if (duration in 0..1000) continue
-
-                val contentUri = ContentUris.withAppendedId(
-                    collection,
-                    id
-                )
+                val contentUri = ContentUris.withAppendedId(collection, id)
 
                 mediaList.add(
                     MediaModel(
@@ -353,10 +332,5 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d", minutes, seconds)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

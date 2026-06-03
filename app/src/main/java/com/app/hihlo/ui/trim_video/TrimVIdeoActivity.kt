@@ -41,25 +41,13 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
             return
         }
 
-        // Check resolution before loading into trimmer
         try {
             val retriever = android.media.MediaMetadataRetriever()
             retriever.setDataSource(this, videoUri)
             val width = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
             val height = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
             retriever.release()
-
             Log.d("VideoCroppingActivity", "Video resolution: ${width}x$height")
-
-            if (width > 3840 || height > 2160) {
-                Toast.makeText(
-                    this,
-                    "Videos above 4K resolution are not supported.",
-                    Toast.LENGTH_LONG
-                ).show()
-                finish()
-                return
-            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -72,7 +60,6 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
             setOnTrimVideoListener(object : OnVideoEditedEvent {
                 override fun getResult(uri: Uri) {
                     ProcessDialog.dismissDialog(true)
-                    //TODO /storage/emulated/0/Download/42ae60aa-1c60-4bd4-bff4-6eef8a5033c0.mp4
                     UserPreference.seletedUri = uri
                     val resultIntent = Intent().apply {
                         putExtra(EXTRA_CROPPED_URI, uri.toString())

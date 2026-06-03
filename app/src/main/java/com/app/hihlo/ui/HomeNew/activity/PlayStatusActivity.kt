@@ -883,12 +883,7 @@ class PlayStatusActivity : AppCompatActivity() {
                 if (diff > 0) binding.root.translationY = diff
                 return true
             }
-//            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-//                val diff = event.rawY - startY
-//                if (diff > 250) finish()
-//                else binding.root.animate().translationY(0f).setDuration(150).start()
-//                return true
-//            }
+
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 val diff = event.rawY - startY
 

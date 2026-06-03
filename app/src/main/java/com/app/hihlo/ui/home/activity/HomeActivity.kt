@@ -51,6 +51,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -83,36 +84,13 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     var applyBottomBarPadding: Boolean = true
     var userImageUrl = ""
     val vm: CallStateViewModel by viewModels()
-    var isBack: Boolean = false
 
     // Optional: also animate the FAB + imgBtn together if you want
     override fun hideBottomElements() {
-//        listOf(binding.bottomAppBar, binding.floatingbtn, binding.imgBtn).forEach { view ->
-//            if (view.visibility == View.VISIBLE) {
-//                view.animate()
-//                    .translationY(view.height.toFloat())
-//                    .alpha(0.85f)           // optional: slight fade
-//                    .setDuration(180L)
-//                    .setInterpolator(AccelerateInterpolator())
-//                    .withEndAction { /* do NOT set invisible here */ }
-//                    .start()
-//            }
-//        }
         hideNavigationView()
     }
 
     override fun showBottomElements() {
-//        listOf(binding.bottomAppBar, binding.floatingbtn, binding.imgBtn).forEach { view ->
-//            view.translationY = view.height.toFloat()
-//            view.alpha = 0.85f
-//
-//            view.animate()
-//                .translationY(0f)
-//                .alpha(1f)
-//                .setDuration(220L)
-//                .setInterpolator(DecelerateInterpolator())
-//                .start()
-//        }
         showNavigationView()
     }
 
@@ -133,7 +111,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         UserDataManager.setHomeLoaded(this, false)
         UserDataManager.postCommentExpandState(this, false)
         navigationMenuClickListener()
-//        setBottomBarPadding()
         setBottomNavigation()
         fragmentChangeCallback()
         handleActivityBackButton()
@@ -144,20 +121,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         if(intent!=null){
             handleIntent(intent)
         }
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                while (true) {
-//                    delay(2)
-//                    if (RTVariable.IS_STATUS_VIEWER_FINISHED) {
-//                        if(RTVariable.IS_STATUS_PROFILE_CLICKED){
-//                            RTVariable.IS_STATUS_PROFILE_CLICKED = false
-//                            RTVariable.IS_STATUS_VIEWER_FINISHED = false
-//                            //popBackToHome2()
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
     fun setOnlineStatusVisibility(boolean: Boolean){

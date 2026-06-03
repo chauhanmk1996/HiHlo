@@ -28,7 +28,6 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
     private lateinit var adapter: AdapterEditProfile
     private var userDetails = UserDetailsX()
     private val args: EditProfileFragmentArgs by navArgs()
-
     private val viewModel: EditProfileViewModel by viewModels()
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -71,13 +70,6 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
 
         }
         binding.editProfileRecycler.adapter = adapter
-        setUserDataUI(userDetails)
-    }
-
-    private fun setUserDataUI(userDetails: UserDetailsX) {
-        binding.apply {
-
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,6 +84,7 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
 //            Log.i("TAG", "onClick: "+editProfileRequest)
       //      viewModel.hitEditProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, editProfileRequest)
         }
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }

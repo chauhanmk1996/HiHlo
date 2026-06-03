@@ -1358,7 +1358,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             Log.e("TAG", "onClick: $userDetails")
             (requireActivity() as? HomeActivity)?.setOnlineStatusVisibility(true)
             findNavController().navigate(R.id.editProfileNewFragment, bundle)
-            //findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment(userDetails))
         }
         binding.messageUserButton.setOnClickListener {
             val bundle = Bundle()

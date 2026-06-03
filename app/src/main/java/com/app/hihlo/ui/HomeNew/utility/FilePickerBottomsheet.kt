@@ -376,8 +376,6 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
             } else {
                 holder.txtDuration.isVisible = false
             }
-//            holder.txtDuration.text =
-//                if (item.mediaType == "video") formatDuration(item.duration) else ""
 
             holder.itemView.setOnClickListener {
                 Log.d("MEDIA_DATA", "uri = ${item.uri}")

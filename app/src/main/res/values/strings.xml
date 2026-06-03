@@ -48,6 +48,7 @@
     <string name="re_enter_your_password">Re - Enter Your Password</string>
     <string name="please_enter_your_phone_number_for_verification">Please enter your phone number for verification</string>
     <string name="no_recent_chats">No Chat</string>
+    <string name="caption">Caption</string>
 
 
     <string-array name="City">
