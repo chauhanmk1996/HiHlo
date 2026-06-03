@@ -7,7 +7,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -35,6 +37,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -71,6 +74,8 @@ import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
@@ -79,6 +84,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import kotlin.math.hypot
+import androidx.core.net.toUri
+import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.AspectRatioFrameLayout
 
 class PlayStatusActivity : AppCompatActivity() {
 
@@ -418,7 +427,37 @@ class PlayStatusActivity : AppCompatActivity() {
         if (story.asset_type == "I") {
             binding.storyImage.visibility = View.VISIBLE
             binding.playerView.visibility = View.GONE
-            Glide.with(this).load(story.asset_url).into(binding.storyImage)
+
+            Glide.with(this)
+                .asBitmap()
+                .load(story.asset_url)
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>?,
+                    ) {
+                        val imageWidth = resource.width.toFloat()
+                        val imageHeight = resource.height.toFloat()
+                        val imageRatio = imageWidth / imageHeight
+                        binding.storyImage.post {
+                            val viewWidth = binding.storyImage.width.toFloat()
+                            val viewHeight = binding.storyImage.height.toFloat()
+                            val viewRatio = viewWidth / viewHeight
+                            val difference = kotlin.math.abs(imageRatio - viewRatio)
+                            binding.storyImage.scaleType =
+                                if (difference < 0.2f) {
+                                    ImageView.ScaleType.FIT_XY
+                                } else {
+                                    ImageView.ScaleType.FIT_CENTER
+                                }
+                            binding.storyImage.setImageBitmap(resource)
+                        }
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {}
+                })
+
+            //Glide.with(this).load(story.asset_url).into(binding.storyImage)
             imageRemaining = imageDuration
             startImageProgress()
         } else {
@@ -426,7 +465,7 @@ class PlayStatusActivity : AppCompatActivity() {
             binding.playerView.visibility = View.VISIBLE
             player = ExoPlayer.Builder(this).build()
             binding.playerView.player = player
-            val mediaItem = MediaItem.fromUri(Uri.parse(story.asset_url))
+            val mediaItem = MediaItem.fromUri(story.asset_url.toUri())
             player?.setMediaItem(mediaItem)
             player?.prepare()
 
@@ -443,8 +482,32 @@ class PlayStatusActivity : AppCompatActivity() {
             player?.play()
             startVideoProgress()
             player?.addListener(object : Player.Listener {
+
                 override fun onPlaybackStateChanged(state: Int) {
                     if (state == Player.STATE_ENDED) playNext()
+                }
+
+                @OptIn(UnstableApi::class)
+                override fun onVideoSizeChanged(videoSize: VideoSize) {
+                    val videoWidth = videoSize.width.toFloat()
+                    val videoHeight = videoSize.height.toFloat()
+                    if (videoWidth == 0f || videoHeight == 0f) return
+
+                    binding.playerView.post {
+
+                        val viewWidth = binding.playerView.width.toFloat()
+                        val viewHeight = binding.playerView.height.toFloat()
+
+                        val scaleX = viewWidth / videoWidth
+                        val scaleY = viewHeight / videoHeight
+
+                        val maxScale = maxOf(scaleX, scaleY)
+
+                        val videoSurface = binding.playerView.videoSurfaceView
+
+                        videoSurface?.scaleX = maxScale
+                        videoSurface?.scaleY = maxScale
+                    }
                 }
             })
         }
