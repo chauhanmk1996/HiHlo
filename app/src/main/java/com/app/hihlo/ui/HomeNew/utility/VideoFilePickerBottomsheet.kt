@@ -236,6 +236,9 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
     // ─── Load only videos ───────────────────────────────────────────
     private fun loadVideos() {
+
+        mediaList.clear()
+
         val collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
         val projection = arrayOf(
@@ -244,7 +247,8 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
             MediaStore.Video.Media.DURATION
         )
 
-        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
+        val sortOrder =
+            "${MediaStore.Video.Media.DATE_ADDED} DESC"
 
         val cursor = requireContext().contentResolver.query(
             collection,
@@ -255,16 +259,37 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
         )
 
         cursor?.use {
-            val idCol = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-            val sizeCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-            val durationCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+
+            val idCol = it.getColumnIndexOrThrow(
+                MediaStore.Video.Media._ID
+            )
+
+            val sizeCol = it.getColumnIndexOrThrow(
+                MediaStore.Video.Media.SIZE
+            )
+
+            val durationCol = it.getColumnIndexOrThrow(
+                MediaStore.Video.Media.DURATION
+            )
 
             while (it.moveToNext()) {
+
                 val id = it.getLong(idCol)
+
                 val size = it.getLong(sizeCol)
+
                 val duration = it.getLong(durationCol)
 
-                val contentUri = ContentUris.withAppendedId(collection, id)
+                // Skip invalid files
+                if (size <= 0L) continue
+
+                // Remove 0–1 second videos
+                if (duration in 0..1000) continue
+
+                val contentUri = ContentUris.withAppendedId(
+                    collection,
+                    id
+                )
 
                 mediaList.add(
                     MediaModel(

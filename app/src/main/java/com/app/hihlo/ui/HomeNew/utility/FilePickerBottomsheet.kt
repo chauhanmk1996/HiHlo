@@ -232,57 +232,106 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
 
     // ─── Media loading ──────────────────────────────────────────────
     private fun loadAllMedia() {
+        mediaList.clear()
         val collection = MediaStore.Files.getContentUri("external")
-
         val projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
             MediaStore.Files.FileColumns.MEDIA_TYPE,
-            MediaStore.Files.FileColumns.DATA,
             MediaStore.Files.FileColumns.SIZE,
             MediaStore.Video.VideoColumns.DURATION
         )
 
-        val selection =
-            "${MediaStore.Files.FileColumns.MEDIA_TYPE}=? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE}=?"
+        val selection = """
+        ${MediaStore.Files.FileColumns.MEDIA_TYPE}=? 
+        OR 
+        ${MediaStore.Files.FileColumns.MEDIA_TYPE}=?
+    """.trimIndent()
+
         val args = arrayOf(
             MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
             MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
         )
-        val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
+
+        val sortOrder =
+            "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
 
         val cursor = requireContext().contentResolver.query(
-            collection, projection, selection, args, sortOrder
+            collection,
+            projection,
+            selection,
+            args,
+            sortOrder
         )
 
         cursor?.use {
-            val idCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-            val typeCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
-            val pathCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA)
-            val sizeCol = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
-            val durationCol = it.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION)
+
+            val idCol = it.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns._ID
+            )
+
+            val typeCol = it.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.MEDIA_TYPE
+            )
+
+            val sizeCol = it.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.SIZE
+            )
+
+            val durationCol = it.getColumnIndexOrThrow(
+                MediaStore.Video.VideoColumns.DURATION
+            )
 
             while (it.moveToNext()) {
+
                 val id = it.getLong(idCol)
+
                 val type = it.getInt(typeCol)
-                val path = it.getString(pathCol) ?: ""
+
                 val size = it.getLong(sizeCol)
+
                 val duration = it.getLong(durationCol)
 
-                val contentUri = when (type) {
-                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE ->
-                        ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                // Skip invalid/small files
+                if (size <= 0L) continue
 
-                    else ->
-                        ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                // Remove 0-1 second videos
+                if (
+                    type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO &&
+                    duration in 0..1000
+                ) {
+                    continue
+                }
+
+                val contentUri = when (type) {
+
+                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE -> {
+
+                        ContentUris.withAppendedId(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            id
+                        )
+                    }
+
+                    else -> {
+
+                        ContentUris.withAppendedId(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            id
+                        )
+                    }
                 }
 
                 val mediaType =
-                    if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) "image" else "video"
+                    if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                        "image"
+                    } else {
+                        "video"
+                    }
 
                 mediaList.add(
                     MediaModel(
                         uri = contentUri,
-                        actualPath = path,
+                        actualPath = "",
                         mediaType = mediaType,
                         fileSize = size,
                         duration = duration

@@ -364,8 +364,9 @@ class PlayStatusActivity : AppCompatActivity() {
 
             // Track (background)
             val track = View(this).apply {
-                setBackgroundColor(Color.parseColor("#55212328"))
+                setBackgroundColor(Color.parseColor("#808080"))
             }
+
             progressWrapper.addView(
                 track,
                 ViewGroup.LayoutParams.MATCH_PARENT,
