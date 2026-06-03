@@ -72,8 +72,8 @@ class ApiRepository {
         limit: String,
     ) = service.getReels(
         token = token,
-        if (page.isEmpty()) null else page,
-        if (limit.isEmpty()) null else limit,
+        page.ifEmpty { null },
+        limit.ifEmpty { null },
     )
 
     suspend fun getReelCommentsApi(token: String, reelId:String,

@@ -299,9 +299,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                             Log.e("TAG", "Home success: ${myStoryData}")
                             Log.e("TAG", "Home success: ${allStory}")
                             adapter?.addStory(listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
-                        }else{
                         }
-                    }else{
                     }
                 }
                 Status.LOADING -> {
@@ -310,31 +308,22 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 }
             }
         }
+
         viewModel.getLikeReelLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Post like success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            val payload = it.data.payload
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }else{
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
-                    }else{
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
-                    }
-//                    ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
-//                    ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-//                    ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel.getPostCommentLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -343,25 +332,20 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                         if (it.data.code == 200){
                             isCommentPosted = true
                             adapter?.updateCommentCount(positionToComment)
-
                             viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
-                        }else{
-                            //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
                 Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel.getReplyToCommentLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -370,47 +354,33 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                         if (it.data.code == 200){
                             isCommentPosted=true
                             viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
-                        }else{
-                            //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
-
                 Status.SUCCESS -> {
-
                     if (it.data?.code == 200) {
-
                         val newPayload = it.data.payload ?: return@observe
-
                         when {
-
-                            // ✅ COMMENT POSTED
                             isCommentPosted -> {
-
                                 isCommentPosted = false
-
                                 viewModel2.commentPayloadCache = newPayload
-
                                 CommentPrefs.savePayload(
                                     requireContext(),
                                     postId.toInt(),
                                     newPayload
                                 )
-
                                 if (::commentsBottomSheetFragment.isInitialized &&
                                     commentsBottomSheetFragment.isAdded
                                 ) {
@@ -418,30 +388,23 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                                 }
                             }
 
-                            // ✅ LOAD MORE (FIXED 🔥)
                             isLoadMore -> {
-
                                 isLoadMore = false
-
                                 val oldPayload =
                                     viewModel2.commentPayloadCache
                                         ?: CommentPrefs.getPayload(requireContext(), postId.toInt())
 
                                 if (oldPayload != null) {
-
                                     val (mergedList, newItemsOnly) =
                                         CommentPrefs.mergeComments(
-                                            oldPayload.comments ?: emptyList(),
-                                            newPayload.comments ?: emptyList()
+                                            oldPayload.comments,
+                                            newPayload.comments
                                         )
-
                                     val updatedPayload = oldPayload.copy(
                                         comments = mergedList
                                     )
 
                                     viewModel2.commentPayloadCache = updatedPayload
-
-                                    // ✅ Save correct list
                                     CommentPrefs.savePayload(
                                         requireContext(),
                                         postId.toInt(),
@@ -451,8 +414,6 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                                     if (::commentsBottomSheetFragment.isInitialized &&
                                         commentsBottomSheetFragment.isAdded
                                     ) {
-
-                                        // 🔥 IMPORTANT: append ONLY new items (no duplicate)
                                         if (newItemsOnly.isNotEmpty()) {
                                             commentsBottomSheetFragment.appendComments(newItemsOnly)
                                         } else {
@@ -470,9 +431,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                                 }
                             }
 
-                            // ✅ FIRST LOAD
                             else -> {
-
                                 viewModel2.commentPayloadCache = newPayload
                                 CommentPrefs.clear(requireContext())
                                 CommentPrefs.savePayload(
@@ -480,7 +439,6 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                                     postId.toInt(),
                                     newPayload
                                 )
-
                                 openCommentsBottomSheet(newPayload)
                             }
                         }
@@ -494,37 +452,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 }
             }
         }
-        /*viewModel.getReelCommentsLiveData().observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    Log.e("TAG", "Reel comments success: ${Gson().toJson(it)}")
-//                    if (it.data?.status==1){
-                    if (it.data?.code == 200){
-                        if (isCommentPosted){
-                            isCommentPosted=false
-                            if (::commentsBottomSheetFragment.isInitialized){
-                                commentsBottomSheetFragment.updateComments(it.data.payload)
-                            }
-                        }else {
-                            openCommentsBottomSheet(it.data.payload ?: Payload())
-                        }
-//                        }else{
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-//                        }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
-                    }
-                    ProcessDialog.dismissDialog(true)
-                }
-                Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
-                }
-                Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
-                }
-            }
-        }*/
+
         viewModel.getDeletePostLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -532,43 +460,37 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     if (it.data?.status==1){
                         if (it.data.code == 200){
                             findNavController().popBackStack()
-                        }else{
-                            //Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    }else{
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel4.getCoinDetailsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "coins details success: ${Gson().toJson(it)}")
                     if (it.data?.status==1){
                         totalAvailableCoins = it.data.payload.coins
-                    }else{
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel4.getSendGiftLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -580,21 +502,20 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                             showButtons = false,
                             autoDismissInMillis = 1000
                         )
-//                        Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                     }else{
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                     }
-                    //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
-                    //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    //ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -604,13 +525,13 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
                             Log.e("TAG", "Status success: ${statusListGlobal}")
-                        }else{
                         }
-                    }else{
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
@@ -736,54 +657,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 intent.putExtra("start_width", clickView.width)
                 intent.putExtra("start_height", clickView.height)
                 startActivity(intent)
-                //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
                 requireActivity().overridePendingTransition(0, 0)
-
-                /*RTVariable.IS_FROM_PROFILE = true
-                val stories = adapter!!.getStoriesList()
-                val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
-                val story = stories.find { it.user_id == post.user_id }
-
-// Use the same list for navigation, not a separate `allStory`
-                val storyListToPass = stories   // or ensure allStory is properly populated
-
-                if (storyPosition != -1 && storyListToPass.isNotEmpty()) {
-                    val bundle = Bundle().apply {
-                        putParcelableArrayList("storyList", ArrayList(storyListToPass))
-                        putInt("position", storyPosition)
-                        // ...
-                    }
-                    findNavController().navigate(R.id.secondStoryFragment, bundle)
-                } else {
-                    // Handle error: story not found or list empty
-                    Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
-                } */
-
-
-
-
-                //Toast.makeText(requireActivity(), "B ${data.id}", Toast.LENGTH_LONG).show()
-//                val stories = adapter!!.getStoriesList()
-//                //val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
-//                val story = adapter!!.getStoriesList().find { it.user_id == post.user_id }
-////                                val my_story = postAdapter.getMyStoriesList().getOrNull(0)
-////                                    ?: MyStory()
-//                val currentUserId = Preferences.getCustomModelPreference<LoginResponse>(
-//                    requireContext(), LOGIN_DATA
-//                )?.payload?.userId?.toString() ?: ""
-//                //val isMyStoryValue = if (post.user_id.toString() == currentUserId) "1" else "0"
-//                Log.e("TTTTT", "SSSSS>>> Story clicked: $story")
-//                val bundle = Bundle().apply {
-//                    putParcelableArrayList("storyList", ArrayList(allStory ?: emptyList()))
-//                    putParcelable("myStoryData", myStoryData)
-//                    putInt("position", RTVariable.STORY_POSITION)
-//                }
-//                try {
-//                    findNavController().navigate(R.id.secondStoryFragment, bundle)
-//                } catch (e: Exception) {
-//                    Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-//                    Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
-//                }
             }
         }
     }
@@ -880,19 +754,6 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     }
 
     private fun openSideOptionsPopup(post: Post, data: Data, view:View) {
-//        val inflater = LayoutInflater.from(requireContext())
-//        val binding = PopupChatSideOptionsBinding.inflate(inflater)
-//        val popupWindow = PopupWindow(
-//            binding.root,
-//            ViewGroup.LayoutParams.WRAP_CONTENT,
-//            ViewGroup.LayoutParams.WRAP_CONTENT,
-//            true
-//        ).apply {
-//            isOutsideTouchable = true
-//            setBackgroundDrawable(Color.TRANSPARENT.toDrawable()) // for outside touch to dismiss
-//            elevation = 20f
-//            showAtLocation(requireView(), Gravity.CENTER, 0, 0)
-//        }
         Log.i("TAG", "openSideOptionsPopup: "+from)
         Log.i("TAG", "openSideOptionsPopup: "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString())
         Log.i("TAG", "openSideOptionsPopup: "+post.user_id)
@@ -921,18 +782,6 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         postId: String,
         userId: String
     ) {
-//        binding.title1.text = "Delete"
-//        binding.title2.isVisible=false
-//        binding.view.setBackgroundDrawable(null)
-//        binding.title1.setOnClickListener {
-//            popupWindow.dismiss()
-//            openDeletePostConfirmationDialog(postId)
-//        }
-
-
-
-
-
         val popup = ReusablePopup(
             context = requireContext(),
             anchorView = view,

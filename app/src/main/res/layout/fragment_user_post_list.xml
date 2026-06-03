@@ -1,60 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:paddingTop="26dp"
-        android:background="@color/screen_background_black"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/screen_background_black"
+        android:paddingTop="26dp"
         tools:context=".ui.chat.fragment.ChatListFragment">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/headerLayout"
-            android:visibility="gone"
-            android:layout_marginTop="20dp"
-            android:paddingBottom="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingBottom="15dp"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
-                android:visibility="visible"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="18dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/back_button_pink_small"/>
-            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_marginStart="18dp"
+                android:src="@drawable/back_button_pink_small"
                 android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/backButton"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:fontFamily="@font/manrope_semibold"
                 android:paddingHorizontal="30dp"
                 android:text="Posts"
-                android:fontFamily="@font/manrope_semibold"
                 android:textColor="@color/white"
-                android:textSize="22sp"/>
+                android:textSize="22sp"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/backButton"
+                app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/postListRecycler"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@+id/headerLayout"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/headerLayout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

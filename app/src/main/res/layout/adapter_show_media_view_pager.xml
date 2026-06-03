@@ -7,50 +7,51 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:minHeight="20dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:minHeight="20dp">
 
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/showMediaRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             android:orientation="vertical"
-            app:spanCount="3"
-            android:id="@+id/showMediaRecycler" />
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="3" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/noPostsFoundPlaceholder"
-            android:visibility="gone"
-            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="65dp"
-            app:layout_constraintStart_toStartOf="@id/showMediaRecycler"
+            android:orientation="vertical"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="@id/showMediaRecycler"
+            app:layout_constraintStart_toStartOf="@id/showMediaRecycler"
             app:layout_constraintTop_toTopOf="@id/showMediaRecycler">
 
             <androidx.appcompat.widget.AppCompatTextView
-                app:layout_constraintBottom_toTopOf="@+id/placeholderImage"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:id="@+id/noPostsFoundPlaceholderText"
-                android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="der"
                 android:fontFamily="@font/manrope_semibold"
+                android:gravity="center_horizontal"
+                android:text="der"
                 android:textColor="@color/white"
                 android:textSize="22sp"
-                />
-            <androidx.appcompat.widget.AppCompatImageView
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/placeholderImage"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/placeholderImage"
                 android:layout_width="23dp"
                 android:layout_height="23dp"
-                android:src="@drawable/play_audio"/>
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/play_audio"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

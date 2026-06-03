@@ -1,40 +1,18 @@
 package com.app.hihlo.ui.HomeNew
 
-import android.Manifest
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
-import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.widget.FrameLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -48,10 +26,8 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.services.s3.AmazonS3Client
-import com.app.hihlo.ImageVideoConverter.ImageVideoConverter
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
-import com.app.hihlo.databinding.AdapterStoriesRecyclerBinding
 import com.app.hihlo.databinding.FragmentHomeNewBinding
 import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.follow.request.FollowRequest
@@ -69,11 +45,9 @@ import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
-import com.app.hihlo.ui.HomeNew.activity.FilePickerStatus
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter
 import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
-import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
 import com.app.hihlo.ui.HomeNew.utility.ImageFilePickerBottomsheet
 import com.app.hihlo.ui.HomeNew.utility.VideoFilePickerBottomsheet
@@ -85,7 +59,6 @@ import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.REQUEST_CODE_
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
-import com.app.hihlo.ui.trim_video.TrimVideoActivity
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.MyApplication
@@ -97,10 +70,8 @@ import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
-import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
-import com.yalantis.ucrop.model.AspectRatio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -110,19 +81,11 @@ import java.io.FileOutputStream
 import kotlin.getValue
 
 class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
-
-    private var myStoryData: MyStory = MyStory()
-
-    //private var currentPage=1
     private var isMediaUploaded: Int = -1
     private val viewModel: HomeViewModel by activityViewModels()
     private val viewModel2: UserPostListViewModel by viewModels()
-
-    //private val viewModel3: GetProfileViewModel by viewModels()
     private lateinit var postAdapter: PostsAdapter
     private var allStory: List<Story>? = null
-    private var isRefreshedFromMenu = false
-    private var isHomeDataLoaded = false
     var isCommentPosted = false
     private var isLoadMore = false
     lateinit var commentsBottomSheetFragment: CommentReelBottomSheet
@@ -130,10 +93,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     var positionToComment: Int = 0
     var adapter: AdapterUserPostList? = null
     var post_position: Int = 0
-
-    // ────────────────────────────────────────
-    // New variables for scroll handling
-    // ────────────────────────────────────────
     private var isHeaderVisible = true
     private var isLoadingMore = false
     private val viewModel3: ReelsViewModel by viewModels()
@@ -142,13 +101,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     var FIRSTVisiblePosition = -1
     var offsetY = 0
     var isRestoringScroll = false
-
-    private var pendingScrollPostId: String? = null
-    private var pendingScrollPosition: Int = -1   // optional fallback
-    var scrollY = 0
-    private var selectedMediaType: String = "I"
     private var selectedBottomSheetType = ""
-
     private val viewModel5: StatusViewModel by activityViewModels()
     private lateinit var statusListGlobal: List<StoryUser>
     private lateinit var statusAdapter: StatusAdapter
@@ -199,41 +152,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         setupRecyclerView()
         setObserver()
         onClick()
-        //Log.i("TAG", "onViewCreated: MBRS " + UserDataManager.get_postCommentShow(requireContext()))
-        //Log.i("TAG", "onViewCreated: MBRPID " + UserDataManager.get_postCommentPid(requireContext()))
-        //Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPosition(requireContext()))
-        //Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPage(requireContext()))
-        /*if(UserDataManager.get_postCommentShow(requireContext())){
-            Log.i("TAG", "onViewCreated: MIBRMP " + UserDataManager.get_postMainPage(requireContext()))
-            Log.i("TAG", "onViewCreated: MIBRS " + UserDataManager.get_postCommentShow(requireContext()))
-            Log.i("TAG", "onViewCreated: MIBRPID " + UserDataManager.get_postCommentPid(requireContext()))
-            Log.i("TAG", "onViewCreated: MIBRP " + UserDataManager.get_postCommentPosition(requireContext()))
-            Log.i("TAG", "onViewCreated: MBRP " + UserDataManager.get_postCommentPage(requireContext()))
-            UserDataManager.postCommentIsShow(requireContext(), false)
-            pendingScrollPostId = UserDataManager.get_postCommentPid(requireContext())
-            pendingScrollPosition = UserDataManager.get_postCommentPosition(requireContext())
-            binding.swipeRefresh.isRefreshing = false
-            postId = pendingScrollPostId ?: ""
-            currentPage = UserDataManager.get_postCommentPage(requireContext())
-            //retainCommentBoxData(requireContext(), postId, "1", "10")
-            viewModel2.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
-            viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
-                UserDataManager.get_postMainPage(requireContext()).toString(), "10", "0")
-            Handler(Looper.getMainLooper()).postDelayed({
-                scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
-            }, 500)
-        } */
-        /*if(UserDataManager.get_postMainIsShow(requireContext())){
-            binding.swipeRefresh.isRefreshing = false
-            UserDataManager.postMainIsSetShow(requireContext(), false)
-            currentPage = UserDataManager.get_postMainPage(requireContext())
-            viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
-                UserDataManager.get_postMainPage(requireContext()).toString(), "10", "0")
-            Handler(Looper.getMainLooper()).postDelayed({
-                Log.e("PPP", "PPP>>> "+UserDataManager.get_postMainPosition(requireContext()))
-                scrollToRecyclerPosition(UserDataManager.get_postMainPosition(requireContext()))
-            }, 1000)
-        } */
+
         if (viewModel.isHomeDataLoaded) {
             UserDataManager.setGetBackToHome(requireContext(), false)
             postAdapter.setPosts(
@@ -242,19 +161,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 viewModel.stories
             )
             binding.storiesLayout.visibility = View.VISIBLE
-            // Where you first set the adapter (e.g., in setObserver or onViewCreated)
+
             statusAdapter = StatusAdapter(
                 RTVariable.statusListGlobal.toMutableList(),   // initial list
                 ::getSelectedTheStory                // click handler
             )
             binding.storiesRecycler.adapter = statusAdapter
-//            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
-//                viewModel.isStoryUploaded,
-//                viewModel.myStory ?: MyStory(),
-//                viewModel.stories,
-//                ::getSelectedStory,
-//                viewModel.profileImage
-//            )
+
             if (!UserDataManager.isGetBackToHome(requireContext())) {
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
                 binding.nestedScrollView.post {
@@ -275,17 +188,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
             hitServiceListApi(viewModel.currentPage, 0)
         }
-        //binding.swipeRefresh.setColorSchemeColors(Color.TRANSPARENT)
-        //binding.swipeRefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
-//        binding.swipeRefresh.post {
-//            val toolbarHeight = binding.headerLayout.height
-//
-//            binding.swipeRefresh.setProgressViewOffset(
-//                false,
-//                toolbarHeight,
-//                toolbarHeight + dpToPx(60)
-//            )
-//        }
+
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.post {
                 binding.swipeRefresh.isRefreshing = true
@@ -293,6 +196,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             binding.progressBar.isVisible = false
             refreshData()
         }
+
         requireActivity().supportFragmentManager.setFragmentResultListener(
             "home_click",
             viewLifecycleOwner
@@ -366,77 +270,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
-//        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
-//            Log.i("TAG", "onViewCreated: homeIconTap")
-////            isRefreshedFromMenu = true
-////            allStory?.toMutableList()?.clear()
-////            viewModel.currentPage = 1
-////            binding.progressBar.isVisible=false
-////            binding.swipeRefresh.setColorSchemeColors(
-////                ContextCompat.getColor(requireContext(), R.color.white)
-////            )
-////            binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
-////                ContextCompat.getColor(requireContext(), R.color.white_10)
-////            )
-////            binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
-////
-////            if(!UserDataManager.isGetBackToHome(requireContext())){
-////                binding.swipeRefresh.isRefreshing = true
-////                viewModel.isRefreshing = false
-////            }
-//
-//            //binding.swipeRefresh.isRefreshing = true
-//            if (binding.nestedScrollView.scrollY == 0) {
-//                if (!viewModel.isHomeDataLoaded) {
-//                    if (!UserDataManager.isGetBackToHome(requireContext())) {
-//                        Log.e("HIT", "HIT>>> IH")
-//                        binding.progressBar.isVisible = false
-//                        viewModel.currentPage = 1
-//                        viewModel.isRefreshing = false
-//
-//                        binding.swipeRefresh.isRefreshing = true
-//
-//                        hitServiceListApi(viewModel.currentPage, 0)
-//                    }
-//                } else if (RTVariable.ISHOMECLICKED) {
-//                    UserDataManager.setGetBackToHome(requireContext(), false)
-//                    RTVariable.ISHOMECLICKED = false
-//                    Log.e("HIT", "HIT>>> IHE")
-//                    binding.progressBar.isVisible = false
-//                    viewModel.currentPage = 1
-//                    viewModel.isRefreshing = false
-//                    binding.swipeRefresh.isRefreshing = true
-//                    hitServiceListApi(viewModel.currentPage, 0)
-//                }
-//            } else {
-//                if (binding.nestedScrollView.scrollY > 0) {
-//                    if (RTVariable.ISHOMECLICKED) {
-//                        UserDataManager.setGetBackToHome(requireContext(), false)
-//                        Log.e("HIT", "HIT>>> IHE")
-//                        binding.progressBar.isVisible = false
-//                        viewModel.currentPage = 1
-//                        viewModel.isRefreshing = false
-//
-//                        binding.swipeRefresh.isRefreshing = true
-//                        binding.nestedScrollView.post {
-//                            binding.nestedScrollView.scrollTo(0, 0)
-//                            hitServiceListApi(viewModel.currentPage, 0)
-//                        }
-//                    }
-//                }else{
-//                    binding.nestedScrollView.scrollTo(0, 0)
-////                    binding.nestedScrollView.setOnScrollChangeListener(
-////                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
-////                            if (scrollY == 0) {
-////                                binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-////                                //hitServiceListApi(viewModel.currentPage, selectedGender)
-////                            }
-////                        }
-////                    )
-//                }
-//            }
-//        }
-        setupScrollListener()  // ← Call here too if needed, but initView is fine
+
+        setupScrollListener()
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -485,64 +320,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    private fun triggerPullToRefreshAnimation() {
-        binding.swipeRefresh.post {
-            try {
-                val now = SystemClock.uptimeMillis()
-                val centerX = binding.swipeRefresh.width / 2f
-
-                // ACTION_DOWN → finger touch
-                val downEvent = MotionEvent.obtain(
-                    now, now, MotionEvent.ACTION_DOWN, centerX, 80f, 0
-                )
-
-                // ACTION_MOVE → tez pull down (sirf 25ms mein)
-                val moveEvent = MotionEvent.obtain(
-                    now, now + 25, MotionEvent.ACTION_MOVE, centerX, 520f, 0
-                )
-
-                // ACTION_UP → finger release (natural feel ke liye)
-                val upEvent = MotionEvent.obtain(
-                    now, now + 80, MotionEvent.ACTION_UP, centerX, 520f, 0
-                )
-
-                // Events bhejo
-                binding.swipeRefresh.dispatchTouchEvent(downEvent)
-                binding.swipeRefresh.dispatchTouchEvent(moveEvent)
-                binding.swipeRefresh.dispatchTouchEvent(upEvent)
-
-                // Clean up
-                downEvent.recycle()
-                moveEvent.recycle()
-                upEvent.recycle()
-
-                // Actual refreshing on kar do
-                binding.swipeRefresh.isRefreshing = true
-
-            } catch (e: Exception) {
-                Log.e("PullRefresh", "Animation failed: ${e.message}")
-                binding.swipeRefresh.isRefreshing = true  // fallback
-            }
-        }
-    }
-
     fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
-
-//    fun scrollToRecyclerPosition(position: Int) {
-//
-//        val lm = binding.postListRecycler.layoutManager as LinearLayoutManager
-//
-//        // ✅ Step 1: jump RecyclerView instantly
-//        lm.scrollToPositionWithOffset(position, 0)
-//
-//        // ✅ Step 2: scroll parent instantly (NO smooth scroll)
-//        binding.nestedScrollView.post {
-//            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
-//            UserDataManager.setGetBackToHome(requireContext(), false)
-//        }
-//    }
 
     fun scrollToRecyclerPosition(position: Int) {
         binding.postListRecycler.post {
@@ -563,77 +343,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    fun scrollToRecyclerMPosition(position: Int, offset: Int) {
-
-        if (position == -1) return
-
-        isRestoringScroll = true
-
-        val recycler = binding.postListRecycler
-        val layoutManager = recycler.layoutManager as? LinearLayoutManager ?: return
-
-        recycler.post {
-
-            // Step 1: Jump to position first (no offset yet)
-            layoutManager.scrollToPosition(position)
-
-            recycler.viewTreeObserver.addOnGlobalLayoutListener(
-                object : ViewTreeObserver.OnGlobalLayoutListener {
-                    override fun onGlobalLayout() {
-
-                        recycler.viewTreeObserver.removeOnGlobalLayoutListener(this)
-
-                        // Step 2: Apply exact offset AFTER layout
-                        layoutManager.scrollToPositionWithOffset(position, offset)
-
-                        // Step 3: Wait one more frame (VERY IMPORTANT)
-                        recycler.post {
-
-                            // Step 4: Final micro-adjustment (pixel perfect)
-                            val view = layoutManager.findViewByPosition(position)
-                            view?.let {
-                                val currentTop = it.top
-                                val diff = currentTop - offset
-                                recycler.scrollBy(0, diff)
-                            }
-
-                            // Step 5: release lock
-                            recycler.postDelayed({
-                                isRestoringScroll = false
-                            }, 50)
-                        }
-                    }
-                }
-            )
-        }
-    }
-
-    fun retainCommentBoxData(context: Context, postId: String, page: String, limit: String) {
-        Log.e("RETAIN", "RETAIN>>> " + postId + " " + page + " " + limit)
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val token = Preferences
-                    .getCustomModelPreference<LoginResponse>(context, LOGIN_DATA)
-                    ?.payload?.authToken
-                Log.e("RETAIN", "TOKEN>>> $token")
-                val response = RetrofitBuilder.apiService.getPostComments(
-                    token = "Bearer $token",
-                    postId = postId,
-                    page = page,
-                    limit = limit
-                )
-                Log.e("RETAIN", "RESPONSE>>> ${Gson().toJson(response)}")
-                if (response.status == 1 && response.code == 200) {
-                    val payload = response.payload
-                    delay(200)
-                    openCommentsBottomSheet(payload)
-                }
-            } catch (e: Exception) {
-                //Log.e("RETAIN_ERROR", "ERROR>>> ${e.message}", e)
-            }
-        }
-    }
-
     private fun refreshData() {
         Handler(Looper.getMainLooper()).postDelayed({
             allStory?.toMutableList()?.clear()
@@ -642,8 +351,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             hitServiceListApi(viewModel.currentPage, 0)
         }, 1000)
     }
-
-    private var isBottomBarVisible = true
 
     private var scrollListener: ScrollDirectionListener? = null
     private fun setupScrollListener() {
@@ -706,53 +413,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 hitServiceListApi(viewModel.currentPage, 0)
             }
         }
-    }
-
-    private fun hideHeaderAndStories() {
-        isHeaderVisible = false
-
-        // Smooth slide up + fade out
-        binding.headerLayout.animate()
-            .translationY(-binding.headerLayout.height.toFloat())
-            .alpha(0f)
-            .setDuration(220)
-            .setInterpolator(android.view.animation.AccelerateInterpolator())
-            .withEndAction { binding.headerLayout.isVisible = false }
-            .start()
-
-        binding.storiesLayout.animate()
-            .translationY(-(binding.storiesLayout.height + 24).toFloat())  // + extra margin if needed
-            .alpha(0f)
-            .setDuration(220)
-            .setInterpolator(android.view.animation.AccelerateInterpolator())
-            .withEndAction { binding.storiesLayout.isVisible = false }
-            .start()
-
-        //scrollListener?.hideBottomElements()  // your bottom nav / bar
-    }
-
-    private fun showHeaderAndStories() {
-        isHeaderVisible = true
-
-        binding.headerLayout.isVisible = true
-        binding.storiesLayout.isVisible = true
-
-        // Slide down + fade in (slightly slower for polish)
-        binding.headerLayout.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .setDuration(280)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
-            .start()
-
-        binding.storiesLayout.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .setDuration(280)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
-            .start()
-
-        //scrollListener?.showBottomElements()
     }
 
     private fun setupRecyclerView() {
@@ -1860,39 +1520,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
     }
 
-    private val filePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uri = result.data?.getStringExtra("uri") ?: ""
-                val type = result.data?.getStringExtra("type") ?: ""
-                Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $type")
-                // TODO: use the returned data here (upload, display, etc.)
-                val mediaType = type
-                val contentUri = Uri.parse(uri)
-
-//            val file = getCacheFileFromContentUri(contentUri)
-//            Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $file")
-//            if (file != null && file.exists()) {
-//                val typeCode = if (mediaType == "video") "V" else "I"
-//                Log.d("RETURNED_DATA_FINAL", "uri = $uri, type = $file, code = $typeCode")
-////                val s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
-////                Log.d("UPLOAD_CHECK", "Bucket: ${s3Data?.BUCKET_NAME}, Keys: ${s3Data?.ACCESS_KEY}")
-////                Log.d("UPLOAD_CHECK", "File exists: ${file?.exists()}, size: ${file?.length()}")
-//                uploadImage(file, typeCode)
-//
-//                // Optional: delete after successful upload
-//                // file.delete()
-//            }
-                Handler(Looper.getMainLooper()).post {
-                    // now the fragment is safely attached
-                    val file = getCacheFileFromContentUri(contentUri)
-                    // ...
-                    val typeCode = if (mediaType == "video") "V" else "I"
-                    file?.let { uploadImage(it, typeCode) }
-                }
-            }
-        }
-
     fun getSelectedTheStory(option: Int, value: StoryUser, position: Int, itemView: View) {
         if (option == 2) {
             val imageView: View = if (position == 0) {
@@ -2019,37 +1646,33 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         )?.payload?.isCreator == 1
                     ) {
                         RTVariable.SELECT_OPTION = false
-                        selectedBottomSheetType =
-                            "Video"   // must match what AddReelFragment expects
-
+                        selectedBottomSheetType = "reel"
                         val bottomSheet = VideoFilePickerBottomsheet()
                         bottomSheet.setOnVideoPickedListener { uri, _ ->
                             UserPreference.seletedUri = uri
                             UserPreference.selectedMediaToUpload = selectedBottomSheetType
                             UserPreference.selectedMediaType = "V"
-                            UserPreference.selectedCropRatio = 1   // 🔥 valid ratio: 9:16
+                            UserPreference.selectedCropRatio = 1
                             findNavController().navigate(R.id.action_homeNewFragment_to_addReelFragment)
                         }
                         bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
-                        //checkGalleryPermissionAndPick2("V")
                     } else {
                         Utils.showCustom_Snackbar(
                             requireActivity().findViewById(android.R.id.content),
                             "You are not a creator"
                         )
-                        //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                     }
                 },
-                //onOption4Click = {},
+
                 option1Text = "Upload Status",
                 option2Text = "Upload Post",
                 option3Text = "Upload Video",
-                //option4Text = "Cancel",
+
                 option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
                 option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
                 option3ImageRes = R.drawable.icon_over_video,
-                //option4ImageRes = R.drawable.ic_cancel_red
-            ).show()
+
+                ).show()
         }
     }
 
@@ -2084,295 +1707,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    fun getSelectedStory(position: Int, story: Story, view: View, intVal: Int) {
-        Log.e("TTTT", "TTTT " + isMediaUploaded + " | " + position + " | " + intVal)
-        if (intVal == 1) {
-            if (Preferences.getCustomModelPreference<LoginResponse>(
-                    requireContext(),
-                    LOGIN_DATA
-                )?.payload?.isCreator == 1
-            ) {
-                if (isMediaUploaded == 1) {
-                    RTVariable.IS_FROM_PROFILE = false
-                    findNavController().navigate(
-                        HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(
-                            isMyStory = "1",
-                            myStoryData = viewModel.myStory ?: MyStory(),
-                            otherStoryData = viewModel.stories?.toTypedArray() ?: emptyArray()
-                        )
-                    )
-                }
-            }
-        } else if (intVal == 2) {
-            RTVariable.IS_FROM_PROFILE = false
-            val bundle = Bundle().apply {
-                putParcelableArrayList("storyList", ArrayList(viewModel.stories ?: emptyList()))
-                putParcelable("myStoryData", viewModel.myStory ?: MyStory())
-                putInt("position", position - 1)
-            }
-            try {
-                findNavController().navigate(R.id.secondStoryFragment, bundle)
-            } catch (e: Exception) {
-                Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
-            }
-        } else if (intVal == 3) {
-            if (Preferences.getCustomModelPreference<LoginResponse>(
-                    requireContext(),
-                    LOGIN_DATA
-                )?.payload?.isCreator == 1
-            ) {
-                ReusablePopup(
-                    context = requireContext(),
-                    anchorView = view,
-                    onOption1Click = {
-                        RTVariable.SELECT_OPTION = true
-                        checkGalleryPermissionAndPick()
-                    },
-                    onOption2Click = {
-                        RTVariable.SELECT_OPTION = false
-                        checkGalleryPermissionAndPick2("I")
-                    },
-                    onOption3Click = {
-                        RTVariable.SELECT_OPTION = false
-                        checkGalleryPermissionAndPick2("V")
-                    },
-                    //onOption4Click = {},
-                    option1Text = "Upload Status",
-                    option2Text = "Upload Photo",
-                    option3Text = "Upload Video",
-                    //option4Text = "Cancel",
-                    option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
-                    option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-                    option3ImageRes = R.drawable.icon_over_video,
-                    //option4ImageRes = R.drawable.ic_cancel_red
-                ).show()
-            } else {
-                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
-            }
-        }
-//        if(position==0){
-//            if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-//                if (isMediaUploaded==1){
-//                    RTVariable.IS_FROM_PROFILE = false
-//                    findNavController().navigate(HomeNewFragmentDirections.actionHomeNewFragmentToStoryFragment(isMyStory = "1", myStoryData = viewModel.myStory ?: MyStory(), otherStoryData = viewModel.stories?.toTypedArray() ?: emptyArray()))
-//                }else if(isMediaUploaded==2){
-//                    ReusablePopup(
-//                        context = requireContext(),
-//                        anchorView = view,
-//                        onOption1Click = {
-//                            checkGalleryPermissionAndPick()
-//                        },
-//                        onOption2Click = {},
-//                        option1Text = "Open Gallery",
-//                        option2Text = "Cancel",
-//                        option1ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-//                        option2ImageRes = R.drawable.ic_cancel_red
-//                    ).show()
-//                }
-//            }else{
-//                Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
-//            }
-//        }else{
-//            RTVariable.IS_FROM_PROFILE = false
-//            val bundle = Bundle().apply {
-//                putParcelableArrayList("storyList", ArrayList(viewModel.stories ?: emptyList()))
-//                putParcelable("myStoryData", viewModel.myStory ?: MyStory())
-//                putInt("position", position - 1)
-//            }
-//            try {
-//                findNavController().navigate(R.id.secondStoryFragment, bundle)
-//            } catch (e: Exception) {
-//                Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-//                Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-    }
-
-    private fun checkGalleryPermissionAndPick2(mediaType: String) {
-        selectedMediaType = mediaType
-
-        // Clear any previous limited access selections for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            clearPhotoPickerSelections()
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Request only the permission we actually need
-            val requiredPermissions = when (mediaType) {
-                "I" -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
-                "V" -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
-                else -> arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO
-                )
-            }
-            requestMultiplePermissionsLauncher.launch(requiredPermissions)
-        } else {
-            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    permission
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                launchMediaPicker()
-            } else {
-                requestSinglePermissionLauncher.launch(permission)
-            }
-        }
-    }
-
-    private val requestMultiplePermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val hasImagePermission = permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
-                val hasVideoPermission = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
-
-                // For Android 13+, if any permission was requested but denied,
-                // it might still be limited access which works with media picker
-                val wasImageRequested =
-                    permissions.containsKey(Manifest.permission.READ_MEDIA_IMAGES)
-                val wasVideoRequested =
-                    permissions.containsKey(Manifest.permission.READ_MEDIA_VIDEO)
-
-                val canProceed = when (selectedMediaType) {
-                    "I" -> hasImagePermission || wasImageRequested
-                    "V" -> hasVideoPermission || wasVideoRequested
-                    else -> hasImagePermission || hasVideoPermission || wasImageRequested || wasVideoRequested
-                }
-
-                if (canProceed) {
-                    launchMediaPicker2()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "Required permissions not granted",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                val granted = permissions.values.all { it }
-                if (granted) launchMediaPicker2()
-                else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
-
-    private fun launchMediaPicker2() {
-        val mediaType = when (selectedMediaType) {
-            "I" -> ActivityResultContracts.PickVisualMedia.ImageOnly
-            "V" -> ActivityResultContracts.PickVisualMedia.VideoOnly
-            else -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
-        }
-
-        // Configure picker to allow only single selection
-        val request = PickVisualMediaRequest.Builder()
-            .setMediaType(mediaType)
-            .build()
-
-        mediaPickerLauncher2.launch(request)
-    }
-
-    private val mediaPickerLauncher2 =
-        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            if (uri != null) {
-                val mimeType = requireContext().contentResolver.getType(uri)
-                UserPreference.selectedMediaType = selectedMediaType
-                if (mimeType?.startsWith("video") == true) {
-//                UserPreference.seletedUri = uri
-                    if (uri != null) {
-                        val mimeType = requireContext().contentResolver.getType(uri)
-                        Log.e("TAG", "mimeType $mimeType")
-                        if (mimeType?.startsWith("video") == true) {
-                            UserPreference.seletedUri = Uri.EMPTY
-                            val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
-                            intent.putExtra("videoUrl", uri.toString())
-                            startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } else {
-                    openCropActivity2(uri)
-                }
-            } else {
-                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun clearPhotoPickerSelections() {
-        try {
-            // This clears the previous selections in the photo picker
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                // For Android 14+, you can use MediaStore.clearUserSelection() if available
-                // MediaStore.clearUserSelection(requireContext().contentResolver)
-            }
-            // For Android 13, there's no direct API to clear selections
-            // The picker will still show previous selections
-        } catch (e: Exception) {
-            Log.e("PhotoPicker", "Could not clear selections", e)
-        }
-    }
-
-    private val requestSinglePermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) launchMediaPicker()
-            else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-        }
-
-    private fun checkGalleryPermissionAndPick() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            launchMediaPicker()
-        } else {
-            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    permission
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                launchMediaPicker()
-            } else {
-                requestSinglePermissionLauncher.launch(permission)
-            }
-        }
-    }
-
-
-    private fun launchMediaPicker() {
-        //pickMedia.launch("*/*")
-        mediaPickerLauncher.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
-        )
-    }
-
-    private val pickMedia =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let { openPreview(it) }
-        }
-
-    private val previewResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                val savedUriString = data?.getStringExtra("uri")
-                val mediaType = data?.getStringExtra("type")
-                val contentUri = Uri.parse(savedUriString)
-
-                val file = getCacheFileFromContentUri(contentUri)
-                if (file != null && file.exists()) {
-                    val typeCode = if (mediaType == "video") "V" else "I"
-                    uploadImage(file, typeCode)
-
-                    // Optional: delete after successful upload
-                    // file.delete()
-                } else {
-                    // handle error
-                }
-            }
-        }
-
     private fun getCacheFileFromContentUri(contentUri: Uri): File? {
         return try {
             val cursor = requireContext().contentResolver.query(contentUri, null, null, null, null)
@@ -2405,89 +1739,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             e.printStackTrace()
             null
         }
-    }
-
-    fun copyToHiHloFolder(uri: Uri, folderType: String, extension: String): File {
-        val dir = File(
-            Environment.getExternalStoragePublicDirectory(folderType),
-            "HiHlo"
-        )
-        if (!dir.exists()) dir.mkdirs()
-        val file = File(dir, "file_${System.currentTimeMillis()}.$extension")
-        requireContext().contentResolver.openInputStream(uri)?.use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-        return file
-    }
-
-    private fun openPreview(uri: Uri) {
-        val type = requireContext().contentResolver.getType(uri) ?: ""
-        val isVideo = type.startsWith("video")
-        val intent = Intent(requireActivity(), ImageVideoConverter::class.java).apply {
-            putExtra("uri", uri.toString())
-            putExtra("isVideo", isVideo)
-        }
-        previewResultLauncher.launch(intent)
-    }
-
-    private val mediaPickerLauncher =
-        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            if (uri != null) {
-//            val mimeType = requireContext().contentResolver.getType(uri)
-//            if (mimeType?.startsWith("video") == true) {
-//                val durationInMillis = getVideoDuration(requireContext(), uri)
-//                val durationInSeconds = durationInMillis / 1000
-//                UserPreference.seletedUri = Uri.EMPTY
-//                val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
-//                intent.putExtra("videoUrl",uri.toString())
-//                intent.putExtra("from","home")
-//                startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
-//            } else {
-//                openCropActivity(uri)
-//            }
-                openPreview(uri)
-            } else {
-                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    private fun openCropActivity2(imageUri: Uri) {
-        val options = UCrop.Options().apply {
-            setFreeStyleCropEnabled(false)
-
-            // Supply only the ratios you want (exclude "Original")
-            setAspectRatioOptions(
-                0, // default selection index
-                AspectRatio("1:1", 1f, 1f),
-                AspectRatio("9:16", 9f, 16f),
-                AspectRatio("16:9", 16f, 9f)
-            )
-        }
-
-        val destinationUri = Uri.fromFile(
-            File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
-        )
-
-        UCrop.of(imageUri, destinationUri)
-            .withOptions(options)
-            .start(requireContext(), this)
-    }
-
-    private fun openCropActivity(imageUri: Uri) {
-        val options = UCrop.Options().apply {
-            setFreeStyleCropEnabled(true)
-        }
-        val destinationUri = Uri.fromFile(
-            File(
-                requireActivity().cacheDir,
-                "cropped_${System.currentTimeMillis()}.jpg"
-            )
-        )
-        UCrop.of(imageUri, destinationUri)
-            .withOptions(options)
-            .start(requireContext(), this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -2556,19 +1807,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private fun isCloseTo(value: Float, target: Float, tolerance: Float = 0.05f): Boolean {
         return kotlin.math.abs(value - target) <= tolerance
-    }
-
-    private fun getVideoDuration(context: Context, uri: Uri): Long {
-        val retriever = MediaMetadataRetriever()
-        return try {
-            retriever.setDataSource(context, uri)
-            val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-            time?.toLongOrNull() ?: 0L
-        } catch (e: Exception) {
-            0L
-        } finally {
-            retriever.release()
-        }
     }
 
     fun initializeS3Client(accessKey: String, secretKey: String): AmazonS3Client {

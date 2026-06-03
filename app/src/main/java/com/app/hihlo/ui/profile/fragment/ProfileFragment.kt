@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -63,7 +62,6 @@ import com.app.hihlo.model.static.profileDetailList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
-import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.HomeNew.utility.FilePickerBottomsheet
 import com.app.hihlo.ui.HomeNew.utility.ImageFilePickerBottomsheet2
 import com.app.hihlo.ui.HomeNew.utility.VideoFilePickerBottomsheet
@@ -95,37 +93,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.getValue
 
-/**
- * Fragment responsible for displaying user profiles.
- *
- * This fragment handles displaying either the current user's profile or another user's profile.
- * It fetches profile data, including user details, posts, reels, followers, and following counts.
- * It provides functionality for:
- * - Viewing posts and reels.
- * - Following/Unfollowing users.
- * - Editing the user's own profile.
- * - Sharing the app.
- * - Navigating to wallet history, followers/following lists, and chat.
- * - Uploading new posts and reels (for the current user).
- * - Blocking and reporting other users.
- *
- * It uses a [ViewPager2] to display tabs for posts and reels.
- * Data is fetched and observed via [GetProfileViewModel].
- * Navigation is handled using the Android Navigation Component.
- * Media picking and cropping are handled using [ActivityResultContracts] and [UCrop].
- *
- * @property bottomSheetFragment Instance of [UploadMediaBottomSheet] for handling media upload options.
- * @property profileMediaViewPager Adapter for the ViewPager that displays posts and reels.
- * @property userDetails Stores the details of the profile being viewed.
- * @property viewModel Instance of [GetProfileViewModel] for fetching profile data.
- * @property args Navigation arguments passed to this fragment, including `isMyProfile` and `userId`.
- * @property isMyProfile String indicating if the profile being viewed is the current user's ("1") or another user's ("0").
- * @property isFollowing Boolean indicating if the current user is following the profile being viewed (for other user profiles).
- * @property userId The ID of the user whose profile is being viewed.
- * @property from String indicating the screen from which the user navigated to this profile.
- * @property selectedMediaType String indicating the type of media selected for upload ("I" for image, "V" for video).
- * @property selectedBottomSheetType String indicating the context from which the upload bottom sheet was opened (e.g., "profile", "post", "reel").
- */
 @AndroidEntryPoint
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     private lateinit var bottomSheetFragment: UploadMediaBottomSheet
@@ -623,22 +590,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
             }
             addReel.setOnClickListener {
-                /*if (viewPager.currentItem!=2){
-                    viewPager.currentItem = 2
-                }*/
-//                if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-//                    if (::bottomSheetFragment.isInitialized){
-//                        selectedBottomSheetType = "profile"
-//                        openUploadBottomSheet("profile")
-////                        bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
-//                    }else{
                 selectedBottomSheetType = "profile"
-                openUploadBottomSheet("profile")
+                openUploadBottomSheet()
                 addReel.setBackgroundColor(Color.TRANSPARENT)
-//                    }
-//                }else{
-//                    Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
-//                }
 
             }
             followUserButton.setOnClickListener {
@@ -662,7 +616,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         }
     }
 
-    private fun openUploadBottomSheet(check: String) {
+    private fun openUploadBottomSheet() {
         ReusablePopup(
             context = requireContext(),
             anchorView = binding.addReel,
@@ -693,7 +647,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     }
                 } else {
                     Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
-                    //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                 }
             },
             onOption2Click = {
@@ -726,25 +679,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             },
             onOption3Click = {
                 if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
-                    //selectedBottomSheetType = "reel"
-//                            openUploadBottomSheet("reel")
-                    //RTVariable.SELECT_OPTION = false
-                    //checkGalleryPermissionAndPick("V")
                     RTVariable.SELECT_OPTION = false
-                    selectedBottomSheetType = "reel"   // must match what AddReelFragment expects
+                    selectedBottomSheetType = "reel"
 
                     val bottomSheet = VideoFilePickerBottomsheet()
                     bottomSheet.setOnVideoPickedListener { uri, _ ->
                         UserPreference.seletedUri = uri
                         UserPreference.selectedMediaToUpload = selectedBottomSheetType
                         UserPreference.selectedMediaType = "V"
-                        UserPreference.selectedCropRatio = 1   // 🔥 valid ratio: 9:16
+                        UserPreference.selectedCropRatio = 1
                         findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
                     }
                     bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                 } else {
                     Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
-                    //Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
                 }
             },
             option1Text = "Upload Status",
@@ -1255,15 +1203,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             .start(requireContext(), this)
     }
 
-    /* private fun openCropActivity(imageUri: Uri) {
-         val options = UCrop.Options().apply {
-             setFreeStyleCropEnabled(true)
-         }
-         val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
-         UCrop.of(imageUri, destinationUri)
-             .withOptions(options)
-             .start(requireContext(), this)
-     }*/
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

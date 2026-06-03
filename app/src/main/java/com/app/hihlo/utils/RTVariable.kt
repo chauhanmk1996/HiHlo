@@ -22,7 +22,7 @@ object RTVariable {
     var COMMENT_FROM: Boolean = false
     var COMMENT_COUNT: Int = 0
     var POST_POSITION: Int = 0
-    var REELS_CURRENT_PAGE: Int = 0
+    var REELS_CURRENT_PAGE: Int = 1
     var REPLY_POSITION = -1
     var REELS_POSITION: Int = 0
     var REELS_ID: String = ""

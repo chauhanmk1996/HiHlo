@@ -55,24 +55,12 @@ class AddReelFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentAddReelBinding.inflate(layoutInflater)
         setUI()
         onClick()
         return binding.root
     }
-    /*override fun onPause() {
-        super.onPause()
-        requireActivity().window.setSoftInputMode(
-            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
-                    WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
-        )
-    }
-
-    override fun onResume() {
-        super.onResume()
-        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-    }*/
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -117,8 +105,6 @@ class AddReelFragment : Fragment() {
                             RTVariable.IS_MEDIA_UPLOADED = true
                             Toast.makeText(requireContext(), "Your Reel Uploaded Successfully", Toast.LENGTH_SHORT).show()
                             (context as HomeActivity).profileSelect()
-
-                            //findNavController().popBackStack()
                         }else{
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
@@ -170,6 +156,7 @@ class AddReelFragment : Fragment() {
             backButton.setOnClickListener {
                 findNavController().popBackStack()
             }
+
             binding.uploadButton.setOnClickListener {
                 if (caption.getString().isEmpty()){
                     Toast.makeText(requireContext(), "Please enter a caption", Toast.LENGTH_SHORT).show()
@@ -188,7 +175,6 @@ class AddReelFragment : Fragment() {
         }
     }
     private fun setUI() {
-//        Log.i("TAG", "setUI: "+uri)
         binding.apply {
             if (UserPreference.selectedMediaType == "I") {
                 Glide.with(requireContext()).load(UserPreference.seletedUri).into(selectedImageView)
@@ -209,16 +195,10 @@ class AddReelFragment : Fragment() {
                 title.text = "New Post"
             }
         }
-
-
     }
-    /*fun initializeS3Client(accessKey: String, secretKey: String): AmazonS3Client {
-        val credentials = BasicAWSCredentials(accessKey, secretKey)
-        return AmazonS3Client(credentials)
-    }*/
+
     fun initializeS3Client(accessKey: String, secretKey: String): AmazonS3Client {
         val credentials = BasicAWSCredentials(accessKey, secretKey)
-        val s3Client = AmazonS3Client(credentials)
 
         // Increase timeout settings
         val clientConfig = com.amazonaws.ClientConfiguration()
@@ -267,11 +247,6 @@ class AddReelFragment : Fragment() {
                 }
             }
 
-            /*override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
-                // Handle progress
-                val percentDone = (bytesCurrent.toFloat() / bytesTotal.toFloat() * 100).toInt()
-                println("Progress: $percentDone%")
-            }*/
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
                 if (bytesTotal > 0) {
                     val percentDone = (bytesCurrent.toFloat() / bytesTotal * 100).toInt()
@@ -282,13 +257,12 @@ class AddReelFragment : Fragment() {
 
             override fun onError(id: Int, ex: Exception) {
                 ProcessDialog.dismissDialog(true)
-                // Handle error
                 ex.printStackTrace()
             }
         })
     }
     private fun uploadImage(imageFile: File, assetType:String) {
-        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+        val s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
         val bucketName = s3Data?.BUCKET_NAME
         val objectKey = "${System.currentTimeMillis()}"
         Log.i("TAG", "uploadImage: "+Gson().toJson(s3Data))

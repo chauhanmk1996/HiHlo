@@ -28,9 +28,9 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginBottom="100dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view"
             app:resize_mode="zoom"
             app:surface_type="texture_view"
@@ -170,9 +170,9 @@
             android:id="@+id/leftClickArea"
             android:layout_width="80dp"
             android:layout_height="0dp"
+            android:layout_marginBottom="40dp"
             android:background="@android:color/transparent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/bottomLayout"
+            app:layout_constraintBottom_toTopOf="@id/captionContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/userDetailsLayout" />
 
@@ -180,9 +180,9 @@
             android:id="@+id/rightClickArea"
             android:layout_width="80dp"
             android:layout_height="0dp"
+            android:layout_marginBottom="40dp"
             android:background="@android:color/transparent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/bottomLayout"
+            app:layout_constraintBottom_toTopOf="@id/captionContainer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/userDetailsLayout" />
 
@@ -240,15 +240,15 @@
                 android:id="@+id/moreLessText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:fontFamily="@font/manrope_bold"
+                android:padding="8dp"
                 android:text="More"
                 android:textColor="@color/theme"
                 android:textSize="13sp"
                 android:visibility="gone"
-                android:padding="8dp"
-                android:layout_marginEnd="4dp"
                 app:layout_constraintBottom_toBottomOf="@id/captionCollapsed"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/captionCollapsed"
@@ -356,14 +356,14 @@
                     android:id="@+id/sendButton"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    android:layout_marginBottom="4dp"
                     android:background="@drawable/story_view_edittext_background"
                     android:focusable="true"
-                    android:paddingEnd="-5dp"
-                    android:layout_marginBottom="4dp"
                     android:paddingVertical="10dp"
+                    android:paddingEnd="-5dp"
                     android:src="@drawable/fluent_send_filled"
                     app:layout_constraintBottom_toBottomOf="@+id/sendEditText"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                    app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

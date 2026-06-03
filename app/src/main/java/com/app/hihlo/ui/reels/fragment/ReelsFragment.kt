@@ -78,6 +78,7 @@ import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.VideoCacheManager
+import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -123,7 +124,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
     private val viewModel2: HomeViewModel by viewModels()
 
-    //    private val args: ReelsFragmentArgs by navArgs()
     private val args by lazy {
         try {
             ReelsFragmentArgs.fromBundle(requireArguments())
@@ -131,76 +131,14 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             null
         }
     }
-
-    //    private var profileReels: com.app.hihlo.model.reel.response.Payload = com.app.hihlo.model.reel.response.Payload()
     private var from = ""
     private var reelPosition = ""
     private var commentOnReelPosition = 0
-    //var currentPosition = 0
     private var targetPosition = 0
-    private var isRestored = false
     private val viewModel6: StatusViewModel by activityViewModels()
     private lateinit var statusListGlobal: List<StoryUser>
-    /*override fun initView(savedInstanceState: Bundle?) {
-        if (!isFirstTime) return
-        isFirstTime = false
-
-        from = args?.from ?: "home"
-        reelPosition = args?.reelPosition ?: "0"
-
-        if (from == "profile") {
-            reelsList = args?.reels?.reels ?: mutableListOf()
-        }
-
-        exoPlayer = ExoPlayer.Builder(requireContext()).build()
-        currentPage = 1
-
-        Log.i("TAG", "initView: $reelsList")
-        Log.i("TAG", "initView: $from")
-
-        viewPagerAdapter(mutableListOf())
-
-        if (from == "profile") {
-            adapter.updateList(reelsList)
-            lifecycleScope.launch {
-                delay(300)
-                binding.viewPager.currentItem = reelPosition.toInt()
-            }
-        } else {
-            hitGetReelsApi(currentPage)
-            setReelsAdapterPagination()
-        }
-
-        viewModel.hitCoinDetailsApi(
-            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                requireContext(), LOGIN_DATA
-            )?.payload?.authToken
-        )
-    }*/
-    /*override fun onResume() {
-        super.onResume()
-        Log.i("TAG", "onResume: isFirstTime = $isFirstTime")
-        Log.i("TAG", "onResume: reelsList size = ${reelsList.size}")
-
-        if (!isFirstTime && reelsList.isNotEmpty()) {
-            binding.viewPager.post {
-                adapter.updateList(reelsList)
-
-                // Attach adapter if not already
-                if (binding.viewPager.adapter == null) {
-                    binding.viewPager.adapter = adapter
-                }
-
-                // Restore position
-                binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
-            }
-        }
-    }*/
-
 
     override fun initView(savedInstanceState: Bundle?) {
-
-
     }
 
     private fun hitGetReelsApi(currentPage: Int) {
@@ -229,26 +167,25 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             refreshReels()
         }
         targetPosition = UserDataManager.getReelsPosition(requireContext())
-        Log.e("TAG", "initView: reelPosition " + targetPosition)
         from = args?.from ?: "home"
         RTVariable.REELS_FROM = from
-        Log.i("TAG", "initView: reelPosition " + reelPosition)
-        Log.i("TAG", "updatedreelsize: " + targetPosition)
-
-        //val savedPosition = UserDataManager.getReelsPosition(requireContext())
 
         reelPosition = when {
-            targetPosition >= 0 -> targetPosition.toString()   // ✅ highest priority
-            !reelPosition.isNullOrEmpty() -> reelPosition    // existing value
+            targetPosition >= 0 -> targetPosition.toString()
+            reelPosition.isNotEmpty() -> reelPosition
             !args?.reelPosition.isNullOrEmpty() -> args?.reelPosition ?: "0"
             else -> "0"
         }
-        //reelPosition = targetPosition.toString()
-        Log.i("TAG", "initView: reelPosition A " + reelPosition)
+
         if (RTVariable.REELS_FROM == "profile") {
             RTVariable.reelsCache = args?.reels?.reels ?: mutableListOf()
         }
-        viewModel2.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
+        viewModel2.hitHomeDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "1", "10", "0"
+        )
         exoPlayer = ExoPlayer.Builder(requireContext()).build()
         Log.i("TAG", "initView: " + RTVariable.reelsCache)
         Log.i("TAG", "initView: " + RTVariable.REELS_FROM)
@@ -261,15 +198,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 delay(300) // delay in milliseconds
                 binding.viewPager.currentItem = reelPosition.toInt()
             }
-            //viewPagerAdapter(mutableListOf())
-            //adapter.updateList(RTVariable.reelsCache)
-//            lifecycleScope.launch {
-//                delay(300) // delay in milliseconds
-//                binding.viewPager.currentItem = reelPosition.toInt()
-//            }
+
             binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
         } else {
-            if(!RTVariable.IS_REELS_LOADED){
+            if (!RTVariable.IS_REELS_LOADED) {
                 currentPage = 1
                 RTVariable.reelsCache.clear()
                 RTVariable.REELS_CURRENT_PAGE = 1
@@ -280,30 +212,31 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             }
 
         }
-//        if (from != "profile") {
-//
-//        }
+
         Log.e("TAG", "updatedreelsize: SP" + RTVariable.IS_REELS_LOADED)
-        if(RTVariable.IS_REELS_LOADED){
+        if (RTVariable.IS_REELS_LOADED) {
             Log.e("TAG", "updatedreelsize: SP" + reelPosition.toInt())
             Log.e("TAG", "updatedreelsize: S" + RTVariable.reelsCache)
             viewPagerAdapter(mutableListOf())
             currentPage = RTVariable.REELS_LAST_POSITION
             adapter.updateList(RTVariable.reelsCache)
             isLoading = true
-            //adapter.notifyDataSetChanged()
             binding.viewPager.setCurrentItem(reelPosition.toInt(), false)
-            //val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
-            //recyclerView?.scrollToPosition(reelPosition.toInt())
-            //binding.viewPager.currentItem = reelPosition.toInt()
         }
+
         viewModel.hitCoinDetailsApi(
             "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                 requireContext(),
                 LOGIN_DATA
             )?.payload?.authToken
         )
-        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+
+        viewModel6.hitStatusDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "0"
+        )
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -322,13 +255,17 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener("self", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "self",
+            viewLifecycleOwner
+        ) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
             refreshReels()
-//            val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
-//            recyclerView?.scrollToPosition(0)
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "other",
+            viewLifecycleOwner
+        ) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
             RTVariable.REELS_INSTANCE_KEY_ID = 0
         }
@@ -336,28 +273,28 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     delay(500)
-                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                    if (RTVariable.IS_STATUS_VIEWER_ACTIVATED) {
                         RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
-                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
                         getRefreshStory(1, 0)
                         getRefreshMainStory(0)
                     }
-                    if(!RTVariable.IS_STORY_CLICKED_FRON_REELS){
+                    if (!RTVariable.IS_STORY_CLICKED_FRON_REELS) {
                         RTVariable.IS_STORY_CLICKED_FRON_REELS = true
                         exoPlayer.play()
                     }
-                    Log.e("ISAPP", "ISAPP>>> "+RTVariable.IS_APP_IN_BACKGROUND)
-                    Log.e("ISAPP", "ISAPP>>> "+RTVariable.reelsCache.size)
                 }
             }
         }
     }
 
-    private fun getRefreshStory(page: Int, gender_id: Int){
+    private fun getRefreshStory(page: Int, gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getHomeData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     page.toString(),
                     10.toString(),
                     gender_id.toString()
@@ -366,27 +303,38 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     viewModel2.stories = response.payload.stories
                     adapter.updateStories(viewModel2.stories)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getRefreshMainStory(gender_id: Int){
+    private fun getRefreshMainStory(gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getStatusData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     gender_id.toString()
                 )
                 if (response.status == 1 && response.code == 200) {
                     statusListGlobal = response.payload
                     RTVariable.statusListGlobal = statusListGlobal
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
@@ -413,13 +361,15 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 )
                 if (response.status == 1 && response.code == 200) {
                     if (response.payload.reels?.isNotEmpty() == true) {
-                        val commentsCount = response.payload.reels.find { reel -> reel.id == RTVariable.REELS_ID.toInt() }?.commentsCount ?: 0
+                        val commentsCount =
+                            response.payload.reels.find { reel -> reel.id == RTVariable.REELS_ID.toInt() }?.commentsCount
+                                ?: 0
                         Log.e("TTTTT", "TTTTT>>>" + commentsCount)
                         adapter.updateCommentCount(RTVariable.POST_POSITION, commentsCount)
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                logD(e.message?:"Issue in getting reels")
             }
         }
     }
@@ -442,7 +392,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             commentOnReelPosition = reelPosition
             when (position) {
                 0 -> {
-//                        locally change the value of liked key and later hit this api only if internet is available
                     RTVariable.reelsCache[reelPosition].isLiked = if (isLikedStatus == 1) 2 else 1
                     adapter.updateLike(reelPosition, if (isLikedStatus == 1) 2 else 1)
                     viewModel.hitLikeReelApi(
@@ -454,15 +403,13 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
 
                 1 -> {
-                    //                    openCommentsSection()
                     this.reelId = reelId.toString()
                     viewModel.hitGetReelCommentsApi(
                         "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                             requireContext(),
                             LOGIN_DATA
                         )?.payload?.authToken, reelId.toString(), "1", "10"
-                    ) // Initial call with page 1, limit 10
-//                        viewModel.hitGetReelCommentsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, reelId.toString())
+                    )
                 }
 
                 2 -> {
@@ -472,29 +419,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                         reels[position].creator.name
                     )
                 }
-                /*3->{
-//                        triggerPushNotification(reels[position].creatorId, reels[position].creator)
-                    if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId!=reels[reelPosition].creatorId){
-                        openCallTypeBottomSheet(reels[reelPosition].creatorId.toString(), reels[reelPosition].creator.name, reels[position].creator.profileImage)
-                    }else{
-                        Toast.makeText(requireContext(), "You cannot call yourself.", Toast.LENGTH_SHORT).show()
-                    }
-                }*/
+
                 3 -> {
                     shareReel(reels[reelPosition].assetUrl)
                 }
 
                 4 -> {
-                    if (userId == Preferences.getCustomModelPreference<LoginResponse>(
-                            requireContext(),
-                            LOGIN_DATA
-                        )?.payload?.userId.toString()
-                    ) {
-//                            openDeletePostConfirmationDialog(reelId.toString(), view)
-
-                    } else {
-//                            showOptionsPopup()
-                    }
                 }
             }
         }
@@ -506,10 +436,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 adapter.currentViewHolder ?: return
 
                 when (state) {
-                    Player.STATE_BUFFERING -> adapter?.currentViewHolder?.loader?.visibility =
+                    Player.STATE_BUFFERING -> adapter.currentViewHolder?.loader?.visibility =
                         View.VISIBLE
 
-                    Player.STATE_READY -> adapter?.currentViewHolder?.loader?.visibility = View.GONE
+                    Player.STATE_READY -> adapter.currentViewHolder?.loader?.visibility = View.GONE
                     Player.STATE_ENDED -> {
                         exoPlayer.seekTo(0)
                         exoPlayer.playWhenReady = true
@@ -535,7 +465,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
     fun openProfile(isStoryUploaded: Int, imageView: View) {
         reelPosition = binding.viewPager.currentItem.toString()
-        if(isStoryUploaded==1){
+        if (isStoryUploaded == 1) {
             RTVariable.IS_STORY_CLICKED_FRON_REELS = true
             exoPlayer.pause()
             if (statusListGlobal.isEmpty()) {
@@ -560,7 +490,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             startActivity(intent)
             //requireActivity().overridePendingTransition(R.anim.slide_up, 0)
             requireActivity().overridePendingTransition(0, 0)
-        }else{
+        } else {
             findNavController().navigate(
                 ReelsFragmentDirections.actionReelsFragmentToProfileFragment(
                     "0",
@@ -614,7 +544,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "")
     }
 
-    fun openSendCoinsDialog(data: RechargePackageListResponse.Payload, reelId: Int, creatorId: Int, name: String) {
+    fun openSendCoinsDialog(
+        data: RechargePackageListResponse.Payload,
+        reelId: Int,
+        creatorId: Int,
+        name: String,
+    ) {
         showCustomDialogWithBinding(
             requireContext(), "Do you want to send ${data.coins} coins to ${name}",
             onYes = {
@@ -758,6 +693,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
     }
+
     private fun viewPagerCallback() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             var currentPosition = 0
@@ -773,9 +709,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     isLoading = false
                 }
                 if (currentPosition < RTVariable.reelsCache.size) {
-                    RTVariable.reelsCache[currentPosition].lastPlaybackPosition = exoPlayer.currentPosition
+                    RTVariable.reelsCache[currentPosition].lastPlaybackPosition =
+                        exoPlayer.currentPosition
                 }
-                if (RTVariable.reelsCache.isNullOrEmpty() || position >= RTVariable.reelsCache.size) {
+                if (RTVariable.reelsCache.isEmpty() || position >= RTVariable.reelsCache.size) {
                     return
                 }
                 userId = RTVariable.reelsCache[position].creatorId.toString()
@@ -917,35 +854,36 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         mediaPickerLauncher.launch(PickVisualMediaRequest(mediaType))
     }
 
-    private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            val mimeType = requireContext().contentResolver.getType(uri)
-            UserPreference.selectedMediaType = selectedMediaType
-            if (::bottomSheetFragment.isInitialized) {
-                bottomSheetFragment.dismiss()
-            }
-            if (mimeType?.startsWith("video") == true) {
+    private val mediaPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                val mimeType = requireContext().contentResolver.getType(uri)
+                UserPreference.selectedMediaType = selectedMediaType
+                if (::bottomSheetFragment.isInitialized) {
+                    bottomSheetFragment.dismiss()
+                }
+                if (mimeType?.startsWith("video") == true) {
 //                UserPreference.seletedUri = uri
-                if (uri != null) {
-                    val mimeType = requireContext().contentResolver.getType(uri)
-                    Log.e("TAG", "mimmeType $mimeType")
-                    if (mimeType?.startsWith("video") == true) {
-                        UserPreference.seletedUri = Uri.EMPTY
-                        val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
-                        intent.putExtra("videoUrl", uri.toString())
-                        startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+                    if (uri != null) {
+                        val mimeType = requireContext().contentResolver.getType(uri)
+                        Log.e("TAG", "mimmeType $mimeType")
+                        if (mimeType?.startsWith("video") == true) {
+                            UserPreference.seletedUri = Uri.EMPTY
+                            val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
+                            intent.putExtra("videoUrl", uri.toString())
+                            startActivityForResult(intent, REQUEST_CODE_CROP_VIDEO)
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT)
-                        .show()
+                    openCropActivity(uri)
                 }
             } else {
-                openCropActivity(uri)
+                Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(requireContext(), "No media selected", Toast.LENGTH_SHORT).show()
         }
-    }
 
     private fun openCropActivity(imageUri: Uri) {
         val options = UCrop.Options().apply {
@@ -981,16 +919,18 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
     }
 
-    private val requestSinglePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) launchMediaPicker()
-        else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-    }
+    private val requestSinglePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) launchMediaPicker()
+            else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+        }
 
-    private val requestMultiplePermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val granted = permissions.values.all { it }
-        if (granted) launchMediaPicker()
-        else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
-    }
+    private val requestMultiplePermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val granted = permissions.values.all { it }
+            if (granted) launchMediaPicker()
+            else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
+        }
     /*private fun openUploadBottomSheet(check: String) {
         val bottomSheetFragment = UploadReelBottomSheetFragment.newInstance(check).apply {
 
@@ -1116,7 +1056,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         if (RTVariable.REELS_PLAYING_POSITION == 0L) {
             RTVariable.REELS_PLAYING_POSITION = 0L
             exoPlayer.seekTo(resumePosition)
-        }else{
+        } else {
             exoPlayer.seekTo(RTVariable.REELS_PLAYING_POSITION)
             RTVariable.REELS_PLAYING_POSITION = 0L
         }
@@ -1132,7 +1072,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         } else {
             exoPlayer.playWhenReady = true
         }
-        if(UserDataManager.isReelMute(requireContext())){
+        if (UserDataManager.isReelMute(requireContext())) {
             val savedPos = UserDataManager.getPosition(requireContext())
 //            if (savedPos == RTVariable.REELS_POSITION) {
 //                exoPlayer.volume = 0f
@@ -1141,7 +1081,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 //            }
             exoPlayer.volume = 0f
             //exoPlayer.volume = 0f
-        }else{
+        } else {
             exoPlayer.volume = 1f
         }
     }
@@ -1151,7 +1091,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         if (it.data.code == 200) {
                             // ✅ SAVE EVERYTHING IN VIEWMODEL
                             viewModel2.myStory = it.data.payload.my_story ?: MyStory()
@@ -1159,17 +1099,20 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                             viewModel2.isStoryUploaded = it.data.payload.is_story_uploaded
                             viewModel2.profileImage = it.data.payload.myProfile.profileImage
                             adapter.updateStories(viewModel2.stories)
-                        }else{
+                        } else {
                         }
-                    }else{
+                    } else {
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
         }
+
         viewModel.getSendGiftLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1184,7 +1127,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                         )
 //                        Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
@@ -1275,6 +1219,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel.getReelsLiveData().observe(viewLifecycleOwner) { response ->
 
             when (response.status) {
@@ -1308,7 +1253,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                                     val firstReel = RTVariable.reelsCache[0]
                                     adapter.currentPlayingPosition = 0
                                     binding.viewPager.setCurrentItem(0, false)
-                                    playVideo(firstReel.assetUrl ?: "", firstReel.lastPlaybackPosition ?: 0L)
+                                    playVideo(
+                                        firstReel.assetUrl ?: "",
+                                        firstReel.lastPlaybackPosition ?: 0L
+                                    )
                                 }
                             } else {
                                 // Pagination → append only (this fixes your bug)
@@ -1456,8 +1404,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                                 "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                                     requireContext(),
                                     LOGIN_DATA
-                                )?.payload?.authToken, reelId.toString(), "1", "10"
-                            ) // Initial call with page 1, limit 10
+                                )?.payload?.authToken, reelId, "1", "10"
+                            )
                             adapter.updateComment(commentOnReelPosition)
                         } else {
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
@@ -1480,6 +1428,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel.getReplyToCommentLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1491,8 +1440,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                                 "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                                     requireContext(),
                                     LOGIN_DATA
-                                )?.payload?.authToken, reelId.toString(), "1", "10"
-                            ) // Initial call with page 1, limit 10
+                                )?.payload?.authToken, reelId, "1", "10")
                         } else {
                             Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
                                 .show()
@@ -1514,27 +1462,27 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel.getLikeReelLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel reply to comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                    } else {
+                    if (it.data?.status != 1) {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
                             .show()
                     }
                 }
 
-                Status.LOADING -> {
-//                    ProcessDialog.showDialog(requireContext(), true)
-                }
-
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-//                    ProcessDialog.dismissDialog(true)
+                }
+
+                Status.LOADING  -> {
+
                 }
             }
         }
+
         viewModel.getGenerateAgoraTokenLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1573,17 +1521,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel.getFollowUserLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        } else {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
+                    if (it.data?.status != 1) {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
                             .show()
                     }
@@ -1591,7 +1534,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
 
                 Status.LOADING -> {
-//                    ProcessDialog.showDialog(requireContext(), true)
                 }
 
                 Status.ERROR -> {
@@ -1600,17 +1542,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel.getUnfollowUserLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "follow user success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        } else {
-//                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
+                    if (it.data?.status != 1) {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
                             .show()
                     }
@@ -1618,7 +1555,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
 
                 Status.LOADING -> {
-//                    ProcessDialog.showDialog(requireContext(), true)
                 }
 
                 Status.ERROR -> {
@@ -1627,37 +1563,27 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 }
             }
         }
+
         viewModel6.getStatusLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Status success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
                             Log.e("TAG", "Status success: ${statusListGlobal}")
-                        }else{
                         }
-                    }else{
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
         }
-    }
-
-    fun getTotalCommentsCount(comments: List<Comment>): Int {
-        var total = 0
-
-        comments.forEach { comment ->
-            total += 1
-            total += (comment.replies?.size ?: 0)
-        }
-
-        return total
     }
 
     private fun openCommentsBottomSheet(payload: Payload) {
@@ -1668,9 +1594,8 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 putParcelable("myStory", viewModel2.myStory)
             }
             onCommentAction = { result ->
-                isCommentPosted = true // Set flag before post
+                isCommentPosted = true
                 currentPage = 1
-                Log.e("CCCCCCC", "CCCCCCC")
                 viewModel.hitPostCommentApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                         requireContext(),
@@ -1679,7 +1604,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 )
             }
             onReplyAction = { result ->
-                isCommentPosted = true // Assuming same flag for reply, adjust if separate
+                isCommentPosted = true
                 currentPage = 1
                 viewModel.hitReplyToCommentsApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
@@ -1689,12 +1614,12 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 )
             }
             onLoadMore = { page, limit ->
-                isLoadMore = true // Set flag before load more API call
+                isLoadMore = true
                 viewModel.hitGetReelCommentsApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                         requireContext(),
                         LOGIN_DATA
-                    )?.payload?.authToken, reelId.toString(), page.toString(), limit.toString()
+                    )?.payload?.authToken, reelId, page.toString(), limit.toString()
                 )
             }
         }
@@ -1704,22 +1629,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             "RoundedBottomSheet"
         )
     }
-    /*private fun openCommentsBottomSheet(payload: Payload) {
-        commentsBottomSheetFragment = RoundedBottomSheet().apply {
-            arguments = Bundle().apply {
-                putParcelable("comments", payload)
-            }
-            onCommentAction = { result ->
-                viewModel.hitPostCommentApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, reelId)
-            }
-            onReplyAction = { result ->
-                viewModel.hitReplyToCommentsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, reelId)
-            }
-        }
-
-        commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
-    }*/
-
 
     override fun onPause() {
         if (::exoPlayer.isInitialized) {
@@ -1727,9 +1636,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             exoPlayer.pause()
         }
         val position = binding.viewPager.currentItem
-        Log.e("LAST POSITION", "LAST POSITION>>> "+position)
-        Log.e("LAST POSITION", "LAST POSITION>>> "+reelId)
-        //RTVariable.REELS_LAST_POSITION = currentPage
         UserDataManager.setReelsPosition(requireContext(), position)
         super.onPause()
     }
@@ -1743,13 +1649,11 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
 
     override fun onResume() {
         super.onResume()
-        if(!RTVariable.IS_PROFILE_POST_LIST){
+        if (!RTVariable.IS_PROFILE_POST_LIST) {
             RTVariable.IS_PROFILE_POST_LIST = false
-            if(UserDataManager.get_postCommentShow(requireContext())){
+            if (UserDataManager.get_postCommentShow(requireContext())) {
                 binding.swipeRefresh.isRefreshing = false
                 UserDataManager.postCommentIsShow(requireContext(), false)
-                //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
-                //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
                 val cached = CommentPrefs.get2Payload(requireContext())
 
                 if (cached != null) {
@@ -1760,5 +1664,4 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             }
         }
     }
-
 }

@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -49,7 +50,11 @@ import java.lang.ref.WeakReference
 import java.util.Locale
 import java.util.UUID
 import androidx.core.net.toUri
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.transformer.Transformer
+import com.app.hihlo.utils.logD
 
+@UnstableApi
 class CustomVideoEditor @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
@@ -86,13 +91,21 @@ class CustomVideoEditor @JvmOverloads constructor(
     private var destinationPath: String
         get() {
             if (mFinalPath == null) {
-                val folder = context.cacheDir
-                mFinalPath = folder.path + File.separator
+                val folder = File(
+                    context.getExternalFilesDir(Environment.DIRECTORY_MOVIES),
+                    "HiHlo"
+                )
+
+                if (!folder.exists()) {
+                    folder.mkdirs()
+                }
+                mFinalPath = folder.absolutePath
             }
             return mFinalPath ?: ""
         }
-        set(finalPath) {
-            mFinalPath = finalPath
+
+        set(value) {
+            mFinalPath = value
         }
 
     init {
@@ -106,17 +119,6 @@ class CustomVideoEditor @JvmOverloads constructor(
         setLayoutSurfaceListener()
     }
 
-    fun removeLayoutSurfaceListener(){
-        binding.iconVideoPlay.setOnClickListener {
-
-
-        }
-        binding.layoutSurfaceView.setOnTouchListener { _, event ->
-
-            true
-        }
-
-    }
     fun setLayoutSurfaceListener() {
         binding.iconVideoPlay.setOnClickListener {
             onClickVideoPlayPause()
@@ -379,24 +381,53 @@ class CustomVideoEditor @JvmOverloads constructor(
         frameColor.setBackgroundColor(color)
     }
 
+    private var transformer: Transformer? = null
     @SuppressLint("UnsafeOptInUsageError")
     fun saveVideo() {
         val txtTime = binding.textTimeSelection.text.toString()
-        val pattern = "\\d{2}:\\d{2}"
+        val pattern = "\\d{2}:\\d{2}(?::\\d{2})?"
         val regex = Regex(pattern)
-        val matches = regex.findAll(txtTime)
-        val timeList = matches.map { it.value }.toList()
+
+        val timeList = regex.findAll(txtTime)
+            .map { it.value }
+            .toList()
+
         if (timeList.size < 2) {
             Toast.makeText(context, "Invalid time range", Toast.LENGTH_SHORT).show()
             return
         }
-        val filePath = "$destinationPath/${UUID.randomUUID()}.mp4"
-        val transformer = androidx.media3.transformer.Transformer.Builder(context)
+
+        val startMilliseconds = timeToMilliseconds(timeList[0])
+        val endMilliseconds = timeToMilliseconds(timeList[1])
+
+        if (startMilliseconds >= endMilliseconds) {
+            Toast.makeText(context, "Invalid trim range", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Cancel previous export if running
+        transformer?.cancel()
+
+        // Create output file safely
+        val outputFile = File(
+            destinationPath,
+            "${UUID.randomUUID()}.mp4"
+        )
+
+        val outputPath = outputFile.absolutePath
+
+        transformer = Transformer.Builder(context)
             .setVideoMimeType(MimeTypes.VIDEO_H264)
             .setAudioMimeType(MimeTypes.AUDIO_AAC)
-            .addListener(object : androidx.media3.transformer.Transformer.Listener {
-                override fun onCompleted(composition: Composition, exportResult: ExportResult) {
-                    mOnVideoEditedListener?.getResult(filePath.toUri())
+            .addListener(object : Transformer.Listener {
+
+                override fun onCompleted(
+                    composition: Composition,
+                    exportResult: ExportResult
+                ) {
+                    logD("VideoTrim:: Export completed")
+                    mOnVideoEditedListener
+                        ?.getResult(outputFile.toUri())
                 }
 
                 override fun onError(
@@ -404,12 +435,15 @@ class CustomVideoEditor @JvmOverloads constructor(
                     exportResult: ExportResult,
                     exportException: ExportException,
                 ) {
-                    exportException.localizedMessage?.let { mOnVideoEditedListener?.onError(it) }
+                    logD("VideoTrim:: Export failed")
+                    mOnVideoEditedListener
+                        ?.onError(
+                            exportException.localizedMessage
+                                ?: "Video export failed"
+                        )
                 }
             })
             .build()
-        val startMilliseconds = timeToMilliseconds(timeList[0])
-        val endMilliseconds = timeToMilliseconds(timeList[1])
 
         val inputMediaItem = MediaItem.Builder()
             .setUri(mSrc)
@@ -422,15 +456,23 @@ class CustomVideoEditor @JvmOverloads constructor(
             .build()
 
         val editedMediaItem = EditedMediaItem.Builder(inputMediaItem)
-            .setFrameRate(30)
             .setEffects(Effects.EMPTY)
             .build()
 
-        val composition =
-            Composition.Builder(listOf(EditedMediaItemSequence(listOf(editedMediaItem))))
-                .build()
+        val composition = Composition.Builder(
+            listOf(
+                EditedMediaItemSequence(
+                    listOf(editedMediaItem)
+                )
+            )
+        ).build()
+        logD("VideoTrim:: Trimming from $startMilliseconds ms to $endMilliseconds ms")
+        transformer?.start(composition, outputPath)
+    }
 
-        transformer.start(composition, filePath)
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        transformer?.cancel()
     }
 
     private fun timeToMilliseconds(time: String): Long {

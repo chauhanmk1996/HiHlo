@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseActivity
@@ -24,6 +26,7 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         return R.layout.activity_trim_video
     }
 
+    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -64,13 +67,12 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
         binding.videoTrimmer.apply {
-            setVideoBackgroundColor(resources.getColor(R.color.black))
+            setVideoBackgroundColor(ContextCompat.getColor(this@TrimVideoActivity,R.color.black ))
             setVideoURI(videoUri)
             setOnTrimVideoListener(object : OnVideoEditedEvent {
                 override fun getResult(uri: Uri) {
                     ProcessDialog.dismissDialog(true)
-                    Log.e("VideoCroppingActivity", "Trim result received")
-//TODO /storage/emulated/0/Download/42ae60aa-1c60-4bd4-bff4-6eef8a5033c0.mp4
+                    //TODO /storage/emulated/0/Download/42ae60aa-1c60-4bd4-bff4-6eef8a5033c0.mp4
                     UserPreference.seletedUri = uri
                     val resultIntent = Intent().apply {
                         putExtra(EXTRA_CROPPED_URI, uri.toString())
