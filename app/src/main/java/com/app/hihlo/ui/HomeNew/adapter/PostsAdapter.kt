@@ -38,13 +38,8 @@ import com.bumptech.glide.Glide
 
 class PostsAdapter(
     private val actionListener: PostActionListener? = null,
-    // You can remove onPostClick lambda if you handle POST_BODY via listener too
     private val onPostClick: ((Post) -> Unit)? = null   // optional - keep only if needed
 ) : RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
-
-//    init {
-//        setHasStableIds(true)
-//    }
 
     init {
         setHasStableIds(true)
@@ -153,16 +148,6 @@ class PostsAdapter(
     inner class PostViewHolder(private val binding: AdapterNewUserPostBinding) :
         RecyclerView.ViewHolder(binding.root) {
         init {
-//            binding.root.setOnClickListener {
-//                val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
-//                actionListener?.onPostAction(
-//                    post,
-//                    PostClickAction.POST_BODY,
-//                    adapterPosition,
-//                    binding.sideOptions
-//                )
-//                onPostClick?.invoke(post)
-//            }
             binding.userImage.setOnClickListener {
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
                 var user = Preferences.getCustomModelPreference<LoginResponse>(binding.root.context, LOGIN_DATA)?.payload?.username

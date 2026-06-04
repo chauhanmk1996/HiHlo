@@ -467,7 +467,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                     requireContext(),
                                     viewModel.currentPage,
                                     post_position,
-                                    postId.toString()
+                                    postId
                                 )
                                 //Toast.makeText(requireContext(), "Comment at position $position", Toast.LENGTH_SHORT).show()
                                 viewModel2.hitGetReelCommentsApi(
@@ -533,19 +533,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             }
 
                             PostsAdapter.PostClickAction.TOWARDS_STORY -> {
-//                                val targetUserId = post.user_id.toString()
-//                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
-//                                //intent.putExtra("play_position", storyPosition)
-//                                val json = Gson().toJson(statusListGlobal)
-//                                intent.putExtra("story_list", json)
-//                                intent.putExtra("is_play_single", true)
-//                                intent.putExtra("user_id", targetUserId)
-//                                startActivity(intent)
-//                                requireActivity().overridePendingTransition(
-//                                    R.anim.slide_up,
-//                                    0
-//                                )
-
                                 if (statusListGlobal.isEmpty()) {
                                     return
                                 }
@@ -555,8 +542,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 view.getLocationOnScreen(location)
                                 val centerX = location[0] + view.width / 2
                                 val centerY = location[1] + view.height / 2
-                                val intent =
-                                    Intent(requireContext(), PlayStatusActivity::class.java)
+                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
 
                                 // normal data
                                 intent.putExtra("play_position", position)
@@ -574,28 +560,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                                 startActivity(intent)
                                 requireActivity().overridePendingTransition(0, 0)
-
-                                /*
-                                RTVariable.IS_FROM_PROFILE = true
-                                val stories = postAdapter.getStoriesList()
-                                val storyPosition = stories.indexOfFirst { it.user_id == post.user_id }
-                                val story = stories.find { it.user_id == post.user_id }
-
-// Use the same list for navigation, not a separate `allStory`
-                                val storyListToPass = stories   // or ensure allStory is properly populated
-
-                                if (storyPosition != -1 && storyListToPass.isNotEmpty()) {
-                                    val bundle = Bundle().apply {
-                                        putParcelableArrayList("storyList", ArrayList(storyListToPass))
-                                        putInt("position", storyPosition)
-                                        // ...
-                                    }
-                                    findNavController().navigate(R.id.secondStoryFragment, bundle)
-                                } else {
-                                    // Handle error: story not found or list empty
-                                    Toast.makeText(context, "Cannot open story", Toast.LENGTH_SHORT).show()
-                                }
-                                */
                             }
                         }
                     }

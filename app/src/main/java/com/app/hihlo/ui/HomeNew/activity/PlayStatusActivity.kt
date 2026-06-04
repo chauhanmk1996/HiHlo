@@ -538,39 +538,11 @@ class PlayStatusActivity : AppCompatActivity() {
             binding.sendEditText.visibility = View.GONE
             binding.seenCount.text = story.seen_count.toString()
         } else {
-            val isFirst = currentUserIndex == 0 && currentStoryIndex == 0
-            binding.seenLayout.visibility = if (isFirst) View.VISIBLE else View.GONE
-            binding.deleteButton.visibility = if (isFirst) View.VISIBLE else View.GONE
-            binding.sendButton.visibility = if (isFirst) View.GONE else View.VISIBLE
-            binding.sendEditText.visibility = if (isFirst) View.GONE else View.VISIBLE
-            if (isFirst) binding.seenCount.text = story.seen_count.toString()
-        }
-
-        /*if (isSinglePlayMode) {
             binding.seenLayout.visibility = View.GONE
             binding.deleteButton.visibility = View.GONE
             binding.sendButton.visibility = View.VISIBLE
             binding.sendEditText.visibility = View.VISIBLE
-        } else {
-            val loginUserId = Preferences.getCustomModelPreference<LoginResponse>(
-                this,
-                LOGIN_DATA
-            )?.payload?.userId
-            if (loginUserId == user.user_id) {
-                binding.seenLayout.visibility = View.VISIBLE
-                binding.deleteButton.visibility = View.VISIBLE
-                binding.sendButton.visibility = View.GONE
-                binding.sendEditText.visibility = View.GONE
-                binding.seenCount.text = story.seen_count.toString()
-            } else {
-                val isFirst = currentUserIndex == 0 && currentStoryIndex == 0
-                binding.seenLayout.visibility = if (isFirst) View.VISIBLE else View.GONE
-                binding.deleteButton.visibility = if (isFirst) View.VISIBLE else View.GONE
-                binding.sendButton.visibility = if (isFirst) View.GONE else View.VISIBLE
-                binding.sendEditText.visibility = if (isFirst) View.GONE else View.VISIBLE
-                if (isFirst) binding.seenCount.text = story.seen_count.toString()
-            }
-        }*/
+        }
         setupCaption(story.caption)
     }
 
