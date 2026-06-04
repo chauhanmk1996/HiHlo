@@ -14,13 +14,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetCredentialResponse
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
@@ -41,23 +35,25 @@ import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     private var isPassHidden = true
     private val viewModel: SigninViewModel by viewModels()
-    private lateinit var auth: FirebaseAuth
-    private lateinit var credentialManager: CredentialManager
     lateinit var firestore: FirebaseFirestore
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 1001
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_signin
@@ -192,68 +188,13 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         }
     }
 
-    fun updateUserOnFirebase(payload: Payload?) {
-        val dataHashMap = hashMapOf(
-            "userId" to payload?.userId,
-            "name" to payload?.fullName,
-            "email" to payload?.email,
-            "status" to "online",
-            "mobileNumber" to "",
-            "device_platform" to "android",
-            "fcm_token" to Preferences.getStringPreference(requireContext(), FCM_TOKEN),
-            "createdAt" to getUidLoggedIn(),
-            "profilePicture" to ""
-        )
-
-        firestore.collection("Users").document(payload?.userId.toString()).set(dataHashMap)
-            .addOnSuccessListener {
-                logD("Google Login Success: $it")
-            }.addOnFailureListener { error ->
-            logD("Google Login Error: $error")
-        }
-    }
-
-    fun Payload.toUserDetailsX(): UserDetailsX {
-        return UserDetailsX(
-            id = this.userId,
-            name = if (this.name?.isNotEmpty() == true && this.name != "") this.name else this.fullName,
-            username = this.username,
-            email = this.email,
-            phone = this.phone,
-            dob = this.dob,
-            city = this.city,
-            country = this.country,
-            about = null,
-
-            profileImage = this.profileImage,
-            profile_image = this.profileImage,
-
-            isCreator = this.isCreator,
-            role = if (this.isCreator == 1) "Creator" else "User", // optional mapping
-
-            followers_count = null,
-            following_count = null,
-            gender = null,
-            interest_name = null,
-            is_verified = null,
-            posts_count = null,
-            blockStatus = null,
-            reels_count = null,
-            is_following = null,
-            is_seen = null,
-            user_live_status = null,
-            creatorStatus = null,
-            isStoryUploaded = null,
-            is_story_uploaded = null,
-            story = null,
-            myStory = null,
-            notificationSettings = null
-        )
-    }
-
     private fun setUpGoogleSignUp() {
-        auth = FirebaseAuth.getInstance()
-        credentialManager = CredentialManager.create(requireContext())
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
     }
 
     private fun clickTermsConditions() {
@@ -361,6 +302,65 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         }
     }
 
+    fun updateUserOnFirebase(payload: Payload?) {
+        val dataHashMap = hashMapOf(
+            "userId" to payload?.userId,
+            "name" to payload?.fullName,
+            "email" to payload?.email,
+            "status" to "online",
+            "mobileNumber" to "",
+            "device_platform" to "android",
+            "fcm_token" to Preferences.getStringPreference(requireContext(), FCM_TOKEN),
+            "createdAt" to getUidLoggedIn(),
+            "profilePicture" to ""
+        )
+
+        firestore.collection("Users").document(payload?.userId.toString()).set(dataHashMap)
+            .addOnSuccessListener {
+                logD("Google Login Success: $it")
+            }.addOnFailureListener { error ->
+                logD("Google Login Error: $error")
+            }
+    }
+
+    fun Payload.toUserDetailsX(): UserDetailsX {
+        return UserDetailsX(
+            id = this.userId,
+            name = if (this.name?.isNotEmpty() == true && this.name != "") this.name else this.fullName,
+            username = this.username,
+            email = this.email,
+            phone = this.phone,
+            dob = this.dob,
+            city = this.city,
+            country = this.country,
+            about = null,
+
+            profileImage = this.profileImage,
+            profile_image = this.profileImage,
+
+            isCreator = this.isCreator,
+            role = if (this.isCreator == 1) "Creator" else "User", // optional mapping
+
+            followers_count = null,
+            following_count = null,
+            gender = null,
+            interest_name = null,
+            is_verified = null,
+            posts_count = null,
+            blockStatus = null,
+            reels_count = null,
+            is_following = null,
+            is_seen = null,
+            user_live_status = null,
+            creatorStatus = null,
+            isStoryUploaded = null,
+            is_story_uploaded = null,
+            story = null,
+            myStory = null,
+            notificationSettings = null
+        )
+    }
+
     private fun onClick() {
         binding.apply {
             tvForgotPassword.setOnClickListener {
@@ -372,83 +372,64 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             clGoogleLogin.setOnClickListener {
                 signInWithGoogle()
             }
-
-            /*clGoogleLogin.setOnClickListener {
-                googleSignInClient.signOut()
-                ProcessDialog.showDialog(requireActivity(), true)
-                val signInIntent = googleSignInClient.signInIntent
-                startActivityForResult(signInIntent, RC_SIGN_IN)
-            }*/
         }
     }
 
     private fun signInWithGoogle() {
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(getString(R.string.default_web_client_id))
-            .setFilterByAuthorizedAccounts(false)
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
-        lifecycleScope.launch {
-            try {
-                val result = credentialManager.getCredential(
-                    requireContext(),
-                    request
-                )
-                handleSignIn(result)
-            } catch (e: GetCredentialException) {
-                logD("GoogleSignIn ERROR CLASS: ${e::class.java.simpleName}")
-                logD("MESSAGE: ${e.message}")
-                showToast(e.message ?: "")
-            } catch (e: Exception) {
-                logD("GoogleSignIn -> Unknown Error: ${e.message}")
-                showToast(e.message ?: "")
-            }
-        }
+        googleSignInClient.signOut()
+        ProcessDialog.showDialog(requireActivity(), true)
+        val signInIntent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
-    private fun handleSignIn(result: GetCredentialResponse) {
-        val credential = result.credential
-        if (credential is CustomCredential &&
-            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-        ) {
-            val googleIdTokenCredential =
-                GoogleIdTokenCredential.createFrom(credential.data)
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-            val idToken = googleIdTokenCredential.idToken
-            firebaseAuthWithGoogle(idToken)
-        } else {
-            logD("GoogleSignIn -> Unexpected credential type")
-            showToast("Google Sign-In Failed")
+        if (requestCode == RC_SIGN_IN) {
+            Log.e("LoginActivity", "Sign-in canceled: " + data)
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            Log.e("LoginActivity", "Sign-in canceled: " + task)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                if (account != null) {
+                    firebaseAuthWithGoogle(account.idToken!!)
+                } else {
+                    // ProcessDialog.dismissDialog(true)
+                    Log.w("LoginActivity", "Sign-in canceled")
+                    // Dismiss your dialog or take fallback action here
+                }
+            } catch (e: ApiException) {
+                ProcessDialog.dismissDialog(true)
+                Log.w("LoginActivity", "Google sign in failed", e)
+            }
         }
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
-        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(firebaseCredential)
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener(requireActivity()) { task ->
-
                 if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    logD("GoogleSignIn-> Success: ${user?.email}")
-                    val model = SocialSignUpRequest(
-                        name = user?.displayName ?: "",
-                        email = user?.email ?: "",
-                        profile_image = user?.photoUrl.toString(),
-                        social_id = user?.uid ?: "",
-                        social_type = "G",
-                        deviceToken = Preferences.getStringPreference(requireContext(), FCM_TOKEN),
-                        deviceType = "A"
-                    )
-                    logD("hitSocialLoginApi: $model")
-                    viewModel.hitSocialApi(model)
+                    hitSocialLoginApi(firebaseAuth.currentUser)
                 } else {
-                    logD("GoogleSignIn-> Firebase Auth Failed: ${task.exception ?: ""}")
-                    showToast("Authentication Failed")
+                    Toast.makeText(requireActivity(), "Authentication Failed", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
+    }
+
+    private fun hitSocialLoginApi(currentUser: FirebaseUser?) {
+        val model = SocialSignUpRequest(
+            name = currentUser?.displayName,
+            email = currentUser?.email,
+            profile_image = currentUser?.photoUrl.toString(),
+            social_id = currentUser?.uid,
+            social_type = "G",
+            deviceToken = Preferences.getStringPreference(requireContext(), FCM_TOKEN),
+            deviceType = "A"
+        )
+        Log.e("modelSocial", "hitSocialLoginApi: $model")
+        viewModel.hitSocialApi(model)
     }
 }

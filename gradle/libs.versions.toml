@@ -1,5 +1,5 @@
 [versions]
-agp = "9.1.0" #//TODO Version Changed
+agp = "9.1.0"
 firebaseBom = "33.15.0"
 googleAuthLibraryOauth2Http = "1.22.0"
 kotlin = "2.2.10"
@@ -25,10 +25,7 @@ firebaseAuthKtx = "23.2.1"
 android_video_trimmer = "1.0.2"
 fullSdk = "4.5.0"
 firebaseMessagingKtx = "24.1.1"
-ffmpeg = "6.0-2"
 swiperefreshlayout = "1.1.0"
-credentials = "1.5.0"
-googleid = "1.2.0"
 
 
 
@@ -66,12 +63,7 @@ android_video_trimmer = { module = "com.github.redevrx:android_video_trimmer", v
 
 full-sdk = { module = "io.agora.rtc:full-sdk", version.ref = "fullSdk" }
 firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
-arthenica-ffmpeg-full = {  group = "com.arthenica", name = "ffmpeg-kit-full", version.ref = "ffmpeg" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
-
-androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
-androidx-credentials-play = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
-google-identity = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

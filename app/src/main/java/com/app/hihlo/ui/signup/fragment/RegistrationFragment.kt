@@ -54,6 +54,10 @@ import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -71,8 +75,8 @@ class RegistrationFragment : Fragment() {
     private lateinit var firebaseAuth: FirebaseAuth
     lateinit var firestore: FirebaseFirestore
     private val socialViewModel: SocialSignUpViewModel by viewModels()
-    private lateinit var auth: FirebaseAuth
-    private lateinit var credentialManager: CredentialManager
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,8 +131,12 @@ class RegistrationFragment : Fragment() {
     }
 
     private fun setUpGoogleSignUp() {
-        auth = FirebaseAuth.getInstance()
-        credentialManager = CredentialManager.create(requireContext())
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
     }
 
     private fun usernameTextWatcher() {
@@ -241,9 +249,9 @@ class RegistrationFragment : Fragment() {
 //            Toast.makeText(requireContext(), "Registration successful!", Toast.LENGTH_SHORT).show()
 //            startActivity(Intent(this, SignInActivity::class.java))
             }.addOnFailureListener { error ->
-            Log.i("TAG", "firebase signup: " + error)
+                Log.i("TAG", "firebase signup: " + error)
 //            Toast.makeText(requireContext(), "Registration failed, try again!", Toast.LENGTH_SHORT).show()
-        }
+            }
     }
 
     private fun initObserver(
@@ -471,65 +479,50 @@ class RegistrationFragment : Fragment() {
     }
 
     private fun signInWithGoogle() {
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(getString(R.string.default_web_client_id))
-            .setFilterByAuthorizedAccounts(false)
-            .build()
+        googleSignInClient.signOut()
+        ProcessDialog.showDialog(requireActivity(),true)
+        val signInIntent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
 
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        lifecycleScope.launch {
+        if (requestCode == RC_SIGN_IN) {
+            Log.e("LoginActivity", "Sign-in canceled: "+data)
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            Log.e("LoginActivity", "Sign-in canceled: "+task)
             try {
-                val result = credentialManager.getCredential(
-                    requireContext(),
-                    request
-                )
-                handleSignIn(result)
-            } catch (e: GetCredentialException) {
-                logD("GoogleSignIn ERROR CLASS: ${e::class.java.simpleName}")
-                logD("MESSAGE: ${e.message}")
-                Toast.makeText(requireContext(), e.message ?: "", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                logD("GoogleSignIn -> Unknown Error: ${e.message}")
-                Toast.makeText(requireContext(), e.message ?: "", Toast.LENGTH_SHORT).show()
+                val account = task.getResult(ApiException::class.java)
+                if (account != null) {
+                    firebaseAuthWithGoogle(account.idToken!!)
+                } else {
+                    // ProcessDialog.dismissDialog(true)
+                    Log.w("LoginActivity", "Sign-in canceled")
+                    // Dismiss your dialog or take fallback action here
+                }
+            } catch (e: ApiException) {
+                ProcessDialog.dismissDialog(true)
+                Log.w("LoginActivity", "Google sign in failed", e)
             }
         }
     }
 
-    private fun handleSignIn(result: GetCredentialResponse) {
-        val credential = result.credential
-        if (credential is CustomCredential &&
-            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-        ) {
-            val googleIdTokenCredential =
-                GoogleIdTokenCredential.createFrom(credential.data)
-
-            val idToken = googleIdTokenCredential.idToken
-            firebaseAuthWithGoogle(idToken)
-        } else {
-            logD("GoogleSignIn -> Unexpected credential type")
-            Toast.makeText(requireContext(), "Google Sign-In Failed", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun firebaseAuthWithGoogle(idToken: String) {
-        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(firebaseCredential)
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    logD("GoogleSignIn-> Success: ${user?.email}")
                     val socialId = firebaseAuth.currentUser?.uid
                     val email = firebaseAuth.currentUser?.email
                     val name = firebaseAuth.currentUser?.displayName
                     val photoUrl = firebaseAuth.currentUser?.photoUrl
-                    hitSocialApi(name, email, photoUrl, socialId)
+                    hitSocialApi(name,email,photoUrl,socialId)
+                    Log.e("TAG", "firebaseAuthWithGoogle: $socialId \n $email $name $photoUrl", )
                 } else {
-                    logD("GoogleSignIn-> Firebase Auth Failed: ${task.exception ?: ""}")
-                    Toast.makeText(requireContext(), "Authentication Failed", Toast.LENGTH_SHORT)
-                        .show()
+                    ProcessDialog.dismissDialog(true)
+                    Toast.makeText(requireActivity(), "Authentication Failed", Toast.LENGTH_SHORT).show()
                 }
             }
     }
@@ -541,7 +534,7 @@ class RegistrationFragment : Fragment() {
             social_id = socialId,
             social_type = "G",
             profile_image = photoUrl.toString(),
-            deviceToken = Preferences.getStringPreference(requireContext(), FCM_TOKEN),
+            deviceToken =Preferences.getStringPreference(requireContext(), FCM_TOKEN),
             deviceType = "A"
         )
         socialViewModel.hitSocialSignUpUser(model)
@@ -549,55 +542,40 @@ class RegistrationFragment : Fragment() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "interest list success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
+                    if (it.data?.status==1){
+                        if (it.data.code == 200){
                             it.data.payload
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                             Preferences.setStringPreference(requireContext(), IS_LOGIN, "2")
                             Preferences.setStringPreference(requireContext(), LOGIN_TYPE, "G")
-                            Preferences.setCustomModelPreference<LoginResponse>(
-                                requireContext(),
-                                LOGIN_DATA,
-                                it.data
-                            )
+                            Preferences.setCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA, it.data)
                             CommonUtils.hideKeyboard(requireActivity())
-                            Log.i(
-                                "TAG",
-                                "setObserver: " + Preferences.getStringPreference(
-                                    requireContext(),
-                                    FCM_TOKEN
-                                )
-                            )
+                            Log.i("TAG", "setObserver: "+ Preferences.getStringPreference(requireContext(), FCM_TOKEN))
 
                             updateUserOnFirebase(it.data.payload)
-                            if (it.data.payload?.city.isNullOrBlank()) {
+                            if(it.data.payload?.city.isNullOrBlank()){
                                 val bundle = Bundle()
                                 val userDetails = it.data.payload?.toUserDetailsX()
-                                bundle.putString("from", "social")
-                                bundle.putParcelable("userDetail", userDetails)
-                                findNavController().navigate(R.id.editProfileNewFragment, bundle)
-                            } else {
+                                bundle.putString("from","social")
+                                bundle.putParcelable("userDetail",userDetails)
+                                findNavController().navigate(R.id.editProfileNewFragment,bundle)
+                            }else{
                                 startActivity(Intent(requireActivity(), HomeActivity::class.java))
                                 requireActivity().finish()
                             }
                             /*startActivity(Intent(requireActivity(), HomeActivity::class.java))
                             requireActivity().finish()*/
-                        } else {
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
+                        }else{
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        Toast.makeText(requireContext(), "${it?.message}", Toast.LENGTH_SHORT)
-                            .show()
+                    }else{
+                        Toast.makeText(requireContext(), "${it?.message}", Toast.LENGTH_SHORT).show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
-
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
-
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)

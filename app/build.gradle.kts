@@ -113,11 +113,8 @@ dependencies {
     implementation(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
-
-
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
     implementation("com.google.firebase:firebase-analytics")
-
 
     implementation("com.amazonaws:aws-android-sdk-s3:2.72.0")
     implementation("com.amazonaws:aws-android-sdk-core:2.72.0")
@@ -135,22 +132,17 @@ dependencies {
 
     implementation("com.github.yalantis:ucrop:2.2.10")
 
-    //    wave form library
+    //Wave form library
     implementation("com.github.massoudss:waveformSeekBar:5.0.2")
 
     implementation("com.razorpay:checkout:1.6.40")
 
-    //wheel picker
+    //Wheel picker
     implementation("com.github.tomeees:scrollpicker:1.7.5")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.burhanrashid52:photoeditor:3.1.0")
-
-    //Google SignIn
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play)
-    implementation(libs.google.identity)
-
 }
+
 configurations.all {
     resolutionStrategy {
         force("com.razorpay:checkout:1.6.40")
