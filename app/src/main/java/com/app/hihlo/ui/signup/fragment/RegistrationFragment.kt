@@ -122,11 +122,12 @@ class RegistrationFragment : Fragment() {
 
     private fun setUpGoogleSignUp() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(getString(R.string.default_web_client_id)) // Get this from firebase console
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+        firebaseAuth = FirebaseAuth.getInstance()
     }
 
     private fun usernameTextWatcher() {
