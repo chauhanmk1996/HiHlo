@@ -25,14 +25,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetCredentialResponse
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentRegistrationBinding
@@ -51,20 +45,16 @@ import com.app.hihlo.ui.signup.model.SocialSignUpRequest
 import com.app.hihlo.ui.signup.view_model.SocialSignUpViewModel
 import com.app.hihlo.utils.ChatUtils.getUidLoggedIn
 import com.app.hihlo.utils.CommonUtils
-import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
-import kotlinx.coroutines.launch
 
 class RegistrationFragment : Fragment() {
     private var isUsernameAvailable: Int = 2
