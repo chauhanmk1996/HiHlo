@@ -41,6 +41,7 @@ import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -371,12 +372,19 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             clGoogleLogin.setOnClickListener {
                 signInWithGoogle()
             }
+
+            /*clGoogleLogin.setOnClickListener {
+                googleSignInClient.signOut()
+                ProcessDialog.showDialog(requireActivity(), true)
+                val signInIntent = googleSignInClient.signInIntent
+                startActivityForResult(signInIntent, RC_SIGN_IN)
+            }*/
         }
     }
 
     private fun signInWithGoogle() {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(getString(R.string.server_client_id))
+            .setServerClientId(getString(R.string.default_web_client_id))
             .setFilterByAuthorizedAccounts(false)
             .build()
 

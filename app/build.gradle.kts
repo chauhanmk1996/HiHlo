@@ -19,13 +19,6 @@ android {
         versionName = "1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        resValue(
-            "string",
-            "server_client_id",
-            project.findProperty("SERVER_CLIENT_ID")?.toString() ?: ""
-        )
-
         lint {
             baseline = file("lint-baseline.xml")
         }
@@ -53,20 +46,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
-    /*packaging {
-        resources {
-            excludes += mutableSetOf("META-INF/gradle/incremental.annotation.processors")
-        }
-    }*/
+
     buildFeatures {
         dataBinding = true
     }
     android {
-        // ... other config
-
         packaging {
             resources {
                 excludes += setOf(
@@ -77,6 +65,7 @@ android {
             }
         }
     }
+
     splits {
         abi {
             isEnable = true
@@ -85,12 +74,9 @@ android {
             isUniversalApk = true // don't build a fat APK
         }
     }
-
-
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -147,17 +133,12 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-auth:21.3.0")
 
-
-
-
-
     implementation("com.github.yalantis:ucrop:2.2.10")
 
     //    wave form library
     implementation("com.github.massoudss:waveformSeekBar:5.0.2")
 
     implementation("com.razorpay:checkout:1.6.40")
-
 
     //wheel picker
     implementation("com.github.tomeees:scrollpicker:1.7.5")

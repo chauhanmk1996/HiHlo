@@ -1,200 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-    </data>
-    <!--
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">-->
-   <!-- <LinearLayout
-        android:background="@color/screen_background_black"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="1"
-        android:orientation="vertical">-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/screen_background_black"
-        android:orientation="vertical"
-        android:weightSum="1"
+        android:descendantFocusability="afterDescendants"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:descendantFocusability="afterDescendants">
+        android:orientation="vertical"
+        android:weightSum="1">
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvCreateAccount"
-            android:paddingTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create an account"
-            android:textSize="24sp"
-
-            android:gravity="center"
-            android:textColor="@color/white"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:fontFamily="@font/manrope_semibold"
+            android:gravity="center"
+            android:paddingTop="50dp"
+            android:text="Create an account"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:paddingHorizontal="15dp"
             android:id="@+id/tvCreateDesc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Connect with your friends today!"
-            android:textSize="14sp"
-            android:gravity="center"
             android:layout_marginTop="5dp"
-            android:textColor="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
             android:fontFamily="@font/manrope_regular"
-            app:layout_constraintTop_toBottomOf="@id/tvCreateAccount"
+            android:gravity="center"
+            android:paddingHorizontal="15dp"
+            android:text="Connect with your friends today!"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/tvCreateAccount" />
+
         <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:focusable="true"
-            android:clickable="true"
             android:layout_weight="1"
-            android:id="@+id/scrollView"
-            android:fillViewport="true">
+            android:clickable="true"
+            android:fillViewport="true"
+            android:focusable="true">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:clipChildren="false">
+                android:clipChildren="false"
+                android:paddingHorizontal="16dp">
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
+                    android:background="@drawable/background_10dp_corner_round"
+                    android:backgroundTint="@color/black_303030"
                     android:hint="Enter Your Name"
+                    android:inputType="textPersonName"
                     android:maxLines="1"
-                    android:textSize="16sp"
+                    android:padding="15dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/gray_hint"
-                    android:padding="15dp"
-                    android:layout_marginTop="25dp"
-                    android:inputType="textPersonName"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:background="@drawable/background_10dp_corner_round"
-                    android:backgroundTint="@color/black_303030"/>
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etUserName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/background_10dp_corner_round"
+                    android:backgroundTint="@color/black_303030"
                     android:hint="Enter Your Username"
+                    android:imeOptions="actionNext"
+                    android:inputType="textPersonName"
                     android:maxLines="1"
-                    android:textSize="16sp"
-                    android:textColor="@color/white"
-                    android:textColorHint="#BFBBBB"
                     android:paddingVertical="15dp"
                     android:paddingStart="15dp"
                     android:paddingEnd="50dp"
-                    android:imeOptions="actionNext"
-                    android:layout_marginTop="20dp"
-                    android:inputType="textPersonName"
-                    app:layout_constraintTop_toBottomOf="@id/etName"
-                    android:background="@drawable/background_10dp_corner_round"
-                    android:backgroundTint="@color/black_303030"/>
+                    android:textColor="@color/white"
+                    android:textColorHint="#BFBBBB"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/etName" />
+
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:visibility="visible"
                     android:id="@+id/username_check"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_marginEnd="10dp"
-                    app:layout_constraintTop_toTopOf="@+id/etUserName"
+                    android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="@+id/etUserName"
-                    app:layout_constraintEnd_toEndOf="@+id/etUserName"/>
+                    app:layout_constraintEnd_toEndOf="@+id/etUserName"
+                    app:layout_constraintTop_toTopOf="@+id/etUserName" />
+
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:text=""
-                    android:visibility="gone"
-                    app:layout_constraintTop_toBottomOf="@id/etUserName"
-                    app:layout_constraintEnd_toEndOf="@id/etUserName"
                     android:id="@+id/usernameWarning"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/theme"
                     android:fontFamily="@font/manrope_medium"
-                    android:textSize="12sp"/>
+                    android:text=""
+                    android:textColor="@color/theme"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="@id/etUserName"
+                    app:layout_constraintTop_toBottomOf="@id/etUserName" />
+
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/background_10dp_corner_round"
+                    android:backgroundTint="@color/black_303030"
                     android:hint="Enter Your Email"
+                    android:inputType="textEmailAddress"
                     android:maxLines="1"
-                    android:textSize="16sp"
+                    android:padding="15dp"
                     android:textColor="@color/white"
                     android:textColorHint="#BFBBBB"
-                    android:padding="15dp"
-                    android:layout_marginTop="20dp"
-                    android:inputType="textEmailAddress"
-                    app:layout_constraintTop_toBottomOf="@id/usernameWarning"
-                    android:background="@drawable/background_10dp_corner_round"
-                    android:backgroundTint="@color/black_303030"/>
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/usernameWarning" />
 
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/etPhoneNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/background_10dp_corner_round"
+                    android:backgroundTint="@color/black_303030"
                     android:hint="Enter Your Phone Number"
-                    android:maxLines="1"
                     android:inputType="number"
-                    android:textSize="16sp"
                     android:maxLength="10"
+                    android:maxLines="1"
+                    android:padding="15dp"
                     android:textColor="@color/white"
                     android:textColorHint="#BFBBBB"
-                    android:padding="15dp"
-                    android:layout_marginTop="20dp"
-                    app:layout_constraintTop_toBottomOf="@id/etEmail"
-                    android:background="@drawable/background_10dp_corner_round"
-                    android:backgroundTint="@color/black_303030"/>
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/etEmail" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    app:layout_constraintTop_toBottomOf="@id/etPhoneNumber"
                     android:background="@drawable/background_10dp_corner_round"
-                    android:backgroundTint="@color/black_303030">
+                    android:backgroundTint="@color/black_303030"
+                    app:layout_constraintTop_toBottomOf="@id/etPhoneNumber">
+
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/etPassword"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="@string/enter_your_password"
                         android:background="@null"
+                        android:hint="@string/enter_your_password"
+                        android:inputType="textPassword"
                         android:maxLines="1"
-                        android:textSize="16sp"
+                        android:padding="15dp"
                         android:textColor="@color/white"
                         android:textColorHint="#BFBBBB"
-                        android:padding="15dp"
-                        android:inputType="textPassword"
-                        app:layout_constraintEnd_toStartOf="@id/password_toggle"
+                        android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"/>
+                        app:layout_constraintEnd_toStartOf="@id/password_toggle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/password_toggle"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_marginEnd="10dp"
-                        app:tint="@color/white"
                         android:src="@drawable/close_eye_2"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                        app:tint="@color/white" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -203,25 +193,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    app:layout_constraintTop_toBottomOf="@id/clPassword"
                     android:background="@drawable/background_10dp_corner_round"
-                    android:backgroundTint="@color/black_303030">
+                    android:backgroundTint="@color/black_303030"
+                    app:layout_constraintTop_toBottomOf="@id/clPassword">
+
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/etCnfPassword"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="@string/re_enter_your_password"
                         android:background="@null"
+                        android:hint="@string/re_enter_your_password"
+                        android:inputType="textPassword"
                         android:maxLines="1"
-                        android:textSize="16sp"
+                        android:padding="15dp"
                         android:textColor="@color/white"
                         android:textColorHint="#BFBBBB"
-                        android:padding="15dp"
-                        android:inputType="textPassword"
-                        app:layout_constraintEnd_toStartOf="@id/cnfPassword_toggle"
+                        android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"/>
+                        app:layout_constraintEnd_toStartOf="@id/cnfPassword_toggle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/cnfPassword_toggle"
@@ -229,14 +220,13 @@
                         android:layout_height="24dp"
                         android:layout_marginEnd="10dp"
                         android:src="@drawable/close_eye_2"
-                        app:tint="@color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                        app:tint="@color/white" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- Login Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSignUp"
                     style="@style/MyButtonStyle"
@@ -246,35 +236,35 @@
                     android:layout_marginBottom="104dp"
                     android:paddingVertical="18dp"
                     android:text="Sign Up"
-                    app:layout_constraintTop_toBottomOf="@id/clCnfPassword"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/clCnfPassword" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvOrWith"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginEnd="20dp"
-                    android:textColor="@color/white"
-                    android:text="@string/or_with"
-                    android:textSize="18sp"
-                    android:gravity="center"
                     android:layout_marginTop="20dp"
+                    android:layout_marginEnd="20dp"
                     android:fontFamily="@font/manrope_semibold"
+                    android:gravity="center"
+                    android:text="@string/or_with"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/btnSignUp"/>
+                    app:layout_constraintTop_toBottomOf="@id/btnSignUp" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clGoogleLogin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="10dp"
-                    android:elevation="2dp"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/background_login_edittext"
+                    android:elevation="2dp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="10dp"
                     app:layout_constraintTop_toBottomOf="@id/tvOrWith">
 
                     <androidx.appcompat.widget.AppCompatImageView
@@ -283,21 +273,21 @@
                         android:layout_height="30dp"
                         android:src="@drawable/ic_google"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"/>
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/manrope_semibold"
+                        android:gravity="center"
                         android:text="Sign up with Google"
                         android:textColor="@color/white"
                         android:textSize="16sp"
-                        android:gravity="center"
-                        android:fontFamily="@font/manrope_semibold"
+                        app:layout_constraintBottom_toBottomOf="@id/ivGoogle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/ivGoogle"
-                        app:layout_constraintTop_toTopOf="@id/ivGoogle"
-                        app:layout_constraintBottom_toBottomOf="@id/ivGoogle"/>
+                        app:layout_constraintTop_toTopOf="@id/ivGoogle" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -305,33 +295,28 @@
                     android:id="@+id/tvDontHaveAccount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="20dp"
-                    android:textColor="@color/white"
-                    android:text="Don’t have an account ? Sign Up"
-                    android:textSize="16sp"
-                    android:gravity="center"
-                    android:layout_marginTop="30dp"
                     android:layout_marginHorizontal="20dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginEnd="20dp"
                     android:fontFamily="@font/manrope_semibold"
+                    android:gravity="center"
+                    android:text="Don’t have an account ? Sign Up"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/clGoogleLogin"/>
+                    app:layout_constraintTop_toBottomOf="@id/clGoogleLogin" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/tvDontHaveAccount"/>
-
-
-
+                    app:layout_constraintTop_toBottomOf="@id/tvDontHaveAccount" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </ScrollView>
 
     </LinearLayout>
-    <!--
-        </ScrollView>
-    -->
+
 </layout>
