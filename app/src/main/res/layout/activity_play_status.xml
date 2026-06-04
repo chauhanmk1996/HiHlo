@@ -206,7 +206,6 @@
             android:contentDescription="Mute/Unmute"
             android:padding="10dp"
             android:src="@drawable/volume_mute"
-            android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@id/captionContainer"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -214,7 +213,7 @@
             android:id="@+id/captionContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="112dp"
+            android:layout_marginBottom="100dp"
             android:background="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent">
 
@@ -223,8 +222,8 @@
                 android:id="@+id/captionCollapsed"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="12dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginVertical="8dp"
                 android:ellipsize="end"
                 android:fontFamily="@font/manrope_regular"
                 android:maxLines="1"
@@ -234,18 +233,18 @@
                 app:layout_constraintEnd_toStartOf="@+id/moreLessText"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="captionCollapsed" />
+                tools:text="Caption Collapsed Caption Collapsed Caption Collapsed Caption Collapsed Caption Collapsed" />
 
             <!-- "More" button -->
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/moreLessText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="12dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:fontFamily="@font/manrope_bold"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:text="More"
                 android:textColor="@color/theme"
                 android:textSize="13sp"
@@ -335,7 +334,7 @@
                     android:id="@+id/sendEditText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="16dp"
                     android:background="@drawable/story_view_edittext_background"
                     android:fontFamily="@font/manrope_regular"
                     android:hint="Message"
@@ -355,9 +354,8 @@
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/sendButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="4dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:background="@drawable/story_view_edittext_background"
                     android:focusable="true"
                     android:paddingVertical="10dp"

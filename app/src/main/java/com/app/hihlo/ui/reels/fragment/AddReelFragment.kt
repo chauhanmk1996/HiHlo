@@ -1,16 +1,16 @@
 package com.app.hihlo.ui.reels.fragment
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -29,10 +29,10 @@ import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.reels.view_model.AddReelViewModel
 import com.app.hihlo.utils.CommonUtils
-import com.app.hihlo.utils.CommonUtils.dpToPx
 import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.getString
+import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
@@ -42,6 +42,7 @@ import java.io.File
 class AddReelFragment : Fragment() {
     private val viewModel: AddReelViewModel by viewModels()
     private lateinit var binding: FragmentAddReelBinding
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,32 +56,21 @@ class AddReelFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setObserver()
+
         CommonUtils.touchHideKeyBoard(view, requireActivity())
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            val finalHeight = if (isKeyboardVisible) {
-                if (isGestureNavigation()) {
-                    imeHeight
-                } else {
-                    imeHeight - dpToPx(40)
-                }
-            } else {
-                dpToPx(20)
-            }
-            binding.root.setPadding(0, 0, 0, finalHeight)
-            insets
-        }
 
         if (isAdded) {
-            (requireActivity() as HomeActivity).setOnlineStatusVisibility(true)
+            (requireActivity() as HomeActivity)
+                .setOnlineStatusVisibility(true)
         }
 
         activity?.window?.decorView?.viewTreeObserver?.addOnGlobalLayoutListener {
             if (!isAdded) {
                 return@addOnGlobalLayoutListener
             }
+
             val rect = Rect()
             activity?.window?.decorView?.getWindowVisibleDisplayFrame(rect)
             val screenHeight =
@@ -89,22 +79,28 @@ class AddReelFragment : Fragment() {
             val isKeyboardVisible = keyboardHeight > screenHeight * 0.15
 
             if (isKeyboardVisible) {
-                binding.captionLayout.postDelayed({
+                binding.clCaptain.postDelayed({
                     if (!isAdded) return@postDelayed
                     val location = IntArray(2)
-                    binding.captionLayout.getLocationOnScreen(location)
-                    val captionBottom = location[1] + binding.captionLayout.height
+                    binding.clCaptain.getLocationOnScreen(location)
+                    val captionBottom = location[1] + binding.clCaptain.height
+                    logD("AddReelFragment:: CaptionBottom = $captionBottom")
                     val keyboardTop = rect.bottom
+                    logD("AddReelFragment:: KeyboardTop = $keyboardTop")
                     val overlap = captionBottom - keyboardTop
+                    logD("AddReelFragment:: Overlap = $overlap")
                     if (overlap > 0) {
-                        binding.captionLayout.animate()
-                            .translationY(-(overlap + dpToPx(40)).toFloat())
+                        val translationY = -(overlap + dpToPx(20)).toFloat()
+                        logD("AddReelFragment:: TranslationY = $translationY")
+                        binding.clCaptain.animate()
+                            .translationY(translationY)
                             .setDuration(150)
                             .start()
                     }
                 }, 100)
             } else {
-                binding.captionLayout.animate()
+                logD("AddReelFragment:: TranslationY = 0f")
+                binding.clCaptain.animate()
                     .translationY(0f)
                     .setDuration(150)
                     .start()
@@ -112,9 +108,19 @@ class AddReelFragment : Fragment() {
         }
     }
 
-    fun isGestureNavigation(): Boolean {
-        val resId = resources.getIdentifier("config_navBarInteractionMode", "integer", "android")
-        return resId > 0 && resources.getInteger(resId) == 2
+    override fun onDestroyView() {
+        super.onDestroyView()
+        globalLayoutListener?.let {
+            requireActivity()
+                .window
+                .decorView
+                .viewTreeObserver
+                .removeOnGlobalLayoutListener(it)
+        }
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
     private fun setObserver() {
