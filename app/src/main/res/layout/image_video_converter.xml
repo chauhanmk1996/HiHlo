@@ -103,7 +103,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnDone2"
+        android:id="@+id/btnNext"
         android:layout_width="80dp"
         android:layout_height="40dp"
         android:layout_marginEnd="16dp"
@@ -153,13 +153,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/tvDone2">
+        app:layout_constraintBottom_toTopOf="@+id/tvShare">
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/etInput2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#50000000"
+            android:background="#80000000"
             android:elevation="4dp"
             android:fontFamily="@font/manrope_regular"
             android:hint="Write Caption..."
@@ -177,7 +177,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvDone2"
+        android:id="@+id/tvShare"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginHorizontal="16dp"

@@ -1414,39 +1414,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     override fun onResume() {
         super.onResume()
-//        val position = UserDataManager.getHomeScrollPosition(requireContext())
-//        val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
-//        Log.e("SCROLL GOING", "SCROLL GOING>>> S "+position+" | "+scrollYp)
-//        if(UserDataManager.isGetBackToHome(requireContext())){
-//            UserDataManager.setGetBackToHome(requireContext(), false)
-//            postAdapter.setPosts(
-//                viewModel.postsCache,
-//                listOf(viewModel.myStory ?: MyStory()),
-//                viewModel.stories
-//            )
-//            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
-//                viewModel.isStoryUploaded,
-//                viewModel.myStory ?: MyStory(),
-//                viewModel.stories,
-//                ::getSelectedStory,
-//                viewModel.profileImage
-//            )
-//            binding.nestedScrollView.post {
-//                binding.nestedScrollView.scrollTo(0, scrollYp)
-//            }
-//        }else{
-//            scrollToRecyclerPosition(viewModel.scroll_position)
-//            if(UserDataManager.get_postCommentShow(requireContext())){
-//                binding.swipeRefresh.isRefreshing = false
-//                UserDataManager.postCommentIsShow(requireContext(), false)
-//                openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
-//                //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
-//            }
-//            if(UserDataManager.get_postMainIsShow(requireContext())){
-//                binding.swipeRefresh.isRefreshing = false
-//                UserDataManager.postMainIsSetShow(requireContext(), false)
-//            }
-//        }
         if (UserDataManager.isGetBackToHome(requireContext())) {
             val position = UserDataManager.getHomeScrollPosition(requireContext())
             scrollToRecyclerPosition(position)
@@ -1473,10 +1440,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         if (RTVariable.IS_STORY_UPDATED_FROM_PROFILE) {
             refreshData()
         }
-
-//        binding.nestedScrollView.post {
-//            binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
-//        }
     }
 
     private fun openCommentsBottomSheet(payload: Payload) {
