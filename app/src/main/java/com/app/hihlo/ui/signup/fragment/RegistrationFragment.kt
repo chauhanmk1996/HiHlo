@@ -80,10 +80,8 @@ class RegistrationFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentRegistrationBinding.inflate(layoutInflater)
-        firestore = FirebaseFirestore.getInstance()
-        firebaseAuth = FirebaseAuth.getInstance()
-        initViews()
         setUpGoogleSignUp()
+        initViews()
         usernameTextWatcher()
         keyBoardClose()
         binding.etUserName.filters = arrayOf(usernameFilter)
@@ -127,6 +125,7 @@ class RegistrationFragment : Fragment() {
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+        firestore = FirebaseFirestore.getInstance()
         firebaseAuth = FirebaseAuth.getInstance()
     }
 

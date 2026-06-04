@@ -50,10 +50,10 @@ import dagger.hilt.android.AndroidEntryPoint
 class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     private var isPassHidden = true
     private val viewModel: SigninViewModel by viewModels()
-    lateinit var firestore: FirebaseFirestore
-    private lateinit var firebaseAuth: FirebaseAuth
+    lateinit var firestore : FirebaseFirestore
     private lateinit var googleSignInClient: GoogleSignInClient
     private val RC_SIGN_IN = 1001
+    private lateinit var firebaseAuth: FirebaseAuth
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_signin
@@ -72,7 +72,6 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
         clickDoNotHaveAccount()
         setPasswordToggle()
         onClick()
-        firestore = FirebaseFirestore.getInstance()
     }
 
     private fun setObserver() {
@@ -189,6 +188,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     }
 
     private fun setUpGoogleSignUp() {
+        firestore = FirebaseFirestore.getInstance()
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id)) // Get this from firebase console
             .requestEmail()
@@ -386,23 +386,22 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == RC_SIGN_IN) {
-            Log.e("LoginActivity", "Sign-in canceled: " + data)
+            Log.e("GoogleSignIn", "resultCode = $resultCode, data = $data")
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            Log.e("LoginActivity", "Sign-in canceled: " + task)
             try {
                 val account = task.getResult(ApiException::class.java)
-                if (account != null) {
+                if (account?.idToken != null) {
+                    logD("GoogleSignIn:: IdToken = ${account.idToken ?: ""}")
                     firebaseAuthWithGoogle(account.idToken!!)
                 } else {
-                    // ProcessDialog.dismissDialog(true)
-                    Log.w("LoginActivity", "Sign-in canceled")
-                    // Dismiss your dialog or take fallback action here
+                    logD("GoogleSignIn:: Google Sign-in failed")
+                    showToast("Google Sign-in failed")
                 }
             } catch (e: ApiException) {
+                logD("GoogleSignIn:: ${e.message ?: e.localizedMessage ?: ""}")
+                showToast(e.message ?: e.localizedMessage ?: "")
                 ProcessDialog.dismissDialog(true)
-                Log.w("LoginActivity", "Google sign in failed", e)
             }
         }
     }
@@ -414,13 +413,12 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
                 if (task.isSuccessful) {
                     hitSocialLoginApi(firebaseAuth.currentUser)
                 } else {
-                    Toast.makeText(requireActivity(), "Authentication Failed", Toast.LENGTH_SHORT)
-                        .show()
+                    showToast("Authentication Failed")
                 }
             }
     }
 
-    private fun hitSocialLoginApi(currentUser: FirebaseUser?) {
+    private fun hitSocialLoginApi(currentUser: FirebaseUser?, ) {
         val model = SocialSignUpRequest(
             name = currentUser?.displayName,
             email = currentUser?.email,
@@ -430,7 +428,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             deviceToken = Preferences.getStringPreference(requireContext(), FCM_TOKEN),
             deviceType = "A"
         )
-        Log.e("modelSocial", "hitSocialLoginApi: $model")
+        logD("HitSocialLoginApi: $model")
         viewModel.hitSocialApi(model)
     }
 }
