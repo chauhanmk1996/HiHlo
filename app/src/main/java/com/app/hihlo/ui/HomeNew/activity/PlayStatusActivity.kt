@@ -10,7 +10,6 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,10 +17,8 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.TextUtils
-import android.text.method.LinkMovementMethod
 import android.text.method.ScrollingMovementMethod
 import android.text.style.ClickableSpan
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -39,7 +36,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
@@ -52,7 +48,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.app.hihlo.R
 import com.app.hihlo.databinding.ActivityPlayStatusBinding
 import com.app.hihlo.databinding.PopupChatSideOptionsBinding
-import com.app.hihlo.enum.MediaType
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
 import com.app.hihlo.model.story_delete.request.StoryDeleteRequest
@@ -76,7 +71,6 @@ import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
@@ -87,7 +81,6 @@ import kotlin.math.hypot
 import androidx.core.net.toUri
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.ui.AspectRatioFrameLayout
 
 class PlayStatusActivity : AppCompatActivity() {
 
@@ -200,10 +193,10 @@ class PlayStatusActivity : AppCompatActivity() {
         binding.rightClickArea.setOnClickListener { playNext() }
         binding.leftClickArea.setOnClickListener { playPrevious() }
 
-        binding.sideOptions.bringToFront()
-        binding.sideOptions.setOnClickListener {
+        binding.ivMenu.bringToFront()
+        binding.ivMenu.setOnClickListener {
             pauseStory()
-            openSideOptionsPopup(binding.sideOptions)
+            openSideOptionsPopup(binding.ivMenu)
         }
 
         binding.sendEditText.setOnClickListener { pauseStory() }
@@ -229,7 +222,7 @@ class PlayStatusActivity : AppCompatActivity() {
             )
         }
 
-        binding.userImageCardView.setOnClickListener { getClick(0) }
+        binding.cvUserPic.setOnClickListener { getClick(0) }
         binding.blurBackground.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 updateKeyboardVisibility(false)
@@ -516,14 +509,14 @@ class PlayStatusActivity : AppCompatActivity() {
 
     private fun updateUIForStory(story: Story) {
         val user = getCurrentUser()
-        binding.userName.text = user.userDetail.name
-        binding.userLocation.text =
-            "${user.userDetail.city ?: ""}, ${user.userDetail.country ?: "India"}"
+        binding.tvUserName.text = user.userDetail.name
+        val location = "${user.userDetail.city ?: ""}, ${user.userDetail.country ?: "India"}"
+        binding.tvUserLocation.text = location
         Glide.with(this).load(user.userDetail.profile_image)
-            .placeholder(R.drawable.profile_placeholder).into(binding.userImage)
+            .placeholder(R.drawable.profile_placeholder).into(binding.ivUserPic)
 
-        val TIME = CommonUtils.getTimeAgo(story.created_at)
-        binding.statusTime.text = if (TIME.equals("Just now")) TIME else "$TIME ago"
+        val time = CommonUtils.getTimeAgo(story.created_at)
+        binding.tvStatusTime.text = if (time == "Just now") time else "$time ago"
 
         binding.btnMuteUnmute.isVisible = story.asset_type == "V"
 
@@ -537,11 +530,13 @@ class PlayStatusActivity : AppCompatActivity() {
             binding.sendButton.visibility = View.GONE
             binding.sendEditText.visibility = View.GONE
             binding.seenCount.text = story.seen_count.toString()
+            binding.ivMenu.visibility = View.GONE
         } else {
             binding.seenLayout.visibility = View.GONE
             binding.deleteButton.visibility = View.GONE
             binding.sendButton.visibility = View.VISIBLE
             binding.sendEditText.visibility = View.VISIBLE
+            binding.ivMenu.visibility = View.VISIBLE
         }
         setupCaption(story.caption)
     }
@@ -736,11 +731,11 @@ class PlayStatusActivity : AppCompatActivity() {
                 val wrapper =
                     binding.storyProgressContainer.getChildAt(currentStoryIndex) as? FrameLayout
                 val fill = wrapper?.tag as? View
-                fill?.let {
+                fill?.let {fil->
                     val totalWidth = wrapper.width
                     val fillWidth = (totalWidth * progressFraction).toInt()
-                    (it.layoutParams as FrameLayout.LayoutParams).width = fillWidth
-                    it.requestLayout()
+                    (fil.layoutParams as FrameLayout.LayoutParams).width = fillWidth
+                    fil.requestLayout()
                 }
             }
         }
@@ -867,7 +862,7 @@ class PlayStatusActivity : AppCompatActivity() {
                         .withEndAction {
                             // Reset translation before finish so animation works correctly
                             binding.root.translationY = 0f
-                            finish() // 🔥 This will call your overridden finish()
+                            finish()
                         }
                         .start()
                 } else {
@@ -1068,7 +1063,7 @@ class PlayStatusActivity : AppCompatActivity() {
             hypot(centerX - (viewScreenX + screenW), centerY - viewScreenY),
             hypot(centerX - viewScreenX, centerY - (viewScreenY + screenH)),
             hypot(centerX - (viewScreenX + screenW), centerY - (viewScreenY + screenH))
-        ).toFloat()
+        )
 
         root.pivotX = 0f
         root.pivotY = 0f
