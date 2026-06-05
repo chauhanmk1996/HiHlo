@@ -16,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -28,22 +27,17 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.app.hihlo.R
-import com.app.hihlo.ReelsDatabase.ReelsDatabaseManager
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentReelsBinding
 import com.app.hihlo.model.follow.request.FollowRequest
-import com.app.hihlo.model.get_reel_comments.response.Comment
 import com.app.hihlo.model.get_reel_comments.response.Payload
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.model.reel.response.Reel
 import com.app.hihlo.model.send_gift.SendGiftRequest
-import com.app.hihlo.model.static.MIN_COINS_FOR_AUDIO
-import com.app.hihlo.model.static.MIN_COINS_FOR_VIDEO
 import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
@@ -58,17 +52,13 @@ import com.app.hihlo.preferences.UserPreference.OTHER_USER_ID
 import com.app.hihlo.preferences.UserPreference.U_ID
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
-import com.app.hihlo.ui.HomeNew.model.StatusItem
-import com.app.hihlo.ui.calling.activity.OldOutgoingCallActivity
 import com.app.hihlo.ui.calling.activity.OutgoingVideoCallActivity
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
-import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
 import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.REQUEST_CODE_CROP_VIDEO
 import com.app.hihlo.ui.reels.adapter.ReelAdapter
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
-import com.app.hihlo.ui.reels.bottom_sheet.CallTypeBottomSheetFragment
 import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
 import com.app.hihlo.ui.trim_video.TrimVideoActivity
@@ -82,10 +72,6 @@ import com.app.hihlo.utils.logD
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
-//import com.google.android.exoplayer2.ExoPlayer
-//import com.google.android.exoplayer2.MediaItem
-//import com.google.android.exoplayer2.Player
-//import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,8 +81,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.util.UUID
-import kotlin.collections.plus
 import kotlin.getValue
 import kotlin.isInitialized
 import kotlin.toString
@@ -620,80 +604,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
         }
     }
 
-    private fun openCallTypeBottomSheet(createrId: String, name: String, profileImage: String) {
-        val bottomSheetFragment = CallTypeBottomSheetFragment.newInstance("call").apply {
-            callerName = name
-            callerImage = profileImage
-            onCallTypeSelected = {
-                dismiss()
-                when (it) {
-                    0 -> {
-                        if ((totalAvailableCoins ?: 0) > MIN_COINS_FOR_AUDIO) {
-                            viewModel.hitGenerateAgoraTokenDataApi(
-                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(),
-                                    LOGIN_DATA
-                                )?.payload?.authToken,
-                                channelName = UUID.randomUUID().toString(),
-                                calleeId = createrId,
-                                uid = Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(),
-                                    LOGIN_DATA
-                                )?.payload?.userId.toString(),
-                                "audio",
-                                sender_id = Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(),
-                                    LOGIN_DATA
-                                )?.payload?.userId.toString()
-                            )
-                        } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "You need atleast $MIN_COINS_FOR_AUDIO coins to make an Audio Call.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                    1 -> {
-                        if ((totalAvailableCoins ?: 0) > MIN_COINS_FOR_VIDEO) {
-                            viewModel.hitGenerateAgoraTokenDataApi(
-                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(),
-                                    LOGIN_DATA
-                                )?.payload?.authToken,
-                                channelName = UUID.randomUUID().toString(),
-                                calleeId = createrId,
-                                uid = Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(),
-                                    LOGIN_DATA
-                                )?.payload?.userId.toString(),
-                                "video",
-                                sender_id = Preferences.getCustomModelPreference<LoginResponse>(
-                                    requireContext(),
-                                    LOGIN_DATA
-                                )?.payload?.userId.toString()
-                            )
-                        } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "You need atleast $MIN_COINS_FOR_VIDEO coins to make a Video Call.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                    /*0->{
-                        viewModel.hitGenerateAgoraTokenDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, channelName = UUID.randomUUID().toString(), calleeId = createrId, uid = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString(), "audio")
-                    }
-                    1->{
-                        viewModel.hitGenerateAgoraTokenDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, channelName = UUID.randomUUID().toString(), calleeId = createrId, uid = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString(), "video")
-                    }*/
-                }
-            }
-        }
-        bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
-    }
-
     private fun viewPagerCallback() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             var currentPosition = 0
@@ -722,14 +632,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                 adapter.notifyItemChanged(previousPosition)
                 adapter.notifyItemChanged(currentPosition)
                 adapter.currentPlayingPosition = currentPosition
-//                binding.viewPager.post {
-//                    if (previousPosition < adapter.itemCount) {
-//                        adapter.notifyItemChanged(previousPosition)
-//                    }
-//                    if (currentPosition < adapter.itemCount) {
-//                        adapter.notifyItemChanged(currentPosition)
-//                    }
-//                }
                 val reel = RTVariable.reelsCache[position]
                 RTVariable.REELS_POSITION = position
                 RTVariable.REELS_ID = reel.id.toString()
@@ -924,30 +826,6 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             if (isGranted) launchMediaPicker()
             else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
         }
-
-    private val requestMultiplePermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val granted = permissions.values.all { it }
-            if (granted) launchMediaPicker()
-            else Toast.makeText(requireContext(), "Permissions denied", Toast.LENGTH_SHORT).show()
-        }
-    /*private fun openUploadBottomSheet(check: String) {
-        val bottomSheetFragment = UploadReelBottomSheetFragment.newInstance(check).apply {
-
-            onUploadTypeSelected = {
-                dismiss()
-                when(it){
-                    0->{
-                        checkGalleryPermissionAndPick("I")
-                    }
-                    1->{
-                        checkGalleryPermissionAndPick("V")
-                    }
-                }
-            }
-        }
-        bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
-    }*/
 
     fun followSelected(id: Int, reelPosition: Int, isAlreadyFollowed: Int) {
         adapter.updateFollow(reelPosition, isAlreadyFollowed)
@@ -1662,6 +1540,10 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
                     openCommentsBottomSheet(cached)
                 }
             }
+        }
+
+        if (::exoPlayer.isInitialized) {
+            exoPlayer.play()
         }
     }
 }

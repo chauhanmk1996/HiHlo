@@ -2,12 +2,10 @@ package com.app.hihlo.ui.home.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Color
@@ -22,10 +20,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
-import android.util.Rational
 import android.view.View
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -33,8 +28,6 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -51,23 +44,18 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
-import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
-import com.app.hihlo.ui.HomeNew.HomeNewFragment
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.calling.CallStateHolder
 import com.app.hihlo.ui.calling.view_model.CallStateViewModel
-import com.app.hihlo.ui.home.fragment.SecondStoryFragmentDirections
-import com.app.hihlo.ui.profile.fragment.ProfileFragmentDirections
 import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
@@ -85,7 +73,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     var userImageUrl = ""
     val vm: CallStateViewModel by viewModels()
 
-    // Optional: also animate the FAB + imgBtn together if you want
     override fun hideBottomElements() {
         hideNavigationView()
     }
@@ -124,12 +111,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     }
 
     fun setOnlineStatusVisibility(boolean: Boolean){
-        if(boolean){
-            binding.onlineStatusImage.isVisible = false
-        }else{
-            binding.onlineStatusImage.isVisible = true
-        }
-        Log.e("DELETE", "DELETE")
+        binding.onlineStatusImage.isVisible = !boolean
     }
 
     fun setOnlineStatus(onlineStatus: String) {
@@ -140,9 +122,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
             "2", "3"->{
                 binding.onlineStatusImage.setImageResource(R.drawable.offline_status_red)
             }
-            /*"3"->{
-                binding.onlineStatusImage.setImageResource(R.drawable.busy_status)
-            }*/
         }
     }
 
@@ -181,7 +160,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         Log.i("TAG", "handleIntentNavigation: "+target)
         when (target) {
             "message" -> {
-                Log.i("TAG", "handleIntentNavigation chatid: "+intent.getStringExtra("chatId") ?: "")
                 UserPreference.CHAT_PUSH_NOTIFICATION_ID = intent.getStringExtra("chat_id") ?: ""
                 navController.navigate(R.id.chatListFragment)
             }
@@ -195,46 +173,43 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (MyApplication.isStackMode) {
-                    // Bring PlayStatusActivity to the front (top of stack)
                     val intent = Intent(this@HomeActivity, PlayStatusActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                     }
                     startActivity(intent)
-                    // Reset the flag to avoid re‑triggering on subsequent back presses
                     MyApplication.isStackMode = false
                 }else{
                     val currentDestinationId = navController.currentDestination?.id
                     setOnlineStatusVisibility(false)
                     when (currentDestinationId) {
                         R.id.homeNewFragment -> {
-                            Log.e("CCCCC", "CCCCC")
                             finish()
                             showNavigationView()
                         }
+
                         R.id.searchNewFragment, R.id.chatListFragment -> {
-                            //popBackToHome()
                             binding.bottomNavigationView.menu.findItem(R.id.search).icon = ContextCompat.getDrawable(this@HomeActivity, R.drawable.search_icon)
                             navController.popBackStack()
                             showNavigationView()
                         }
+
                         R.id.reelsFragment -> {
                             if (UserPreference.navigatedToMyProfile){
-//                            UserPreference.navigatedToMyProfile=false
                                 navController.popBackStack()
                                 showNavigationView()
-//                            navigateToProfile(navController.currentDestination?.id, Preferences.getCustomModelPreference<LoginResponse>(this@HomeActivity, LOGIN_DATA)?.payload?.profileImage.toString())
                             }else{
                                 popBackToHome()
                             }
                         }
+
                         R.id.profileFragment -> {
-//                        popBackToHome()
                             navController.popBackStack()
                             showNavigationView()
                         }
-                        R.id.openAdFragment -> {
 
+                        R.id.openAdFragment -> {
                         }
+
                         else -> {
                             navController.popBackStack()
                             showNavigationView()
@@ -248,7 +223,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     private fun popBackToHome() {
         val popped = navController.popBackStack(R.id.homeNewFragment, false)
         if (!popped) {
-            // HomeFragment not in back stack — navigate to it
             navController.navigate(R.id.homeNewFragment)
         }
         binding.bottomNavigationView.selectedItemId = R.id.home
@@ -256,59 +230,34 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     }
 
     private fun popBackToHome2() {
-//        val currentDestId = navController.currentDestination?.id
-//        if (currentDestId != R.id.homeNewFragment) {
-//            navController.navigate(R.id.homeNewFragment)
-//        }else{
-//            supportFragmentManager.setFragmentResult("home_click", Bundle())
-//        }
         supportFragmentManager.setFragmentResult("home_click", Bundle())
         binding.bottomNavigationView.selectedItemId = R.id.home
         showBottomElements()
     }
 
     override fun getLayoutId(): Int {
-        return R.layout.activity_home // Ensure this points to the correct layout resource
+        return R.layout.activity_home
     }
     private fun floatingButtonClick() {
         binding.floatingbtn.setOnClickListener {
-            // Simulate clicking the "Home" item in the BottomNavigationView
             binding.bottomNavigationView.selectedItemId = R.id.reel
         }
     }
     private fun clearBottomBarPadding() {
         binding.bottomAppBar.setPadding(0, 0, 0, 0)
         binding.bottomNavigationView.setPadding(0, 0, 0, 0)
-
-        // Optional: remove listener only if you completely remove the bar
-        // ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigationView, null)
     }
 
      fun setBottomBarPadding() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Remove extra padding from BottomAppBar and its children
             binding.bottomAppBar.setPadding(0, 0, 0, 0)
             val offset = if (isGestureNavigation()) systemBars.bottom else 0
             binding.bottomNavigationView.setPadding(0, 0, 0, offset)
             WindowInsetsCompat.CONSUMED
         }
     }
-     /*fun fullyResetFloatingButton() {
-        val root = findViewById<ConstraintLayout>(R.id.home)
-        val fab = findViewById<FloatingActionButton>(R.id.floatingbtn)
-        val img = findViewById<AppCompatImageView>(R.id.imgBtn)
 
-        // Temporarily remove both
-        root.removeView(fab)
-        root.removeView(img)
-
-        // Re-add them after a slight delay to allow layout to settle
-        Handler(Looper.getMainLooper()).postDelayed({
-            root.addView(fab)
-            root.addView(img)
-        }, 100)
-    }*/
      fun fullyResetFloatingButton() {
          val fab = findViewById<FloatingActionButton>(R.id.floatingbtn)
          val img = findViewById<AppCompatImageView>(R.id.imgBtn)
@@ -324,82 +273,15 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
          }
      }
 
-
-
-    /*private fun setBottomBarPadding() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomAppBar) { view, insets ->
-            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-
-            val isKeyboardVisible = imeInsets.bottom > 0
-
-            val bottomPadding = if (!isKeyboardVisible && isGestureNavigation()) {
-                systemBarsInsets.bottom
-            } else {
-                0
-            }
-
-            // Apply bottom padding to BottomAppBar itself (not just the BottomNavigationView)
-            binding.bottomAppBar.setPadding(0, 0, 0, bottomPadding)
-            binding.bottomNavigationView.setPadding(0, 0, 0, 0) // Always 0 to avoid double padding
-
-            insets
-        }
-    }*/
-
-    /*private fun setBottomBarPadding() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomAppBar) { view, insets ->
-            val systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-
-            val isKeyboardVisible = imeInsets.bottom > 0
-
-            if (!isKeyboardVisible && isGestureNavigation()) {
-                binding.bottomAppBar.setPadding(0, 0, 0, systemBarsInsets.bottom+ CommonUtils.dpToPx(15))
-                binding.bottomNavigationView.setPadding(0, 0, 0, 0) // Always 0 to avoid double padding
-            } else {
-                binding.bottomAppBar.setPadding(0, 0, 0, CommonUtils.dpToPx(-10))
-                binding.bottomNavigationView.setPadding(0, 0, 0, 0) // Always 0 to avoid double padding
-            }
-
-            // Apply bottom padding to BottomAppBar itself (not just the BottomNavigationView)
-
-
-            insets
-        }
-    }*/
-    /*private fun setBottomBarPadding() {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-        val currentFragment = navHostFragment?.childFragmentManager?.primaryNavigationFragment
-
-        if (currentFragment is ChatFragment) {
-            // Skip setting insets in ChatFragment
-            return
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Remove extra padding from BottomAppBar and its children
-            binding.bottomAppBar.setPadding(0, 0, 0, 0)
-            val offset = if (isGestureNavigation()) systemBars.bottom else 0
-            binding.bottomNavigationView.setPadding(0, 0, 0, offset)
-            WindowInsetsCompat.CONSUMED
-        }
-    }*/
-
-
-
-
     fun isGestureNavigation(): Boolean {
         val resId = resources.getIdentifier("config_navBarInteractionMode", "integer", "android")
         return resId > 0 && resources.getInteger(resId) == 2
     }
+
     private fun setBottomNavigation() {
         binding.bottomNavigationView.background = null
         binding.bottomNavigationView.selectedItemId = R.id.home
     }
-
-
 
     fun setUserProfileImageWithStroke(context: Context, bottomNavView: BottomNavigationView, imageUrl: String, isSelected: Boolean = false) {
         if (imageUrl.isBlank()) {
@@ -439,9 +321,9 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
 
         val borderPaint = Paint().apply {
             isAntiAlias = true
-            color = if (isSelected) strokeColor else Color.GRAY // Change stroke color
+            color = if (isSelected) strokeColor else Color.GRAY
             style = Paint.Style.STROKE
-            strokeWidth = if (isSelected) 6f else 0f  // Adjust stroke thickness
+            strokeWidth = if (isSelected) 6f else 0f
         }
 
         if (isSelected) {
@@ -451,19 +333,14 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
         } else {
             canvas.drawCircle(radius, radius, radius, paint)
         }
-
-
         return BitmapDrawable(context.resources, output)
     }
 
     private fun navigationMenuClickListener() {
         binding.bottomNavigationView.itemIconTintList = null
-
         setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             val currentDestId = navController.currentDestination?.id
-
-            // Reset all to unselected first
             binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_icon)
             binding.bottomNavigationView.menu.findItem(R.id.chat).icon = ContextCompat.getDrawable(this, R.drawable.chat_icon)
             binding.bottomNavigationView.menu.findItem(R.id.search).icon = ContextCompat.getDrawable(this, R.drawable.search_icon)
@@ -471,7 +348,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
             when (item.itemId) {
                 R.id.home -> {
                     UserDataManager.setHomeLoaded(this, true)
-                    //UserDataManager.setGetBackToHome(this, false)
                     RTVariable.ISOTHERCLICKED = false
                     RTVariable.ISHOMECLICKED = true
                     RTVariable.IS_CHAT_OTHER = true
@@ -484,16 +360,15 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     }else{
                         supportFragmentManager.setFragmentResult("home_click", Bundle())
                     }
-                    //navController.navigate(R.id.homeNewFragment)
                     binding.imgBtn.setImageResource(R.drawable.reel_icon_unselected)
                     binding.bottomNavigationView.menu.findItem(R.id.home).icon = ContextCompat.getDrawable(this, R.drawable.home_selected)
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     true
                 }
+
                 R.id.chat -> {
                     UserDataManager.setGetBackToHome(binding.root.context, true)
                     UserDataManager.setHomeLoaded(this, false)
-                    //UserDataManager.saveChatScrollPosition(binding.root.context, "inbox", 0)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
                     RTVariable.IS_CHAT_CLICKED = true
@@ -520,6 +395,7 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     true
                 }
+
                 R.id.reel -> {
                     UserDataManager.setGetBackToHome(binding.root.context, true)
                     UserDataManager.setHomeLoaded(this, false)
@@ -530,11 +406,6 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     RTVariable.REELS_INSTANCE_KEY_ID = 0
                     RTVariable.SEARCH_SELF_CLICKED = 1
                     UserDataManager.setReelsPosition(binding.root.context, UserDataManager.getReelsPosition(binding.root.context))
-//                    if(!RTVariable.BOTTOM_REELS_ICON_CLICKED){
-//                        RTVariable.BOTTOM_REELS_ICON_CLICKED = true
-//                    }else{
-//                        RTVariable.BOTTOM_REELS_ICON_CLICKED = false
-//                    }
                     RTVariable.BOTTOM_REELS_ICON_CLICKED = true
                     Log.e("TTTTT","APP IN BACKGROUND RS "+UserDataManager.isGetBackToHome(binding.root.context))
                     showNavigationView()
@@ -553,12 +424,12 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     true
                 }
+
                 R.id.search -> {
                     UserDataManager.setGetBackToHome(binding.root.context, true)
                     UserDataManager.setHomeLoaded(this, false)
                     RTVariable.ISOTHERCLICKED = true
                     RTVariable.ISHOMECLICKED = false
-                    //RTVariable.SEARCH_CLICKED = true
                     RTVariable.IS_CHAT_OTHER = true
                     RTVariable.CHAT_INSTANCE_KEY_ID = 1
                     RTVariable.REELS_INSTANCE_KEY_ID = 1
@@ -581,10 +452,12 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
                     setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = false)
                     true
                 }
+
                 R.id.profile -> {
                     profileSelect()
                     true
                 }
+
                 else -> false
             }
         }
@@ -608,11 +481,8 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     }
 
     private fun navigateToProfile(currentDestId: Int?, userImageUrl: String) {
-//        if (currentDestId != R.id.profileFragment) {
             navController.navigate(R.id.profileFragment)
-//        }
         binding.imgBtn.setImageResource(R.drawable.reel_icon_unselected)
-        // Load profile image with stroke
         setUserProfileImageWithStroke(this, binding.bottomNavigationView, userImageUrl, isSelected = true)
     }
 
