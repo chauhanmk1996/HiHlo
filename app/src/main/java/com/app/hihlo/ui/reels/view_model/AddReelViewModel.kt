@@ -8,12 +8,9 @@ import com.app.hihlo.model.add_post.request.AddPostRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AddReelViewModel @Inject constructor(): ViewModel()  {
+class AddReelViewModel: ViewModel()  {
     private val addReelLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getAddReelLiveData(): LiveData<Resources<CommonResponse>> {

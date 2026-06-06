@@ -3,8 +3,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -13,7 +11,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.app.hihlo.R
-import com.app.hihlo.model.static.NotificationsTypeModel
+import com.app.hihlo.model.staticModel.NotificationsTypeModel
 import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.NOTIFICATION_TOGGLE
 import com.app.hihlo.preferences.Preferences
@@ -28,7 +26,6 @@ import com.app.hihlo.preferences.UserPreference.OTHER_USER_ID
 import com.app.hihlo.preferences.UserPreference.USER_NAME
 import com.app.hihlo.preferences.UserPreference.U_ID
 import com.app.hihlo.ui.calling.activity.OldIncomingCallActivity
-import com.app.hihlo.ui.calling.activity.SingleVideoCallActivity
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.utils.AgoraUtils.isAppOnForeground
 import com.app.hihlo.utils.AgoraUtils.isForegroundServiceRunning

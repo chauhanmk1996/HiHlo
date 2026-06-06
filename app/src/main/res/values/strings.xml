@@ -2,7 +2,20 @@
     <string name="default_web_client_id">810492134429-729kklruqrrgvnjgdr1or7ie9031nt5m.apps.googleusercontent.com</string>
 
     <string name="app_name">HiHlo</string>
-    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="network_error_please_again_try_later">Network Error. Please Try Again</string>
+    <string name="connection_lost_please_again_try_later">Connection Lost. Please Try Again</string>
+    <string name="server_error_please_try_again_later">Server Error. Please Try Again</string>
+    <string name="something_went_wrong_please_retry">Something went wrong please retry</string>
+    <string name="gps_enable">GPS Enable</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="please_open_your_phone_setting_and_enable_your_location">Please open your phone setting and enable your location</string>
+    <string name="our_apps_core_functionality_are_based_on_these_permissions">Our apps core functionality are based on these permissions</string>
+    <string name="setting">Setting</string>
+    <string name="need_location_permission">Our apps core functionality are based on Location permissions. Please open your phone setting and enable your location and give location permission</string>
+    <string name="please_click_back_again_to_exit">Please click BACK again to exit</string>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="settings">Settings</string>
     <string name="name">Name</string>

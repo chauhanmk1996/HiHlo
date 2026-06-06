@@ -16,12 +16,12 @@ import com.app.hihlo.model.interest_list.response.Interests
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class EditProfileViewModel @Inject constructor():ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class EditProfileViewModel :ViewModel() {
     private val _citiesCache = MutableLiveData<List<Cities>>()
     private val genderListLiveData = SingleLiveEvent<Resources<GenderListResponse>>()
 

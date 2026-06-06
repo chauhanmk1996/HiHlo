@@ -13,12 +13,12 @@ import com.app.hihlo.model.update_call_charge.UpdateCallChargeResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class GetProfileViewModel @Inject constructor():ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class GetProfileViewModel :ViewModel() {
     private val getPushNotificationLiveData = SingleLiveEvent<Resources<GetNotificationSettingResponse>>()
     fun getPushNotificationLiveData(): LiveData<Resources<GetNotificationSettingResponse>> {
         return getPushNotificationLiveData

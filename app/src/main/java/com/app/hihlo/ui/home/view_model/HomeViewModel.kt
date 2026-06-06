@@ -7,9 +7,7 @@ import com.app.hihlo.model.common_response.CommonResponse
 import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.add_story_model.AddStoryResponse
 import com.app.hihlo.model.gender_list.GenderListResponse
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
@@ -20,8 +18,7 @@ import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.get_reel_comments.response.Payload
 import com.app.hihlo.network_call.repository.ApiRepository
 
-@HiltViewModel
-class HomeViewModel @Inject constructor():ViewModel() {
+class HomeViewModel:ViewModel() {
 
     var isHomeDataLoaded = false
 

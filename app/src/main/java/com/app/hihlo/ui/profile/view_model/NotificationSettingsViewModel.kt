@@ -10,12 +10,12 @@ import com.app.hihlo.model.set_notification.SetNotificationRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class NotificationSettingsViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class NotificationSettingsViewModel : ViewModel() {
     private val setPushNotificationLiveData = SingleLiveEvent<Resources<CommonResponse>>()
     fun pushNotificationLiveData(): LiveData<Resources<CommonResponse>> {
         return setPushNotificationLiveData

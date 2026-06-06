@@ -5,13 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.story_response.StoryResponse
 import com.app.hihlo.network_call.repository.ApiRepository
-import com.app.hihlo.ui.HomeNew.model.StatusResponse
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class StatusViewModel @Inject constructor():ViewModel() {
+class StatusViewModel:ViewModel() {
 
     private val statusLiveDate = SingleLiveEvent<Resources<StoryResponse>>()
 

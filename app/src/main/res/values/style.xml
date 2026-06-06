@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="BottomSheetTopRoundedDialog" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/bottomSheetStyleTopRoundedWrapper</item>
+    </style>
+
+    <style name="bottomSheetStyleTopRoundedWrapper" parent="Widget.Design.BottomSheet.Modal">
+        <item name="behavior_autoShrink">true</item>
+        <item name="android:background">@drawable/top_round_32</item>
+        <item name="android:animateLayoutChanges">false</item>
+    </style>
+
+</resources>

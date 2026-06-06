@@ -44,13 +44,11 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     private var isPassHidden = true
     private val viewModel: SigninViewModel by viewModels()
-    lateinit var firestore : FirebaseFirestore
+    lateinit var firestore: FirebaseFirestore
     private lateinit var googleSignInClient: GoogleSignInClient
     private val RC_SIGN_IN = 1001
     private lateinit var firebaseAuth: FirebaseAuth
@@ -363,16 +361,18 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
     }
 
     private fun onClick() {
-        binding.apply {
-            tvForgotPassword.setOnClickListener {
-                val bundle = Bundle()
-                bundle.putString("from", "login")
-                findNavController().navigate(R.id.emailFragment, bundle)
-            }
+        binding.loginButton.setOnClickListener {
+            viewModel.loginApi(requireContext())
+        }
 
-            clGoogleLogin.setOnClickListener {
-                signInWithGoogle()
-            }
+        binding.tvForgotPassword.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putString("from", "login")
+            findNavController().navigate(R.id.emailFragment, bundle)
+        }
+
+        binding.clGoogleLogin.setOnClickListener {
+            signInWithGoogle()
         }
     }
 
@@ -418,7 +418,7 @@ class SigninFragment : BaseFragment<FragmentSigninBinding>() {
             }
     }
 
-    private fun hitSocialLoginApi(currentUser: FirebaseUser?, ) {
+    private fun hitSocialLoginApi(currentUser: FirebaseUser?) {
         val model = SocialSignUpRequest(
             name = currentUser?.displayName,
             email = currentUser?.email,

@@ -31,7 +31,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.Window
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
@@ -53,12 +52,11 @@ import com.app.hihlo.databinding.PopupChatMoreOptionsBinding
 import com.app.hihlo.model.chat.Messages
 import com.app.hihlo.ui.chat.view_model.ChatViewModel
 import com.app.hihlo.ui.chat.adapter.MessageAdapter
-import dagger.hilt.android.AndroidEntryPoint
+
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.view.marginBottom
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
@@ -79,7 +77,7 @@ import com.app.hihlo.databinding.PopupChatSideOptionsBinding
 import com.app.hihlo.model.get_profile.UserDetailsX
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
-import com.app.hihlo.model.static.chatMoreOptionsList
+import com.app.hihlo.model.staticModel.chatMoreOptionsList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference.AGORA_TOKEN
@@ -101,10 +99,10 @@ import com.app.hihlo.model.deduct_chat_coin.DeductChatCoinRequest
 import com.app.hihlo.model.predefined_chats.PredefinedChatsResponse
 import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.model.send_gift.SendGiftRequest
-import com.app.hihlo.model.static.MIN_COINS_FOR_AUDIO
-import com.app.hihlo.model.static.MIN_COINS_FOR_VIDEO
-import com.app.hihlo.model.static.MIN_COINS_TO_INITIATE_CHAT
-import com.app.hihlo.model.static.StaticLists.longPressMessageList
+import com.app.hihlo.model.staticModel.MIN_COINS_FOR_AUDIO
+import com.app.hihlo.model.staticModel.MIN_COINS_FOR_VIDEO
+import com.app.hihlo.model.staticModel.MIN_COINS_TO_INITIATE_CHAT
+import com.app.hihlo.model.staticModel.StaticLists.longPressMessageList
 import com.app.hihlo.model.unblock_user.request.UnblockUserRequest
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.UserPreference
@@ -112,7 +110,6 @@ import com.app.hihlo.preferences.UserPreference.CALLER_USER_IMAGE
 import com.app.hihlo.ui.chat.adapter.AdapterPredefinedChat
 import com.app.hihlo.preferences.UserPreference.CITY_COUNTRY
 import com.app.hihlo.preferences.UserPreference.USER_NAME
-import com.app.hihlo.ui.calling.activity.OldOutgoingCallActivity
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.REQUEST_CODE_CROP_VIDEO
@@ -121,7 +118,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.MediaUtils.uriToFile
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusableAudioVideoPopup
 import com.app.hihlo.utils.ReusablePopup
@@ -139,7 +136,7 @@ import java.io.IOException
 import java.util.UUID
 import kotlin.math.abs
 
-@AndroidEntryPoint
+
 class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPlayInterface {
     lateinit var adapter: MessageAdapter
     var listType = ""
@@ -1175,7 +1172,7 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
             onYes = {
                 viewModel.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                        MyApplication.appContext, LOGIN_DATA
+                        HiHloApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
                     SendGiftRequest(coins = data.coins.toString(), recipientId = otherUserId.toString(), type = "chat")
                 )

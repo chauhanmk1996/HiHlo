@@ -48,6 +48,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.network_call.RetrofitBuilder
 import com.app.hihlo.preferences.LOGIN_DATA
@@ -56,7 +57,6 @@ import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
 import com.app.hihlo.ui.calling.CallStateHolder
 import com.app.hihlo.ui.calling.view_model.CallStateViewModel
-import com.app.hihlo.utils.MyApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.common.ScrollDirectionListener
@@ -172,12 +172,12 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(), ScrollDirectionListene
     private fun handleActivityBackButton() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (MyApplication.isStackMode) {
+                if (HiHloApplication.isStackMode) {
                     val intent = Intent(this@HomeActivity, PlayStatusActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                     }
                     startActivity(intent)
-                    MyApplication.isStackMode = false
+                    HiHloApplication.isStackMode = false
                 }else{
                     val currentDestinationId = navController.currentDestination?.id
                     setOnlineStatusVisibility(false)

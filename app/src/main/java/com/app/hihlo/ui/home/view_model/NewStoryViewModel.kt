@@ -18,9 +18,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
-import javax.inject.Inject
 
-class NewStoryViewModel @Inject constructor():ViewModel() {
+class NewStoryViewModel :ViewModel() {
     private val seenStoryLiveData = SingleLiveEvent<Resources<CommonResponse>>()
     val firestore = FirebaseFirestore.getInstance()
 

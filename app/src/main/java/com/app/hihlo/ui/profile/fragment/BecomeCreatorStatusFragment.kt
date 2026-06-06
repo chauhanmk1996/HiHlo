@@ -12,9 +12,9 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentBecomeCreatorStatusBinding
 import com.app.hihlo.databinding.FragmentProfileSettingBinding
 import com.app.hihlo.ui.home.activity.HomeActivity
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
+
+
 class BecomeCreatorStatusFragment : Fragment() {
     private lateinit var binding: FragmentBecomeCreatorStatusBinding
     private var status = ""

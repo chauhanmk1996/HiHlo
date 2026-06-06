@@ -1,6 +1,7 @@
 package com.app.hihlo.ui.signup.view_model
 
 import android.app.Application
+import android.content.Context
 import android.util.Patterns
 import android.view.View
 import androidx.databinding.ObservableField
@@ -10,22 +11,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.R
-import com.app.hihlo.model.home.response.HomeResponse
 import com.app.hihlo.model.login.request.LoginRequest
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.Preferences
-import com.app.hihlo.ui.signup.model.SocialLoginRequest
 import com.app.hihlo.ui.signup.model.SocialSignUpRequest
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SigninViewModel @Inject constructor(application: Application): AndroidViewModel(application) {
+class SigninViewModel : ViewModel() {
     val email = ObservableField<String>()
     val password = ObservableField<String>()
     val isTermsChecked = MutableLiveData(true)
@@ -61,15 +57,8 @@ class SigninViewModel @Inject constructor(application: Application): AndroidView
             ex.printStackTrace()
         }
     }
-    fun onClick(view: View) {
-        when(view.id){
-            R.id.loginButton->{
-                onSubmit()
-            }
-        }
-    }
 
-    fun onSubmit() {
+    fun loginApi(context: Context) {
         val emailInput = email.get()?.trim()
         val passwordInput = password.get()?.trim()
 
@@ -92,10 +81,7 @@ class SigninViewModel @Inject constructor(application: Application): AndroidView
             return
         }
 
-
-        // Success
-        hitLoginDataApi(LoginRequest(email = emailInput, password = passwordInput, deviceToken = Preferences.getStringPreference(getApplication(), FCM_TOKEN), deviceType = "A", ))
-//        _validationMessage.value = "Successful!"
+        hitLoginDataApi(LoginRequest(email = emailInput, password = passwordInput, deviceToken = Preferences.getStringPreference(context, FCM_TOKEN), deviceType = "A", ))
     }
 
     private val socialLoginLiveData = SingleLiveEvent<Resources<LoginResponse>>()

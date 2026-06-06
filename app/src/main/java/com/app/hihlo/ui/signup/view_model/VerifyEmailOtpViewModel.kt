@@ -3,18 +3,19 @@ package com.app.hihlo.ui.signup.view_model
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
+
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
-@HiltViewModel
-class VerifyEmailOtpViewModel @Inject constructor(application: Application): AndroidViewModel(application) {
+
+
+class VerifyEmailOtpViewModel: ViewModel() {
 
     private val verifyLiveData = SingleLiveEvent<Resources<LoginResponse>>()
 

@@ -15,12 +15,9 @@ import com.app.hihlo.model.update_call_status.UpdateCallStatusResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class OutgoingCallViewModel @Inject constructor(): ViewModel() {
+class OutgoingCallViewModel : ViewModel() {
     private val updateOnlineStatusLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getUpdateOnlineStatusLiveData(): LiveData<Resources<CommonResponse>> {

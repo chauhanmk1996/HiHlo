@@ -11,12 +11,9 @@ import com.app.hihlo.model.end_call.request.EndCallRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class IncomingCallViewModel @Inject constructor(): ViewModel() {
+class IncomingCallViewModel : ViewModel() {
     private val endCallLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getEndCallLiveData(): LiveData<Resources<CommonResponse>> {

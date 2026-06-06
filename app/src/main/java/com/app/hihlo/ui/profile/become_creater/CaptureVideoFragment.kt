@@ -37,7 +37,6 @@ import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
 import com.google.common.io.Files.getFileExtension
 import com.google.gson.Gson
-import dagger.model.Binding
 import java.io.File
 
 class CaptureVideoFragment : Fragment() {

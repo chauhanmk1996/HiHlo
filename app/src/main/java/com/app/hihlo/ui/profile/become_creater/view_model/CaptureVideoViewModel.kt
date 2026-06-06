@@ -8,12 +8,12 @@ import com.app.hihlo.ui.profile.become_creater.model.CreatorsBenefitsResponse
 import com.app.hihlo.ui.profile.become_creater.model.UserToCreatorRequest
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class CaptureVideoViewModel @Inject constructor() : ViewModel(){
+import kotlinx.coroutines.launch
+
+
+
+class CaptureVideoViewModel  : ViewModel(){
 
     private val userToCreatorLiveData = SingleLiveEvent<Resources<CreatorsBenefitsResponse>>()
 

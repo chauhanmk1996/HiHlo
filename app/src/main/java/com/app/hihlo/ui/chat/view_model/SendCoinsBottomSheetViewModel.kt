@@ -7,12 +7,12 @@ import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SendCoinsBottomSheetViewModel @Inject constructor(): ViewModel(){
+import kotlinx.coroutines.launch
+
+
+
+class SendCoinsBottomSheetViewModel : ViewModel(){
 
     private val rechargeCoinsLiveData = SingleLiveEvent<Resources<RechargePackageListResponse>>()
 

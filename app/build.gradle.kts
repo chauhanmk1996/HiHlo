@@ -1,10 +1,13 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.firebase.crashlytics")
-    id("com.google.gms.google-services")
-    id("androidx.navigation.safeargs.kotlin")
-    id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.navigation.safeargs.kotlin)
 }
 
 android {
@@ -15,64 +18,60 @@ android {
         applicationId = "com.app.hihlo"
         minSdk = 29
         targetSdk = 36
-        versionCode = 8
-        versionName = "1.8"
+        versionCode = 1
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        lint {
-            baseline = file("lint-baseline.xml")
-        }
+
+        // resValue("string", "server_client_id", project.findProperty("SERVER_CLIENT_ID")?.toString() ?: "")
+        // resValue("string", "google_map_key", project.findProperty("GOOGLE_MAP_KEY")?.toString() ?: "")
+        // resValue("string", "facebook_app_id", project.findProperty("FACEBOOK_APP_ID")?.toString() ?: "")
+        // resValue("string", "fb_login_protocol_scheme", project.findProperty("FACEBOOK_LOGIN_PROTOCOL_SCHEME")?.toString() ?: "")
+        // resValue("string", "facebook_client_token", project.findProperty("FACEBOOK_CLIENT_TOKEN")?.toString() ?: "")
     }
 
     buildTypes {
-        /*release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }*/
+        debug {
+            // buildConfigField("String", "BASE_URL_API", "\"https://backend.kuberfinancial.com.au/\"")
+        }
+
         release {
+            // buildConfigField("String", "BASE_URL_API", "\"https://www.kuberfinancial.com.au/\"")
+
             isMinifyEnabled = false
-            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
-
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
         dataBinding = true
-    }
-    android {
-        packaging {
-            resources {
-                excludes += setOf(
-                    "META-INF/INDEX.LIST",
-                    "META-INF/DEPENDENCIES",
-                    "META-INF/gradle/incremental.annotation.processors"
-                )
-            }
-        }
+        buildConfig = true
     }
 
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a", "armeabi-v7a") // remove x86 unless needed
-            isUniversalApk = true // don't build a fat APK
-        }
+    lint {
+        disable += setOf(
+            "IconLauncherShape",
+            "LogNotTimber",
+            "MergeRootFrame",
+            "TypographyEllipsis"
+        )
+
+        baseline = file("lint-baseline.xml")
     }
 }
 
@@ -81,66 +80,88 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.databinding.runtime)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.media3.datasource)
-
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.messaging.ktx)
-    implementation(libs.firebase.crashlytics.ktx)
-    implementation(libs.google.auth.library.oauth2.http)
-    implementation(libs.androidx.swiperefreshlayout)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    //Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit2.converter.gson)
-    implementation(libs.okhttp)
-    implementation(libs.logging.interceptor)
+    //Constraint Layout
+    implementation(libs.constraint.layout)
 
-    //glide
+    //Glide
     implementation(libs.glide)
-    annotationProcessor(libs.compiler)
-    implementation("io.coil-kt:coil:2.7.0")
 
-    //Hilt - Dagger
-    implementation(libs.hilt.android.compiler)
-    implementation(libs.hilt.android)
+    //Coil for SVG Image
+    implementation(libs.bundles.coil.all)
 
-    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    //Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase.all)
 
-    implementation("com.amazonaws:aws-android-sdk-s3:2.72.0")
-    implementation("com.amazonaws:aws-android-sdk-core:2.72.0")
+    //Fragment Ktx
+    implementation(libs.fragment.ktx)
 
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
-    implementation("androidx.media3:media3-transformer:1.3.1")
+    //Viewmodel LiveData
+    implementation(libs.bundles.lifecycle.all)
 
-    implementation(libs.android.video.trimmer)
+    //Permission
+    implementation(libs.android.permission)
 
+    //Rx-Java
+    implementation(libs.bundles.rx.java.all)
+
+    //Retrofit
+    implementation(libs.bundles.retrofit.all)
+
+    //Okhttp
+    implementation(libs.bundles.okhttp.all)
+
+    //Gson
+    implementation(libs.gson)
+
+    //Swipe Refresh Layout
+    implementation(libs.androidx.swiperefreshlayout)
+
+    //Navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+    //Vide Trimmer
+    implementation(libs.video.trimmer)
+
+    //DataSource
+    implementation(libs.androidx.media3.datasource)
+
+    //Agora
     implementation(libs.full.sdk)
 
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    //AmazonAws
+    implementation(libs.amazon.aws)
+    implementation(libs.amazon.aws.core)
 
-    implementation("com.github.yalantis:ucrop:2.2.10")
+    //ExoPlayer
+    implementation(libs.bundles.exoplayer.all)
 
-    //Wave form library
-    implementation("com.github.massoudss:waveformSeekBar:5.0.2")
+    //Play Service Auth
+    implementation(libs.play.services.auth)
 
-    implementation("com.razorpay:checkout:1.6.40")
+    //Crop
+    implementation(libs.ucrop)
 
-    //Wheel picker
-    implementation("com.github.tomeees:scrollpicker:1.7.5")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.burhanrashid52:photoeditor:3.1.0")
+    //SeekBar
+    implementation(libs.waveform.seekbar)
+
+    //Razorpay
+    implementation(libs.razorpay.checkout)
+
+    //Scroll Picker
+    implementation(libs.scrollpicker)
+
+    //Photo Editor
+    implementation(libs.photoeditor)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    //coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
 
 configurations.all {

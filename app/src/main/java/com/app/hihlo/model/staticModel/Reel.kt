@@ -1,4 +1,4 @@
-package com.app.hihlo.model.static
+package com.app.hihlo.model.staticModel
 
 data class Reel(
     val id: Int,

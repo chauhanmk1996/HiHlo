@@ -11,9 +11,8 @@ import com.app.hihlo.model.chat.RecentChats
 import com.app.hihlo.model.get_recent_chat.response.GetRecentChatResponse
 import com.app.hihlo.model.get_recent_chat.response.RecentChat
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
-import com.app.hihlo.model.save_recent_chat.response.SaveRecentChatResponse
 import com.app.hihlo.network_call.repository.ApiRepository
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
 import com.google.firebase.firestore.FirebaseFirestore
@@ -211,7 +210,7 @@ class RecentChatListViewModel: ViewModel() {
                     .addOnSuccessListener {
 //                        isChatDeleted.value = true
                         Toast.makeText(
-                            MyApplication.appContext?.applicationContext,
+                            HiHloApplication.appContext?.applicationContext,
                             "Chat deleted successfully",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -219,21 +218,21 @@ class RecentChatListViewModel: ViewModel() {
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(
-                            MyApplication.appContext?.applicationContext,
+                            HiHloApplication.appContext?.applicationContext,
                             "Failed to delete chat",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
             }.addOnFailureListener { e ->
                 Toast.makeText(
-                    MyApplication.appContext?.applicationContext,
+                    HiHloApplication.appContext?.applicationContext,
                     "Failed to delete messages",
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }.addOnFailureListener { e ->
             Toast.makeText(
-                MyApplication.appContext?.applicationContext,
+                HiHloApplication.appContext?.applicationContext,
                 "Failed to fetch messages",
                 Toast.LENGTH_SHORT
             ).show()

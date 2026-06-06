@@ -7,12 +7,12 @@ import com.app.hihlo.model.get_profile.GetProfileResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class ProfilePostViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class ProfilePostViewModel : ViewModel() {
     private val profileLiveData = SingleLiveEvent<Resources<GetProfileResponse>>()
 
     fun getProfileLiveData(): LiveData<Resources<GetProfileResponse>> {

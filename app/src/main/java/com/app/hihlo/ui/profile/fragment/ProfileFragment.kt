@@ -58,7 +58,7 @@ import com.app.hihlo.model.reel.response.Creator
 import com.app.hihlo.model.reel.response.Pagination
 import com.app.hihlo.model.reel.response.Payload
 import com.app.hihlo.model.reel.response.Reel
-import com.app.hihlo.model.static.profileDetailList
+import com.app.hihlo.model.staticModel.profileDetailList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
@@ -87,13 +87,13 @@ import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.model.AspectRatio
-import dagger.hilt.android.AndroidEntryPoint
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.getValue
 
-@AndroidEntryPoint
+
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     private lateinit var bottomSheetFragment: UploadMediaBottomSheet
     private lateinit var profileMediaViewPager: AdapterProfileMediaViewPager

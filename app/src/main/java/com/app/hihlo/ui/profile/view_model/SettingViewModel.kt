@@ -7,12 +7,12 @@ import com.app.hihlo.model.common_response.CommonResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SettingViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class SettingViewModel : ViewModel() {
     private val logoutUserLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getLogoutUserLiveData(): LiveData<Resources<CommonResponse>> {

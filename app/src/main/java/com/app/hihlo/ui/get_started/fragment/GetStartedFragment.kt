@@ -10,10 +10,10 @@ import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentGetStartedBinding
 import com.app.hihlo.databinding.FragmentProfileBinding
-import dagger.hilt.android.AndroidEntryPoint
 
 
-@AndroidEntryPoint
+
+
 class GetStartedFragment : BaseFragment<FragmentGetStartedBinding>() {
     override fun initView(savedInstanceState: Bundle?) {
         onClick()

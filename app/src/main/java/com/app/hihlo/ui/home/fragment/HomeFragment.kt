@@ -58,11 +58,11 @@ import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
-import dagger.hilt.android.AndroidEntryPoint
+
 import java.io.File
 import com.yalantis.ucrop.UCrop
 
-@AndroidEntryPoint
+
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private var myStoryData: MyStory = MyStory()
     private var isMediaUploaded: Int = -1

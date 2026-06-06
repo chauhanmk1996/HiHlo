@@ -16,13 +16,13 @@ abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
     var _binding: DB? = null
     protected val binding get() = _binding!!
     open fun getLayoutId(): Int {
-        return 0 // Default: you should override this
+        return 0
     }
 
     override fun onCreateView(
-        inflater: android.view.LayoutInflater, container: android.view.ViewGroup?,
+        inflater: android.view.LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): android.view.View? {
+    ): View? {
         _binding = DataBindingUtil.inflate(inflater, getLayoutId(), container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         initView(savedInstanceState)

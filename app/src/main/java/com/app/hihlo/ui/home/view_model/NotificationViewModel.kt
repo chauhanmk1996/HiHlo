@@ -8,12 +8,9 @@ import com.app.hihlo.model.notification.response.GetNotificationListResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class NotificationViewModel @Inject constructor(): ViewModel() {
+class NotificationViewModel: ViewModel() {
     private val notificationListLiveDate = SingleLiveEvent<Resources<GetNotificationListResponse>>()
 
     fun getNotificationLiveData(): LiveData<Resources<GetNotificationListResponse>> {

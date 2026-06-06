@@ -4,17 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.ads_list.GetAdsListResponse
-import com.app.hihlo.model.common_response.CommonResponse
-import com.app.hihlo.model.predefined_chats.PredefinedChatsResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class ViewAdsViewModel @Inject constructor(): ViewModel() {
+class ViewAdsViewModel : ViewModel() {
     private val viewAdsLiveData = SingleLiveEvent<Resources<GetAdsListResponse>>()
 
     fun getViewAdsLiveData(): LiveData<Resources<GetAdsListResponse>> {

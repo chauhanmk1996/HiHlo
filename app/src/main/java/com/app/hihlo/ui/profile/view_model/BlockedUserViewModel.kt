@@ -10,12 +10,12 @@ import com.app.hihlo.model.unblock_user.request.UnblockUserRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class BlockedUserViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class BlockedUserViewModel : ViewModel() {
     private val blockedUsersLiveData = SingleLiveEvent<Resources<BlockedUsersResponse>>()
 
     fun getBlockedUsersLiveData(): LiveData<Resources<BlockedUsersResponse>> {

@@ -3,6 +3,7 @@ package com.app.hihlo.ui.signup.view_model
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.hihlo.model.check_username.request.CheckUsernameRequest
 import com.app.hihlo.model.check_username.response.CheckUsernameResponse
@@ -12,12 +13,12 @@ import com.app.hihlo.ui.signup.model.SignUp
 import com.app.hihlo.ui.signup.model.SocialSignUpRequest
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SocialSignUpViewModel @Inject constructor(application: Application): AndroidViewModel(application) {
+import kotlinx.coroutines.launch
+
+
+
+class SocialSignUpViewModel : ViewModel() {
 
     private val SocialSignUpLiveDate = SingleLiveEvent<Resources<LoginResponse>>()
 

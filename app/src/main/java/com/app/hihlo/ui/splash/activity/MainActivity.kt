@@ -18,41 +18,11 @@ import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.signup.activity.SignupFlowActivity
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/*
-@AndroidEntryPoint
-class MainActivity : BaseActivity<ActivityMainBinding>() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        delayTime()
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
-
-    }
-    override fun getLayoutId(): Int {
-        return R.layout.activity_main // Ensure this points to the correct layout resource
-    }
-    private fun delayTime() {
-        lifecycleScope.launch {
-            delay(1000)
-            withContext(Dispatchers.Main) {
-                if (Preferences.getStringPreference(this@MainActivity, IS_LOGIN)=="2"){
-                        startActivity(Intent(this@MainActivity, HomeActivity::class.java))
-                    finish()
-                }else {
-                    startActivity(Intent(this@MainActivity, SignupFlowActivity::class.java))
-                    finish()
-                }
-            }
-        }
-    }
-
-}*/
-@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -63,10 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Set nav bar color to black and force white icons
         fixNavigationBarForDarkMode()
-
         delayTime()
     }
 
@@ -74,12 +41,27 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             delay(1000)
             withContext(Dispatchers.Main) {
-                Log.e("TAG", "delayTime: ${Preferences.getCustomModelPreference<LoginResponse>(this@MainActivity, LOGIN_DATA)?.payload}", )
+                Log.e(
+                    "TAG",
+                    "delayTime: ${
+                        Preferences.getCustomModelPreference<LoginResponse>(
+                            this@MainActivity,
+                            LOGIN_DATA
+                        )?.payload
+                    }",
+                )
                 if (Preferences.getStringPreference(this@MainActivity, IS_LOGIN) == "2") {
-                    if(Preferences.getCustomModelPreference<LoginResponse>(this@MainActivity, LOGIN_DATA)?.payload?.city.isNullOrBlank()
-                        || Preferences.getCustomModelPreference<LoginResponse>(this@MainActivity, LOGIN_DATA)?.payload?.profileImage.isNullOrEmpty()){
+                    if (Preferences.getCustomModelPreference<LoginResponse>(
+                            this@MainActivity,
+                            LOGIN_DATA
+                        )?.payload?.city.isNullOrBlank()
+                        || Preferences.getCustomModelPreference<LoginResponse>(
+                            this@MainActivity,
+                            LOGIN_DATA
+                        )?.payload?.profileImage.isNullOrEmpty()
+                    ) {
                         startActivity(Intent(this@MainActivity, SignupFlowActivity::class.java))
-                    }else{
+                    } else {
                         startActivity(Intent(this@MainActivity, HomeActivity::class.java))
                     }
                 } else {
@@ -91,23 +73,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fixNavigationBarForDarkMode() {
-        val isDark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val isDark =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
             val decorView = window.decorView
             var flags = decorView.systemUiVisibility
-            if (isDark) {
+            flags = if (isDark) {
                 // Remove light nav bar flag so icons become white
-                flags = flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
+                flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
             } else {
                 // Add light nav bar flag so icons become dark
-                flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
             }
             decorView.systemUiVisibility = flags
         }
     }
-
-
-
 }
-

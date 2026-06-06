@@ -8,12 +8,9 @@ import com.app.hihlo.model.deduct_chat_coin.DeductChatCoinRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class OpenAdViewModel @Inject constructor(): ViewModel() {
+class OpenAdViewModel : ViewModel() {
     private val viewAdsLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getViewAdsLiveData(): LiveData<Resources<CommonResponse>> {

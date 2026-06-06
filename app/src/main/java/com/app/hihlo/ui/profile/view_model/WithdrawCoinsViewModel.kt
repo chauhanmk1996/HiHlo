@@ -8,12 +8,12 @@ import com.app.hihlo.model.contact_us.request.ContactUsRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class WithdrawCoinsViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class WithdrawCoinsViewModel : ViewModel() {
     private val withdrawCoinsLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getWithdrawCoinsLiveData(): LiveData<Resources<CommonResponse>> {

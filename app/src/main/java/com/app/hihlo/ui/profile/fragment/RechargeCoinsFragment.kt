@@ -22,10 +22,10 @@ import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
-import dagger.hilt.android.AndroidEntryPoint
+
 import org.json.JSONObject
 
-@AndroidEntryPoint
+
 class RechargeCoinsFragment : BaseFragment<FragmentRechargeCoinsBinding>(), PaymentResultListener {
     private val viewModel: RechargeCoinsViewModel by viewModels()
     var selectedCoins = ""

@@ -19,13 +19,10 @@ import com.app.hihlo.model.send_gift.SendGiftResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.app.hihlo.model.reel.response.Reel
 
-@HiltViewModel
-class ReelsViewModel @Inject constructor():ViewModel() {
+class ReelsViewModel:ViewModel() {
 
     var isreelsDataLoaded: Boolean = false
 

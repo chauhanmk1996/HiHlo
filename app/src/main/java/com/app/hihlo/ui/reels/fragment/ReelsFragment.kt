@@ -63,7 +63,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
 import com.app.hihlo.ui.trim_video.TrimVideoActivity
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
@@ -74,7 +74,7 @@ import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
-import dagger.hilt.android.AndroidEntryPoint
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -85,7 +85,7 @@ import kotlin.getValue
 import kotlin.isInitialized
 import kotlin.toString
 
-@AndroidEntryPoint
+
 class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
     private lateinit var bottomSheetFragment: UploadMediaBottomSheet
     private lateinit var exoPlayer: ExoPlayer
@@ -539,7 +539,7 @@ class ReelsFragment : BaseFragment<FragmentReelsBinding>() {
             onYes = {
                 viewModel.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                        MyApplication.appContext, LOGIN_DATA
+                        HiHloApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
                     SendGiftRequest(
                         coins = data.coins.toString(),

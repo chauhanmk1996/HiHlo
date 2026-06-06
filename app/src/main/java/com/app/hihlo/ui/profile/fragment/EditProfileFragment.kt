@@ -10,20 +10,16 @@ import androidx.navigation.fragment.navArgs
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentEditProfileBinding
-import com.app.hihlo.model.get_profile.UserDetails
 import com.app.hihlo.model.get_profile.UserDetailsX
-import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.static.editProfileColumnsList
-import com.app.hihlo.preferences.LOGIN_DATA
-import com.app.hihlo.preferences.Preferences
+import com.app.hihlo.model.staticModel.editProfileColumnsList
 import com.app.hihlo.ui.profile.adapter.AdapterEditProfile
 import com.app.hihlo.ui.profile.view_model.EditProfileViewModel
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
+
+
 class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
     private lateinit var adapter: AdapterEditProfile
     private var userDetails = UserDetailsX()

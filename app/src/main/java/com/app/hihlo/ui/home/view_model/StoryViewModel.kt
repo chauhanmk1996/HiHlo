@@ -9,12 +9,9 @@ import com.app.hihlo.model.story_seen.request.StorySeen
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class StoryViewModel @Inject constructor():ViewModel() {
+class StoryViewModel:ViewModel() {
     private val seenStoryLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun seenStoryLiveData(): LiveData<Resources<CommonResponse>> {

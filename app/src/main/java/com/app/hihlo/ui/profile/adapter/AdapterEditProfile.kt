@@ -11,11 +11,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.databinding.AdapterEditProfileBinding
 import com.app.hihlo.model.edit_profile.request.EditProfileRequest
-import com.app.hihlo.model.get_profile.UserDetails
 import com.app.hihlo.model.get_profile.UserDetailsX
 import com.app.hihlo.model.interest_list.response.Interests
-import com.app.hihlo.model.static.EditProfileColumnModel
-import com.app.hihlo.model.static.editProfileDataMap
+import com.app.hihlo.model.staticModel.EditProfileColumnModel
+import com.app.hihlo.model.staticModel.editProfileDataMap
 
 class AdapterEditProfile(
     val list: List<EditProfileColumnModel>,

@@ -5,13 +5,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import com.app.hihlo.ui.splash.activity.MainActivity
 import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.signup.activity.SignupFlowActivity
 import com.app.hihlo.utils.AgoraUtils.isAppOnForeground
-import com.app.hihlo.utils.CommonUtils
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.json.JSONObject
@@ -33,19 +31,19 @@ class TokenInterceptor : Interceptor {
             }
 
             Handler(Looper.getMainLooper()).post {
-                Toast.makeText(MyApplication.appContext, message, Toast.LENGTH_LONG).show()
+                Toast.makeText(HiHloApplication.appContext, message, Toast.LENGTH_LONG).show()
             }
         }else if (response.code == 401/*||response.code == 500*/){
-            if (isAppOnForeground(MyApplication.appContext!!)){
-                Preferences.removeAllPreferencesExcept(MyApplication.appContext!!, listOf(FCM_TOKEN))
-                val intent = Intent(MyApplication.appContext, SignupFlowActivity::class.java)
+            if (isAppOnForeground(HiHloApplication.appContext!!)){
+                Preferences.removeAllPreferencesExcept(HiHloApplication.appContext!!, listOf(FCM_TOKEN))
+                val intent = Intent(HiHloApplication.appContext, SignupFlowActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                MyApplication.appContext?.startActivity(intent)
+                HiHloApplication.appContext?.startActivity(intent)
             }
         }
         else if (response.code==502||response.code==429){
             Handler(Looper.getMainLooper()).post {
-                Toast.makeText(MyApplication.appContext, "There is some technical glitch. Internet connection may be interrupted. Please try again later!", Toast.LENGTH_LONG).show()
+                Toast.makeText(HiHloApplication.appContext, "There is some technical glitch. Internet connection may be interrupted. Please try again later!", Toast.LENGTH_LONG).show()
             }
         }
 

@@ -64,7 +64,7 @@ import com.app.hihlo.ui.home.view_model.NewStoryViewModel
 import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.toPx
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.network_utils.Status
@@ -911,7 +911,7 @@ class PlayStatusActivity : AppCompatActivity() {
     fun getClick(click: Int) {
         if (click == 0 && currentUserIndex in userStoryList.indices) {
             val userId = userStoryList[currentUserIndex].user_id.toString()
-            MyApplication.isStackMode = true
+            HiHloApplication.isStackMode = true
             RTVariable.IS_STATUS_PROFILE_CLICKED = true
             val intent = Intent(this, HomeActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT

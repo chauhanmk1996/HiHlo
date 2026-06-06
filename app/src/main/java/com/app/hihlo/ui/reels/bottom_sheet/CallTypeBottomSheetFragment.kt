@@ -3,7 +3,6 @@ package com.app.hihlo.ui.reels.bottom_sheet
 import android.app.Dialog
 import android.content.res.ColorStateList
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,14 +10,10 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentCallTypeBottomSheetBinding
-import com.app.hihlo.databinding.FragmentUploadReelBottomSheetBinding
 import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.static.StaticLists.callTypeList
-import com.app.hihlo.model.static.StaticLists.uploadReelList
+import com.app.hihlo.model.staticModel.StaticLists.callTypeList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
-import com.app.hihlo.ui.home.bottom_sheet.UploadMediaBottomSheet
-import com.app.hihlo.ui.reels.adapter.AdapterListPopup
 import com.app.hihlo.utils.CommonUtils.toPx
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

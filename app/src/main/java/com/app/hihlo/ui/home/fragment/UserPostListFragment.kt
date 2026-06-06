@@ -2,17 +2,11 @@ package com.app.hihlo.ui.home.fragment
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -26,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentUserPostListBinding
-import com.app.hihlo.databinding.PopupChatSideOptionsBinding
 import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.get_profile.Data
 import com.app.hihlo.model.get_profile.Posts
@@ -43,10 +36,7 @@ import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
-import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
-import com.app.hihlo.ui.HomeNew.model.StatusItem
 import com.app.hihlo.ui.chat.bottom_sheet.SendCoinsBottomSheetFragment
-import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.adapter.AdapterUserPostList
 import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.home.view_model.UserPostListViewModel
@@ -54,7 +44,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.BlockFlagBottomSheet
 import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
@@ -69,7 +59,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.getValue
-import kotlin.math.log
 
 class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     private val viewModel: UserPostListViewModel by viewModels()
@@ -861,7 +850,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             onYes = {
                 viewModel4.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                        MyApplication.appContext, LOGIN_DATA
+                        HiHloApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
                     SendGiftRequest(coins = data.coins.toString(), recipientId = creatorId.toString(), type = "reel", reelId = reelId.toString())
                 )

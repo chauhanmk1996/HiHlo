@@ -24,27 +24,21 @@ import com.app.hihlo.model.send_gift.SendGiftResponse
 import com.app.hihlo.model.unblock_user.request.UnblockUserRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.ChatUtils
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import com.google.gson.Gson
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
-import javax.inject.Inject
-import kotlin.collections.remove
 
-@HiltViewModel
-class ChatViewModel @Inject constructor(): ViewModel() {
+class ChatViewModel : ViewModel() {
     val isChatDeleted = MutableLiveData(false)
     var paid = MutableLiveData("0")
     var creator = MutableLiveData("0")
@@ -599,7 +593,7 @@ class ChatViewModel @Inject constructor(): ViewModel() {
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Failed to delete message", e)
                 Toast.makeText(
-                    MyApplication.appContext?.applicationContext,
+                    HiHloApplication.appContext?.applicationContext,
                     "Failed to delete message",
                     Toast.LENGTH_SHORT
                 ).show()
@@ -623,7 +617,7 @@ class ChatViewModel @Inject constructor(): ViewModel() {
                     .addOnSuccessListener {
                         isChatDeleted.value = true
                         Toast.makeText(
-                            MyApplication.appContext?.applicationContext,
+                            HiHloApplication.appContext?.applicationContext,
                             "Chat deleted successfully",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -631,21 +625,21 @@ class ChatViewModel @Inject constructor(): ViewModel() {
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(
-                            MyApplication.appContext?.applicationContext,
+                            HiHloApplication.appContext?.applicationContext,
                             "Failed to delete chat",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
             }.addOnFailureListener { e ->
                 Toast.makeText(
-                    MyApplication.appContext?.applicationContext,
+                    HiHloApplication.appContext?.applicationContext,
                     "Failed to delete messages",
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }.addOnFailureListener { e ->
             Toast.makeText(
-                MyApplication.appContext?.applicationContext,
+                HiHloApplication.appContext?.applicationContext,
                 "Failed to fetch messages",
                 Toast.LENGTH_SHORT
             ).show()

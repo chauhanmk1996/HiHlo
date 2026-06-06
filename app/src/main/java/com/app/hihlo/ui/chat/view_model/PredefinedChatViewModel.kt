@@ -8,11 +8,9 @@ import com.app.hihlo.model.predefined_chats.PredefinedChatsResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class PredefinedChatViewModel: ViewModel() {
+class PredefinedChatViewModel : ViewModel() {
     private val predefinedChatLiveData = SingleLiveEvent<Resources<PredefinedChatsResponse>>()
 
     fun getPredefinedChatLiveData(): LiveData<Resources<PredefinedChatsResponse>> {

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.databinding.AdapterChatMoreOptionsBinding
-import com.app.hihlo.model.static.ProfileDetailModel
+import com.app.hihlo.model.staticModel.ProfileDetailModel
 
 class AdapterChatMoreOptions(val chatMoreOptionsList: List<ProfileDetailModel>, function: () -> Unit) : RecyclerView.Adapter<AdapterChatMoreOptions.ViewHolder>() {
     override fun onCreateViewHolder(

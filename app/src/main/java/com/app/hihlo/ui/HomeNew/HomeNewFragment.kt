@@ -61,7 +61,7 @@ import com.app.hihlo.ui.reels.bottom_sheet.CommentReelBottomSheet
 import com.app.hihlo.ui.reels.view_model.ReelsViewModel
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.MediaUtils
-import com.app.hihlo.utils.MyApplication
+import com.app.hihlo.HiHloApplication
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
@@ -591,7 +591,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             onYes = {
                 viewModel4.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                        MyApplication.appContext, LOGIN_DATA
+                        HiHloApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
                     SendGiftRequest(
                         coins = data.coins.toString(),

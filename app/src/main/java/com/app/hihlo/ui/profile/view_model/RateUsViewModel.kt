@@ -8,12 +8,12 @@ import com.app.hihlo.model.rating_review.RatingReviewRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class RateUsViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class RateUsViewModel : ViewModel() {
     private val rateUsLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getRateUsLiveData(): LiveData<Resources<CommonResponse>> {

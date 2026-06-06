@@ -8,12 +8,12 @@ import com.app.hihlo.model.contact_us.request.ContactUsRequest
 import com.app.hihlo.network_call.repository.ApiRepository
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class ContactUsViewModel @Inject constructor(): ViewModel() {
+import kotlinx.coroutines.launch
+
+
+
+class ContactUsViewModel : ViewModel() {
     private val contactUsLiveData = SingleLiveEvent<Resources<CommonResponse>>()
 
     fun getContactUsLiveData(): LiveData<Resources<CommonResponse>> {

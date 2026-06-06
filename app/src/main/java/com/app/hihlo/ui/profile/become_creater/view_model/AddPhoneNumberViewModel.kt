@@ -10,13 +10,13 @@ import com.app.hihlo.ui.profile.become_creater.model.UserToCreatorRequest
 import com.app.hihlo.ui.profile.become_creater.model.VerifyPhoneOtpRequest
 import com.app.hihlo.utils.network_utils.Resources
 import com.app.hihlo.utils.network_utils.SingleLiveEvent
-import dagger.hilt.android.lifecycle.HiltViewModel
+
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
-@HiltViewModel
-class AddPhoneNumberViewModel @Inject constructor():ViewModel() {
+
+
+class AddPhoneNumberViewModel :ViewModel() {
     private val addPhoneNumberLiveData = SingleLiveEvent<Resources<CreatorsBenefitsResponse>>()
 
     fun getAddPhoneNumberLiveData(): LiveData<Resources<CreatorsBenefitsResponse>> {

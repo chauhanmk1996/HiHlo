@@ -1,6 +1,5 @@
 package com.app.hihlo.ui.reels.adapter
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextPaint
@@ -30,7 +29,7 @@ import com.app.hihlo.databinding.ItemReelBinding
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.reel.response.Reel
-import com.app.hihlo.model.static.reelSideOptionsList
+import com.app.hihlo.model.staticModel.reelSideOptionsList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter.CustomTypefaceSpan

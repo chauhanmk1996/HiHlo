@@ -14,9 +14,9 @@ import com.app.hihlo.ui.profile.view_model.FaqViewModel
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
+
+
 class FaqFragment : BaseFragment<FragmentFaqBinding>() {
     private val viewModel: FaqViewModel by viewModels()
     override fun getLayoutId(): Int {

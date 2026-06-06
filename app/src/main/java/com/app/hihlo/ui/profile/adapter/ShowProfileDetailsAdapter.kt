@@ -3,9 +3,8 @@ package com.app.hihlo.ui.profile.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.app.hihlo.databinding.AdapterShowProfileDetailsBinding
-import com.app.hihlo.model.static.ProfileDetailModel
+import com.app.hihlo.model.staticModel.ProfileDetailModel
 
 class ShowProfileDetailsAdapter(val list: List<ProfileDetailModel>): RecyclerView.Adapter<ShowProfileDetailsAdapter.ViewHolder>() {
     inner class ViewHolder(val binding:AdapterShowProfileDetailsBinding):RecyclerView.ViewHolder(binding.root)
