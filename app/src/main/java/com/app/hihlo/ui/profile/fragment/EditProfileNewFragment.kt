@@ -59,7 +59,7 @@ import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.profile.adapter.CityAdapter
 import com.app.hihlo.ui.profile.adapter.InterestSpinnerAdapter
 import com.app.hihlo.ui.profile.view_model.EditProfileViewModel
-import com.app.hihlo.ui.signup.activity.SignupFlowActivity
+import com.app.hihlo.ui.signUpToHome.SignupFlowActivity
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.touchHideKeyBoard
 import com.app.hihlo.utils.network_utils.ProcessDialog

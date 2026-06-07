@@ -25,7 +25,7 @@ import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.profile.model.DeleteAccountRequest
 import com.app.hihlo.ui.reels.adapter.AdapterBlockFlag
 import com.app.hihlo.ui.reels.view_model.BlockFlagViewModel
-import com.app.hihlo.ui.signup.activity.SignupFlowActivity
+import com.app.hihlo.ui.signUpToHome.SignupFlowActivity
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.CommonUtils.toPx

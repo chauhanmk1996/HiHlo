@@ -1,62 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.app.hihlo.ui.signUpToHome.SignUpToHomeViewModel" />
     </data>
 
-    <LinearLayout
-        android:id="@+id/llMain"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:background="@color/screen_background_black"
-        tools:context=".ui.signup.fragment.EmailFragment">
+        android:background="@color/black"
+        tools:context=".ui.signUpToHome.TermsConditionsFragment">
 
-        <LinearLayout
-            android:id="@+id/llBack"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_back"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginTop="@dimen/dp_20"
+            android:padding="@dimen/dp_12"
+            android:src="@drawable/back_button_pink"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_16"
+            android:fontFamily="@font/manrope_bold"
+            android:textColor="@color/white"
+            android:textSize="@dimen/dp_24"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_back"
+            app:layout_constraintTop_toTopOf="@id/iv_back"
+            tools:text="Terms Conditions" />
+
+        <WebView
+            android:id="@+id/web_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_16"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_back" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/ivBack"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:paddingVertical="5dp"
-                android:layout_marginVertical="20dp"
-                android:src="@drawable/back_button_pink"/>
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvTittle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/contact_us"
-                android:textSize="22sp"
-                android:layout_marginEnd="50dp"
-                android:layout_marginStart="10dp"
-                android:textColor="@color/white"
-                android:layout_gravity="center"
-                android:fontFamily="@font/manrope_semibold"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:backgroundTint="@color/black_303030"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="20dp">
-
-            <WebView
-                android:id="@+id/webView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

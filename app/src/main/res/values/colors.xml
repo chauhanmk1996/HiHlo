@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
+    <color name="black">#000000</color>
     <color name="black_20">#66000000</color>
     <color name="black_10">#33000000</color>
     <color name="black_40">#00000066</color>
@@ -8,7 +8,7 @@
     <color name="black_60">#99000000</color>
     <color name="black_background">#70000000</color>
     <color name="light_black">#000000B3</color>
-    <color name="screen_background_black">#FF000000</color>
+    <color name="screen_background_black">#000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="white_30">#4DFFFFFF</color>
     <color name="white_20">#33FFFFFF</color>
@@ -29,6 +29,11 @@
     <color name="gray_hint">#BFBBBB</color>
     <color name="black_1c1c1c">#1C1C1C</color>
     <color name="bottom_sheet_color">#212328</color>
+
+    <color name="color_B90A66">#B90A66</color>
+    <color name="color_303030">#303030</color>
+    <color name="color_BFBBBB">#BFBBBB</color>
+    <color name="color_ADA9A9">#ADA9A9</color>
 
 
 </resources>

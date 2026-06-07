@@ -4,16 +4,13 @@ import com.app.hihlo.model.add_coins.AddCoinsRequest
 import com.app.hihlo.model.add_post.request.AddPostRequest
 import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.block_user.request.BlockUserRequest
-import com.app.hihlo.model.check_username.request.CheckUsernameRequest
 import com.app.hihlo.model.contact_us.request.ContactUsRequest
 import com.app.hihlo.model.deduct_call_coin.DeductCallCoinRequest
 import com.app.hihlo.model.deduct_chat_coin.DeductChatCoinRequest
-import com.app.hihlo.model.deduct_coin.request.DeductCoinRequest
 import com.app.hihlo.model.edit_profile.request.EditProfileRequest
 import com.app.hihlo.model.end_call.request.EndCallRequest
 import com.app.hihlo.model.flag_user.request.FlagUserRequest
 import com.app.hihlo.model.follow.request.FollowRequest
-import com.app.hihlo.model.login.request.LoginRequest
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.rating_review.RatingReviewRequest
 import com.app.hihlo.model.reply_to_comment.request.ReplyToCommentRequest
@@ -30,25 +27,9 @@ import com.app.hihlo.ui.profile.become_creater.model.SendOtpPhoneRequest
 import com.app.hihlo.ui.profile.become_creater.model.UserToCreatorRequest
 import com.app.hihlo.ui.profile.become_creater.model.VerifyPhoneOtpRequest
 import com.app.hihlo.ui.profile.model.DeleteAccountRequest
-import com.app.hihlo.ui.signup.model.ChangePasswordRequest
-import com.app.hihlo.ui.signup.model.ResetPasswordRequest
-import com.app.hihlo.ui.signup.model.SignUp
-import com.app.hihlo.ui.signup.model.SocialLoginRequest
-import com.app.hihlo.ui.signup.model.SocialSignUpRequest
-import retrofit2.http.Field
-import retrofit2.http.Query
 
 class ApiRepository {
     private val service = RetrofitBuilder.apiService
-
-    suspend fun loginApi(request: LoginRequest) = service.login(request)
-
-    suspend fun socialLogin(request: SocialSignUpRequest) = service.socialLogin(request)
-
-    suspend fun resetPassword(request: ResetPasswordRequest) = service.resetPassword(request)
-
-    suspend fun changePassword(token:String,request: ChangePasswordRequest) = service.changePassword(token,request)
-
 
     suspend fun getHomeDataApi(
         token: String, page: String,
@@ -121,14 +102,6 @@ class ApiRepository {
 
     suspend fun logoutUserApi(token: String) = service.logoutUser(token)
 
-    suspend fun sendEmailOtp(email: String,userName:String?,purpose: String?) = service.sendMailOtp(email,userName,purpose)
-
-    suspend fun verifyEmailOtp(email: String,otp:String) = service.verifyEmailOtp(email,otp)
-
-    suspend fun registerUser(model: SignUp) = service.registerUser(model)
-
-    suspend fun socialSignUp(model: SocialSignUpRequest) = service.socialSignUp(model)
-
     suspend fun getRecentChatApi(token:String,
                                  fromUserId: String? = null,
                                  toUserId: String? = null,
@@ -159,8 +132,6 @@ class ApiRepository {
     suspend fun getFaqListApi() = service.getFaqList()
 
     suspend fun deletePostApi(token: String, postId: String) = service.deletePost(token, postId)
-
-    suspend fun checkUsernameApi(request: CheckUsernameRequest) = service.checkUsername(request)
 
     suspend fun updateLiveStatusApi(token: String, liveStatusId: Int) = service.updateLiveStatus(token, liveStatusId)
 

@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:paddingTop="16dp"
         android:background="@color/screen_background_black"
-        tools:context=".ui.signup.fragment.EmailFragment">
+        tools:context=".ui.signUpToHome.ForgotPasswordFragment">
 
         <LinearLayout
             app:layout_constraintTop_toTopOf="parent"

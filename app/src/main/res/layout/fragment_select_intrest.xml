@@ -13,7 +13,7 @@
         android:paddingHorizontal="20dp"
         android:orientation="vertical"
         android:background="@color/screen_background_black"
-        tools:context=".ui.signup.fragment.EmailFragment">
+        tools:context=".ui.signUpToHome.ForgotPasswordFragment">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivBack"

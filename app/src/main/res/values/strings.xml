@@ -1,7 +1,12 @@
 <resources>
-    <string name="default_web_client_id">810492134429-729kklruqrrgvnjgdr1or7ie9031nt5m.apps.googleusercontent.com</string>
-
     <string name="app_name">HiHlo</string>
+    <string name="name_digit">abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+    <string name="name_number_digit">abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789</string>
+    <string name="company_name_digit">abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ.,0123456789</string>
+    <string name="email_digit">abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@.0123456789</string>
+    <string name="mobile_digit">0123456789</string>
+
+    <string name="default_web_client_id">810492134429-729kklruqrrgvnjgdr1or7ie9031nt5m.apps.googleusercontent.com</string>
 
     <string name="network_error_please_again_try_later">Network Error. Please Try Again</string>
     <string name="connection_lost_please_again_try_later">Connection Lost. Please Try Again</string>
@@ -62,6 +67,30 @@
     <string name="please_enter_your_phone_number_for_verification">Please enter your phone number for verification</string>
     <string name="no_recent_chats">No Chat</string>
     <string name="caption">Caption</string>
+    <string name="get_started">Get Started</string>
+    <string name="don_t_have_an_account_sign_up">Don’t have an account ? Sign Up</string>
+    <string name="please_enter_email_id">Please enter email id</string>
+    <string name="please_enter_valid_email_id">Please enter valid email id</string>
+    <string name="please_enter_password">Please enter Password</string>
+    <string name="please_enter_your_email_to_reset_the_password">Please enter your email to reset the password</string>
+    <string name="create_an_account">Create an account</string>
+    <string name="connect_with_your_friends_today">Connect with your friends today!</string>
+    <string name="enter_your_name">Enter Your Name</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_have_an_account_sign_in">Already have an account? Sign In</string>
+    <string name="please_enter_your_name">Please enter your name</string>
+    <string name="check_your_email">Check your email</string>
+    <string name="we_sent_a_reset_link_to_your_registered_email_id_enter_4_digit_code_that_mentioned_in_the_email">We sent a reset link to your registered email id enter 4 digit code that mentioned in the email</string>
+    <string name="confirm">Confirm</string>
+    <string name="resend">Resend</string>
+    <string name="did_not_receive_otp">Didn\'t receive OTP?</string>
+    <string name="create_a_new_password_ensure_it_differs_from_previous_ones_for_security">Create a new password. Ensure it differs from previous ones for security</string>
+    <string name="set_a_new_password">Set a new password</string>
+    <string name="change_password">Change Password</string>
+    <string name="new_password">New Password</string>
+    <string name="about_us">About Us</string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="privacy_policy">Privacy Policy</string>
 
 
     <string-array name="City">

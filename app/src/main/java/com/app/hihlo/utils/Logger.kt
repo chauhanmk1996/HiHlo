@@ -6,7 +6,7 @@ import java.util.Date
 import java.util.Locale
 
 fun logD(message: String) {
-    val logMessage = "${getCurrentTimeStamp()} [Kuber]: $message\n"
+    val logMessage = "${getCurrentTimeStamp()} [HiHlo]: $message\n"
     Log.d("HiHlo", logMessage)
 }
 

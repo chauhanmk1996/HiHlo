@@ -17,8 +17,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentAddDetailsBinding
 import com.app.hihlo.model.gender_list.Gender
 import com.app.hihlo.ui.profile.view_model.AddDetailViewModel
-import com.app.hihlo.ui.profile.view_model.EditProfileViewModel
-import com.app.hihlo.ui.signup.model.SignUp
+import com.app.hihlo.ui.signUpToHome.SignUpRequest
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
@@ -32,12 +31,11 @@ class AddDetailsFragment : Fragment() {
    var selectedGenderId_ :Int ? =null
 
     private var selectedDate:String? = "Select DOB"
-    var signUpData: SignUp?=null
+    var signUpRequest: SignUpRequest?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            signUpData = it.getParcelable("data")
-            Log.e("TAG", "onCreate: $signUpData", )
+            signUpRequest = it.getParcelable("data")
         }
     }
 
@@ -69,21 +67,21 @@ class AddDetailsFragment : Fragment() {
                 }else{
 
                     val gender =selectedGenderId_ // binding.spinGender.selectedItemId.toInt()+1
-                    val data = SignUp(
-                        name = signUpData?.name,
-                        username = signUpData?.username,
-                        email = signUpData?.email,
-                        phoneNumber = signUpData?.phoneNumber,
+                    val signUpRequest = SignUpRequest(
+                        name = signUpRequest?.name,
+                        username = signUpRequest?.username,
+                        email = signUpRequest?.email,
+                        phoneNumber = signUpRequest?.phoneNumber,
                         gender_id = gender.toString(),
                         dob = selectedDate,
-                        password = signUpData?.password,
-                        deviceType = signUpData?.deviceType,
-                        city = signUpData?.password,
-                        deviceToken = signUpData?.deviceToken
+                        password = signUpRequest?.password,
+                        deviceType = signUpRequest?.deviceType,
+                        city = signUpRequest?.password,
+                        deviceToken = signUpRequest?.deviceToken
                         )
                     val bundle = Bundle()
-                    bundle.putParcelable("data",data)
-                    Log.d("TAG", "intiVicdsfdsfews: $data")
+                    bundle.putParcelable("data",signUpRequest)
+                    Log.d("TAG", "intiVicdsfdsfews: $signUpRequest")
                     findNavController().navigate(R.id.addCountryFragment,bundle)
                 }
 

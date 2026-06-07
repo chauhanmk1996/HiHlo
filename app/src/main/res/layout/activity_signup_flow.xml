@@ -3,15 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.signup.activity.SignupFlowActivity">
+        tools:context=".ui.signUpToHome.SignupFlowActivity">
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/signup_nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
@@ -21,4 +18,5 @@
             app:navGraph="@navigation/signup_flow_nav" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

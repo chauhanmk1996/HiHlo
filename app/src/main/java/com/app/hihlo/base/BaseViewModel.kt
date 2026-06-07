@@ -5,15 +5,17 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import com.app.hihlo.BuildConfig
 import com.app.hihlo.utils.ErrorUtil
 import com.app.hihlo.Global
 import com.app.hihlo.R
+import com.app.hihlo.connection.ApiServices
 
 open class BaseViewModel : ViewModel() {
 
-    /*TODO val apiService by lazy {
-        ApiClient.create()
-    }*/
+    val apiService by lazy {
+        ApiServices.create(BuildConfig.BASE_URL_API)
+    }
 
     fun onError(throwable: Throwable) {
         showLoading(false)

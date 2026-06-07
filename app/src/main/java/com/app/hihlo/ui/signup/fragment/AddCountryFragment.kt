@@ -17,7 +17,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentAddCountryBinding
 import com.app.hihlo.model.city_list.response.Cities
 import com.app.hihlo.ui.profile.view_model.EditProfileViewModel
-import com.app.hihlo.ui.signup.model.SignUp
+import com.app.hihlo.ui.signUpToHome.SignUpRequest
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 
@@ -27,7 +27,7 @@ class AddCountryFragment : Fragment(),CityAdapter.OnCitySelectedListener {
     private val viewModel: EditProfileViewModel by viewModels()
     var selectedCity:String? = null
     var selectedPosition:Int?=-1
-    var signUpData: SignUp?=null
+    var signUpData: SignUpRequest?=null
 
     var isLoading = false
     var currentPage=1
@@ -62,7 +62,7 @@ class AddCountryFragment : Fragment(),CityAdapter.OnCitySelectedListener {
                 if(selectedCity.isNullOrEmpty()){
                     Toast.makeText(requireActivity(), "Please select a city", Toast.LENGTH_SHORT).show()
                 }else{
-                    val data = SignUp(
+                    val data = SignUpRequest(
                         name = signUpData?.name,
                         username = signUpData?.username,
                         email = signUpData?.email,

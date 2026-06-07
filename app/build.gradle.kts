@@ -32,11 +32,11 @@ android {
 
     buildTypes {
         debug {
-            // buildConfigField("String", "BASE_URL_API", "\"https://backend.kuberfinancial.com.au/\"")
+            buildConfigField("String", "BASE_URL_API", "\"https://hihlo.com/api/v1/\"")
         }
 
         release {
-            // buildConfigField("String", "BASE_URL_API", "\"https://www.kuberfinancial.com.au/\"")
+            buildConfigField("String", "BASE_URL_API", "\"https://hihlo.com/api/v1/\"")
 
             isMinifyEnabled = false
             proguardFiles(
@@ -162,6 +162,9 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     //coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
+    //Otp View
+    implementation(libs.otp)
 }
 
 configurations.all {

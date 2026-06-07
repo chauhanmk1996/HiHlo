@@ -18,7 +18,7 @@ import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.profile.view_model.SettingViewModel
-import com.app.hihlo.ui.signup.activity.SignupFlowActivity
+import com.app.hihlo.ui.signUpToHome.SignupFlowActivity
 import com.app.hihlo.ui.signup.view_model.SigninViewModel
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status

@@ -12,14 +12,11 @@ import com.app.hihlo.model.block_reasons.response.BlockReasonsResponse
 import com.app.hihlo.model.block_user.request.BlockUserRequest
 import com.app.hihlo.model.blocked_userlist.BlockedUsersResponse
 import com.app.hihlo.model.chat_history.ChatHistoryResponse
-import com.app.hihlo.model.check_username.request.CheckUsernameRequest
-import com.app.hihlo.model.check_username.response.CheckUsernameResponse
 import com.app.hihlo.model.city_list.response.CityListResponse
 import com.app.hihlo.model.contact_us.request.ContactUsRequest
 import com.app.hihlo.model.deduct_call_coin.DeductCallCoinRequest
 import com.app.hihlo.model.deduct_call_coin.DeductCallCoinResponse
 import com.app.hihlo.model.deduct_chat_coin.DeductChatCoinRequest
-import com.app.hihlo.model.deduct_coin.request.DeductCoinRequest
 import com.app.hihlo.model.delete_comment.DeleteResponse
 import com.app.hihlo.model.edit_profile.request.EditProfileRequest
 import com.app.hihlo.model.edit_profile.response.EditProfileResponse
@@ -36,8 +33,6 @@ import com.app.hihlo.model.get_recent_chat.response.GetRecentChatResponse
 import com.app.hihlo.model.get_reel_comments.response.ReelCommentsResponse
 import com.app.hihlo.model.home.response.HomeResponse
 import com.app.hihlo.model.interest_list.response.InterestListResponse
-import com.app.hihlo.model.login.request.LoginRequest
-import com.app.hihlo.model.login.response.LoginResponse
 import com.app.hihlo.model.notification.response.GetNotificationListResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.post_comments.response.PostCommentsResponse
@@ -64,17 +59,11 @@ import com.app.hihlo.model.story_upload_status_model.StoryUploadStatusResponse
 import com.app.hihlo.model.update_call_charge.UpdateCallChargeResponse
 import com.app.hihlo.model.update_call_status.UpdateCallStatusRequest
 import com.app.hihlo.model.update_call_status.UpdateCallStatusResponse
-import com.app.hihlo.ui.HomeNew.model.StatusResponse
 import com.app.hihlo.ui.profile.become_creater.model.CreatorsBenefitsResponse
 import com.app.hihlo.ui.profile.become_creater.model.SendOtpPhoneRequest
 import com.app.hihlo.ui.profile.become_creater.model.UserToCreatorRequest
 import com.app.hihlo.ui.profile.become_creater.model.VerifyPhoneOtpRequest
 import com.app.hihlo.ui.profile.model.DeleteAccountRequest
-import com.app.hihlo.ui.signup.model.ChangePasswordRequest
-import com.app.hihlo.ui.signup.model.ResetPasswordRequest
-import com.app.hihlo.ui.signup.model.SignUp
-import com.app.hihlo.ui.signup.model.SocialLoginRequest
-import com.app.hihlo.ui.signup.model.SocialSignUpRequest
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -86,47 +75,6 @@ import retrofit2.http.Path
 
 
 interface ApiService {
-    @POST("login")
-    suspend fun login(@Body requestBody: LoginRequest): LoginResponse
-
-    @POST("social-auth")
-    suspend fun socialLogin(@Body requestBody: SocialSignUpRequest): LoginResponse
-
-    @FormUrlEncoded
-    @POST("send-mail")
-    suspend fun sendMailOtp(
-        @Field("email") email: String,
-        @Field("username") type: String?,
-        @Field("purpose") purpose: String?,
-    ): LoginResponse
-
-    @POST("forgot-password")
-    suspend fun resetPassword(@Body requestBody: ResetPasswordRequest): LoginResponse
-
-    @POST("change-password")
-    suspend fun changePassword(
-        @Header("Authorization") token: String,
-        @Body requestBody: ChangePasswordRequest,
-    ): LoginResponse
-
-    @FormUrlEncoded
-    @POST("verify-mail-otp")
-    suspend fun verifyEmailOtp(
-        @Field("email") email: String,
-        @Field("otp") type: String,
-    ): LoginResponse
-
-    @POST("signup")
-    suspend fun registerUser(
-        @Body model: SignUp,
-    ): LoginResponse
-
-    @POST("social-signup")
-    suspend fun socialSignUp(
-        @Body model: SocialSignUpRequest,
-    ): LoginResponse
-
-
     @GET("home")
     suspend fun getHomeData(
         @Header("Authorization") token: String,
@@ -377,9 +325,6 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Field("postId") postId: String,
     ): CommonResponse
-
-    @POST("check-username")
-    suspend fun checkUsername(@Body request: CheckUsernameRequest): CheckUsernameResponse
 
     @FormUrlEncoded
     @POST("live-status")

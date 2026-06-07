@@ -1,14 +1,19 @@
+
 package com.app.hihlo.utils
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.fragment.app.Fragment
 import com.app.hihlo.Global
 import com.app.hihlo.R
+import com.google.firebase.messaging.FirebaseMessaging
 
 fun AppCompatTextView.getString(): String {
     return this.text.trim().toString()
@@ -65,4 +70,35 @@ fun showShortToast(message: String, context: Context) {
     toast.duration = Toast.LENGTH_SHORT
     toast.view = layout
     toast.show()
+}
+
+fun getDeviceToken(sharedPreference: SharedPreferenceUtil) {
+    FirebaseMessaging.getInstance().token.addOnCompleteListener {
+        try {
+            if (it.isComplete) {
+                it.result?.let { token ->
+                    sharedPreference.deviceToken = token
+                    logD("Device Token = $token")
+                }
+            }
+        } catch (e: Exception) {
+            logD("Device Token Error = ${e.message ?: ""}")
+        }
+    }
+}
+
+fun Activity.startScreen(activity: Activity) {
+    startActivity(Intent(this, activity::class.java))
+}
+
+fun Fragment.startScreen(activity: Activity) {
+    startActivity(Intent(requireContext(), activity::class.java))
+}
+
+fun View.show() {
+    this.visibility = View.VISIBLE
+}
+
+fun View.hide() {
+    this.visibility = View.GONE
 }

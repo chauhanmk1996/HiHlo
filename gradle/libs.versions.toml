@@ -41,6 +41,7 @@ razorpay = "1.6.40"
 scrollpicker = "1.7.5"
 photoeditor = "3.1.0"
 desugarJdkLibs = "2.1.5"
+otp = "1.4.4"
 
 
 [libraries]
@@ -118,6 +119,8 @@ scrollpicker = { module = "com.github.tomeees:scrollpicker", version.ref = "scro
 photoeditor = { module = "com.burhanrashid52:photoeditor", version.ref = "photoeditor" }
 
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+
+otp = { module = "io.github.chaosleung:pinview", version.ref = "otp" }
 
 
 [plugins]

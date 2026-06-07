@@ -7,7 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.Preferences
-import com.app.hihlo.ui.signup.activity.SignupFlowActivity
+import com.app.hihlo.ui.signUpToHome.SignupFlowActivity
 import com.app.hihlo.utils.AgoraUtils.isAppOnForeground
 import com.app.hihlo.HiHloApplication
 import okhttp3.Interceptor

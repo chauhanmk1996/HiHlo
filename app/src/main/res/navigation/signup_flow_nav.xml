@@ -7,60 +7,61 @@
 
     <fragment
         android:id="@+id/getStartedFragment"
-        android:name="com.app.hihlo.ui.get_started.fragment.GetStartedFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.GetStartedFragment"
         android:label="fragment_get_started">
         <action
             android:id="@+id/action_getStartedFragment_to_signinFragment"
             app:destination="@id/signinFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/signinFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.SigninFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.SigninFragment"
         android:label="SigninFragment"
-        tools:layout="@layout/fragment_signin"/>
+        tools:layout="@layout/fragment_signin" />
     <fragment
-        android:id="@+id/emailFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.EmailFragment"
-        android:label="EmailFragment"
-        tools:layout="@layout/fragment_email"/>
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.ForgotPasswordFragment"
+        android:label="ForgotPasswordFragment"
+        tools:layout="@layout/fragment_forgot_password" />
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.RegistrationFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.RegistrationFragment"
         android:label="RegistrationFragment"
-        tools:layout="@layout/fragment_registration"/>
+        tools:layout="@layout/fragment_registration" />
     <fragment
         android:id="@+id/otpFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.OtpFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.OtpFragment"
         android:label="OtpFragment"
-        tools:layout="@layout/fragment_otp"/>
+        tools:layout="@layout/fragment_otp" />
     <fragment
         android:id="@+id/newPasswordFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.NewPasswordFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.NewPasswordFragment"
         android:label="NewPasswordFragment"
-        tools:layout="@layout/fragment_new_password"/>
+        tools:layout="@layout/fragment_new_password" />
     <fragment
         android:id="@+id/addDetailsFragment"
         android:name="com.app.hihlo.ui.signup.fragment.AddDetailsFragment"
         android:label="AddDetailsFragment"
-        tools:layout="@layout/fragment_add_details"/>
+        tools:layout="@layout/fragment_add_details" />
     <fragment
         android:id="@+id/addCountryFragment"
         android:name="com.app.hihlo.ui.signup.fragment.AddCountryFragment"
         android:label="AddCountryFragment"
-        tools:layout="@layout/fragment_add_country"/>
+        tools:layout="@layout/fragment_add_country" />
     <fragment
         android:id="@+id/selectInterestFragment"
         android:name="com.app.hihlo.ui.signup.fragment.SelectInterestFragment"
         android:label="SelectInterestFragment"
-        tools:layout="@layout/fragment_select_intrest"/>
+        tools:layout="@layout/fragment_select_intrest" />
     <fragment
         android:id="@+id/termsConditionsFragment"
-        android:name="com.app.hihlo.ui.profile.terms_conditions.TermsConditionsFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.TermsConditionsFragment"
         android:label="TermsConditionsFragment"
-        tools:layout="@layout/fragment_terms_conditions"/>
+        tools:layout="@layout/fragment_terms_conditions" />
     <fragment
         android:id="@+id/editProfileNewFragment"
         android:name="com.app.hihlo.ui.profile.fragment.EditProfileNewFragment"
         android:label="EditProfileFragment"
-        tools:layout="@layout/fragment_edit_profile_new"/>
+        tools:layout="@layout/fragment_edit_profile_new" />
 </navigation>
