@@ -30,7 +30,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentContactUsBinding
 import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.contact_us.request.ContactUsRequest
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference

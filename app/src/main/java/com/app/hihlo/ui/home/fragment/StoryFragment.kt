@@ -32,8 +32,7 @@ import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentStoryBinding
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Story
-import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.login.response.Payload
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.story_delete.request.StoryDeleteRequest
 import com.app.hihlo.model.story_seen.request.StorySeen
 import com.app.hihlo.preferences.LOGIN_DATA
@@ -42,6 +41,7 @@ import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
 import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.home.view_model.StoryViewModel
+import com.app.hihlo.ui.signUpToHome.LoginPayload
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.VideoCacheManager
@@ -57,7 +57,7 @@ import com.google.gson.Gson
 import kotlin.math.abs
 
 class StoryFragment : BaseFragment<FragmentStoryBinding>() {
-    private var myDetails: Payload = Payload()
+    private var myDetails: LoginPayload = LoginPayload()
     private lateinit var isMyStory: String
     private lateinit var myStoryData: MyStory
     private lateinit var otherStoryData: List<Story>
@@ -221,7 +221,7 @@ class StoryFragment : BaseFragment<FragmentStoryBinding>() {
             sendEditText.isVisible=false
             seenLayout.isVisible=true
             deleteButton.isVisible=true
-            myDetails = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload ?: Payload()
+            myDetails = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload ?: LoginPayload()
             Glide.with(requireContext()).load(myDetails.profileImage).placeholder(R.drawable.profile_placeholder).error(R.drawable.profile_placeholder).into(userImage)
             userName.text = myDetails.fullName
             statusTime.text = CommonUtils.getTimeAgo(myStoryData.created_at ?: "")+" ago"

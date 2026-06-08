@@ -11,7 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.databinding.FragmentNotificationSettingBinding
 import com.app.hihlo.model.get_notification_setting.response.GetNotificationSettingResponse
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.set_notification.SetNotificationRequest
 import com.app.hihlo.model.staticModel.NotificationsTypeModel
 import com.app.hihlo.preferences.LOGIN_DATA

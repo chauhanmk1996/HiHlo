@@ -48,7 +48,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.app.hihlo.R
 import com.app.hihlo.databinding.ActivityPlayStatusBinding
 import com.app.hihlo.databinding.PopupChatSideOptionsBinding
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
 import com.app.hihlo.model.story_delete.request.StoryDeleteRequest
 import com.app.hihlo.model.story_response.Story

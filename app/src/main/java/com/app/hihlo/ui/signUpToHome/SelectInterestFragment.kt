@@ -1,13 +1,13 @@
-package com.app.hihlo.ui.signup.fragment
+package com.app.hihlo.ui.signUpToHome
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,22 +15,19 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentSelectIntrestBinding
 import com.app.hihlo.model.get_profile.UserDetailsX
 import com.app.hihlo.model.interest_list.response.Interests
-import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.login.response.Payload
 import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.IS_LOGIN
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.profile.view_model.EditProfileViewModel
-import com.app.hihlo.ui.signup.view_model.RegisterationViewModel
-import com.app.hihlo.ui.signup.model.SignUp
+import com.app.hihlo.ui.signup.fragment.SelectInterestAdapter
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 
-class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelectedListener {
-    private lateinit var binding:FragmentSelectIntrestBinding
+class SelectInterestFragment : Fragment(), SelectInterestAdapter.OnInterestSelectedListener {
+    private lateinit var binding: FragmentSelectIntrestBinding
     private lateinit var selectInterestAdapter: SelectInterestAdapter
     private val viewModel: EditProfileViewModel by viewModels()
     private val registerViewModel: RegisterationViewModel by viewModels()
@@ -60,7 +57,7 @@ class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelect
             ivBack.setOnClickListener {
                 findNavController().popBackStack()
             }
-            clNext.setOnClickListener { 
+            clNext.setOnClickListener {
                 if (selectedInterest.isNullOrEmpty()){
                     Toast.makeText(requireActivity(), "Please select your interest", Toast.LENGTH_SHORT).show()
                 }else{
@@ -83,7 +80,7 @@ class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelect
                     Toast.makeText(requireActivity(), "Logged in successfully", Toast.LENGTH_SHORT).show()
                 }
             }
-            
+
         }
         Log.e("TAG", "initViews: $selectedPosition", )
     }
@@ -99,9 +96,12 @@ class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelect
                         val list = it.data.payload
                         Log.e("TAG", "hitRegisterApi: $list", )
                         Preferences.setStringPreference(requireContext(), IS_LOGIN, "2")
-                        Preferences.setCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA, it.data)
+                        Preferences.setCustomModelPreference<LoginResponse>(requireContext(),
+                            LOGIN_DATA, it.data)
                         CommonUtils.hideKeyboard(requireActivity())
-                        Log.i("TAG", "setObserver: "+ Preferences.getStringPreference(requireContext(), FCM_TOKEN))
+                        Log.i("TAG", "setObserver: "+ Preferences.getStringPreference(requireContext(),
+                            FCM_TOKEN
+                        ))
                         if(it.data.payload?.city.isNullOrBlank() || it.data.payload.profileImage.isNullOrEmpty()){
                             val bundle = Bundle()
                             val userDetails = list?.toUserDetailsX()
@@ -130,7 +130,7 @@ class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelect
     fun Payload.toUserDetailsX(): UserDetailsX {
         return UserDetailsX(
             id = this.userId,
-            name = if(this.name?.isNotEmpty() == true && this.name!="") this.name else this.fullName,
+            name = if (this.name?.isNotEmpty() == true && this.name != "") this.name else this.fullName,
             username = this.username,
             email = this.email,
             phone = this.phone,
@@ -169,9 +169,11 @@ class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelect
 
 
     private fun loadRcv() {
-        binding.rcvInterest.layoutManager = LinearLayoutManager(requireActivity(),
-            LinearLayoutManager.VERTICAL,false)
-        selectInterestAdapter = SelectInterestAdapter(requireActivity(),this)
+        binding.rcvInterest.layoutManager = LinearLayoutManager(
+            requireActivity(),
+            LinearLayoutManager.VERTICAL, false
+        )
+        selectInterestAdapter = SelectInterestAdapter(requireActivity(), this)
         binding.rcvInterest.adapter = selectInterestAdapter
         selectInterestAdapter.selectedPosition = selectedPosition!!
         getInterest()
@@ -214,7 +216,7 @@ class SelectInterestFragment : Fragment(),SelectInterestAdapter.OnInterestSelect
 
 
 
-    override fun onInterestSelect(city: Interests,position:Int) {
+    override fun onInterestSelect(city: Interests, position:Int) {
         selectedInterest = city.name
         selectedPosition = position
         selectedId = city.id.toString()

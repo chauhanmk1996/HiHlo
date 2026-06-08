@@ -91,6 +91,8 @@
     <string name="about_us">About Us</string>
     <string name="terms_and_conditions">Terms and Conditions</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="interest">Interest</string>
+    <string name="choose_the_option_that_suits_you_best">Choose the option that suits you best.</string>
 
 
     <string-array name="City">

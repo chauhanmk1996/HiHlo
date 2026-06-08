@@ -18,7 +18,7 @@ import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentRateUsBinding
 import com.app.hihlo.model.contact_us.request.ContactUsRequest
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.rating_review.RatingReviewRequest
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences

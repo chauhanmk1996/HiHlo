@@ -12,7 +12,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.AdapterChatListBinding
 import com.app.hihlo.model.get_recent_chat.response.RecentChat
 import com.app.hihlo.model.home.response.Story
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.utils.ChatUtils.getChatListDay

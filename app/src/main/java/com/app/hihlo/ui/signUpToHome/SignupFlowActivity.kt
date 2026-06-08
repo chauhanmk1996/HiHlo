@@ -8,8 +8,6 @@ import com.app.hihlo.R
 import com.app.hihlo.base.BaseNewActivity
 import com.app.hihlo.databinding.ActivitySignupFlowBinding
 import com.app.hihlo.model.get_profile.UserDetailsX
-import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.login.response.Payload
 import com.app.hihlo.preferences.IS_LOGIN
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
@@ -52,7 +50,7 @@ class SignupFlowActivity :
         return resId > 0 && resources.getInteger(resId) == 2
     }
 
-    fun Payload.toUserDetailsX(): UserDetailsX {
+    fun LoginPayload.toUserDetailsX(): UserDetailsX {
         return UserDetailsX(
             id = this.userId,
             name = if (this.name?.isNotEmpty() == true && this.name != "") this.name else this.fullName,

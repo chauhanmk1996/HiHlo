@@ -11,12 +11,12 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.databinding.FragmentWithdrawCoinsBinding
 import com.app.hihlo.model.contact_us.request.ContactUsRequest
-import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.login.response.Payload
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.profile.view_model.ContactUsViewModel
 import com.app.hihlo.ui.profile.view_model.WithdrawCoinsViewModel
+import com.app.hihlo.ui.signUpToHome.LoginPayload
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.network_utils.ProcessDialog
@@ -28,7 +28,7 @@ class WithdrawCoinsFragment : Fragment() {
     private lateinit var binding: FragmentWithdrawCoinsBinding
     private val viewModel: WithdrawCoinsViewModel by viewModels()
     private var screenShotUrl=""
-    var loginResponse: Payload?=null
+    var loginResponse: LoginPayload?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +43,7 @@ class WithdrawCoinsFragment : Fragment() {
     ): View? {
         binding = FragmentWithdrawCoinsBinding.inflate(layoutInflater)
         totalCoins = arguments?.getInt("totalCoins")
-        loginResponse = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload ?: Payload()
+        loginResponse = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload ?: LoginPayload()
         initViews()
         return binding.root
     }

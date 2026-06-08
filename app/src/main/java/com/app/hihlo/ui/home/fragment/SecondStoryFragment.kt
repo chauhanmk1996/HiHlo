@@ -46,7 +46,7 @@ import com.app.hihlo.databinding.PopupChatSideOptionsBinding
 import com.app.hihlo.enum.MediaType
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Story
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
 import com.app.hihlo.model.story_seen.request.StorySeen
 import com.app.hihlo.preferences.LOGIN_DATA

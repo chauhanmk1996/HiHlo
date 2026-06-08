@@ -1,97 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.app.hihlo.ui.signUpToHome.SignUpToHomeViewModel" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="20dp"
-        android:orientation="vertical"
-        android:background="@color/screen_background_black"
-        tools:context=".ui.signUpToHome.ForgotPasswordFragment">
+        android:background="@color/black"
+        tools:context=".ui.signUpToHome.SelectInterestFragment">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivBack"
+            android:id="@+id/iv_back"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginTop="@dimen/dp_20"
+            android:padding="@dimen/dp_12"
+            android:src="@drawable/back_button_pink"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_interest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:src="@drawable/back_button_pink"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/clMain"
+            android:layout_marginTop="@dimen/dp_20"
+            android:fontFamily="@font/manrope_bold"
+            android:text="@string/interest"
+            android:textColor="@color/white"
+            android:textSize="@dimen/dp_24"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintTop_toBottomOf="@id/iv_back" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_interest_desc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_16"
+            android:fontFamily="@font/manrope_regular"
+            android:text="@string/choose_the_option_that_suits_you_best"
+            android:textColor="@color/textDescColor"
+            android:textSize="@dimen/dp_16"
+            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintTop_toBottomOf="@id/tv_interest" />
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvInterest"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Interest"
-                android:textColor="@color/white"
-                android:layout_marginTop="40dp"
-                android:textSize="24sp"
-                android:fontFamily="@font/manrope_bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvIntrestDesc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Choose the option that suits you best."
-                android:textColor="@color/textDescColor"
-                android:layout_marginTop="15dp"
-                android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/tvInterest"
-                android:fontFamily="@font/manrope_regular"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rcvInterest"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="10dp"
-                tools:listitem="@layout/item_intrest"
-                app:layout_constraintBottom_toTopOf="@id/clNext"
-                app:layout_constraintTop_toBottomOf="@id/tvIntrestDesc">
-
-            </androidx.recyclerview.widget.RecyclerView>
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/dp_8"
+            app:layout_constraintBottom_toTopOf="@id/btn_submit"
+            app:layout_constraintTop_toBottomOf="@id/tv_interest_desc">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clNext"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="20dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:background="@drawable/colored_background">
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tvNext"
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_interest"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="10dp"
-                    android:text="Submit"
-                    android:textSize="18sp"
-                    android:gravity="center"
-                    android:fontFamily="@font/manrope_regular"
-                    android:textColor="@color/white"
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    tools:itemCount="3"
+                    tools:listitem="@layout/list_item_interest" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_32"
+                    app:layout_constraintTop_toBottomOf="@+id/rv_interest" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+        </androidx.core.widget.NestedScrollView>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_submit"
+            style="@style/buttonStyle"
+            android:layout_marginBottom="@dimen/dp_48"
+            android:text="@string/submit"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart" />
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/dp_16" />
 
-    </LinearLayout>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/dp_16" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

@@ -17,7 +17,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.AdapterShowMediaViewPagerBinding
 import com.app.hihlo.model.get_profile.Posts
 import com.app.hihlo.model.home.response.Post
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.reel.response.Pagination
 import com.app.hihlo.model.reel.response.Payload
 import com.app.hihlo.preferences.LOGIN_DATA

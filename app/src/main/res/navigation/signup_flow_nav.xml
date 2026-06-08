@@ -51,7 +51,7 @@
         tools:layout="@layout/fragment_add_country" />
     <fragment
         android:id="@+id/selectInterestFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.SelectInterestFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.SelectInterestFragment"
         android:label="SelectInterestFragment"
         tools:layout="@layout/fragment_select_intrest" />
     <fragment

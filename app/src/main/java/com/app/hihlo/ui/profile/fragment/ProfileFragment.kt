@@ -53,7 +53,7 @@ import com.app.hihlo.model.get_profile.Data
 import com.app.hihlo.model.get_profile.Posts
 import com.app.hihlo.model.get_profile.UserDetailsX
 import com.app.hihlo.model.home.response.Post
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.reel.response.Creator
 import com.app.hihlo.model.reel.response.Pagination
 import com.app.hihlo.model.reel.response.Payload

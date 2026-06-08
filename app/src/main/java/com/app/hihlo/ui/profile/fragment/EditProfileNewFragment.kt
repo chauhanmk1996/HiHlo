@@ -52,7 +52,7 @@ import com.app.hihlo.model.city_list.response.Cities
 import com.app.hihlo.model.edit_profile.request.EditProfileRequest
 import com.app.hihlo.model.get_profile.UserDetailsX
 import com.app.hihlo.model.interest_list.response.Interests
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.home.activity.HomeActivity

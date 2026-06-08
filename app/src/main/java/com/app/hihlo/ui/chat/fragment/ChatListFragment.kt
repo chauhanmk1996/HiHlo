@@ -29,7 +29,7 @@ import com.app.hihlo.model.get_recent_chat.response.RecentChat
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.home.response.UserDetails
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
 import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.network_call.RetrofitBuilder

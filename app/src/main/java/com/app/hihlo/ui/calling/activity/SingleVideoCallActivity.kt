@@ -60,7 +60,7 @@ import androidx.core.view.isVisible
 import com.app.hihlo.base.BaseActivity
 import com.app.hihlo.databinding.ActivityOutgoingVideoCallBinding
 import com.app.hihlo.model.end_call.request.EndCallRequest
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference.CALLER_USER_IMAGE

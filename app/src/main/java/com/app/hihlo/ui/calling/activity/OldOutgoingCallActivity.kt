@@ -49,7 +49,7 @@ import com.app.hihlo.base.BaseActivity
 import com.app.hihlo.databinding.ActivityOutgoingVideoCallBinding
 import com.app.hihlo.model.deduct_call_coin.DeductCallCoinRequest
 import com.app.hihlo.model.end_call.request.EndCallRequest
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.save_call.SaveCallRequest
 import com.app.hihlo.model.update_call_status.UpdateCallStatusRequest
 import com.app.hihlo.preferences.LOGIN_DATA

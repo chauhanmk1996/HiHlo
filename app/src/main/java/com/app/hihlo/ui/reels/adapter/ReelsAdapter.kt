@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.R
 import com.app.hihlo.databinding.ItemReelBinding
 import com.app.hihlo.model.home.response.Story
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.reel.response.Reel
 import com.app.hihlo.model.staticModel.reelSideOptionsList
 import com.app.hihlo.preferences.LOGIN_DATA

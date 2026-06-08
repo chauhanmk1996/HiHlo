@@ -17,7 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentProfileSettingBinding
 import com.app.hihlo.model.get_profile.UserDetailsX
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.set_notification.SetNotificationRequest
 import com.app.hihlo.model.staticModel.audioCallCoinsList
 import com.app.hihlo.model.staticModel.videoCallCoinsList

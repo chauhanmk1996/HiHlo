@@ -17,7 +17,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.BottomSheetBlockFlagBinding
 import com.app.hihlo.model.block_user.request.BlockUserRequest
 import com.app.hihlo.model.flag_user.request.FlagUserRequest
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.story_delete.request.StoryDeleteRequest
 import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.LOGIN_DATA

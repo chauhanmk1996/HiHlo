@@ -75,7 +75,7 @@ import com.app.hihlo.databinding.AdapterChatOtherAudioBinding
 import com.app.hihlo.databinding.FragmentUploadMediaBottomSheetBinding
 import com.app.hihlo.databinding.PopupChatSideOptionsBinding
 import com.app.hihlo.model.get_profile.UserDetailsX
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.save_recent_chat.request.SaveRecentChatRequest
 import com.app.hihlo.model.staticModel.chatMoreOptionsList
 import com.app.hihlo.preferences.LOGIN_DATA

@@ -18,8 +18,7 @@ import com.app.hihlo.base.BaseActivity
 import com.app.hihlo.databinding.ActivityHomeBinding
 import com.app.hihlo.databinding.ActivityRechargeCoinsBinding
 import com.app.hihlo.model.add_coins.AddCoinsRequest
-import com.app.hihlo.model.login.response.LoginResponse
-import com.app.hihlo.model.login.response.Payload
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.recharge_package.response.RechargePackageListResponse
 import com.app.hihlo.model.wallet_history.WalletHistoryResponse
 import com.app.hihlo.preferences.LOGIN_DATA
@@ -29,6 +28,7 @@ import com.app.hihlo.ui.profile.adapter.AdapterWalletHistory
 import com.app.hihlo.ui.profile.fragment.WithdrawCoinsFragment
 import com.app.hihlo.ui.profile.view_model.RechargeCoinsViewModel
 import com.app.hihlo.ui.profile.view_model.WalletHistoryViewModel
+import com.app.hihlo.ui.signUpToHome.LoginPayload
 import com.app.hihlo.utils.CommonUtils.showCustomDialogWithBinding
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
@@ -49,7 +49,7 @@ class RechargeCoinsActivity : BaseActivity<ActivityRechargeCoinsBinding>() , Pay
     var selectedCoins = ""
 
     var currentCoins: Int?=null
-    var loginResponse: Payload?=null
+    var loginResponse: LoginPayload?=null
     override fun getLayoutId(): Int {
         return R.layout.activity_recharge_coins // Ensure this points to the correct layout resource
     }
@@ -72,7 +72,7 @@ class RechargeCoinsActivity : BaseActivity<ActivityRechargeCoinsBinding>() , Pay
         super.onCreate(savedInstanceState)
 //        binding = ActivityRechargeCoinsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        loginResponse = Preferences.getCustomModelPreference<LoginResponse>(this, LOGIN_DATA)?.payload ?: Payload()
+        loginResponse = Preferences.getCustomModelPreference<LoginResponse>(this, LOGIN_DATA)?.payload ?: LoginPayload()
         Log.i("TAG", "onCreate loginResponse: "+loginResponse)
         onClick()
         binding.withdraw.isVisible = loginResponse?.isCreator==1

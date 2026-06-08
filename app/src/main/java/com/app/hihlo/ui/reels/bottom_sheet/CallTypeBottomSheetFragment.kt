@@ -10,7 +10,7 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentCallTypeBottomSheetBinding
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.staticModel.StaticLists.callTypeList
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences

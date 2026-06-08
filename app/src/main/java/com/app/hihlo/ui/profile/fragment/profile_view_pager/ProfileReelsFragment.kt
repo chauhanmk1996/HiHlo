@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.databinding.AdapterShowMediaViewPagerBinding
 import com.app.hihlo.model.get_profile.Data
 import com.app.hihlo.model.get_profile.Posts
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.reel.response.Creator
 import com.app.hihlo.model.reel.response.Pagination
 import com.app.hihlo.model.reel.response.Payload

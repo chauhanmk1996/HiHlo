@@ -16,7 +16,7 @@ import com.app.hihlo.R
 import com.app.hihlo.databinding.FragmentCaptureVideoBinding
 import com.app.hihlo.databinding.FragmentOpenAdBinding
 import com.app.hihlo.databinding.FragmentViewAdsBinding
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.chat.view_model.ChatViewModel

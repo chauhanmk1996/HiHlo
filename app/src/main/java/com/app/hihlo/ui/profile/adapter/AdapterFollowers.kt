@@ -12,7 +12,7 @@ import com.app.hihlo.databinding.AdapterFollowersBinding
 import com.app.hihlo.model.following_list.response.Following
 import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Story
-import com.app.hihlo.model.login.response.LoginResponse
+import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.ui.HomeNew.adapter.PostsAdapter.PostClickAction
