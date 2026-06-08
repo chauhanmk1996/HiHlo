@@ -93,6 +93,21 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="interest">Interest</string>
     <string name="choose_the_option_that_suits_you_best">Choose the option that suits you best.</string>
+    <string name="please_select_your_interest">Please select your interest</string>
+    <string name="change_your_password_ensure_it_differs_from_previous_ones_for_security">Change your password. Ensure it differs from previous ones for security</string>
+    <string name="enter_old_password">Enter old password</string>
+    <string name="old_password">Old Password</string>
+    <string name="enter_your_user_name">Enter Your Username</string>
+    <string name="details">Details</string>
+    <string name="enter_your_dob_and_select_your_gender_to_proceed">Enter your DOB and select your Gender to proceed.</string>
+    <string name="next">Next</string>
+    <string name="select_dob">Select DOB</string>
+    <string name="you_must_be_at_least_13_years_old">You must be at least 13 years old</string>
+    <string name="please_select_date_of_birth">Please select date of birth</string>
+    <string name="add_current_city">Add Current City</string>
+    <string name="search">Search...</string>
+    <string name="please_select_a_city">Please select a city</string>
+    <string name="no_city_found">No City Found!</string>
 
 
     <string-array name="City">

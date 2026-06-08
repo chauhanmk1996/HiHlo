@@ -50,6 +50,8 @@ class SigninFragment :
     private lateinit var firebaseAuth: FirebaseAuth
 
     override fun onInitDataBinding(viewBinding: FragmentSigninBinding) {
+        mViewModel.mEmailIdLiveData.value = ""
+        mViewModel.mPasswordLiveData.value = ""
         mViewModel.mDeviceTokenLiveData.value =
             Preferences.getStringPreference(requireContext(), FCM_TOKEN)
         setObserver()
@@ -298,9 +300,9 @@ class SigninFragment :
         }
 
         viewBinding.tvForgotPassword.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString("from", "login")
-            findNavController().navigate(R.id.forgotPasswordFragment, bundle)
+             val bundle = Bundle()
+             bundle.putString("from", "login")
+             findNavController().navigate(R.id.forgotPasswordFragment, bundle)
         }
 
         viewBinding.clGoogleLogin.setOnClickListener {

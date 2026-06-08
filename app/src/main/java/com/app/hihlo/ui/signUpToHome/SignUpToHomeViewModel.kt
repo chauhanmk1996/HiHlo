@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.app.hihlo.Global
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseViewModel
+import com.app.hihlo.model.city_list.response.CityListResponse
+import com.app.hihlo.model.gender_list.GenderListResponse
+import com.app.hihlo.model.interest_list.response.InterestListResponse
+import com.app.hihlo.ui.signUpToHome.SignUpRequest
 import com.app.hihlo.utils.AppValidator
 import com.app.hihlo.utils.LiveDataEvent
 import kotlinx.coroutines.Dispatchers
@@ -27,21 +31,23 @@ class SignUpToHomeViewModel : BaseViewModel() {
     val mConfirmPasswordLiveData = MutableLiveData<String>()
     val mOtpLiveData = MutableLiveData<String>()
     val resendOtpText = MutableLiveData<String>()
+    val mSearchLiveData = MutableLiveData<String>()
 
 
     val checkUserNameResponse = MutableLiveData<LiveDataEvent<CheckUserNameResponse>>()
     val socialSignUpResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
     val sendEmailOtpResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
     val verifyEmailOtpResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
-
-
+    val interestListResponse = MutableLiveData<LiveDataEvent<InterestListResponse>>()
+    val genderListResponse = MutableLiveData<LiveDataEvent<GenderListResponse>>()
+    val cityListResponse = MutableLiveData<LiveDataEvent<CityListResponse>>()
     val loginResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
     val socialLoginResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
     val forgotPasswordResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
     val resetPasswordResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
 
 
-    val signUpResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
+    val registerUserResponse = MutableLiveData<LiveDataEvent<LoginResponse>>()
 
     fun checkUsernameApi() {
         viewModelScope.launch {
@@ -56,6 +62,29 @@ class SignUpToHomeViewModel : BaseViewModel() {
                 checkUserNameResponse.postValue(LiveDataEvent(response))
             } catch (e: Exception) {
                 onError(e)
+            }
+        }
+    }
+
+    fun sendSignUpEmailApi() {
+        showLoading(true)
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.sendMailOtpApi(
+                        sendEmailOtpRequest = SendEmailOtpRequest(
+                            email = mEmailIdLiveData.value ?: "",
+                            username = mUserNameLiveData.value ?: "",
+                            purpose = "signup",
+                        )
+                    )
+                }
+                showLoading(false)
+                sendEmailOtpResponse.postValue(LiveDataEvent(response))
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                showLoading(false)
             }
         }
     }
@@ -144,6 +173,91 @@ class SignUpToHomeViewModel : BaseViewModel() {
         return true
     }
 
+    fun getInterestListApi() {
+        showLoading(true)
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.getInterestListApi()
+                }
+                showLoading(false)
+                interestListResponse.postValue(LiveDataEvent(response))
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    fun getGenderListApi() {
+        showLoading(true)
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.getGenderListApi()
+                }
+                showLoading(false)
+                genderListResponse.postValue(LiveDataEvent(response))
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    fun getCityListApi(page: Int,isLoading: Boolean) {
+        showLoading(isLoading)
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.getCityListApi(
+                        search = mSearchLiveData.value ?: "",
+                        page = page
+                    )
+                }
+                showLoading(false)
+                cityListResponse.postValue(LiveDataEvent(response))
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    fun registerUserApi(signUpRequest: SignUpRequest) {
+        showLoading(true)
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.registerUserApi(
+                        signUpRequest = SignUpRequest(
+                            name = signUpRequest.name ?: "",
+                            username = signUpRequest.username ?: "",
+                            email = signUpRequest.email ?: "",
+                            phoneNumber = signUpRequest.phoneNumber ?: "",
+                            gender_id = signUpRequest.gender_id ?: "",
+                            dob = signUpRequest.dob ?: "",
+                            password = signUpRequest.password ?: "",
+                            deviceType = signUpRequest.deviceType ?: "",
+                            deviceToken = signUpRequest.deviceToken ?: "",
+                            confirmPassword = signUpRequest.password ?: "",
+                            city = signUpRequest.city ?: "",
+                            interest_id = signUpRequest.interest_id ?: ""
+                        )
+                    )
+                }
+                showLoading(false)
+                registerUserResponse.postValue(LiveDataEvent(response))
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
 
     fun loginApi() {
         if (isValidLogin()) {
@@ -278,7 +392,7 @@ class SignUpToHomeViewModel : BaseViewModel() {
         }
 
         if (!AppValidator.isValidPassword(mPasswordLiveData.value!!)) {
-            showToast("Please enter valid valid password")
+            showToast("Please enter valid password")
             return false
         }
         if (mConfirmPasswordLiveData.value.isNullOrEmpty()) {
@@ -293,34 +407,6 @@ class SignUpToHomeViewModel : BaseViewModel() {
         return true
     }
 
-
-
-
-    fun registerUserApi() {
-        if (isValidSignUp()) {
-            showLoading(true)
-            viewModelScope.launch {
-                try {
-                    val response = withContext(Dispatchers.IO) {
-                        apiService.registerUserApi(
-                            signUpRequest = SignUpRequest(
-                                email = mEmailIdLiveData.value ?: "",
-                                password = mPasswordLiveData.value ?: "",
-                                deviceToken = mDeviceTokenLiveData.value ?: "",
-                                deviceType = "A",
-                            )
-                        )
-                    }
-                    showLoading(false)
-                    loginResponse.postValue(LiveDataEvent(response))
-                } catch (e: Exception) {
-                    onError(e)
-                } finally {
-                    showLoading(false)
-                }
-            }
-        }
-    }
 
     private fun isValidSignUp(): Boolean {
         if (mNameLiveData.value.isNullOrEmpty()) {
@@ -377,28 +463,5 @@ class SignUpToHomeViewModel : BaseViewModel() {
             return false
         }
         return true
-    }
-
-    fun signUpApi() {
-        showLoading(true)
-        viewModelScope.launch {
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    apiService.sendMailOtpApi(
-                        sendEmailOtpRequest = SendEmailOtpRequest(
-                            email = mEmailIdLiveData.value ?: "",
-                            username = mUserNameLiveData.value ?: "",
-                            purpose = "signup",
-                        )
-                    )
-                }
-                showLoading(false)
-                signUpResponse.postValue(LiveDataEvent(response))
-            } catch (e: Exception) {
-                onError(e)
-            } finally {
-                showLoading(false)
-            }
-        }
     }
 }

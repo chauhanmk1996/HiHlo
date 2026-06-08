@@ -20,6 +20,8 @@ class NewPasswordFragment :
     private var data: SignUpRequest? = null
 
     override fun onInitDataBinding(viewBinding: FragmentNewPasswordBinding) {
+        mViewModel.mPasswordLiveData.value = ""
+        mViewModel.mConfirmPasswordLiveData.value = ""
         arguments?.let {
             data = it.getParcelable("data")
         }

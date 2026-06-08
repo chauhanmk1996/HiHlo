@@ -65,6 +65,14 @@ class RegistrationFragment :
     }
 
     override fun onInitDataBinding(viewBinding: FragmentRegistrationBinding) {
+        mViewModel.mNameLiveData.value = ""
+        mViewModel.mUserNameLiveData.value = ""
+        mViewModel.mEmailIdLiveData.value = ""
+        mViewModel.mMobileNumberLiveData.value = ""
+        mViewModel.mPasswordLiveData.value = ""
+        mViewModel.mConfirmPasswordLiveData.value = ""
+
+
         mViewModel.mDeviceTokenLiveData.value =
             Preferences.getStringPreference(requireContext(), FCM_TOKEN)
         setUpGoogleSignUp()
@@ -102,7 +110,7 @@ class RegistrationFragment :
             }
         }
 
-        mViewModel.signUpResponse.observe(this) {
+        mViewModel.sendEmailOtpResponse.observe(this) {
             if (it?.peekContent() != null) {
                 val signUpRequest = SignUpRequest(
                     name = mViewModel.mNameLiveData.value ?: "",
@@ -122,7 +130,7 @@ class RegistrationFragment :
                 bundle.putParcelable("data", signUpRequest)
                 bundle.putString("purpose", "signup")
                 findNavController().navigate(R.id.otpFragment, bundle)
-                mViewModel.signUpResponse.value = null
+                mViewModel.sendEmailOtpResponse.value = null
             }
         }
 
@@ -325,7 +333,7 @@ class RegistrationFragment :
     private fun okClick(viewBinding: FragmentRegistrationBinding) {
         viewBinding.apply {
             btnSignUp.setOnClickListener {
-                mViewModel.signUpApi()
+                mViewModel.sendSignUpEmailApi()
             }
 
             clGoogleLogin.setOnClickListener {

@@ -25,6 +25,7 @@ class OtpFragment :
     private var signUpData: SignUpRequest? = null
 
     override fun onInitDataBinding(viewBinding: FragmentOtpBinding) {
+        viewBinding.otp.setText("")
         arguments?.let {
             from = it.getString("from").toString()
             signUpData = it.getParcelable("data")

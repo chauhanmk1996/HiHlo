@@ -848,7 +848,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="emailFragment">
+                  <entry key="forgotPasswordFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">

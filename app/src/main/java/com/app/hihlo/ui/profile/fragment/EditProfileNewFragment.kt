@@ -77,9 +77,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.activityViewModels
 import com.app.hihlo.model.city_list.response.CityListResponse
 import com.app.hihlo.model.gender_list.Gender
 import com.app.hihlo.ui.profile.adapter.InterestAdapter
+import com.app.hihlo.ui.signUpToHome.SignUpToHomeViewModel
 import com.app.hihlo.utils.CommonUtils.touchHideKeyBoard
 import com.app.hihlo.utils.UsernameInputFilter
 import com.app.hihlo.utils.getLength
@@ -87,20 +89,22 @@ import com.app.hihlo.utils.getString
 import java.text.BreakIterator
 import kotlin.collections.isNotEmpty
 import kotlin.collections.toMutableList
+import kotlin.getValue
 
 class EditProfileNewFragment : Fragment() {
-    private lateinit var binding:FragmentEditProfileNewBinding
-    private var userDetailsMain:UserDetailsX?=null
-    private var intrestList:List<Interests>?=null
+    private lateinit var binding: FragmentEditProfileNewBinding
+    private var userDetailsMain: UserDetailsX? = null
+    private var intrestList: List<Interests>? = null
     var imageUrl = ""
     var newImageUrl = ""
     var intrestName = ""
     var cityId = ""
-    var selectedGenderId_:Int?=null
-    var citiesList:List<Cities> = listOf()
-    var isValidUsername=1
+    var selectedGenderId_: Int? = null
+    var citiesList: List<Cities> = listOf()
+    var isValidUsername = 1
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private val viewModel: EditProfileViewModel by viewModels()
+    private val mViewModel: SignUpToHomeViewModel by activityViewModels()
 
     var from = ""
 
@@ -117,7 +121,7 @@ class EditProfileNewFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentEditProfileNewBinding.inflate(layoutInflater)
         initViews()
@@ -129,22 +133,29 @@ class EditProfileNewFragment : Fragment() {
             CommonUtils.touchHideKeyBoard(binding.root, requireActivity())
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            if (from=="social"||from=="normal"){}
-            else findNavController().popBackStack()
+            if (from == "social" || from == "normal") {
+            } else findNavController().popBackStack()
         }
         binding.etAbout.filters = arrayOf(GraphemeLengthFilter(150))
         return binding.root
     }
+
     private fun setBottomMargin() {
         val layoutParams = binding.mainLayout.layoutParams as? ViewGroup.MarginLayoutParams
         layoutParams?.let {
             val desiredMarginInPx = when (activity) {
                 is HomeActivity -> {
-                    if ((requireActivity() as HomeActivity).isGestureNavigation()) CommonUtils.dpToPx(0) else CommonUtils.dpToPx(-40)
+                    if ((requireActivity() as HomeActivity).isGestureNavigation()) CommonUtils.dpToPx(
+                        0
+                    ) else CommonUtils.dpToPx(-40)
                 }
+
                 is SignupFlowActivity -> {
-                    if ((requireActivity() as SignupFlowActivity).isGestureNavigation()) CommonUtils.dpToPx(0) else CommonUtils.dpToPx(-40)
+                    if ((requireActivity() as SignupFlowActivity).isGestureNavigation()) CommonUtils.dpToPx(
+                        0
+                    ) else CommonUtils.dpToPx(-40)
                 }
+
                 else -> CommonUtils.dpToPx(0) // Default or handle other activities
             }
             it.bottomMargin = desiredMarginInPx
@@ -159,7 +170,7 @@ class EditProfileNewFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 //val currentLength = s?.length ?: 0
                 val currentLength = getGraphemeCount(s.toString())
-                Log.e("LENGTH", "LENGTH>>> "+currentLength+" | full text: ${s}")
+                Log.e("LENGTH", "LENGTH>>> " + currentLength + " | full text: ${s}")
                 binding.tvCount.text = "$currentLength/150"
             }
 
@@ -174,7 +185,7 @@ class EditProfileNewFragment : Fragment() {
             end: Int,
             dest: Spanned?,
             dstart: Int,
-            dend: Int
+            dend: Int,
         ): CharSequence? {
             val newText = StringBuilder(dest)
                 .replace(dstart, dend, source?.subSequence(start, end).toString())
@@ -191,6 +202,7 @@ class EditProfileNewFragment : Fragment() {
             }
             return allowedText
         }
+
         private fun getGraphemeCount(text: String): Int {
             val it = BreakIterator.getCharacterInstance()
             it.setText(text)
@@ -225,7 +237,8 @@ class EditProfileNewFragment : Fragment() {
                 if (selectionStart < 1) {
                     setSelection(1)
                 }
-                viewModel.hitCheckUsernameDataApi(text.toString())
+                mViewModel.mUserNameLiveData.value = text.toString()
+                mViewModel.checkUsernameApi()
             }
             filters = arrayOf(
                 UsernameInputFilter(),
@@ -248,34 +261,38 @@ class EditProfileNewFragment : Fragment() {
         }
     }
 
-    private fun initViews(){
+    private fun initViews() {
         setUserDetail()
         hitGenderList()
         touchHideKeyBoard(binding.root, requireActivity())
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-            imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val imageUri: Uri? = result.data?.data
+        imagePickerLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val imageUri: Uri? = result.data?.data
 //                selectedImageUri = imageUri
-                if (imageUri != null) {
-                    openCropActivity(imageUri)
-                }else{
-                    Toast.makeText(requireActivity(), "Cancelled", Toast.LENGTH_SHORT).show()
+                    if (imageUri != null) {
+                        openCropActivity(imageUri)
+                    } else {
+                        Toast.makeText(requireActivity(), "Cancelled", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
-        }
         binding.spinTopic.setOnClickListener {
             loadTopicSpinner(intrestList) { selectedCity ->
                 // Use selectedCity object (id, name)
-                binding.spinTopic.text = selectedCity.name // Replace Spinner with TextView or set programmatically
-                intrestName = selectedCity.name ?: ""            }
+                binding.spinTopic.text =
+                    selectedCity.name // Replace Spinner with TextView or set programmatically
+                intrestName = selectedCity.name ?: ""
+            }
         }
         binding.spinCity.setOnClickListener {
             showCitySelectionDialog(citiesList) { selectedCity ->
                 // Use selectedCity object (id, name)
-                binding.spinCity.text = selectedCity.city_name // Replace Spinner with TextView or set programmatically
+                binding.spinCity.text =
+                    selectedCity.city_name // Replace Spinner with TextView or set programmatically
                 cityId = selectedCity.city_name.toString()
             }
         }
@@ -285,7 +302,7 @@ class EditProfileNewFragment : Fragment() {
 
     }
 
-    fun hitGenderList(){
+    fun hitGenderList() {
         viewModel.hitGenderListApi()
     }
 
@@ -293,100 +310,87 @@ class EditProfileNewFragment : Fragment() {
         val options = UCrop.Options().apply {
             setFreeStyleCropEnabled(true)
         }
-        val destinationUri = Uri.fromFile(File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        val destinationUri = Uri.fromFile(
+            File(
+                requireActivity().cacheDir,
+                "cropped_${System.currentTimeMillis()}.jpg"
+            )
+        )
         UCrop.of(imageUri, destinationUri)
             .withOptions(options)
             .start(requireContext(), this)
     }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data) // Always call super
-        Log.i("TAG", "onActivityResult: "+"outside")
-        if (resultCode==RESULT_OK){
-            when(requestCode){
+        Log.i("TAG", "onActivityResult: " + "outside")
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
                 UCrop.REQUEST_CROP -> {
                     val resultUri = UCrop.getOutput(data!!)
-                    Log.i("TAG", "onActivityResult: "+resultUri)
+                    Log.i("TAG", "onActivityResult: " + resultUri)
 //                    binding.ivUserImage.setImageURI(resultUri)
                     Glide.with(requireContext()).load(resultUri).into(binding.ivUserImage)
-                    val fileImage = uriToFile(resultUri ?: Uri.EMPTY,requireActivity())
+                    val fileImage = uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
                     uploadImage(fileImage)
                 }
             }
-        }else {
+        } else {
             Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
         }
 
     }
+
     private fun apiOberserver() {
         viewModel.hitInterestListDataApi()
+
         viewModel.getInterestListLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "interest list success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            val list = it.data.payload.rows
-                            intrestList = list
-                            Log.e("TAG", "apiOberserver: $intrestList")
-
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            it.data.payload?.rows?.let { list ->
+                                intrestList = list
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
                 }
             }
         }
-//        viewModel.hitCitiesListDataApi()
-        /*viewModel.getCitiesListLiveData().observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    Log.e("TAG", "city list success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            citiesList = it.data.payload.rows
-                          //  intrestList = list
-//                            loadCitySpinner(citiesList)
-//                            Log.e("TAG", "apiOberserver: $list", )
 
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
-                    }
-                    ProcessDialog.dismissDialog(true)
-                }
-                Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
-                }
-                Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
-                }
-            }
-        }*/
         viewModel.getEditProfileLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "update profile success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             val list = it.data.payload
                             Log.e("TAG", "apiOberserver: $list")
                             Log.e("TAG", "PRO IMG: $imageUrl | $newImageUrl")
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                            val loginData = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
+                            val loginData = Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )
                             loginData?.payload?.apply {
                                 city = list.user.city
                                 country = list.user.country
@@ -395,67 +399,42 @@ class EditProfileNewFragment : Fragment() {
                                 userId = list.user.id ?: loginData.payload.userId
                                 name = list.user.name
                                 phone = list.user.phone
-                                profileImage = if (newImageUrl!="") newImageUrl else imageUrl
+                                profileImage = if (newImageUrl != "") newImageUrl else imageUrl
                                 username = list.user.username
                                 userName = list.user.username
                             }
-                            Preferences.setCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA, loginData)
-                            if(from=="social"||from=="normal"){
+                            Preferences.setCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA,
+                                loginData
+                            )
+                            if (from == "social" || from == "normal") {
                                 val intent = Intent(requireActivity(), HomeActivity::class.java)
                                 startActivity(intent)
                                 requireActivity().finish()
-                            }else{
-                                val imageURL = if (newImageUrl!="") newImageUrl else imageUrl
-                                if(requireActivity() is HomeActivity) (requireActivity() as HomeActivity).updateProfileImage(imageURL)
+                            } else {
+                                val imageURL = if (newImageUrl != "") newImageUrl else imageUrl
+                                if (requireActivity() is HomeActivity) (requireActivity() as HomeActivity).updateProfileImage(
+                                    imageURL
+                                )
                                 findNavController().popBackStack()
                             }
 
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
-                Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
-                }
-            }
-        }
-        viewModel.getCheckUsernameLiveData().observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    Log.e("TAG", "check username success: ${Gson().toJson(it)}")
-                    if (it.data?.status==0||it.data?.status==1){
-                        if (it.data.code == 200){
-                            binding.apply {
-                                isValidUsername=it.data.payload.usernameAvailable
-                                if (it.data.payload.usernameAvailable==2||it.data.payload.usernameAvailable==3){
-//                                    usernameWarning.isVisible=true
-//                                    usernameWarning.text = it.data.message
-                                    usernameCheck.setImageResource(R.drawable.cancel_red)
-                                }else{
-//                                    usernameWarning.isVisible=false
-                                    usernameCheck.setImageResource(R.drawable.checked_green)
-                                }
-                            }
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
-                    }
-                    ProcessDialog.dismissDialog(true)
-                }
-                Status.LOADING -> {
-//                    ProcessDialog.showDialog(requireContext(), true)
-                }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -463,22 +442,35 @@ class EditProfileNewFragment : Fragment() {
             }
         }
 
+        mViewModel.checkUserNameResponse.observe(requireActivity()) {
+            if (it?.peekContent() != null) {
+                binding.apply {
+                    isValidUsername = it.peekContent().payload.usernameAvailable
+                    if (it.peekContent().payload.usernameAvailable == 2 || it.peekContent().payload.usernameAvailable == 3) {
+                        usernameCheck.setImageResource(R.drawable.cancel_red)
+                    } else {
+                        usernameCheck.setImageResource(R.drawable.checked_green)
+                    }
+                }
+                mViewModel.checkUserNameResponse.value = null
+            }
+        }
     }
 
-    private fun setUserDetail(){
+    private fun setUserDetail() {
         binding.apply {
-            if(from=="social" || from =="normal"){
+            if (from == "social" || from == "normal") {
                 backButton.visibility = View.GONE
-                tittle.text ="Complete Profile"
+                tittle.text = "Complete Profile"
                 updateButton.text = "Update Profile"
                 etName.isEnabled = false
-            }else{
+            } else {
                 spinGender.isEnabled = false
                 spinGender.isClickable = false
                 spinGender.isFocusable = false
 
             }
-            if(from == "normal"){
+            if (from == "normal") {
                 etName.isEnabled = false
                 etPhoneNumber.isEnabled = false
                 etEmail.isEnabled = false
@@ -518,6 +510,7 @@ class EditProfileNewFragment : Fragment() {
             }
         }
     }
+
     private fun setUsername(editText: EditText, username: String?) {
 
         val clean = username
@@ -538,21 +531,21 @@ class EditProfileNewFragment : Fragment() {
         lockAtSymbol(editText)
         attachUsernameWatcher(editText)
     }
+
     private fun attachUsernameWatcher(editText: EditText) {
-
         editText.doAfterTextChanged {
-
             if (editText.selectionStart < 1) {
                 editText.setSelection(1)
             }
 
-            // API call only when username part changes
             val username = editText.text.toString().removePrefix("@")
             if (username.isNotEmpty()) {
-                viewModel.hitCheckUsernameDataApi(username)
+                mViewModel.mUserNameLiveData.value = username
+                mViewModel.checkUsernameApi()
             }
         }
     }
+
     private fun lockAtSymbol(editText: EditText) {
         editText.setOnKeyListener { _, keyCode, event ->
             keyCode == KeyEvent.KEYCODE_DEL &&
@@ -575,9 +568,17 @@ class EditProfileNewFragment : Fragment() {
 
         return AmazonS3Client(credentials, clientConfig)
     }
-    fun uploadImageToS3(context: Context, file: File, bucketName: String, objectKey: String, accessKey: String, secretKey: String) {
+
+    fun uploadImageToS3(
+        context: Context,
+        file: File,
+        bucketName: String,
+        objectKey: String,
+        accessKey: String,
+        secretKey: String,
+    ) {
         // Initialize S3 client
-        val s3Client = initializeS3Client( accessKey, secretKey)
+        val s3Client = initializeS3Client(accessKey, secretKey)
 
         // Initialize TransferUtility
         val transferUtility = TransferUtility.builder()
@@ -585,7 +586,9 @@ class EditProfileNewFragment : Fragment() {
             .s3Client(s3Client)
             .build()
 
-        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(context)
+        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(
+            context
+        )
 
         // Start the upload
         val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
@@ -597,16 +600,24 @@ class EditProfileNewFragment : Fragment() {
                 if (state == TransferState.COMPLETED) {
                     // Upload completed successfully
 //                    val imageUrl = "https://$bucketName.s3.amazonaws.com/$objectKey"
-                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA)?.payload?.AWS_CDN_URL
+                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(
+                        safeContext,
+                        LOGIN_DATA
+                    )?.payload?.AWS_CDN_URL
                     val slash = "/"
                     val imageUrl = "$urlCdn$slash$objectKey"
                     newImageUrl = imageUrl
                     println("Image URL: $imageUrl")
-                    val loginData = Preferences.getCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA)
+                    val loginData =
+                        Preferences.getCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA)
                     loginData?.payload?.apply {
                         profileImage = newImageUrl
                     }
-                    Preferences.setCustomModelPreference<LoginResponse>(safeContext, LOGIN_DATA, loginData)
+                    Preferences.setCustomModelPreference<LoginResponse>(
+                        safeContext,
+                        LOGIN_DATA,
+                        loginData
+                    )
 
                 } else if (state == TransferState.FAILED) {
                     // Handle failure
@@ -620,17 +631,29 @@ class EditProfileNewFragment : Fragment() {
                     Log.d("UploadProgress", "Uploaded: $percentDone%")
                 }
             }
+
             override fun onError(id: Int, ex: Exception) {
                 // Handle error
                 ex.printStackTrace()
             }
         })
     }
+
     private fun uploadImage(imageFile: File) {
-        val s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+        val s3Data = Preferences.getCustomModelPreference<LoginResponse>(
+            requireContext(),
+            LOGIN_DATA
+        )?.payload?.S3Details
         val bucketName = s3Data?.BUCKET_NAME
         val objectKey = "${System.currentTimeMillis()}"
-        uploadImageToS3(requireContext(), imageFile, bucketName ?: "", objectKey, s3Data?.ACCESS_KEY ?: "", s3Data?.SECRET_KEY ?: "")
+        uploadImageToS3(
+            requireContext(),
+            imageFile,
+            bucketName ?: "",
+            objectKey,
+            s3Data?.ACCESS_KEY ?: "",
+            s3Data?.SECRET_KEY ?: ""
+        )
     }
 
     fun uriToFile(uri: Uri, activity: Activity): File {
@@ -673,7 +696,7 @@ class EditProfileNewFragment : Fragment() {
 
     }
 
-    private fun checkValidation(){
+    private fun checkValidation() {
         val etName = binding.etName.getString()
         val etUserName = binding.etUserName.getString()
         val etPhone = binding.etPhoneNumber.getString()
@@ -684,44 +707,43 @@ class EditProfileNewFragment : Fragment() {
         val country = binding.etCountry.getString()
         val intrest = intrestName
 
-        if(imageUrl==""&&newImageUrl==""){
+        if (imageUrl == "" && newImageUrl == "") {
             Toast.makeText(requireActivity(), "Please select your image", Toast.LENGTH_SHORT).show()
-        }
-        else if(etName.isEmpty()){
+        } else if (etName.isEmpty()) {
             Toast.makeText(requireActivity(), "Please enter your name", Toast.LENGTH_SHORT).show()
-        }else if(etUserName.isEmpty()){
+        } else if (etUserName.isEmpty()) {
             Toast.makeText(requireActivity(), "Please enter user name", Toast.LENGTH_SHORT).show()
-        }
-        else if(isValidUsername!=1){
-            Toast.makeText(requireActivity(), "Please enter a valid user name", Toast.LENGTH_SHORT).show()
-        }
-        else if(etPhone.isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter your phone number", Toast.LENGTH_SHORT).show()
-        }else if(dob.isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter date of birth", Toast.LENGTH_SHORT).show()
-        }else if(etEmail.isEmpty()){
+        } else if (isValidUsername != 1) {
+            Toast.makeText(requireActivity(), "Please enter a valid user name", Toast.LENGTH_SHORT)
+                .show()
+        } else if (etPhone.isEmpty()) {
+            Toast.makeText(requireActivity(), "Please enter your phone number", Toast.LENGTH_SHORT)
+                .show()
+        } else if (dob.isEmpty()) {
+            Toast.makeText(requireActivity(), "Please enter date of birth", Toast.LENGTH_SHORT)
+                .show()
+        } else if (etEmail.isEmpty()) {
             Toast.makeText(requireActivity(), "Please enter your email", Toast.LENGTH_SHORT).show()
-        }else if(!CommonUtils.isValidEmail(etEmail.toString())){
+        } else if (!CommonUtils.isValidEmail(etEmail.toString())) {
             Toast.makeText(requireActivity(), "Please enter valid email", Toast.LENGTH_SHORT).show()
-        }else if(cityId.isNullOrBlank()){
+        } else if (cityId.isNullOrBlank()) {
             Toast.makeText(requireActivity(), "Please select city", Toast.LENGTH_SHORT).show()
-        }
-        else if(aboutMe.isEmpty()){
+        } else if (aboutMe.isEmpty()) {
             Toast.makeText(requireActivity(), "Please enter your Bio.", Toast.LENGTH_SHORT).show()
-        }else{
+        } else {
             var imageUrlToSend = ""
-            if(newImageUrl.isEmpty()){
+            if (newImageUrl.isEmpty()) {
                 imageUrlToSend = imageUrl
-            }else{
+            } else {
                 imageUrlToSend = newImageUrl
             }
-            val gender = binding.spinGender.selectedItemId.toInt()+1
+            val gender = binding.spinGender.selectedItemId.toInt() + 1
             val model = EditProfileRequest(
                 name = etName.toString(),
                 username = etUserName.toString(),
                 phone = etPhone.toString(),
                 dob = dob.toString(),
-               // gender_id = gender.toString(),
+                // gender_id = gender.toString(),
                 gender_id = selectedGenderId_.toString(),
                 email = etEmail.toString(),
                 city = city.toString(),
@@ -731,9 +753,14 @@ class EditProfileNewFragment : Fragment() {
                 about = aboutMe.toString(),
 
 
-            )
+                )
             Log.e("TAG", "checkValidation: $model")
-            viewModel.hitEditProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, model)
+            viewModel.hitEditProfileDataApi(
+                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken, model
+            )
             //updateApi()
         }
     }
@@ -769,7 +796,7 @@ class EditProfileNewFragment : Fragment() {
 
         // Make dialog fill width
         val window = dialog.window
-        window?.setBackgroundDrawable(  Color.TRANSPARENT.toDrawable())
+        window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val params = window?.attributes
         params?.width = WindowManager.LayoutParams.MATCH_PARENT
         params?.height = WindowManager.LayoutParams.WRAP_CONTENT
@@ -804,13 +831,6 @@ class EditProfileNewFragment : Fragment() {
         dialog.show()
 
 
-
-
-
-
-
-
-
         /*val adapter = InterestSpinnerAdapter(requireContext(), intrestList)
         binding.spinTopic.adapter = adapter
 
@@ -832,6 +852,7 @@ class EditProfileNewFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }*/
     }
+
     /*private fun loadCitySpinner(list: List<Cities>) {
         val cityName = list.map { it.city_name }
         val adapter = ArrayAdapter(
@@ -862,7 +883,7 @@ class EditProfileNewFragment : Fragment() {
 
         // Make dialog fill width
         val window = dialog.window
-        window?.setBackgroundDrawable(  Color.TRANSPARENT.toDrawable())
+        window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         val params = window?.attributes
         params?.width = WindowManager.LayoutParams.MATCH_PARENT
         params?.height = WindowManager.LayoutParams.WRAP_CONTENT
@@ -874,15 +895,19 @@ class EditProfileNewFragment : Fragment() {
         val rvCities = dialog.findViewById<RecyclerView>(R.id.rvCities)
 
         var isLoading = false
-        var currentPage=1
+        var currentPage = 1
         val adapter = CityAdapter(listOf()) {
             onSelected(it)
             dialog.dismiss()
         }
-        val cityList : MutableList<Cities> = mutableListOf()
+        val cityList: MutableList<Cities> = mutableListOf()
         rvCities.layoutManager = LinearLayoutManager(requireContext())
         rvCities.adapter = adapter
-        viewModel.hitCitiesListDataApi("", "10", currentPage.toString())  // Call API with search + limit
+        viewModel.hitCitiesListDataApi(
+            "",
+            "10",
+            currentPage.toString()
+        )  // Call API with search + limit
         viewModel.getCitiesListLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -891,11 +916,11 @@ class EditProfileNewFragment : Fragment() {
                         val newList = it.data.payload.cities
                         if (etSearch.text.toString().isNotEmpty()) {
                             adapter.filterList(newList)
-                        }else{
+                        } else {
                             if (it.data.payload.cities.isNotEmpty() == true) {
-                                isLoading=true
+                                isLoading = true
                                 cityList.addAll(newList.toMutableList())
-                                if (currentPage == 1 ) {
+                                if (currentPage == 1) {
                                     adapter.filterList(cityList)
                                 } else {
                                     adapter.filterList(cityList)
@@ -905,9 +930,11 @@ class EditProfileNewFragment : Fragment() {
                         }
                     }
                 }
+
                 Status.ERROR -> {
                     Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
                 }
+
                 Status.LOADING -> {
                     // Optional: show progress inside dialog
                 }
@@ -918,10 +945,14 @@ class EditProfileNewFragment : Fragment() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager?
                 if (layoutManager?.findLastVisibleItemPosition() == adapter.itemCount - 2) {
-                    Log.i("TAG", "onScrolled: "+"triggered")
+                    Log.i("TAG", "onScrolled: " + "triggered")
                     if (isLoading) {
                         currentPage++
-                        viewModel.hitCitiesListDataApi("", "10", currentPage.toString())  // Call API with search + limit
+                        viewModel.hitCitiesListDataApi(
+                            "",
+                            "10",
+                            currentPage.toString()
+                        )  // Call API with search + limit
                     }
                     isLoading = false
                 }
@@ -931,7 +962,7 @@ class EditProfileNewFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                currentPage=1
+                currentPage = 1
                 cityList.clear()
                 val query = s.toString().trim()
                 viewModel.hitCitiesListDataApi(query, "10")  // Call API with search + limit
@@ -958,7 +989,11 @@ class EditProfileNewFragment : Fragment() {
                 return view
             }
 
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup,
+            ): View {
                 val view = super.getDropDownView(position, convertView, parent)
                 // ✅ Set background for dropdown items
                 if (position == binding.spinGender.selectedItemPosition) {
@@ -974,13 +1009,19 @@ class EditProfileNewFragment : Fragment() {
         binding.spinGender.adapter = adapter
 
         // ✅ Pre-select gender if exists
-        val selectedIndex = genderNames.indexOfFirst { it.equals(userDetailsMain?.gender, ignoreCase = true) }
+        val selectedIndex =
+            genderNames.indexOfFirst { it.equals(userDetailsMain?.gender, ignoreCase = true) }
         if (selectedIndex >= 0) {
             binding.spinGender.setSelection(selectedIndex)
         }
 
         binding.spinGender.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long,
+            ) {
                 selectedGenderId_ = selectedGenderId[position]
                 Log.d("TAG", "onItemSelected: ${selectedGenderId_}")
             }
@@ -992,6 +1033,7 @@ class EditProfileNewFragment : Fragment() {
     fun Int.dpToPx(context: Context): Int {
         return (this * context.resources.displayMetrics.density).toInt()
     }
+
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1006,7 +1048,8 @@ class EditProfileNewFragment : Fragment() {
                     focusedView.getGlobalVisibleRect(outRect)
                     if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
                         focusedView.clearFocus()
-                        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        val imm =
+                            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                         imm.hideSoftInputFromWindow(focusedView.windowToken, 0)
                     }
                 }
@@ -1045,30 +1088,34 @@ class EditProfileNewFragment : Fragment() {
 //        )
     }
 
-    fun setObserver(){
+    fun setObserver() {
         viewModel.getGenderLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             var data = it.data.payload.genderList
                             Log.d("TAG", "setOsdcdcbserver: ${it.data.payload}")
                             initGenderSpinner(data)
 
                             //  setCountData(it.data.payload.userDetails.posts_count, it.data.payload.userDetails.followers_count, it.data.payload.userDetails.following_count)
 
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)

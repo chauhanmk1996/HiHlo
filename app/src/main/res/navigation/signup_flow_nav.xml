@@ -41,19 +41,19 @@
         tools:layout="@layout/fragment_new_password" />
     <fragment
         android:id="@+id/addDetailsFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.AddDetailsFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.AddDetailsFragment"
         android:label="AddDetailsFragment"
         tools:layout="@layout/fragment_add_details" />
     <fragment
         android:id="@+id/addCountryFragment"
-        android:name="com.app.hihlo.ui.signup.fragment.AddCountryFragment"
+        android:name="com.app.hihlo.ui.signUpToHome.AddCountryFragment"
         android:label="AddCountryFragment"
         tools:layout="@layout/fragment_add_country" />
     <fragment
         android:id="@+id/selectInterestFragment"
         android:name="com.app.hihlo.ui.signUpToHome.SelectInterestFragment"
         android:label="SelectInterestFragment"
-        tools:layout="@layout/fragment_select_intrest" />
+        tools:layout="@layout/fragment_select_interest" />
     <fragment
         android:id="@+id/termsConditionsFragment"
         android:name="com.app.hihlo.ui.signUpToHome.TermsConditionsFragment"

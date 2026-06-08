@@ -29,8 +29,7 @@ class SignupFlowActivity :
     }
 
     private fun setUpNavFragment() {
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.signup_nav_host_fragment) as NavHostFragment
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.signup_nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         val loginData = Preferences.getCustomModelPreference<LoginResponse>(
             this,

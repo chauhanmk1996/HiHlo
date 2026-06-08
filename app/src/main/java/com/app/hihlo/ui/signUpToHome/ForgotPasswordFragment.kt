@@ -15,6 +15,7 @@ class ForgotPasswordFragment :
     private var from = ""
 
     override fun onInitDataBinding(viewBinding: FragmentForgotPasswordBinding) {
+        mViewModel.mEmailIdLiveData.value = ""
         arguments?.let {
             from = it.getString("from").toString()
         }

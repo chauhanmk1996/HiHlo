@@ -1,191 +1,110 @@
 package com.app.hihlo.ui.profile.fragment
 
-import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.fragment.app.viewModels
-import androidx.navigation.NavOptions
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.app.hihlo.R
+import com.app.hihlo.base.BaseNewFragment
 import com.app.hihlo.databinding.FragmentChangePasswordBinding
 import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
-import com.app.hihlo.ui.home.activity.HomeActivity
-import com.app.hihlo.ui.signup.model.ChangePasswordRequest
-import com.app.hihlo.ui.signup.view_model.ResetPasswordViewModel
+import com.app.hihlo.ui.profile.view_model.SettingViewModel
 import com.app.hihlo.utils.CommonUtils
-import com.app.hihlo.utils.CommonUtils.setupUIToHideKeyboard
-import com.app.hihlo.utils.getString
-import com.app.hihlo.utils.network_utils.ProcessDialog
-import com.app.hihlo.utils.network_utils.Status
-import com.google.gson.Gson
+import com.app.hihlo.utils.getLength
 import kotlin.getValue
 
-class ChangePasswordFragment : Fragment() {
-    private lateinit var binding: FragmentChangePasswordBinding
+class ChangePasswordFragment :
+    BaseNewFragment<FragmentChangePasswordBinding, SettingViewModel>(R.layout.fragment_change_password) {
+
+    val mViewModel: SettingViewModel by activityViewModels()
     private var isOldPassHidden = true
-    private var isPassHidden = true
-    private var isCnfPassHidden = true
-    private val resetPasswordViewModel: ResetPasswordViewModel by viewModels()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
+    private var isNewPassHidden = true
+    private var isConfirmPassHidden = true
 
+    override fun onInitDataBinding(viewBinding: FragmentChangePasswordBinding) {
+        observer()
+        setPasswordToggle(viewBinding)
+        onClick(viewBinding)
+    }
+
+    private fun observer() {
+        mViewModel.changePasswordResponse.observe(this) {
+            if (it?.peekContent() != null) {
+                showToast(it.peekContent().message ?: "")
+                findNavController().popBackStack()
+                mViewModel.changePasswordResponse.value = null
+            }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentChangePasswordBinding.inflate(layoutInflater)
-        initViews()
-        //(requireContext() as HomeActivity).setOnlineStatusVisibility(true)
-        return binding.root
-    }
-
-    private fun initViews() {
-        setPasswordToggle()
-        setupUIToHideKeyboard(binding.root, requireActivity())
-        binding.backButton.setOnClickListener {
-            //(requireContext() as HomeActivity).setOnlineStatusVisibility(false)
-            findNavController().popBackStack()
-        }
-        binding.btnChangePassword.setOnClickListener {
-            checkValidation()
-        }
-    }
-
-    private fun checkValidation() {
-        val oldPassword = binding.oldPassword.getString()
-        val newPassword = binding.password.getString()
-        val cnfNewPassword = binding.etCnfpassword.getString()
-        if (oldPassword.isEmpty()) {
-            Toast.makeText(requireActivity(), "Please enter old password", Toast.LENGTH_SHORT)
-                .show()
-        } else if (newPassword.isEmpty()) {
-            Toast.makeText(requireActivity(), "Please enter new password", Toast.LENGTH_SHORT)
-                .show()
-        } else if (cnfNewPassword.isEmpty()) {
-            Toast.makeText(
-                requireActivity(),
-                "Please enter confirm new password",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else if (newPassword != cnfNewPassword) {
-            Toast.makeText(
-                requireActivity(),
-                "New password and confirm password not matched",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            val model = ChangePasswordRequest(
-                oldPassword = oldPassword,
-                newPassword = newPassword,
-                confirmedNewPassword = cnfNewPassword
-            )
-            hitChangePasswordApi(model)
-        }
-    }
-
-    private fun hitChangePasswordApi(model: ChangePasswordRequest) {
-        resetPasswordViewModel.hitChangePassword(
-            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                requireContext(),
-                LOGIN_DATA
-            )?.payload?.authToken, model
-        )
-        resetPasswordViewModel.getChangePasswordLiveDataLiveData().observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    Log.e("TAG", "change pass success: ${Gson().toJson(it)}")
-                    if (it.data?.status == 1) {
-                        if (it.data.code == 200) {
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
-                            findNavController().popBackStack()
-                        } else {
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                    ProcessDialog.dismissDialog(true)
+    private fun setPasswordToggle(viewBinding: FragmentChangePasswordBinding) {
+        viewBinding.apply {
+            etOldPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+            ivOldPasswordToggle.setOnClickListener {
+                isOldPassHidden = if (isOldPassHidden) {
+                    ivOldPasswordToggle.setImageResource(R.drawable.open_eye_2)
+                    etOldPassword.transformationMethod =
+                        HideReturnsTransformationMethod.getInstance()
+                    false
+                } else {
+                    ivOldPasswordToggle.setImageResource(R.drawable.close_eye_2)
+                    etOldPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+                    true
                 }
+                etOldPassword.setSelection(etOldPassword.getLength())
+            }
 
-                Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
+            etNewPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+            ivNewPasswordToggle.setOnClickListener {
+                isNewPassHidden = if (isNewPassHidden) {
+                    ivNewPasswordToggle.setImageResource(R.drawable.open_eye_2)
+                    etNewPassword.transformationMethod =
+                        HideReturnsTransformationMethod.getInstance()
+                    false
+                } else {
+                    ivNewPasswordToggle.setImageResource(R.drawable.close_eye_2)
+                    etNewPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+                    true
                 }
+                etNewPassword.setSelection(etNewPassword.getLength())
+            }
 
-                Status.ERROR -> {
-                    Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
+            etConfirmPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
+            ivConfirmPasswordToggle.setOnClickListener {
+                isConfirmPassHidden = if (isConfirmPassHidden) {
+                    ivConfirmPasswordToggle.setImageResource(R.drawable.open_eye_2)
+                    etConfirmPassword.transformationMethod =
+                        HideReturnsTransformationMethod.getInstance()
+                    false
+                } else {
+                    ivConfirmPasswordToggle.setImageResource(R.drawable.close_eye_2)
+                    etConfirmPassword.transformationMethod =
+                        CommonUtils.DotPasswordTransformationMethod
+                    true
                 }
+                etConfirmPassword.setSelection(etConfirmPassword.getLength())
             }
         }
     }
 
-    private fun setPasswordToggle() {
-
-        //for old password
-        binding.oldPassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
-        binding.oldPasswordToggle.setOnClickListener {
-            isOldPassHidden = if (isOldPassHidden) {
-                binding.oldPasswordToggle.setImageResource(R.drawable.open_eye_2)
-                binding.oldPassword.transformationMethod =
-                    HideReturnsTransformationMethod.getInstance()
-                false
-            } else {
-                binding.oldPasswordToggle.setImageResource(R.drawable.close_eye_2)
-                binding.oldPassword.transformationMethod =
-                    CommonUtils.DotPasswordTransformationMethod
-                true
+    private fun onClick(viewBinding: FragmentChangePasswordBinding) {
+        viewBinding.apply {
+            ivBack.setOnClickListener {
+                findNavController().popBackStack()
             }
-            binding.oldPassword.setSelection(binding.oldPassword.text.toString().length)
-        }
 
-        //for new Password
-        binding.password.transformationMethod = CommonUtils.DotPasswordTransformationMethod
-        binding.passwordToggle.setOnClickListener {
-            isPassHidden = if (isPassHidden) {
-                binding.passwordToggle.setImageResource(R.drawable.open_eye_2)
-                binding.password.transformationMethod =
-                    HideReturnsTransformationMethod.getInstance()
-                false
-            } else {
-                binding.passwordToggle.setImageResource(R.drawable.close_eye_2)
-                binding.password.transformationMethod = CommonUtils.DotPasswordTransformationMethod
-                true
+            btnChangePassword.setOnClickListener {
+                val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken
+                mViewModel.changePasswordApi(token)
             }
-            binding.password.setSelection(binding.password.text.toString().length)
         }
+    }
 
-
-        //for confirm new password
-        binding.etCnfpassword.transformationMethod = CommonUtils.DotPasswordTransformationMethod
-        binding.cnfPwdToggle.setOnClickListener {
-            isCnfPassHidden = if (isCnfPassHidden) {
-                binding.cnfPwdToggle.setImageResource(R.drawable.open_eye_2)
-                binding.etCnfpassword.transformationMethod =
-                    HideReturnsTransformationMethod.getInstance()
-                false
-            } else {
-                binding.cnfPwdToggle.setImageResource(R.drawable.close_eye_2)
-                binding.etCnfpassword.transformationMethod =
-                    CommonUtils.DotPasswordTransformationMethod
-                true
-            }
-            binding.etCnfpassword.setSelection(binding.etCnfpassword.text.toString().length)
-        }
-
-
+    override fun getViewModel(): SettingViewModel {
+        return mViewModel
     }
 }

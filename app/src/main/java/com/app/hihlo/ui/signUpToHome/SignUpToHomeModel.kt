@@ -105,12 +105,6 @@ data class VerifyEmailOtpRequest(
     var otp: String? = null
 )
 
-
-
-
-
-
-
 @Keep
 @Parcelize
 data class SignUpRequest(

@@ -1,6 +1,9 @@
 package com.app.hihlo.connection
 
 import com.app.hihlo.constant.ApiConstant
+import com.app.hihlo.model.city_list.response.CityListResponse
+import com.app.hihlo.model.gender_list.GenderListResponse
+import com.app.hihlo.model.interest_list.response.InterestListResponse
 import com.app.hihlo.ui.signUpToHome.ChangePasswordRequest
 import com.app.hihlo.ui.signUpToHome.CheckUserNameRequest
 import com.app.hihlo.ui.signUpToHome.CheckUserNameResponse
@@ -24,8 +27,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.java
 
@@ -86,14 +91,26 @@ interface ApiServices {
         @Body verifyEmailOtpRequest: VerifyEmailOtpRequest,
     ): LoginResponse
 
-    @POST(ApiConstant.SIGN_UP)
+    @GET(ApiConstant.GET_INTEREST_LIST)
+    suspend fun getInterestListApi(
+    ): InterestListResponse
+
+    @GET(ApiConstant.GET_GENDER_LIST)
+    suspend fun getGenderListApi(
+        @Query("type") login: String? = null,
+    ): GenderListResponse
+
+    @GET(ApiConstant.GET_CITY_LIST)
+    suspend fun getCityListApi(
+        @Query("search") search: String? = null,
+        @Query("limit") limit: String? = "20",
+        @Query("page") page: Int = 1,
+    ): CityListResponse
+
+    @POST(ApiConstant.REGISTER_USER)
     suspend fun registerUserApi(
         @Body signUpRequest: SignUpRequest,
     ): LoginResponse
-
-
-
-
 
     @POST(ApiConstant.LOGIN)
     suspend fun loginApi(
@@ -110,15 +127,10 @@ interface ApiServices {
         @Body resetPasswordRequest: ResetPasswordRequest,
     ): LoginResponse
 
-
-
-
-
-
-    @POST("change-password")
+    @POST(ApiConstant.CHANGE_PASSWORD)
     suspend fun changePasswordApi(
         @Header("Authorization") token: String,
-        @Body requestBody: ChangePasswordRequest,
+        @Body changePasswordRequest: ChangePasswordRequest,
     ): LoginResponse
 
 }
