@@ -22,12 +22,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // resValue("string", "server_client_id", project.findProperty("SERVER_CLIENT_ID")?.toString() ?: "")
-        // resValue("string", "google_map_key", project.findProperty("GOOGLE_MAP_KEY")?.toString() ?: "")
-        // resValue("string", "facebook_app_id", project.findProperty("FACEBOOK_APP_ID")?.toString() ?: "")
-        // resValue("string", "fb_login_protocol_scheme", project.findProperty("FACEBOOK_LOGIN_PROTOCOL_SCHEME")?.toString() ?: "")
-        // resValue("string", "facebook_client_token", project.findProperty("FACEBOOK_CLIENT_TOKEN")?.toString() ?: "")
     }
 
     buildTypes {
@@ -72,6 +66,20 @@ android {
         )
 
         baseline = file("lint-baseline.xml")
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+
+            include(
+                "armeabi-v7a",
+                "arm64-v8a"
+            )
+
+            isUniversalApk = false
+        }
     }
 }
 
@@ -160,8 +168,6 @@ dependencies {
     implementation(libs.photoeditor)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
-
-    //coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     //Otp View
     implementation(libs.otp)

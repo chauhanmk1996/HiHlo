@@ -19,8 +19,7 @@ import com.app.hihlo.utils.network_utils.Status
 import com.google.gson.Gson
 
 
-
-class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
+class EditProfileFragment : BaseFragment<FragmentEditProfileBinding>() {
     private lateinit var adapter: AdapterEditProfile
     private var userDetails = UserDetailsX()
     private val args: EditProfileFragmentArgs by navArgs()
@@ -29,40 +28,49 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
     override fun initView(savedInstanceState: Bundle?) {
         userDetails = args.userDetails
 
-        Log.i("TAG", "initView: "+userDetails)
-        adapter = AdapterEditProfile(editProfileColumnsList, userDetails){ key ->
-                when (key) {
-                    "name" -> {
-                        // Handle name update
-                    }
-                    "username" -> {
-                        // Handle username update
-                    }
-                    "phone" -> {
-                        // Handle phone update
-                    }
-                    "dob" -> {
-                        // Handle DOB update
-                    }
-                    "email" -> {
-                        // Handle email update
-                    }
-                    "city" -> {
-                        // Handle city update
-                    }
-                    "country" -> {
-                        // Handle country update
-                    }
-                    "interestId" -> {
-                        // Handle topic/interest update
-                    }
-                    "about" -> {
-                        // Handle about update
-                    }
-                    else -> {
-                        // Unknown key - handle gracefully
-                    }
+        Log.i("TAG", "initView: " + userDetails)
+        adapter = AdapterEditProfile(editProfileColumnsList, userDetails) { key ->
+            when (key) {
+                "name" -> {
+                    // Handle name update
                 }
+
+                "username" -> {
+                    // Handle username update
+                }
+
+                "phone" -> {
+                    // Handle phone update
+                }
+
+                "dob" -> {
+                    // Handle DOB update
+                }
+
+                "email" -> {
+                    // Handle email update
+                }
+
+                "city" -> {
+                    // Handle city update
+                }
+
+                "country" -> {
+                    // Handle country update
+                }
+
+                "interestId" -> {
+                    // Handle topic/interest update
+                }
+
+                "about" -> {
+                    // Handle about update
+                }
+
+                else -> {
+                    // Unknown key - handle gracefully
+                }
+            }
 
         }
         binding.editProfileRecycler.adapter = adapter
@@ -78,7 +86,7 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
         binding.updateButton.setOnClickListener {
 //            val editProfileRequest = adapter.collectEditProfileRequest()
 //            Log.i("TAG", "onClick: "+editProfileRequest)
-      //      viewModel.hitEditProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, editProfileRequest)
+            //      viewModel.hitEditProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, editProfileRequest)
         }
 
         binding.backButton.setOnClickListener {
@@ -91,22 +99,26 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             findNavController().popBackStack()
 
 
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -117,22 +129,25 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "interest list success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 
 
-
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -145,33 +160,34 @@ class EditProfileFragment  : BaseFragment<FragmentEditProfileBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "interest list success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 
 
-
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
                 }
             }
         }
-
     }
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_edit_profile
     }
-
 }

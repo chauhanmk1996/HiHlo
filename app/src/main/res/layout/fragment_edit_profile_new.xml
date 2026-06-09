@@ -4,6 +4,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.app.hihlo.ui.signUpToHome.SignUpToHomeViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,17 +21,15 @@
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="35dp"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/backButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="10dp"
-                android:src="@drawable/back_button_pink_small"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_20"
+                android:padding="@dimen/dp_12"
+                android:src="@drawable/back_button_pink"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,16 +37,16 @@
                 android:id="@+id/tittle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 android:fontFamily="@font/manrope_light"
                 android:gravity="start|center_vertical"
-                android:text="Edit Profile"
+                android:text="@string/edit_profile"
                 android:textColor="@color/white"
                 android:textSize="22sp"
-                android:layout_marginStart="10dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/backButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/backButton"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/backButton" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -53,12 +54,12 @@
             android:id="@+id/nestedScrollView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:fillViewport="true"
-            app:layout_constraintTop_toBottomOf="@id/headerLayout"
             app:layout_constraintBottom_toTopOf="@id/bottomLayout"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -73,7 +74,6 @@
                     android:layout_width="86dp"
                     android:layout_height="86dp"
                     android:layout_marginStart="15dp"
-                    android:layout_marginTop="18dp"
                     app:cardCornerRadius="100dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -86,6 +86,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@drawable/profile_placeholder" />
+
                 </com.google.android.material.card.MaterialCardView>
 
                 <androidx.appcompat.widget.AppCompatImageView
@@ -105,7 +106,7 @@
                     android:fontFamily="@font/manrope_medium"
                     android:gravity="center_horizontal"
                     android:paddingHorizontal="20dp"
-                    android:text="Change Profile Picture"
+                    android:text="@string/change_profile_picture"
                     android:textColor="@color/white"
                     android:textSize="18sp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -138,7 +139,7 @@
                         android:layout_marginTop="5dp"
                         android:background="@drawable/background_10dp_corner_round"
                         android:backgroundTint="@color/black_303030"
-                        android:hint="Enter you name"
+                        android:hint="@string/enter_you_name"
                         android:inputType="textPersonName"
                         android:maxLength="50"
                         android:maxLines="1"
@@ -178,7 +179,7 @@
                         android:background="@drawable/background_10dp_corner_round"
                         android:backgroundTint="@color/black_303030"
                         android:capitalize="none"
-                        android:hint="Enter your user name"
+                        android:hint="@string/enter_your_user_name"
                         android:imeOptions="actionDone"
                         android:inputType="text"
                         android:maxLength="40"
@@ -213,7 +214,6 @@
                         app:layout_constraintEnd_toEndOf="@id/etUserName"
                         app:layout_constraintTop_toBottomOf="@id/etUserName" />
 
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
@@ -231,7 +231,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="Phone Number"
+                        android:text="@string/phone_number"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -242,7 +242,7 @@
                         android:layout_marginTop="5dp"
                         android:background="@drawable/background_10dp_corner_round"
                         android:backgroundTint="@color/black_303030"
-                        android:hint="Enter your phone number"
+                        android:hint="@string/enter_your_phone_number"
                         android:inputType="phone"
                         android:maxLength="10"
                         android:maxLines="1"
@@ -268,7 +268,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="DOB"
+                        android:text="@string/dob"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -280,7 +280,7 @@
                         android:background="@drawable/background_10dp_corner_round"
                         android:backgroundTint="@color/black_303030"
                         android:focusable="false"
-                        android:hint="Enter your date of birth"
+                        android:hint="@string/enter_your_date_of_birth"
                         android:inputType="date"
                         android:maxLines="1"
                         android:padding="15dp"
@@ -305,7 +305,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="Gender"
+                        android:text="@string/gender"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -340,7 +340,9 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -358,7 +360,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="Email"
+                        android:text="@string/email"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -371,7 +373,7 @@
                         android:backgroundTint="@color/black_303030"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:hint="Enter your email"
+                        android:hint="@string/enter_your_email"
                         android:inputType="textEmailAddress"
                         android:maxLength="50"
                         android:padding="15dp"
@@ -380,7 +382,6 @@
                         android:textSize="16sp" />
 
                 </LinearLayout>
-
 
                 <LinearLayout
                     android:id="@+id/llCountry"
@@ -397,7 +398,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="Country"
+                        android:text="@string/country"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -409,7 +410,7 @@
                         android:background="@drawable/background_10dp_corner_round"
                         android:backgroundTint="@color/black_303030"
                         android:focusable="false"
-                        android:hint="Enter your country"
+                        android:hint="@string/enter_your_country"
                         android:padding="15dp"
                         android:textColor="@color/white"
                         android:textColorHint="#BFBBBB"
@@ -432,7 +433,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="City"
+                        android:text="@string/city"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -467,9 +468,10 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                </LinearLayout>
 
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/llTopic"
@@ -486,7 +488,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="Topic"
+                        android:text="@string/topic"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -504,7 +506,7 @@
                             android:layout_marginEnd="5dp"
                             android:entries="@array/City"
                             android:gravity="center_vertical"
-                            android:hint="Choose your interest"
+                            android:hint="@string/choose_your_interest"
                             android:maxLines="1"
                             android:paddingStart="15dp"
                             android:textColor="@color/white"
@@ -523,7 +525,9 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -541,7 +545,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/manrope_medium"
-                        android:text="Bio"
+                        android:text="@string/bio"
                         android:textColor="@color/white"
                         android:textSize="16sp" />
 
@@ -552,10 +556,10 @@
                         android:layout_marginTop="5dp"
                         android:background="@drawable/background_10dp_corner_round"
                         android:backgroundTint="@color/black_303030"
-                        android:hint="It’s like what i have.."
+                        android:hint="@string/it_s_like_what_i_have"
+                        android:imeOptions="actionDone"
                         android:maxLines="4"
                         android:padding="15dp"
-                        android:imeOptions="actionDone"
                         android:textColor="@color/white"
                         android:textColorHint="#BFBBBB"
                         android:textSize="16sp" />
@@ -574,6 +578,7 @@
                         app:layout_constraintEnd_toEndOf="parent" />
 
                 </LinearLayout>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>
@@ -591,22 +596,23 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/updateButton"
+                style="@style/MyButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="38dp"
                 android:layout_marginTop="15dp"
-                style="@style/MyButtonStyle"
-                app:layout_constraintTop_toBottomOf="@id/llAbout"
-                android:text="Update Profile"
+                android:layout_marginBottom="40dp"
                 android:fontFamily="@font/manrope_medium"
+                android:paddingVertical="15dp"
+                android:text="@string/update_profile"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="18sp"
-                android:textAllCaps="false"
                 app:backgroundTint="@color/theme"
-                android:paddingVertical="15dp"/>
-        </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toBottomOf="@id/llAbout" />
 
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

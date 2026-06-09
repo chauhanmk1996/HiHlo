@@ -1,11 +1,9 @@
 package com.app.hihlo.utils
 
-import android.util.Log
 import com.app.hihlo.R
 import com.app.hihlo.model.chat.MessageStatus
 import com.app.hihlo.model.chat.Messages
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -108,8 +106,6 @@ object ChatUtils {
         }
     }
     fun getUidLoggedIn(): String {
-        val firestore = FirebaseFirestore.getInstance()
-
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
             userid = auth.currentUser!!.uid

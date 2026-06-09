@@ -108,6 +108,21 @@
     <string name="search">Search...</string>
     <string name="please_select_a_city">Please select a city</string>
     <string name="no_city_found">No City Found!</string>
+    <string name="change_profile_picture">Change Profile Picture</string>
+    <string name="enter_you_name">Enter you name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="enter_your_phone_number">Enter your phone number</string>
+    <string name="dob">DOB</string>
+    <string name="enter_your_date_of_birth">Enter your date of birth</string>
+    <string name="gender">Gender</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="country">Country</string>
+    <string name="enter_your_country">Enter your country</string>
+    <string name="city">City</string>
+    <string name="topic">Topic</string>
+    <string name="choose_your_interest">Choose your interest</string>
+    <string name="bio">Bio</string>
+    <string name="it_s_like_what_i_have">It’s like what i have..</string>
 
 
     <string-array name="City">
