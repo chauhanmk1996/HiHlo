@@ -17,15 +17,14 @@
             android:id="@+id/userDetailsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="10dp"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/userImageCardView"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="16dp"
                 android:background="@drawable/gredient_circle"
                 android:padding="4dp"
                 app:cardCornerRadius="80dp"
@@ -70,25 +69,25 @@
                 android:id="@+id/nameLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                app:layout_constraintEnd_toStartOf="@+id/sideOptions"
+                android:layout_marginHorizontal="@dimen/dp_12"
+                app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
+                app:layout_constraintEnd_toStartOf="@+id/followButtonLayout"
                 app:layout_constraintStart_toEndOf="@+id/userImageCardView"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="@+id/userImageCardView">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/userName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
                     android:ellipsize="end"
                     android:fontFamily="@font/manrope_semibold"
                     android:includeFontPadding="false"
                     android:maxLines="1"
-                    android:text="Isha_00"
                     android:textColor="@color/white"
-                    android:textSize="13sp"
+                    android:textSize="13dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Isha_00" />
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
@@ -104,7 +103,6 @@
                     android:id="@+id/userLocation"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
                     android:ellipsize="end"
                     android:fontFamily="@font/manrope_regular"
                     android:maxLines="1"
@@ -115,15 +113,44 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/userName" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/followButtonLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"
+                app:layout_constraintEnd_toStartOf="@id/sideOptions"
+                app:layout_constraintTop_toTopOf="@+id/userImageCardView">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/followButtonImage"
+                    android:layout_width="63dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/follow_button_reel" />
+
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/sideOptions"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/more_option"
+                app:backgroundTint="@color/theme"
+                app:layout_constraintBottom_toBottomOf="@id/nameLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/nameLayout" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/captionContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/userImageCardView">
 
                 <!-- Collapsed version -->
@@ -131,15 +158,16 @@
                     android:id="@+id/captionCollapsed"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_16"
                     android:ellipsize="end"
                     android:fontFamily="@font/manrope_regular"
                     android:maxLines="1"
                     android:textColor="@color/white_FEFEFF"
-                    android:textSize="13sp"
-                    android:visibility="visible"
+                    android:textSize="13dp"
                     app:layout_constraintEnd_toStartOf="@+id/moreLessText"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/choose_photos_that_capture_your_personality_and_the_things_you_love_to_do" />
 
                 <!-- "More" button -->
                 <androidx.appcompat.widget.AppCompatTextView
@@ -148,14 +176,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:layout_marginTop="0dp"
+                    android:layout_marginEnd="@dimen/dp_8"
                     android:clickable="true"
                     android:focusable="true"
                     android:fontFamily="@font/manrope_bold"
-                    android:paddingHorizontal="0dp"
-                    android:paddingVertical="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingTop="@dimen/dp_8"
+                    android:paddingEnd="@dimen/dp_8"
+                    android:paddingBottom="@dimen/dp_8"
                     android:text="More"
                     android:textColor="@color/theme"
-                    android:textSize="13sp"
+                    android:textSize="13dp"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@id/captionCollapsed"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -166,58 +197,20 @@
                     android:id="@+id/captionExpanded"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/dp_16"
                     android:fontFamily="@font/manrope_regular"
                     android:textColor="@color/white_FEFEFF"
-                    android:textSize="13sp"
+                    android:textSize="13dp"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/choose_photos_that_capture_your_personality_and_the_things_you_love_to_do" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <LinearLayout
-                android:id="@+id/followButtonLayout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="2.45dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="start"
-                android:orientation="vertical"
-                android:visibility="visible"
-                app:layout_constraintEnd_toEndOf="@id/nameLayout"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/followButtonImage"
-                    android:layout_width="63dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/follow_button_reel" />
-            </LinearLayout>
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/sideOptions"
-                android:layout_width="27dp"
-                android:layout_height="27dp"
-                android:padding="2dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/more_option"
-                app:backgroundTint="@color/theme"
-                app:layout_constraintBottom_toBottomOf="@id/nameLayout"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/nameLayout" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--            android:minHeight="100dp"-->
-        <!--            android:maxHeight="350dp"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            android:layout_marginTop="10dp"-->
-        <!--            app:layout_constraintTop_toBottomOf="@id/userDetailsLayout">-->
-        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/postImage"
             android:layout_width="match_parent"
@@ -241,7 +234,7 @@
                 android:id="@+id/actionsGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="16dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -306,7 +299,7 @@
                 android:id="@+id/giftImage"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="16dp"
                 android:padding="2.3dp"
                 android:src="@drawable/giftbold"
                 app:layout_constraintBottom_toBottomOf="parent"

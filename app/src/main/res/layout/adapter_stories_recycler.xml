@@ -2,23 +2,18 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/storyLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_marginStart="7dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginTop="1dp"
             android:id="@+id/otherStoryCardview"
             android:layout_width="84dp"
             android:layout_height="84dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="7dp"
             android:background="@drawable/story_gray_border"
             app:cardCornerRadius="80dp"
             app:layout_constraintBottom_toTopOf="@id/name"
@@ -29,15 +24,14 @@
             app:strokeWidth="2dp">
 
             <com.google.android.material.card.MaterialCardView
-
                 android:layout_width="73dp"
                 android:layout_height="73dp"
                 android:layout_gravity="center"
                 app:cardCornerRadius="50dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:strokeColor="@color/black"
                 app:strokeWidth="0.5dp">
 
@@ -47,23 +41,22 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/sample_profile" />
+
             </com.google.android.material.card.MaterialCardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.card.MaterialCardView
-            android:layout_marginStart="7dp"
-            android:layout_marginEnd="7dp"
-            android:backgroundTint="@color/screen_background_black"
-
             android:id="@+id/myStoryCardView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="6dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
+            android:backgroundTint="@color/screen_background_black"
             app:cardCornerRadius="50dp"
             app:layout_constraintBottom_toBottomOf="@id/myStoryGradient"
             app:layout_constraintEnd_toEndOf="@id/myStoryGradient"
-
             app:layout_constraintStart_toStartOf="@id/myStoryGradient"
             app:layout_constraintTop_toTopOf="@id/myStoryGradient">
 
@@ -74,31 +67,33 @@
                 android:background="@color/theme"
                 android:scaleType="centerCrop"
                 android:src="@drawable/sample_profile" />
+
         </com.google.android.material.card.MaterialCardView>
 
         <View
-            android:layout_marginStart="7dp"
-            android:layout_marginEnd="7dp"
             android:id="@+id/myStoryGradient"
             android:layout_width="84dp"
             android:layout_height="84dp"
             android:layout_centerInParent="true"
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
             android:background="@drawable/story_gradient_border"
             android:gravity="center"
             app:layout_constraintBottom_toTopOf="@id/name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/plusBottomRight"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:elevation="2dp"
             android:layout_marginBottom="21dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:background="@drawable/black_circle"
-            android:visibility="gone">
+            android:elevation="2dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/ivPlusIcon"
@@ -107,19 +102,19 @@
                 android:padding="0dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/plus_icon_pink"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
             android:id="@+id/name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
             android:ellipsize="end"
             android:fontFamily="@font/manrope_regular"
             android:gravity="center_horizontal"
@@ -129,34 +124,34 @@
             android:text="My Story"
             android:textColor="@color/white"
             android:textSize="12sp"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:visibility="invisible"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
         <LinearLayout
             android:id="@+id/uploadLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
             android:layout_marginBottom="0dp"
+            android:background="@drawable/bg_upload_button"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingTop="1.5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="1.5dp"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="1.5dp"
-            android:paddingBottom="1.5dp"
-            android:background="@drawable/bg_upload_button"
-            android:visibility="visible">
+            app:layout_constraintStart_toStartOf="parent">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="1dp"
                 android:fontFamily="@font/manrope_semibold"
                 android:text="Upload"
-                android:layout_marginEnd="1dp"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
@@ -182,4 +177,5 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

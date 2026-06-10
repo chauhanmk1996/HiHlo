@@ -112,38 +112,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     override fun initView(savedInstanceState: Bundle?) {
         viewModel.hitGenderListApi()
-//        binding.swipeRefresh.setColorSchemeColors(
-//            ContextCompat.getColor(requireContext(), R.color.white)
-//        )
-//        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
-//            ContextCompat.getColor(requireContext(), R.color.white_10)
-//        )
-        //binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
-//        if (!viewModel.isHomeDataLoaded) {
-//            if(!UserDataManager.isGetBackToHome(requireContext())){
-//                Log.e("HIT", "HIT>>> IH")
-//                binding.progressBar.isVisible = false
-//                viewModel.currentPage = 1
-//                binding.swipeRefresh.isRefreshing = true
-//                viewModel.isRefreshing = false
-//                hitServiceListApi(viewModel.currentPage, 0)
-//            }
-//        }
-//        if (!viewModel.isHomeDataLoaded) {
-//            viewModel.currentPage = 1
-//            hitServiceListApi(viewModel.currentPage, 0)
-//        } else {
-//            // 🔥 restore UI from cache
-//            allStory?.let { postAdapter.setPosts(viewModel.postsCache, listOf(myStoryData), it) }
-//            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
-//                viewModel.isStoryUploaded,
-//                viewModel.myStory ?: MyStory(),
-//                viewModel.stories,
-//                ::getSelectedStory,
-//                viewModel.profileImage
-//            )
-//        }
-        //setupScrollListener()  // ← Replaced setPagination with this
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -160,13 +128,13 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 listOf(viewModel.myStory ?: MyStory()),
                 viewModel.stories
             )
-            binding.storiesLayout.visibility = View.VISIBLE
+            binding.rvStories.visibility = View.VISIBLE
 
             statusAdapter = StatusAdapter(
                 RTVariable.statusListGlobal.toMutableList(),   // initial list
                 ::getSelectedTheStory                // click handler
             )
-            binding.storiesRecycler.adapter = statusAdapter
+            binding.rvStories.adapter = statusAdapter
 
             if (!UserDataManager.isGetBackToHome(requireContext())) {
                 val scrollYp = UserDataManager.getHomeScrollYPosition(requireContext())
@@ -183,9 +151,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             Log.e("HIT", "HIT>>> Initial load (process death / fresh open)")
             viewModel.currentPage = 1
             viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = true          // shows loading indicator
-            binding.progressBar.isVisible = false
-
+            binding.swipeRefresh.isRefreshing = true
             hitServiceListApi(viewModel.currentPage, 0)
         }
 
@@ -193,7 +159,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             binding.swipeRefresh.post {
                 binding.swipeRefresh.isRefreshing = true
             }
-            binding.progressBar.isVisible = false
             refreshData()
         }
 
@@ -202,29 +167,11 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             viewLifecycleOwner
         ) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
-//            isRefreshedFromMenu = true
-//            allStory?.toMutableList()?.clear()
-//            viewModel.currentPage = 1
-//            binding.progressBar.isVisible=false
-//            binding.swipeRefresh.setColorSchemeColors(
-//                ContextCompat.getColor(requireContext(), R.color.white)
-//            )
-//            binding.swipeRefresh.setProgressBackgroundColorSchemeColor(
-//                ContextCompat.getColor(requireContext(), R.color.white_10)
-//            )
-//            binding.swipeRefresh.setSize(SwipeRefreshLayout.DEFAULT)
-//
-//            if(!UserDataManager.isGetBackToHome(requireContext())){
-//                binding.swipeRefresh.isRefreshing = true
-//                viewModel.isRefreshing = false
-//            }
 
-            //binding.swipeRefresh.isRefreshing = true
             if (binding.nestedScrollView.scrollY == 0) {
                 if (!viewModel.isHomeDataLoaded) {
                     if (!UserDataManager.isGetBackToHome(requireContext())) {
                         Log.e("HIT", "HIT>>> IH")
-                        binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
 
@@ -236,7 +183,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     UserDataManager.setGetBackToHome(requireContext(), false)
                     RTVariable.ISHOMECLICKED = false
                     Log.e("HIT", "HIT>>> IHE")
-                    binding.progressBar.isVisible = false
                     viewModel.currentPage = 1
                     viewModel.isRefreshing = false
 
@@ -248,7 +194,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     if (RTVariable.ISHOMECLICKED) {
                         UserDataManager.setGetBackToHome(requireContext(), false)
                         Log.e("HIT", "HIT>>> IHE")
-                        binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
                         binding.swipeRefresh.isRefreshing = true
@@ -259,14 +204,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     }
                 } else {
                     binding.nestedScrollView.smoothScrollTo(0, 0)
-//                    binding.nestedScrollView.setOnScrollChangeListener(
-//                        NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
-//                            if (scrollY == 0) {
-//                                //binding.nestedScrollView.setOnScrollChangeListener(null as NestedScrollView.OnScrollChangeListener?)
-//                                //hitServiceListApi(viewModel.currentPage, selectedGender)
-//                            }
-//                        }
-//                    )
                 }
             }
         }
@@ -282,7 +219,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     }
                     if (RTVariable.ISHOMECLICKED) {
                         RTVariable.ISHOMECLICKED = false
-                        binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
                         binding.swipeRefresh.isRefreshing = true
@@ -290,7 +226,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     }
                     if (RTVariable.IS_MEDIA_UPLOADED) {
                         RTVariable.IS_MEDIA_UPLOADED = false
-                        binding.progressBar.isVisible = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
                         binding.swipeRefresh.isRefreshing = true
@@ -325,14 +260,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     fun scrollToRecyclerPosition(position: Int) {
-        binding.postListRecycler.post {
-            val layoutManager = binding.postListRecycler.layoutManager as? LinearLayoutManager
+        binding.rvPost.post {
+            val layoutManager = binding.rvPost.layoutManager as? LinearLayoutManager
                 ?: return@post
             layoutManager.scrollToPositionWithOffset(position, 0)
-            binding.postListRecycler.post {
-                val viewHolder = binding.postListRecycler.findViewHolderForAdapterPosition(position)
+            binding.rvPost.post {
+                val viewHolder = binding.rvPost.findViewHolderForAdapterPosition(position)
                 val itemView = viewHolder?.itemView ?: return@post
-                val y = itemView.y + binding.postListRecycler.y
+                val y = itemView.y + binding.rvPost.y
                 binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
                 UserDataManager.setGetBackToHome(requireContext(), false)
                 binding.nestedScrollView.post {
@@ -354,32 +289,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private var scrollListener: ScrollDirectionListener? = null
     private fun setupScrollListener() {
-
         binding.nestedScrollView.setOnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
-
-            // 🔥 VERY IMPORTANT: block during restore
             if (isRestoringScroll) return@setOnScrollChangeListener
-
-            val dy = scrollY - oldScrollY
-
-            // 👉 Your header logic (unchanged)
-            if (dy > 10) {
-                if (isHeaderVisible) {
-                    // hideHeaderAndStories()
-                }
-            } else if (dy < -10) {
-                if (!isHeaderVisible) {
-                    // showHeaderAndStories()  ///
-                }
-            }
-
-            if (scrollY < 100 && !isHeaderVisible) {
-                // showHeaderAndStories()
-            }
 
             // 👉 Get RecyclerView position + offset
             val layoutManager =
-                binding.postListRecycler.layoutManager as? LinearLayoutManager
+                binding.rvPost.layoutManager as? LinearLayoutManager
                     ?: return@setOnScrollChangeListener
 
             val firstCompletelyVisible = layoutManager.findFirstCompletelyVisibleItemPosition()
@@ -416,8 +331,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun setupRecyclerView() {
-        binding.postListRecycler.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+        binding.rvPost.apply {
             postAdapter = PostsAdapter(
                 actionListener = object : PostsAdapter.PostActionListener {
                     override fun onPostAction(
@@ -542,7 +456,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 view.getLocationOnScreen(location)
                                 val centerX = location[0] + view.width / 2
                                 val centerY = location[1] + view.height / 2
-                                val intent = Intent(requireContext(), PlayStatusActivity::class.java)
+                                val intent =
+                                    Intent(requireContext(), PlayStatusActivity::class.java)
 
                                 // normal data
                                 intent.putExtra("play_position", position)
@@ -739,10 +654,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     viewLifecycleOwner.lifecycleScope.launch {
                         delay(1000)
                         if (!isAdded || _binding == null) return@launch
-//                        binding.storiesRecycler.adapter =
-//                            StatusAdapter(statusListGlobal.toMutableList(), ::getSelectedTheStory)
                         statusAdapter.updateStories(statusListGlobal)
-                        binding.storiesLayout.visibility = View.VISIBLE
+                        binding.rvStories.visibility = View.VISIBLE
                     }
                 } else {
                     Toast.makeText(
@@ -794,7 +707,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun onClick() {
-        binding.notificationLayout.setOnClickListener {
+        binding.ivNotification.setOnClickListener {
             findNavController().navigate(R.id.action_homeNewFragment_to_notificationFragment)
         }
     }
@@ -907,15 +820,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun setObserver() {
-//        if(UserDataManager.get_postCommentShow(requireContext()) || UserDataManager.get_postMainIsShow(requireContext())){
-//            binding.progressBar.isVisible=false
-//        }else{
-//            binding.progressBar.isVisible=true
-//        }
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    binding.progressBar.isVisible = false
                     binding.swipeRefresh.isRefreshing = false
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
@@ -948,13 +855,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                     viewModel.stories
                                 )
                             }
-//                            binding.storiesRecycler.adapter = AdapterStoriesRecycler(
-//                                viewModel.isStoryUploaded,
-//                                viewModel.myStory ?: MyStory(),
-//                                viewModel.stories,
-//                                ::getSelectedStory,
-//                                viewModel.profileImage
-//                            )
                             viewModel.isHomeDataLoaded = true
                             isLoadingMore = false
                             if (RTVariable.ISHOMECLICKED) {
@@ -969,14 +869,12 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                         isLoadingMore = false
                     }
-                    binding.progressBar.isVisible = false
                 }
 
                 Status.LOADING -> {
                 }
 
                 Status.ERROR -> {
-                    binding.progressBar.isVisible = false
                     isLoadingMore = false
                 }
             }
@@ -1339,12 +1237,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                     statusListGlobal.toMutableList(),   // initial list
                                     ::getSelectedTheStory                // click handler
                                 )
-                                binding.storiesRecycler.adapter = statusAdapter
-                                binding.storiesLayout.visibility = View.VISIBLE
+                                binding.rvStories.adapter = statusAdapter
+                                binding.rvStories.visibility = View.VISIBLE
                             }
-                        } else {
                         }
-                    } else {
                     }
                 }
 
