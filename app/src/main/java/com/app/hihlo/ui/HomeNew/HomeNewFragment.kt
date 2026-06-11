@@ -13,7 +13,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -93,7 +92,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     var positionToComment: Int = 0
     var adapter: AdapterUserPostList? = null
     var post_position: Int = 0
-    private var isHeaderVisible = true
     private var isLoadingMore = false
     private val viewModel3: ReelsViewModel by viewModels()
     private val viewModel4: ReelsViewModel by viewModels()
@@ -148,35 +146,23 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         } else {
-            Log.e("HIT", "HIT>>> Initial load (process death / fresh open)")
             viewModel.currentPage = 1
             viewModel.isRefreshing = false
-            binding.swipeRefresh.isRefreshing = true
             hitServiceListApi(viewModel.currentPage, 0)
         }
 
         binding.swipeRefresh.setOnRefreshListener {
-            binding.swipeRefresh.post {
-                binding.swipeRefresh.isRefreshing = true
-            }
             refreshData()
         }
 
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            "home_click",
-            viewLifecycleOwner
-        ) { _, _ ->
-            Log.i("TAG", "onViewCreated: homeIconTap")
-
+        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
             if (binding.nestedScrollView.scrollY == 0) {
                 if (!viewModel.isHomeDataLoaded) {
                     if (!UserDataManager.isGetBackToHome(requireContext())) {
                         Log.e("HIT", "HIT>>> IH")
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-
-                        binding.swipeRefresh.isRefreshing = true
-
+                        binding.progressBar.visibility = View.VISIBLE
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                 } else if (RTVariable.ISHOMECLICKED) {
@@ -185,8 +171,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                     Log.e("HIT", "HIT>>> IHE")
                     viewModel.currentPage = 1
                     viewModel.isRefreshing = false
-
-                    binding.swipeRefresh.isRefreshing = true
+                    binding.progressBar.visibility = View.VISIBLE
                     hitServiceListApi(viewModel.currentPage, 0)
                 }
             } else {
@@ -196,7 +181,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         Log.e("HIT", "HIT>>> IHE")
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-                        binding.swipeRefresh.isRefreshing = true
+                        binding.progressBar.visibility = View.VISIBLE
                         binding.nestedScrollView.post {
                             binding.nestedScrollView.scrollTo(0, 0)
                             hitServiceListApi(viewModel.currentPage, 0)
@@ -221,14 +206,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         RTVariable.ISHOMECLICKED = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-                        binding.swipeRefresh.isRefreshing = true
+                        binding.progressBar.visibility = View.VISIBLE
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                     if (RTVariable.IS_MEDIA_UPLOADED) {
                         RTVariable.IS_MEDIA_UPLOADED = false
                         viewModel.currentPage = 1
                         viewModel.isRefreshing = false
-                        binding.swipeRefresh.isRefreshing = true
+                        binding.progressBar.visibility = View.VISIBLE
                         hitServiceListApi(viewModel.currentPage, 0)
                     }
                     if (RTVariable.IS_STATUS_DELETED) {
@@ -289,13 +274,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private var scrollListener: ScrollDirectionListener? = null
     private fun setupScrollListener() {
-        binding.nestedScrollView.setOnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
+        binding.nestedScrollView.setOnScrollChangeListener { v, _, scrollY, _, _ ->
             if (isRestoringScroll) return@setOnScrollChangeListener
 
-            // 👉 Get RecyclerView position + offset
-            val layoutManager =
-                binding.rvPost.layoutManager as? LinearLayoutManager
-                    ?: return@setOnScrollChangeListener
+            val layoutManager = binding.rvPost.layoutManager as? LinearLayoutManager ?: return@setOnScrollChangeListener
 
             val firstCompletelyVisible = layoutManager.findFirstCompletelyVisibleItemPosition()
             val firstVisible = if (firstCompletelyVisible != -1) {
@@ -315,16 +297,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 UserDataManager.setHomeScrollPosition(requireContext(), FIRSTVisiblePosition)
                 UserDataManager.setHomeScrollYPosition(requireContext(), offsetY)
             }
-            Log.e(
-                "SCROLL GOING",
-                "Position=$FIRSTVisiblePosition | Offset=$offsetY | ScrollY=$scrollY"
-            )
             val contentView = binding.nestedScrollView.getChildAt(0)
                 ?: return@setOnScrollChangeListener
             val diff = (contentView.bottom - (v.height + scrollY))
-            if (diff < 500 && diff > 0 && !isLoadingMore) {
+            Log.i("Scroll Listener::", "Difference = $diff")
+            if (diff in 1..<800 && !isLoadingMore) {
                 isLoadingMore = true
                 viewModel.currentPage++
+                binding.progressBar.visibility = View.VISIBLE
                 hitServiceListApi(viewModel.currentPage, 0)
             }
         }
@@ -823,7 +803,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    binding.swipeRefresh.isRefreshing = false
+                    binding.progressBar.visibility = View.GONE
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     if (it.data?.status == 1) {
@@ -1280,11 +1260,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         } else {
             scrollToRecyclerPosition(viewModel.scroll_position)
         }
+
         if (UserDataManager.get_postCommentShow(requireContext())) {
-            binding.swipeRefresh.isRefreshing = false
+            binding.progressBar.visibility = View.GONE
             UserDataManager.postCommentIsShow(requireContext(), false)
-            //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
-            //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
             val cached = CommentPrefs.get2Payload(requireContext())
 
             if (cached != null) {
@@ -1293,8 +1272,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 openCommentsBottomSheet(cached)
             }
         }
+
         if (UserDataManager.get_postMainIsShow(requireContext())) {
-            binding.swipeRefresh.isRefreshing = false
+            binding.progressBar.visibility = View.GONE
             UserDataManager.postMainIsSetShow(requireContext(), false)
         }
         if (RTVariable.IS_STORY_UPDATED_FROM_PROFILE) {

@@ -88,14 +88,25 @@
                     android:layout_marginTop="10dp"
                     android:nestedScrollingEnabled="false"
                     android:orientation="vertical"
-                    tools:listitem="@layout/adapter_new_user_posts"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintTop_toBottomOf="@+id/rv_stories" />
+                    app:layout_constraintTop_toBottomOf="@+id/rv_stories"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/adapter_new_user_posts" />
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_24"
+                    android:indeterminateTint="@color/color_B90A66"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rv_post" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/dp_40"
-                    app:layout_constraintTop_toBottomOf="@+id/rv_post" />
+                    android:layout_height="@dimen/dp_56"
+                    app:layout_constraintTop_toBottomOf="@+id/progress_bar" />
 
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guidelineStart"
