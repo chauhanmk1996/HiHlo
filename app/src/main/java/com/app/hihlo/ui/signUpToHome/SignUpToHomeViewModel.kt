@@ -24,7 +24,7 @@ class SignUpToHomeViewModel : BaseViewModel() {
     val mDeviceTokenLiveData = MutableLiveData<String>()
     val mEmailIdLiveData = MutableLiveData<String>()
     val mPasswordLiveData = MutableLiveData<String>()
-    val mTermsCheckedLiveData = MutableLiveData<Boolean>()
+    val mTermsCheckedLiveData = MutableLiveData<Boolean>(true)
     val mNameLiveData = MutableLiveData<String>()
     val mUserNameLiveData = MutableLiveData<String>()
     val mMobileNumberLiveData = MutableLiveData<String>()
@@ -298,6 +298,11 @@ class SignUpToHomeViewModel : BaseViewModel() {
 
         if (mPasswordLiveData.value.isNullOrEmpty()) {
             showToast(Global.baseActivity.getString(R.string.please_enter_password))
+            return false
+        }
+
+        if (mTermsCheckedLiveData.value == false){
+            showToast("Please accept terms & conditions and Policy")
             return false
         }
         return true

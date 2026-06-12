@@ -801,6 +801,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
     private fun setObserver() {
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
+            binding.swipeRefresh.isRefreshing = false
             when (it.status) {
                 Status.SUCCESS -> {
                     binding.progressBar.visibility = View.GONE
@@ -846,7 +847,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             isLoadingMore = false  // ← Reset on error too
                         }
                     } else {
-                        //Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
                         isLoadingMore = false
                     }
                 }
