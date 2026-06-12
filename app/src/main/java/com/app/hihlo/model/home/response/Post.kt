@@ -15,5 +15,6 @@ data class Post(
     val id: Int?=null,
     val user_id: Int?=null,
     val post_height_size: Int?=null,
-    val creatorDetail:CreatorDetail?=null
+    val creatorDetail:CreatorDetail?=null,
+    var is_cover: String?=null,
 ): Parcelable

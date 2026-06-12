@@ -68,6 +68,7 @@ import com.app.hihlo.utils.Utils
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
+import com.app.hihlo.utils.toUpperString
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
@@ -103,6 +104,9 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private val viewModel5: StatusViewModel by activityViewModels()
     private lateinit var statusListGlobal: List<StoryUser>
     private lateinit var statusAdapter: StatusAdapter
+    private var coverPostPosition: Int = 0
+    private var coverPostId: Int = 0
+    private var coverPostIsCover: String = ""
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_home_new
@@ -155,7 +159,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             refreshData()
         }
 
-        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "home_click",
+            viewLifecycleOwner
+        ) { _, _ ->
             if (binding.nestedScrollView.scrollY == 0) {
                 if (!viewModel.isHomeDataLoaded) {
                     if (!UserDataManager.isGetBackToHome(requireContext())) {
@@ -277,7 +284,8 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         binding.nestedScrollView.setOnScrollChangeListener { v, _, scrollY, _, _ ->
             if (isRestoringScroll) return@setOnScrollChangeListener
 
-            val layoutManager = binding.rvPost.layoutManager as? LinearLayoutManager ?: return@setOnScrollChangeListener
+            val layoutManager = binding.rvPost.layoutManager as? LinearLayoutManager
+                ?: return@setOnScrollChangeListener
 
             val firstCompletelyVisible = layoutManager.findFirstCompletelyVisibleItemPosition()
             val firstVisible = if (firstCompletelyVisible != -1) {
@@ -330,18 +338,24 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             }
 
                             PostsAdapter.PostClickAction.OPTIONS_MENU -> {
-                                if (post.user_id.toString() == Preferences.getCustomModelPreference<LoginResponse>(
+                                val loginUserId =
+                                    Preferences.getCustomModelPreference<LoginResponse>(
                                         requireContext(),
                                         LOGIN_DATA
                                     )?.payload?.userId.toString()
-                                ) {
-                                    profileOptions(
-                                        view,
-                                        post.id.toString(),
-                                        post.user_id.toString()
-                                    )
+                                val postId = post.id
+                                val isCover: String = if (post.is_cover == "TRUE") {
+                                    "FALSE"
                                 } else {
-                                    openSideOptionsPopup(view, post.id.toString())
+                                    "TRUE"
+                                }
+                                if (post.user_id.toString() == loginUserId) {
+                                    coverPostPosition = position
+                                    coverPostId = postId ?: 0
+                                    coverPostIsCover = isCover
+                                    profileOptions(view, postId.toString(), isCover)
+                                } else {
+                                    openSideOptionsPopup(view, postId.toString())
                                 }
                             }
 
@@ -539,15 +553,10 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         requireContext(),
                         LOGIN_DATA
                     )?.payload?.authToken,
-                    FollowRequest(following_id = user_id.toString())
+                    FollowRequest(following_id = user_id)
 
                 )
                 if (response.status == 1 && response.code == 200) {
-//                    Toast.makeText(
-//                        requireContext(),
-//                        "Follow successfully",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
                     postAdapter.updateFollow(position, 1)
                 } else {
                     Toast.makeText(
@@ -573,11 +582,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                 )
                 if (response.status == 1 && response.code == 200) {
-//                    Toast.makeText(
-//                        requireContext(),
-//                        "Unfollow successfully",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
                     postAdapter.updateFollow(position, 2)
                 } else {
                     Toast.makeText(
@@ -722,18 +726,33 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         )
     }
 
-    private fun profileOptions(view: View, postId: String, userId: String) {
+    private fun profileOptions(view: View, postId: String, isCover: String) {
+        val firstOption: String = if (isCover == "TRUE") {
+            "Set Cover"
+        } else {
+            "Remove Cover"
+        }
         val popup = ReusablePopup(
             context = requireContext(),
             anchorView = view,
             onOption1Click = {
+                val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken
+                viewModel.setRemoveCoverApi(token, postId, isCover)
+            },
+            onOption2Click = {
                 openDeletePostConfirmationDialog(postId)
             },
-            onOption2Click = {},
-            option1Text = "Delete",
-            option2Text = "Cancel",
-            option1ImageRes = R.drawable.delete_icon,
-            option2ImageRes = R.drawable.ic_cancel_red
+            onOption3Click = {
+            },
+            option1Text = firstOption,
+            option2Text = "Delete",
+            option3Text = "Cancel",
+            option1ImageRes = R.drawable.filled_star,
+            option2ImageRes = R.drawable.delete_icon,
+            option3ImageRes = R.drawable.ic_cancel_red
         )
         popup.show()
     }
@@ -859,6 +878,42 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
+        viewModel.setRemoveCoverApi().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            val loginUserId = Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.userId.toString()
+
+                            // Remove previous cover
+                            val oldCoverIndex = viewModel.postsCache.indexOfFirst { post ->
+                                post.user_id.toString() == loginUserId && post.is_cover == "TRUE"
+                            }
+
+                            if (oldCoverIndex != -1) {
+                                viewModel.postsCache[oldCoverIndex].is_cover = "FALSE"
+                                postAdapter.updateCover(oldCoverIndex, "FALSE")
+                            }
+
+                            // Set new cover
+                            viewModel.postsCache[coverPostPosition].is_cover = coverPostIsCover
+                            postAdapter.updateCover(coverPostPosition, coverPostIsCover)
+                        }
+                    }
+                }
+
+                Status.LOADING -> {
+                }
+
+                Status.ERROR -> {
+                }
+            }
+        }
+
         viewModel.addStoryLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -886,6 +941,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel2.getLikeReelLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -912,6 +968,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel2.getReelCommentsLiveData().observe(viewLifecycleOwner) {
 
             when (it.status) {
@@ -1020,6 +1077,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel2.getPostCommentLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1054,6 +1112,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel2.getReplyToCommentLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1086,6 +1145,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel2.getDeletePostLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1112,6 +1172,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel3.getFollowUserLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1131,6 +1192,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel3.getUnfollowUserLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1150,6 +1212,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel4.getCoinDetailsLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1172,6 +1235,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel4.getSendGiftLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -1201,6 +1265,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 }
             }
         }
+
         viewModel5.getStatusLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {

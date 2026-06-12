@@ -2,344 +2,174 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-    </data>
-
     <androidx.cardview.widget.CardView
-        android:layout_marginBottom="6dp"
-        android:layout_marginHorizontal="3dp"
         android:layout_width="match_parent"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="3dp"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="3dp"
+        android:layout_marginBottom="6dp"
         android:shadowColor="@color/white"
-        android:layout_height="match_parent">
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp">
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/mainLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <androidx.appcompat.widget.AppCompatImageView
-                android:src="@drawable/sample_computer_image"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:id="@+id/backgroundImage"
-                android:scaleType="centerCrop"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/sample_computer_image"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="4dp"
-                android:paddingHorizontal="7dp"
                 android:layout_margin="6dp"
-                app:layout_constraintTop_toTopOf="parent"
+                android:background="@drawable/background_15dp_corner_no_stroke"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="4dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:background="@drawable/background_15dp_corner_no_stroke">
+                app:layout_constraintTop_toTopOf="parent">
+
                 <androidx.appcompat.widget.AppCompatImageView
-                    app:tint="@color/white"
-                    android:visibility="gone"
                     android:id="@+id/interestImage"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:tint="@color/white" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/interest"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/interestImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope_regular"
-                    android:textSize="10sp"
+                    android:text="Fitness"
                     android:textColor="@color/white"
-                    android:text="Fitness"/>
+                    android:textSize="10sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/interestImage"
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="4dp"
-                android:paddingHorizontal="7dp"
                 android:layout_marginVertical="6dp"
                 android:layout_marginEnd="6dp"
-                app:layout_constraintTop_toTopOf="parent"
+                android:background="@drawable/background_15dp_corner_no_stroke"
+                android:orientation="horizontal"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:background="@drawable/background_15dp_corner_no_stroke">
+                app:layout_constraintTop_toTopOf="parent">
+
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/onlineStatusImage"
-
                     android:layout_width="9dp"
                     android:layout_height="9dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="4dp"
-                    android:src="@drawable/online_status_green"/>
+                    android:src="@drawable/online_status_green" />
+
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/onlineText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope_regular"
-                    android:textSize="10sp"
+                    android:text="Online"
                     android:textColor="@color/white"
-                    android:text="Online" />
+                    android:textSize="10sp" />
 
             </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:maxWidth="160dp"
                 android:id="@+id/userDetailsLayout"
-                android:paddingEnd="10dp"
-                android:layout_marginBottom="3dp"
-                android:layout_marginStart="2dp"
-                android:background="@drawable/background_20dp_corner_no_stroke"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginBottom="3dp"
+                android:background="@drawable/background_20dp_corner_no_stroke"
+                android:maxWidth="160dp"
+                android:paddingEnd="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
+
                 <androidx.cardview.widget.CardView
                     android:id="@+id/userImageCardView"
-                    android:layout_marginEnd="7dp"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginEnd="7dp"
                     app:cardCornerRadius="50dp"
-                    app:cardElevation="0dp">
+                    app:cardElevation="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
                     <androidx.appcompat.widget.AppCompatImageView
-                        android:scaleType="centerCrop"
-                        android:background="@color/black"
                         android:id="@+id/userImage"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
+                        android:layout_height="match_parent"
+                        android:background="@color/black"
+                        android:scaleType="centerCrop" />
+
                 </androidx.cardview.widget.CardView>
-                <!--                <androidx.appcompat.widget.AppCompatImageView-->
-                <!--                    app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"-->
-                <!--                    app:layout_constraintEnd_toEndOf="@id/userImageCardView"-->
-                <!--                    android:id="@+id/onlineStatusImage"-->
-                <!--                    android:layout_marginEnd="2dp"-->
-                <!--                    android:layout_marginBottom="2dp"-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="match_parent"/>-->
+
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:maxWidth="80dp"
-                    android:includeFontPadding="false"
-                    android:maxLines="1"
-                    android:ellipsize="end"
                     android:id="@+id/userName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/manrope_regular"
+                    android:includeFontPadding="false"
+                    android:maxWidth="80dp"
+                    android:maxLines="1"
+                    android:text="Isha_00dsadddddddddd"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
                     app:layout_constraintBottom_toTopOf="@+id/userLocation"
                     app:layout_constraintStart_toEndOf="@+id/userImageCardView"
-                    android:fontFamily="@font/manrope_regular"
-                    android:textSize="10sp"
-                    android:textColor="@color/white"
-                    android:text="Isha_00dsadddddddddd"/>
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/verifiedNameTick"
-                    android:layout_marginStart="2dp"
                     android:layout_width="10dp"
                     android:layout_height="10dp"
+                    android:layout_marginStart="2dp"
                     android:src="@drawable/verified_tick"
-                    app:layout_constraintTop_toTopOf="@id/userName"
+                    app:layout_constraintBottom_toBottomOf="@id/userName"
                     app:layout_constraintStart_toEndOf="@+id/userName"
-                    app:layout_constraintBottom_toBottomOf="@id/userName"/>
+                    app:layout_constraintTop_toTopOf="@id/userName" />
+
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:maxLines="1"
-                    android:ellipsize="end"
                     android:id="@+id/userLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/userName"
-                    app:layout_constraintStart_toEndOf="@+id/userImageCardView"
+                    android:ellipsize="end"
                     android:fontFamily="@font/manrope_regular"
-                    android:textSize="6sp"
+                    android:maxLines="1"
+                    android:text="Jaipur, India"
                     android:textColor="@color/white"
-                    android:text="Jaipur, India"/>
+                    android:textSize="6sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/userImageCardView"
+                    app:layout_constraintTop_toBottomOf="@+id/userName" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     </androidx.cardview.widget.CardView>
+
 </layout>
-
-
-<!--<?xml version="1.0" encoding="utf-8"?>-->
-<!--<layout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto">-->
-
-<!--    <data>-->
-
-<!--    </data>-->
-
-<!--    <androidx.cardview.widget.CardView-->
-<!--        android:layout_marginHorizontal="4dp"-->
-<!--        android:layout_width="match_parent"-->
-<!--        app:cardCornerRadius="10dp"-->
-<!--        app:cardElevation="0dp"-->
-<!--        android:layout_height="match_parent">-->
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:id="@+id/mainLayout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent">-->
-<!--            <androidx.appcompat.widget.AppCompatImageView-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                android:scaleType="centerCrop"-->
-<!--                android:id="@+id/backgroundImage"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="0dp"/>-->
-<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:paddingVertical="4dp"-->
-<!--                android:paddingHorizontal="7dp"-->
-<!--                android:layout_margin="6dp"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                android:background="@drawable/background_15dp_corner_no_stroke">-->
-<!--                <androidx.appcompat.widget.AppCompatImageView-->
-<!--                    app:tint="@color/white"-->
-<!--                    android:visibility="gone"-->
-<!--                    android:id="@+id/interestImage"-->
-<!--                    android:layout_width="12dp"-->
-<!--                    android:layout_height="12dp"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="parent"-->
-<!--                    app:layout_constraintBottom_toBottomOf="parent"/>-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/interest"-->
-<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="parent"-->
-<!--                    app:layout_constraintStart_toEndOf="@id/interestImage"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:fontFamily="@font/manrope_regular"-->
-<!--                    android:textSize="10sp"-->
-<!--                    android:textColor="@color/white"-->
-<!--                    android:text="Fitness"/>-->
-
-<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
-<!--            <LinearLayout-->
-<!--                android:orientation="horizontal"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:paddingVertical="4dp"-->
-<!--                android:paddingHorizontal="7dp"-->
-<!--                android:layout_marginVertical="6dp"-->
-<!--                android:layout_marginEnd="6dp"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                android:background="@drawable/background_15dp_corner_no_stroke">-->
-<!--                <androidx.appcompat.widget.AppCompatImageView-->
-<!--                    android:id="@+id/onlineStatusImage"-->
-
-<!--                    android:layout_width="9dp"-->
-<!--                    android:layout_height="9dp"-->
-<!--                    android:layout_gravity="center_vertical"-->
-<!--                    android:layout_marginEnd="4dp"-->
-<!--                    android:src="@drawable/online_status_green"/>-->
-<!--                <TextView-->
-<!--                    android:id="@+id/onlineText"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:fontFamily="@font/manrope_regular"-->
-<!--                    android:textSize="10sp"-->
-<!--                    android:textColor="@color/white"-->
-<!--                    android:text="Online" />-->
-
-<!--            </LinearLayout>-->
-
-<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--                android:maxWidth="160dp"-->
-<!--                android:id="@+id/userDetailsLayout"-->
-<!--                android:paddingEnd="10dp"-->
-<!--                android:layout_marginBottom="3dp"-->
-<!--                android:layout_marginStart="2dp"-->
-<!--                android:background="@drawable/background_20dp_corner_no_stroke"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent">-->
-<!--                <androidx.cardview.widget.CardView-->
-<!--                    android:id="@+id/userImageCardView"-->
-<!--                    android:layout_marginEnd="7dp"-->
-<!--                    android:layout_width="30dp"-->
-<!--                    android:layout_height="30dp"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="parent"-->
-<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                    app:cardCornerRadius="50dp"-->
-<!--                    app:cardElevation="0dp">-->
-<!--                    <androidx.appcompat.widget.AppCompatImageView-->
-<!--                        android:scaleType="centerCrop"-->
-<!--                        android:background="@color/black"-->
-<!--                        android:id="@+id/userImage"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="match_parent"/>-->
-<!--                </androidx.cardview.widget.CardView>-->
-<!--&lt;!&ndash;                <androidx.appcompat.widget.AppCompatImageView&ndash;&gt;-->
-<!--&lt;!&ndash;                    app:layout_constraintBottom_toBottomOf="@+id/userImageCardView"&ndash;&gt;-->
-<!--&lt;!&ndash;                    app:layout_constraintEnd_toEndOf="@id/userImageCardView"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:id="@+id/onlineStatusImage"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_marginEnd="2dp"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_marginBottom="2dp"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_width="match_parent"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_height="match_parent"/>&ndash;&gt;-->
-<!--                <TextView-->
-<!--                    android:maxWidth="80dp"-->
-<!--                    android:includeFontPadding="false"-->
-<!--                    android:maxLines="1"-->
-<!--                    android:ellipsize="end"-->
-<!--                    android:id="@+id/userName"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="4dp"-->
-<!--                    app:layout_constraintTop_toTopOf="parent"-->
-<!--                    app:layout_constraintBottom_toTopOf="@+id/userLocation"-->
-<!--                    app:layout_constraintStart_toEndOf="@+id/userImageCardView"-->
-<!--                    android:fontFamily="@font/manrope_regular"-->
-<!--                    android:textSize="10sp"-->
-<!--                    android:textColor="@color/white"-->
-<!--                    android:text="Isha_00dsadddddddddd"/>-->
-<!--                <androidx.appcompat.widget.AppCompatImageView-->
-<!--                    android:id="@+id/verifiedNameTick"-->
-<!--                    android:layout_marginStart="2dp"-->
-<!--                    android:layout_width="10dp"-->
-<!--                    android:layout_height="10dp"-->
-<!--                    android:src="@drawable/verified_tick"-->
-<!--                    app:layout_constraintTop_toTopOf="@id/userName"-->
-<!--                    app:layout_constraintStart_toEndOf="@+id/userName"-->
-<!--                    app:layout_constraintBottom_toBottomOf="@id/userName"/>-->
-<!--                <TextView-->
-<!--                    android:maxLines="1"-->
-<!--                    android:ellipsize="end"-->
-<!--                    android:id="@+id/userLocation"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="4dp"-->
-<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/userName"-->
-<!--                    app:layout_constraintStart_toEndOf="@+id/userImageCardView"-->
-<!--                    android:fontFamily="@font/manrope_regular"-->
-<!--                    android:textSize="6sp"-->
-<!--                    android:textColor="@color/white"-->
-<!--                    android:text="Jaipur, India"/>-->
-<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-
-
-<!--    </androidx.cardview.widget.CardView>-->
-<!--</layout>-->

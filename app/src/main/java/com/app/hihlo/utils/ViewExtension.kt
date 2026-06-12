@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.app.hihlo.Global
 import com.app.hihlo.R
 import com.google.firebase.messaging.FirebaseMessaging
+import java.util.Locale
 
 fun AppCompatTextView.getString(): String {
     return this.text.trim().toString()
@@ -101,4 +102,8 @@ fun View.show() {
 
 fun View.hide() {
     this.visibility = View.GONE
+}
+
+fun String.toUpperString(): String {
+    return this.uppercase(Locale.getDefault())
 }

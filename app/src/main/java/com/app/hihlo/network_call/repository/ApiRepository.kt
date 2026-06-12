@@ -11,6 +11,7 @@ import com.app.hihlo.model.edit_profile.request.EditProfileRequest
 import com.app.hihlo.model.end_call.request.EndCallRequest
 import com.app.hihlo.model.flag_user.request.FlagUserRequest
 import com.app.hihlo.model.follow.request.FollowRequest
+import com.app.hihlo.model.home.response.SetRemoveCoverRequest
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
 import com.app.hihlo.model.rating_review.RatingReviewRequest
 import com.app.hihlo.model.reply_to_comment.request.ReplyToCommentRequest
@@ -33,7 +34,7 @@ class ApiRepository {
 
     suspend fun getHomeDataApi(
         token: String, page: String,
-        limit: String, genderId:String
+        limit: String, genderId: String,
     ) = service.getHomeData(
         token = token,
         if (page.isEmpty()) null else page,
@@ -41,8 +42,17 @@ class ApiRepository {
         if (genderId.isEmpty()) null else genderId,
     )
 
+    suspend fun setRemoveCoverApi(token: String, postId: String, isCover: String) =
+        service.setRemoveCoverApi(
+            token = token,
+            SetRemoveCoverRequest(
+                post_id = postId,
+                is_cover = isCover
+            )
+        )
+
     suspend fun getStatusDataApi(
-        token: String, genderId: String
+        token: String, genderId: String,
     ) = service.getStatusData(
         token = token,
         genderId = genderId
@@ -57,40 +67,97 @@ class ApiRepository {
         limit.ifEmpty { null },
     )
 
-    suspend fun getReelCommentsApi(token: String, reelId:String,
-                                   page: String? = null,
-                                   limit: String? = null ) = service.getReelComments(token = token, reelId, page,limit )
+    suspend fun getReelCommentsApi(
+        token: String, reelId: String,
+        page: String? = null,
+        limit: String? = null,
+    ) = service.getReelComments(token = token, reelId, page, limit)
+
     suspend fun addPostApi(token: String, request: AddPostRequest) = service.addPost(token, request)
     suspend fun addReelApi(token: String, request: AddPostRequest) = service.addReel(token, request)
-    suspend fun postReelCommentApi(token: String, request:PostCommentsRequest, reelId:String) = service.postComments(token = token, request, reelId)
-    suspend fun replyToCommentApi(token: String, request:ReplyToCommentRequest, reelId:String) = service.replyToComment(token = token, request, reelId)
+    suspend fun postReelCommentApi(token: String, request: PostCommentsRequest, reelId: String) =
+        service.postComments(token = token, request, reelId)
+
+    suspend fun replyToCommentApi(token: String, request: ReplyToCommentRequest, reelId: String) =
+        service.replyToComment(token = token, request, reelId)
+
     suspend fun getBlockReasonsApi() = service.getBlockReasons()
     suspend fun getFlagReasonsApi() = service.getFlagReasons()
-    suspend fun blockUserApi(token: String, request: BlockUserRequest) = service.blockUser(token, request)
-    suspend fun unblockUserApi(token: String, request: UnblockUserRequest) = service.unblockUser(token, request)
-    suspend fun flagUserApi(token: String, request: FlagUserRequest) = service.flagUser(token, request)
+    suspend fun blockUserApi(token: String, request: BlockUserRequest) =
+        service.blockUser(token, request)
+
+    suspend fun unblockUserApi(token: String, request: UnblockUserRequest) =
+        service.unblockUser(token, request)
+
+    suspend fun flagUserApi(token: String, request: FlagUserRequest) =
+        service.flagUser(token, request)
+
     suspend fun likeReelApi(token: String, reelId: String) = service.likeReel(token, reelId)
-    suspend fun getProfileApi(token: String, page: String, limit: String) = service.getProfile(token, if (page.isEmpty()) null else page,
-    if (limit.isEmpty()) null else limit,)
-    suspend fun getEditProfileApi(token: String, request: EditProfileRequest) = service.getEditProfile(token, request)
-    suspend fun getOtherUserProfileApi(token: String, userId:String, page: String, limit: String) = service.getOtherUserProfile(token, userId, if (page.isEmpty()) null else page,
-        if (limit.isEmpty()) null else limit,)
-    suspend fun addStoryApi(token: String, request: AddStoryRequest) = service.addStory(token, request)
+    suspend fun getProfileApi(token: String, page: String, limit: String) = service.getProfile(
+        token, if (page.isEmpty()) null else page,
+        if (limit.isEmpty()) null else limit,
+    )
+
+    suspend fun getEditProfileApi(token: String, request: EditProfileRequest) =
+        service.getEditProfile(token, request)
+
+    suspend fun getOtherUserProfileApi(token: String, userId: String, page: String, limit: String) =
+        service.getOtherUserProfile(
+            token, userId, if (page.isEmpty()) null else page,
+            if (limit.isEmpty()) null else limit,
+        )
+
+    suspend fun addStoryApi(token: String, request: AddStoryRequest) =
+        service.addStory(token, request)
+
     suspend fun storySeenApi(token: String, request: StorySeen) = service.storySeen(token, request)
-    suspend fun storyDeleteApi(token: String, request: StoryDeleteRequest) = service.deleteStory(token, request)
-    suspend fun getFollowingListApi(token: String, self: String, other: String, otherUserId: String) = service.getFollowingList(token, if (self.isEmpty()) null else self,if (other.isEmpty()) null else other,if (otherUserId.isEmpty()) null else otherUserId,)
-    suspend fun getFollowersListApi(token: String, self: String, other: String, otherUserId: String) = service.getFollowersList(token, if (self.isEmpty()) null else self,if (other.isEmpty()) null else other,if (otherUserId.isEmpty()) null else otherUserId,)
-    suspend fun getFollowUserApi(token: String, request:FollowRequest) = service.followUser(token, request)
-    suspend fun getUnfollowUserApi(token: String, request:FollowRequest) = service.unfollowUser(token, request)
+    suspend fun storyDeleteApi(token: String, request: StoryDeleteRequest) =
+        service.deleteStory(token, request)
+
+    suspend fun getFollowingListApi(
+        token: String,
+        self: String,
+        other: String,
+        otherUserId: String,
+    ) = service.getFollowingList(
+        token,
+        if (self.isEmpty()) null else self,
+        if (other.isEmpty()) null else other,
+        if (otherUserId.isEmpty()) null else otherUserId,
+    )
+
+    suspend fun getFollowersListApi(
+        token: String,
+        self: String,
+        other: String,
+        otherUserId: String,
+    ) = service.getFollowersList(
+        token,
+        if (self.isEmpty()) null else self,
+        if (other.isEmpty()) null else other,
+        if (otherUserId.isEmpty()) null else otherUserId,
+    )
+
+    suspend fun getFollowUserApi(token: String, request: FollowRequest) =
+        service.followUser(token, request)
+
+    suspend fun getUnfollowUserApi(token: String, request: FollowRequest) =
+        service.unfollowUser(token, request)
+
     suspend fun getInterestListApi() = service.interestsList()
-    suspend fun getCitiesListApi(search: String? = null, limit: String? = null, page: String? = null) = service.citiesList(search, limit, page)
+    suspend fun getCitiesListApi(
+        search: String? = null,
+        limit: String? = null,
+        page: String? = null,
+    ) = service.citiesList(search, limit, page)
+
     suspend fun generateAgoraToken(
         token: String,
         channelName: String,
         calleeId: String,
-        uid:String,
-        callType:String,
-        sender_id:String,
+        uid: String,
+        callType: String,
+        sender_id: String,
     ) = service.generateAgoraToken(
         token = token,
         if (channelName.isEmpty()) null else channelName,
@@ -102,24 +169,31 @@ class ApiRepository {
 
     suspend fun logoutUserApi(token: String) = service.logoutUser(token)
 
-    suspend fun getRecentChatApi(token:String,
-                                 fromUserId: String? = null,
-                                 toUserId: String? = null,
-                                 type: String? = null,
+    suspend fun getRecentChatApi(
+        token: String,
+        fromUserId: String? = null,
+        toUserId: String? = null,
+        type: String? = null,
     ) = service.getRecentChats(token, fromUserId, toUserId, type)
-    suspend fun saveRecentChatApi(token:String, request: SaveRecentChatRequest) = service.saveRecentChat(token, request)
+
+    suspend fun saveRecentChatApi(token: String, request: SaveRecentChatRequest) =
+        service.saveRecentChat(token, request)
 
     suspend fun deleteAccountReasons() = service.deleteAccountReasons()
 
-    suspend fun deleteAccount(token: String,model: DeleteAccountRequest) = service.deleteAccount(token,model)
+    suspend fun deleteAccount(token: String, model: DeleteAccountRequest) =
+        service.deleteAccount(token, model)
 
     suspend fun getCreatorBenefits() = service.getCreatorBenefits()
 
-    suspend fun sendOtpPhone(token: String,model: SendOtpPhoneRequest) = service.sendOtpPhone(token,model)
+    suspend fun sendOtpPhone(token: String, model: SendOtpPhoneRequest) =
+        service.sendOtpPhone(token, model)
 
-    suspend fun verifyPhoneOtp(token: String,model: VerifyPhoneOtpRequest) = service.verifyPhoneOtp(token,model)
+    suspend fun verifyPhoneOtp(token: String, model: VerifyPhoneOtpRequest) =
+        service.verifyPhoneOtp(token, model)
 
-    suspend fun userToCreator(token: String,model: UserToCreatorRequest) = service.userToCreator(token,model)
+    suspend fun userToCreator(token: String, model: UserToCreatorRequest) =
+        service.userToCreator(token, model)
 
     suspend fun getPredefinedChatsApi(token: String) = service.getPredefinedChats(token)
 
@@ -127,76 +201,122 @@ class ApiRepository {
 
     suspend fun getBlockedUsersApi(token: String) = service.getBlockedUsers(token)
 
-    suspend fun getSearchUsersListApi(token: String, page: String, limit: String, searchKey: String) = service.getSearchUserList(token,searchKey, page, limit)
+    suspend fun getSearchUsersListApi(
+        token: String,
+        page: String,
+        limit: String,
+        searchKey: String,
+    ) = service.getSearchUserList(token, searchKey, page, limit)
 
     suspend fun getFaqListApi() = service.getFaqList()
 
     suspend fun deletePostApi(token: String, postId: String) = service.deletePost(token, postId)
 
-    suspend fun updateLiveStatusApi(token: String, liveStatusId: Int) = service.updateLiveStatus(token, liveStatusId)
+    suspend fun updateLiveStatusApi(token: String, liveStatusId: Int) =
+        service.updateLiveStatus(token, liveStatusId)
 
-    suspend fun getNotificationListApi(token: String, limit: String, page: String) = service.getNotificationList(token, page, limit)
+    suspend fun getNotificationListApi(token: String, limit: String, page: String) =
+        service.getNotificationList(token, page, limit)
 
-    suspend fun deleteRecentChatApi(token: String, request: SaveRecentChatRequest) = service.deleteRecentChat(token ,request)
+    suspend fun deleteRecentChatApi(token: String, request: SaveRecentChatRequest) =
+        service.deleteRecentChat(token, request)
 
     suspend fun rechargeCoinsListApi() = service.rechargeCoinsList()
 
-    suspend fun contactUsApi(token: String, request: ContactUsRequest) = service.contactUs(token ,request)
+    suspend fun contactUsApi(token: String, request: ContactUsRequest) =
+        service.contactUs(token, request)
 
-    suspend fun ratingReviewApi(token: String, request: RatingReviewRequest) = service.ratingReview(token ,request)
+    suspend fun ratingReviewApi(token: String, request: RatingReviewRequest) =
+        service.ratingReview(token, request)
 
-    suspend fun sendGiftApi(token: String, request: SendGiftRequest) = service.sendGift(token ,request)
+    suspend fun sendGiftApi(token: String, request: SendGiftRequest) =
+        service.sendGift(token, request)
 
     suspend fun walletHistoryApi(token: String) = service.walletHistory(token)
 
-    suspend fun addCoinsApi(token: String, request: AddCoinsRequest) = service.addWalletCoins(token ,request)
+    suspend fun addCoinsApi(token: String, request: AddCoinsRequest) =
+        service.addWalletCoins(token, request)
 
     suspend fun withdrawCoinsApi(token: String, coins: String) = service.withdrawCoins(token, coins)
 
 //    suspend fun deductCoinsApi(token: String, request: DeductCoinRequest) = service.deductCallCoins(token ,request)
 
-    suspend fun coinDetailsApi(token: String) = service.getCoinDetails(token )
+    suspend fun coinDetailsApi(token: String) = service.getCoinDetails(token)
 
-    suspend fun getPredefinedChatsOfUserApi(token: String) = service.getPredefinedChatsOfUser(token )
+    suspend fun getPredefinedChatsOfUserApi(token: String) = service.getPredefinedChatsOfUser(token)
 
-    suspend fun addPreDefinedChatApi(token: String, preDefinedChat: String) = service.addPredefinedChat(token, preDefinedChat)
+    suspend fun addPreDefinedChatApi(token: String, preDefinedChat: String) =
+        service.addPredefinedChat(token, preDefinedChat)
 
-    suspend fun editPreDefinedChatApi(token: String, preDefinedChatId: String, preDefinedChat: String) = service.editPredefinedChat(token, preDefinedChatId, preDefinedChat)
+    suspend fun editPreDefinedChatApi(
+        token: String,
+        preDefinedChatId: String,
+        preDefinedChat: String,
+    ) = service.editPredefinedChat(token, preDefinedChatId, preDefinedChat)
 
-    suspend fun deletePreDefinedChatApi(token: String, id: String) = service.deletePredefinedChat(token, id)
+    suspend fun deletePreDefinedChatApi(token: String, id: String) =
+        service.deletePredefinedChat(token, id)
 
     suspend fun notificationReadApi(token: String) = service.notificationRead(token)
 
     suspend fun notificationDeleteApi(token: String) = service.notificationDelete(token)
 
-    suspend fun saveCallDetailsApi(token: String, request: SaveCallRequest) = service.saveCallDetails(token, request)
+    suspend fun saveCallDetailsApi(token: String, request: SaveCallRequest) =
+        service.saveCallDetails(token, request)
 
-    suspend fun updateCallStatusApi(token: String, request: UpdateCallStatusRequest) = service.updateCallStatus(token, request)
+    suspend fun updateCallStatusApi(token: String, request: UpdateCallStatusRequest) =
+        service.updateCallStatus(token, request)
 
-    suspend fun deductCallCoinsApi(token: String, request: DeductCallCoinRequest) = service.deductCallCoin(token, request)
+    suspend fun deductCallCoinsApi(token: String, request: DeductCallCoinRequest) =
+        service.deductCallCoin(token, request)
 
-    suspend fun deductCoinsOnChatApi(token: String, request: DeductChatCoinRequest) = service.deductCallCoinOnChat(token, request)
+    suspend fun deductCoinsOnChatApi(token: String, request: DeductChatCoinRequest) =
+        service.deductCallCoinOnChat(token, request)
 
     suspend fun getAdsApi(token: String) = service.getAds(token)
 
-    suspend fun checkChatHistoryApi(token: String, toUserId: String) = service.checkChatHistory(token, toUserId)
+    suspend fun checkChatHistoryApi(token: String, toUserId: String) =
+        service.checkChatHistory(token, toUserId)
 
     suspend fun viewAdsApi(token: String, adId: String) = service.viewAds(token, adId)
 
     suspend fun deleteReelApi(token: String, reelId: String) = service.deleteReel(token, reelId)
 
-    suspend fun handleMessageRequestApi(token: String, chatId: String, action: String) = service.handleMessageRequest(token, chatId, action)
-    suspend fun updateCoinsRequestApi(token: String, audioCallPrice:String, videoCallPrice: String) = service.updateCoinsRequest(token, audioCallPrice, videoCallPrice)
-    suspend fun getGenderListApi(login: String? = null) = service.getGenderListApi(login)
-    suspend fun setNotificationApi(token: String, request: SetNotificationRequest) = service.setNotifications(token, request)
-    suspend fun readMessagesApi(token: String, chatId: String?=null, anotherUserId: String?=null) = service.readMessages(token, chatId, anotherUserId)
-    suspend fun getNotificationSettingsApi(token: String) = service.getNotificationSettings(token)
-    suspend fun getPostCommentsApi(token: String, postId:String,
-                                   page: String? = null,
-                                   limit: String? = null) = service.getPostComments(token = token, postId, page,limit)
+    suspend fun handleMessageRequestApi(token: String, chatId: String, action: String) =
+        service.handleMessageRequest(token, chatId, action)
 
-    suspend fun addPostCommentApi(token: String, request:PostCommentsRequest, postId:String) = service.postCommentToPost(token = token, request, postId)
-    suspend fun replyToPostCommentApi(token: String, request:ReplyToCommentRequest, postId:String) = service.replyToPostComment(token = token, request, postId)
+    suspend fun updateCoinsRequestApi(
+        token: String,
+        audioCallPrice: String,
+        videoCallPrice: String,
+    ) = service.updateCoinsRequest(token, audioCallPrice, videoCallPrice)
+
+    suspend fun getGenderListApi(login: String? = null) = service.getGenderListApi(login)
+    suspend fun setNotificationApi(token: String, request: SetNotificationRequest) =
+        service.setNotifications(token, request)
+
+    suspend fun readMessagesApi(
+        token: String,
+        chatId: String? = null,
+        anotherUserId: String? = null,
+    ) = service.readMessages(token, chatId, anotherUserId)
+
+    suspend fun getNotificationSettingsApi(token: String) = service.getNotificationSettings(token)
+    suspend fun getPostCommentsApi(
+        token: String, postId: String,
+        page: String? = null,
+        limit: String? = null,
+    ) = service.getPostComments(token = token, postId, page, limit)
+
+    suspend fun addPostCommentApi(token: String, request: PostCommentsRequest, postId: String) =
+        service.postCommentToPost(token = token, request, postId)
+
+    suspend fun replyToPostCommentApi(
+        token: String,
+        request: ReplyToCommentRequest,
+        postId: String,
+    ) = service.replyToPostComment(token = token, request, postId)
+
     suspend fun likePostApi(token: String, reelId: String) = service.likePost(token, reelId)
 
 }

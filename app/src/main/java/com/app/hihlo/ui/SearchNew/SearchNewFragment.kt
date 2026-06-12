@@ -109,12 +109,12 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     private var myStoryData: MyStory = MyStory()
     private var isMediaUploaded: Int = -1
-    private lateinit var adapterHomePosts:AdapterHomeCreators
+    private lateinit var adapterHomePosts: AdapterHomeCreators
     private val viewModel: HomeViewModel by viewModels()
     private var isLoading = false
-    private var currentPage=1
-    private var isRefreshedFromMenu=false
-    private var creatorsList:MutableList<Post> = mutableListOf()
+    private var currentPage = 1
+    private var isRefreshedFromMenu = false
+    private var creatorsList: MutableList<Post> = mutableListOf()
     private var isHomeDataLoaded = false
     private var allStory: List<Story>? = null
     private var scrollChangedListener: ViewTreeObserver.OnScrollChangedListener? = null
@@ -147,7 +147,10 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             isSearchStarted = false
             refreshData()
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener("home_click", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "home_click",
+            viewLifecycleOwner
+        ) { _, _ ->
             Log.i("TAG", "onViewCreated: homeIconTap")
         }
 
@@ -170,7 +173,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         }
                     }
 
-                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+                    if (RTVariable.IS_STATUS_VIEWER_ACTIVATED) {
                         RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
                         getRefreshStory(1, 0)
                         getRefreshMainStory(0)
@@ -190,7 +193,10 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }, 100)
         showSearchBar()
         lastScrollY = 0
-        requireActivity().supportFragmentManager.setFragmentResultListener("self", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "self",
+            viewLifecycleOwner
+        ) { _, _ ->
             Log.i("TAG", "onViewCreated: searchIconTap")
             makeRefresh = true
             binding.nestedScrollView.post {
@@ -211,22 +217,29 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 RTVariable.IS_USER_SEARCH_STARTED = false
                 val text = binding.searchEdittext.text.toString().trim()
                 if (text.isEmpty()) {
-                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    val imm =
+                        requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(binding.searchEdittext.windowToken, 0)
                 }
             }
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener("other", viewLifecycleOwner) { _, _ ->
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            "other",
+            viewLifecycleOwner
+        ) { _, _ ->
             Log.i("TAG", "onViewCreated: chatIconTap")
             RTVariable.SEARCH_SELF_CLICKED = 0
         }
     }
 
-    private fun getRefreshStory(page: Int, gender_id: Int){
+    private fun getRefreshStory(page: Int, gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getHomeData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     page.toString(),
                     10.toString(),
                     gender_id.toString()
@@ -235,27 +248,38 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     viewModel.stories = response.payload.stories
                     search_adapter.updateStories(viewModel.stories)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getRefreshMainStory(gender_id: Int){
+    private fun getRefreshMainStory(gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getStatusData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     gender_id.toString()
                 )
                 if (response.status == 1 && response.code == 200) {
                     statusListGlobal = response.payload
                     RTVariable.statusListGlobal = statusListGlobal
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
@@ -274,60 +298,91 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.creatorsRecycler.layoutManager = layoutManager
-        adapterHomePosts = AdapterHomeCreators(mutableListOf()){ post, click, position ->
-            when(click){
-                0->{
+        adapterHomePosts = AdapterHomeCreators(mutableListOf()) { post, click, position ->
+            when (click) {
+                0 -> {
                     creatorsList.toTypedArray().forEachIndexed { index, creator ->
                         Log.e("TAG", "Home success: [$index] = $creator")
                     }
                     Log.e("TAG", "Home success: ${Posts()} || ${position.toString()}")
                     //findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToUserPostListFragment(homePosts = creatorsList.toTypedArray(), profilePosts = Posts(), from = "home", position = position.toString()))
-                    findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment("0", post.user_id.toString()))
+                    findNavController().navigate(
+                        SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment(
+                            "0",
+                            post.user_id.toString()
+                        )
+                    )
                 }
-                1->{
+
+                1 -> {
                     (requireActivity() as HomeActivity).hideNavigationView()
-                    findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment("0", post.user_id.toString()))
+                    findNavController().navigate(
+                        SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment(
+                            "0",
+                            post.user_id.toString()
+                        )
+                    )
                 }
             }
         }
         binding.creatorsRecycler.adapter = adapterHomePosts
 
-        search_adapter = SearchAdapter(mutableListOf()){ position, click, clickedView ->
-            when(click){
-                0->{
+        search_adapter = SearchAdapter(mutableListOf()) { position, click, clickedView ->
+            when (click) {
+                0 -> {
                     val bundle = Bundle().apply {
-                        putParcelableArrayList("storyList", ArrayList(listOf<Story>(mapUserToStory(RTVariable.users_List[position])) ?: emptyList()))
+                        putParcelableArrayList(
+                            "storyList",
+                            ArrayList(
+                                listOf<Story>(mapUserToStory(RTVariable.users_List[position]))
+                                    ?: emptyList()
+                            )
+                        )
                         putInt("position", 0)
                     }
                     try {
                         findNavController().navigate(R.id.secondStoryFragment, bundle)
                     } catch (e: Exception) {
                         Log.e("HomeFragment", "Navigation failed: ${e.message}", e)
-                        Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Failed to open story", Toast.LENGTH_SHORT)
+                            .show()
                     }
 //                    findNavController().navigate(SearchFragmentDirections.actionSearchFragmentToStoryFragment(isMyStory = "0", myStoryData = MyStory(), otherStoryData =  mapUserToStory(userList[position])))
                 }
-                1->{
+
+                1 -> {
 //                    val bundle = Bundle()
 //                    bundle.putParcelable("userDetail",mapUserToUserDetailsX(userList[position]))
 //                    findNavController().navigate(R.id.action_searchFragment_to_profileFragment, bundle)
 
-                    findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment("0", RTVariable.users_List[position].id.toString()))
+                    findNavController().navigate(
+                        SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment(
+                            "0",
+                            RTVariable.users_List[position].id.toString()
+                        )
+                    )
 
                 }
-                2->{
+
+                2 -> {
                     getSendFollow(RTVariable.USER_ID)
                 }
-                3->{
+
+                3 -> {
                     getSendUnFollow(RTVariable.USER_ID)
                 }
-                4->{
+
+                4 -> {
 
                     val targetUserId = RTVariable.USER_ID.toInt().toString()
 
                     // Safe check: if statusListGlobal is null or empty, show retry message and re-fetch
                     if (statusListGlobal == null || statusListGlobal!!.isEmpty()) {
-                        Toast.makeText(requireContext(), "Loading stories, please wait...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Loading stories, please wait...",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         viewModel6.hitStatusDataApi(
                             "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                                 requireContext(), LOGIN_DATA
@@ -361,17 +416,17 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }
         binding.searchRecycler.adapter = search_adapter
 
-        if(!RTVariable.IS_SEARCH_MAIN_LOADED){
-            RTVariable.postsCache.clear()
-            viewModel.currentPage=1
-            hitSearchUserApi()
-            hitServiceListApi(viewModel.currentPage, selectedGender)
-        }
-        Log.e("IS_SEARCH_MAIN_LOADED", "IS_SEARCH_MAIN_LOADED>>> I "+RTVariable.IS_SEARCH_MAIN_LOADED)
+        RTVariable.postsCache.clear()
+        viewModel.currentPage = 1
+        hitSearchUserApi()
+        hitServiceListApi(viewModel.currentPage, selectedGender)
 
-        if(RTVariable.IS_SEARCH_MAIN_LOADED){
-            Log.e("IS_SEARCHING", "IS_SEARCHING>>> "+RTVariable.IS_USER_SEARCH_STARTED)
-            Log.e("IS_SEARCH_MAIN_LOADED", "IS_SEARCH_MAIN_LOADED>>> I "+RTVariable.postsCache.toMutableList())
+        if (RTVariable.IS_SEARCH_MAIN_LOADED) {
+            Log.e("IS_SEARCHING", "IS_SEARCHING>>> " + RTVariable.IS_USER_SEARCH_STARTED)
+            Log.e(
+                "IS_SEARCH_MAIN_LOADED",
+                "IS_SEARCH_MAIN_LOADED>>> I " + RTVariable.postsCache.toMutableList()
+            )
             binding.swipeRefresh.isEnabled = false
             binding.allButtonContainer.isVisible = true
             //binding.homeFilterGenderRecycler.isVisible=false
@@ -386,7 +441,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             binding.searchRecycler.visibility = View.GONE
             binding.creatorsRecycler.visibility = View.VISIBLE
 
-            if(RTVariable.IS_USER_SEARCH_STARTED){
+            if (RTVariable.IS_USER_SEARCH_STARTED) {
                 binding.searchEdittext.setText(RTVariable.SEARCH_TEXT)
                 binding.allButtonContainer.isVisible = false
                 //binding.homeFilterGenderRecycler.isVisible=false
@@ -401,7 +456,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             }
         }
 
-        if(!RTVariable.IS_SEARCH_MAIN_LOADED){
+        if (!RTVariable.IS_SEARCH_MAIN_LOADED) {
             binding.nestedScrollView2.visibility = View.GONE
             binding.nestedScrollView.visibility = View.VISIBLE
             binding.searchRecycler.visibility = View.GONE
@@ -440,11 +495,14 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }
     }
 
-    private fun getSendFollow(user_id: String){
+    private fun getSendFollow(user_id: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.followUser(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     FollowRequest(following_id = user_id)
                 )
                 if (response.status == 1 && response.code == 200) {
@@ -455,19 +513,26 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     ).show()
                     hitSearchUserApi()
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
             RTVariable.USER_ID = ""
         }
     }
 
-    private fun getSendUnFollow(user_id: String){
+    private fun getSendUnFollow(user_id: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.unfollowUser(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     FollowRequest(unfollowId = user_id)
                 )
                 if (response.status == 1 && response.code == 200) {
@@ -478,9 +543,13 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     ).show()
                     hitSearchUserApi()
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
             RTVariable.USER_ID = ""
         }
@@ -505,10 +574,10 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun onClick() {
-        binding.mainLayout.setOnClickListener{
+        binding.mainLayout.setOnClickListener {
             //binding.homeFilterGenderRecycler.isVisible=false
         }
-        binding.main.setOnClickListener{
+        binding.main.setOnClickListener {
             //binding.homeFilterGenderRecycler.isVisible=false
         }
 
@@ -565,7 +634,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             binding.backBtn.isVisible = false
             val text = binding.searchEdittext.text.toString().trim()
             if (text.isEmpty()) {
-                val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm =
+                    requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(binding.searchEdittext.windowToken, 0)
             }
         }
@@ -648,8 +718,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             val diff = contentBottom - (scrollY + scrollViewHeight)
             Log.d("SCROLL_MANUAL", "scrollY: $scrollY, contentBottom: $contentBottom, diff: $diff")
             UserDataManager.postSearchCreatorScrollY(binding.root.context, scrollY)
-            if (diff <= 300 && diff  != 0) { // `300` is a buffer to pre-load before actual bottom
-                if (isLoading){
+            if (diff <= 300 && diff != 0) { // `300` is a buffer to pre-load before actual bottom
+                if (isLoading) {
                     viewModel.currentPage++
                     hitServiceListApi(viewModel.currentPage, selectedGender)
                 }
@@ -669,6 +739,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         isBottomBarVisible = false
                     }
                 }
+
                 scrollY < lastScrollY - 10 -> {     // scrolling up
                     if (!isBottomBarVisible) {
                         //scrollListener?.showBottomElements()
@@ -691,13 +762,17 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             val scrollViewHeight = scrollView.height
             val contentBottom = contentView.bottom
             val diff = contentBottom - (scrollY + scrollViewHeight)
-            Log.d("SCROLL_STATE", "scrollY 2nd Nested: $scrollY, contentBottom: $contentBottom, diff: $diff")
+            Log.d(
+                "SCROLL_STATE",
+                "scrollY 2nd Nested: $scrollY, contentBottom: $contentBottom, diff: $diff"
+            )
             UserDataManager.postSearchUserScrollY(binding.root.context, scrollY)
             val pos = UserDataManager.get_SearchUserScrollY(binding.root.context)
-            Log.d("SCROLL_STATE", "scrollY 2nd Nested >>> "+pos)
+            Log.d("SCROLL_STATE", "scrollY 2nd Nested >>> " + pos)
         }
 
     }
+
     private val scrollThreshold = 5
     private fun setupScrollListener() {
         binding.nestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
@@ -708,6 +783,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     //hideSearchBar()
                     //binding.homeFilterGenderRecycler.isVisible=false
                 }
+
                 delta < -scrollThreshold -> {
                     //showSearchBar()
                     //binding.homeFilterGenderRecycler.isVisible=false
@@ -746,18 +822,19 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     override fun onResume() {
         super.onResume()
-        Log.e("IS_SEARCHING", "IS_SEARCHING>>> "+RTVariable.IS_USER_SEARCH_STARTED)
-        if(RTVariable.IS_USER_SEARCH_STARTED){
+        Log.e("IS_SEARCHING", "IS_SEARCHING>>> " + RTVariable.IS_USER_SEARCH_STARTED)
+        if (RTVariable.IS_USER_SEARCH_STARTED) {
             val scrollY = UserDataManager.get_SearchUserScrollY(binding.root.context)
             binding.nestedScrollView2.post {
                 binding.nestedScrollView2.scrollTo(0, scrollY)
             }
-        }else{
+        } else {
             val scrollY = UserDataManager.get_SearchCreatorScrollY(binding.root.context)
             binding.nestedScrollView.post {
                 binding.nestedScrollView.scrollTo(0, scrollY)
             }
         }
+        //hitServiceListApi(viewModel.currentPage, selectedGender)
     }
 
     override fun onPause() {
@@ -772,82 +849,121 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             }
         }
         RTVariable.SEARCH_MAIN_CURRENT_PAGE = viewModel.currentPage
-        Log.e("IS_SEARCHING", "IS_SEARCHING>>> "+RTVariable.IS_USER_SEARCH_STARTED)
-        Log.e("IS_SEARCHING", "IS_SEARCHING>>> "+RTVariable.SEARCH_TEXT)
+        Log.e("IS_SEARCHING", "IS_SEARCHING>>> " + RTVariable.IS_USER_SEARCH_STARTED)
+        Log.e("IS_SEARCHING", "IS_SEARCHING>>> " + RTVariable.SEARCH_TEXT)
         scrollChangedListener = null
         scrollChangedListener2 = null
         super.onPause()
     }
-    fun hitSearchUserApi(){
+
+    fun hitSearchUserApi() {
         Log.e("TAG", "get search list: ${binding.searchEdittext.getString()}")
-        viewModel2.hitSearchUsersList("Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.getString())
+        viewModel2.hitSearchUsersList(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken ?: "", "1", "20", binding.searchEdittext.getString()
+        )
     }
-    private fun hitServiceListApi(page: Int, genderId:Int?=null) {
-        Log.e("TAG", "Home success: ${Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken}")
-        viewModel.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "10", genderId.toString())
-        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+
+    private fun hitServiceListApi(page: Int, genderId: Int? = null) {
+        Log.e(
+            "TAG",
+            "Home success: ${
+                Preferences.getCustomModelPreference<LoginResponse>(
+                    requireContext(),
+                    LOGIN_DATA
+                )?.payload?.authToken
+            }"
+        )
+        viewModel.hitHomeDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, page.toString(), "10", genderId.toString()
+        )
+        viewModel6.hitStatusDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "0"
+        )
     }
+
     private fun setObserver() {
         viewModel.getHomeLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            isRefreshedFromMenu=false
-                            isHomeDataLoaded=true
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            isRefreshedFromMenu = false
+                            isHomeDataLoaded = true
                             isMediaUploaded = it.data.payload.is_story_uploaded
                             myStoryData = it.data.payload.my_story ?: MyStory()
                             allStory = it.data.payload.stories
-                            Log.e("TAG", "setObserver: $allStory", )
-                            if (it.data.payload.posts.isNotEmpty()){
-                                isLoading=true
+                            Log.e("TAG", "setObserver: $allStory")
+                            if (it.data.payload.posts.isNotEmpty()) {
+                                isLoading = true
                                 if (viewModel.currentPage == 1) {
                                     RTVariable.postsCache.clear()
                                 }
 
                                 it.data.payload.posts.let { list ->
-                                    val uniqueUsersPostList = list.distinctBy { post ->
-                                        post.user_id
-                                    }
+                                    val uniqueUsersPostList =
+                                        list.groupBy { it.user_id }.map { (_, posts) ->
+                                            // First try to get cover post
+                                            posts.find { it.is_cover == "TRUE" }
+
+                                            // If no cover post exists, take first post
+                                                ?: posts.first()
+                                        }
                                     RTVariable.postsCache.addAll(uniqueUsersPostList)
                                 }
 
                                 if (viewModel.currentPage == 1) {
-                                    if (RTVariable.postsCache.size > 0){
+                                    if (RTVariable.postsCache.size > 0) {
                                         adapterHomePosts.clearList()
                                         adapterHomePosts.updateList(RTVariable.postsCache.toMutableList())
-                                    }else{
+                                    } else {
                                         adapterHomePosts.clearList()
                                     }
                                 } else {
                                     adapterHomePosts.updateList(RTVariable.postsCache.toMutableList())
                                 }
-                                search_adapter?.addStory(listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
+                                search_adapter.addStory(
+                                    listOf(
+                                        it.data.payload.my_story ?: MyStory()
+                                    ), it.data.payload.stories
+                                )
                             }
                             RTVariable.IS_SEARCH_MAIN_LOADED = true
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
 
-                    if(!makeRefresh){
+                    if (!makeRefresh) {
                         ProcessDialog.dismissDialog(true)
                     }
                     //binding.progressBar.isVisible=false
                 }
+
                 Status.LOADING -> {
-                    if (viewModel.currentPage==1) {
-                        if(!makeRefresh){
+                    if (viewModel.currentPage == 1) {
+                        if (!makeRefresh) {
                             ProcessDialog.showDialog(requireContext(), true)
                         }
                     }
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    if(!makeRefresh){
+                    if (!makeRefresh) {
                         ProcessDialog.dismissDialog(true)
                     }
                     //binding.progressBar.isVisible=false
@@ -859,20 +975,24 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Add story success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             hitServiceListApi(currentPage, selectedGender)
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //if (currentPage==1) ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -884,30 +1004,34 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels Gender success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             var data = it.data.payload.genderList
                             genderList = data
                             Log.d("TAG", "setOsdcdcbserver: ${it.data.payload}")
-                            if (selectedGender==null){
+                            if (selectedGender == null) {
                                 binding.allButton.text = data[0].gender_name
                                 viewModel.filterById = data[0].id
                                 viewModel.filterByName = data[0].gender_name
-                            }else{
+                            } else {
                                 binding.allButton.text = data[selectedGender ?: 0].gender_name
                             }
-                            currentPage=1
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                            currentPage = 1
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     //ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     //ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     //ProcessDialog.dismissDialog(true)
@@ -919,27 +1043,31 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "get search list: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             //userList = it.data.payload.users.toMutableList()
                             RTVariable.users_List.addAll(it.data.payload.users.toMutableList())
                             search_adapter.clearList()
                             search_adapter.updateList(RTVariable.users_List)
-                            if(isSearchStarted){
+                            if (isSearchStarted) {
                                 binding.searchRecycler.visibility = View.VISIBLE
                                 binding.creatorsRecycler.visibility = View.GONE
                             }
                             RTVariable.IS_SEARCH_MAIN_LOADED = true
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
+
                 Status.LOADING -> {
 //                    ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                 }
@@ -950,7 +1078,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Status success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
@@ -958,8 +1086,10 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         }
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
@@ -975,7 +1105,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     requireActivity().findViewById<View>(R.id.floatingbtn).visibility = View.GONE
                     requireActivity().findViewById<View>(R.id.imgBtn).visibility = View.GONE
                 } else {
-                    requireActivity().findViewById<View>(R.id.bottomAppBar).visibility = View.VISIBLE
+                    requireActivity().findViewById<View>(R.id.bottomAppBar).visibility =
+                        View.VISIBLE
                     requireActivity().findViewById<View>(R.id.floatingbtn).visibility = View.VISIBLE
                     requireActivity().findViewById<View>(R.id.imgBtn).visibility = View.VISIBLE
                 }
@@ -1008,21 +1139,22 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data) // Always call super
-        Log.i("TAG", "onActivityResult: "+"outside")
-        if (resultCode==RESULT_OK){
-            when(requestCode){
-                REQUEST_CODE_CROP_VIDEO->{
+        Log.i("TAG", "onActivityResult: " + "outside")
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                REQUEST_CODE_CROP_VIDEO -> {
                     val file = File(UserPreference.seletedUri.path)
                     uploadImage(file, "V")
                 }
+
                 UCrop.REQUEST_CROP -> {
                     val resultUri = UCrop.getOutput(data!!)
-                    Log.i("TAG", "onActivityResult: "+resultUri)
+                    Log.i("TAG", "onActivityResult: " + resultUri)
                     val file = MediaUtils.uriToFile(resultUri ?: Uri.EMPTY, requireActivity())
                     uploadImage(file, "I")
                 }
             }
-        }else {
+        } else {
             Log.w("HomeFragment", " cropping was cancelled or failed with code: $resultCode")
         }
     }
@@ -1037,7 +1169,15 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         return AmazonS3Client(credentials)
     }
 
-    fun uploadImageToS3(context: Context, file: File, bucketName: String, objectKey: String, accessKey: String, secretKey: String, assetType:String) {
+    fun uploadImageToS3(
+        context: Context,
+        file: File,
+        bucketName: String,
+        objectKey: String,
+        accessKey: String,
+        secretKey: String,
+        assetType: String,
+    ) {
         // Initialize S3 client
         val s3Client = initializeS3Client(accessKey, secretKey)
 
@@ -1047,7 +1187,9 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             .s3Client(s3Client)
             .build()
 
-        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(context)
+        com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler.getInstance(
+            context
+        )
 
         // Start the upload
         val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
@@ -1057,12 +1199,25 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             override fun onStateChanged(id: Int, state: TransferState) {
                 if (state == TransferState.COMPLETED) {
                     ProcessDialog.dismissDialog(true)
-                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.AWS_CDN_URL
+                    val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.AWS_CDN_URL
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
                     println("Image URL: $mediaUrl")
                     val caption = "Test Caption"
-                    viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType, caption = caption))
+                    viewModel.hitAddStoryDataApi(
+                        "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                            requireContext(),
+                            LOGIN_DATA
+                        )?.payload?.authToken,
+                        AddStoryRequest(
+                            assetUrl = mediaUrl,
+                            assetType = assetType,
+                            caption = caption
+                        )
+                    )
 
                 } else if (state == TransferState.FAILED) {
                     // Handle failure
@@ -1083,10 +1238,22 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             }
         })
     }
-    private fun uploadImage(imageFile: File, assetType:String) {
-        val s3Data = Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.S3Details
+
+    private fun uploadImage(imageFile: File, assetType: String) {
+        val s3Data = Preferences.getCustomModelPreference<LoginResponse>(
+            requireContext(),
+            LOGIN_DATA
+        )?.payload?.S3Details
         val bucketName = s3Data?.BUCKET_NAME
         val objectKey = "${System.currentTimeMillis()}"
-        uploadImageToS3(requireContext(), imageFile, bucketName ?: "", objectKey, s3Data?.ACCESS_KEY ?: "", s3Data?.SECRET_KEY ?: "", assetType)
+        uploadImageToS3(
+            requireContext(),
+            imageFile,
+            bucketName ?: "",
+            objectKey,
+            s3Data?.ACCESS_KEY ?: "",
+            s3Data?.SECRET_KEY ?: "",
+            assetType
+        )
     }
 }

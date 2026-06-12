@@ -3,27 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@color/screen_background_black"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:layout_marginTop="35dp"
+        android:layout_height="match_parent"
+        android:background="@color/screen_background_black">
 
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="35dp">
+
             <androidx.core.widget.NestedScrollView
-                android:background="@color/screen_background_black"
                 android:id="@+id/nestedScrollView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fillViewport="true"
-                android:clipToPadding="false">
+                android:background="@color/screen_background_black"
+                android:clipToPadding="false"
+                android:fillViewport="true">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/mainLayout"
@@ -53,17 +50,17 @@
                             android:id="@+id/notificationLayout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingEnd="10dp"
                             android:layout_marginEnd="13dp"
+                            android:paddingEnd="10dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent">
 
                             <androidx.appcompat.widget.AppCompatImageView
-                                android:scaleType="fitXY"
                                 android:id="@+id/notification"
                                 android:layout_width="24dp"
                                 android:layout_height="26dp"
+                                android:scaleType="fitXY"
                                 android:src="@drawable/notification_icon"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -78,17 +75,8 @@
                                 android:visibility="visible"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
-                        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                        <!--                <androidx.appcompat.widget.AppCompatImageView-->
-                        <!--                    android:id="@+id/notificationButton"-->
-                        <!--                    android:layout_width="35dp"-->
-                        <!--                    android:layout_height="35dp"-->
-                        <!--                    android:layout_marginEnd="13dp"-->
-                        <!--                    android:src="@drawable/notification_bell"-->
-                        <!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-                        <!--                    app:layout_constraintEnd_toEndOf="parent"-->
-                        <!--                    app:layout_constraintTop_toTopOf="parent" />-->
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -112,28 +100,31 @@
                                 android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="15sp" />
+
                         </LinearLayout>
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
                     <ProgressBar
-                        android:visibility="visible"
                         android:id="@+id/progressBar"
-                        app:layout_constraintTop_toBottomOf="@+id/headerLayout"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         android:layout_width="25dp"
                         android:layout_height="70dp"
-                        android:indeterminate="true"
-                        android:layout_margin="5dp"
                         android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:indeterminate="true"
+                        android:indeterminateBehavior="cycle"
                         android:indeterminateTint="@color/white"
-                        android:indeterminateBehavior="cycle" />
+                        android:visibility="visible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/headerLayout" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/homeFilterGenderRecycler"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="70dp"
                         android:layout_marginTop="10dp"
+                        android:layout_marginEnd="70dp"
                         android:background="@drawable/background_black_with_stroke_with_border"
                         android:elevation="1dp"
                         android:orientation="vertical"
@@ -152,21 +143,20 @@
                         app:layout_constraintTop_toBottomOf="@+id/progressBar">
 
                         <androidx.recyclerview.widget.RecyclerView
-                            android:layout_marginTop="20dp"
                             android:id="@+id/storiesRecycler"
                             android:layout_width="match_parent"
                             android:layout_height="110dp"
+                            android:layout_marginTop="20dp"
                             android:orientation="horizontal"
                             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             tools:listitem="@layout/adapter_stories_recycler" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
                     <androidx.recyclerview.widget.RecyclerView
-
                         android:id="@+id/creatorsRecycler"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -181,6 +171,9 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.core.widget.NestedScrollView>
+
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

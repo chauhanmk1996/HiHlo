@@ -38,7 +38,7 @@ import com.bumptech.glide.Glide
 
 class PostsAdapter(
     private val actionListener: PostActionListener? = null,
-    private val onPostClick: ((Post) -> Unit)? = null   // optional - keep only if needed
+    private val onPostClick: ((Post) -> Unit)? = null,   // optional - keep only if needed
 ) : RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
     init {
@@ -105,7 +105,7 @@ class PostsAdapter(
         notifyDataSetChanged()   // ok for first page or refresh
     }
 
-    fun clearList(){
+    fun clearList() {
         //var size = postsList.size
         //postsList.clear()
         //notifyItemRangeRemoved(0, size)
@@ -125,7 +125,7 @@ class PostsAdapter(
     override fun onBindViewHolder(
         holder: PostViewHolder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         if (payloads.isNotEmpty() && payloads.contains("STORY_UPDATE")) {
             holder.updateStoryUI(postsList[position])
@@ -134,8 +134,13 @@ class PostsAdapter(
         }
     }
 
-    fun updateFollow(position: Int, isAlreadyFollowed: Int){
+    fun updateFollow(position: Int, isAlreadyFollowed: Int) {
         postsList[position].is_follow = isAlreadyFollowed
+        notifyItemChanged(position)
+    }
+
+    fun updateCover(position: Int, isCover: String) {
+        postsList[position].is_cover = isCover
         notifyItemChanged(position)
     }
 
@@ -150,23 +155,26 @@ class PostsAdapter(
         init {
             binding.userImage.setOnClickListener {
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
-                var user = Preferences.getCustomModelPreference<LoginResponse>(binding.root.context, LOGIN_DATA)?.payload?.username
-                if (post.creatorDetail?.username==user){
+                var user = Preferences.getCustomModelPreference<LoginResponse>(
+                    binding.root.context,
+                    LOGIN_DATA
+                )?.payload?.username
+                if (post.creatorDetail?.username == user) {
                     actionListener?.onPostAction(
                         post,
                         PostClickAction.POST_PROFILE,
                         adapterPosition,
                         binding.userImage
                     )
-                }else{
-                    if(post.creatorDetail?.isStoryUploaded==1){
+                } else {
+                    if (post.creatorDetail?.isStoryUploaded == 1) {
                         actionListener?.onPostAction(
                             post,
                             PostClickAction.TOWARDS_STORY,
                             adapterPosition,
                             binding.userImage
                         )
-                    }else{
+                    } else {
                         actionListener?.onPostAction(
                             post,
                             PostClickAction.POST_PROFILE,
@@ -186,25 +194,18 @@ class PostsAdapter(
                     binding.userImage
                 )
             }
-//            binding.userName.setOnClickListener {
-//                val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
-//                actionListener?.onPostAction(
-//                    post,
-//                    PostClickAction.POST_PROFILE_NAME,
-//                    adapterPosition,
-//                    binding.userName
-//                )
-//            }
+
             binding.likeImage.setOnClickListener {
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
                 val action = if (post.isLiked == 1) PostClickAction.UNLIKE else PostClickAction.LIKE
-                if (post.isLiked  == 1) {
-                    post.isLiked  = 2
+                if (post.isLiked == 1) {
+                    post.isLiked = 2
                     if (post.likesCount != null) {
                         post.likesCount = post.likesCount?.minus(1)
                         binding.likesCount.text = post.likesCount.toString()
                     }
-                    Glide.with(binding.root.context).load(R.drawable.btn_heart_normal).into(binding.likeImage)
+                    Glide.with(binding.root.context).load(R.drawable.btn_heart_normal)
+                        .into(binding.likeImage)
                     binding.likeImage.scaleX = 1f
                     binding.likeImage.scaleY = 1f
                     binding.likeImage.alpha = 1f
@@ -214,7 +215,8 @@ class PostsAdapter(
                         post.likesCount = post.likesCount?.plus(1)
                         binding.likesCount.text = post.likesCount.toString()
                     }
-                    Glide.with(binding.root.context).load(R.drawable.btn_heart_fill).into(binding.likeImage)
+                    Glide.with(binding.root.context).load(R.drawable.btn_heart_fill)
+                        .into(binding.likeImage)
                     binding.likeImage.apply {
                         scaleX = 0.7f
                         scaleY = 0.7f
@@ -239,13 +241,14 @@ class PostsAdapter(
             binding.btnLike.setOnClickListener {
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
                 val action = if (post.isLiked == 1) PostClickAction.UNLIKE else PostClickAction.LIKE
-                if (post.isLiked  == 1) {
-                    post.isLiked  = 2
+                if (post.isLiked == 1) {
+                    post.isLiked = 2
                     if (post.likesCount != null) {
                         post.likesCount = post.likesCount?.minus(1)
                         binding.likesCount.text = post.likesCount.toString()
                     }
-                    Glide.with(binding.root.context).load(R.drawable.btn_heart_normal).into(binding.likeImage)
+                    Glide.with(binding.root.context).load(R.drawable.btn_heart_normal)
+                        .into(binding.likeImage)
                     binding.likeImage.scaleX = 1f
                     binding.likeImage.scaleY = 1f
                     binding.likeImage.alpha = 1f
@@ -255,7 +258,8 @@ class PostsAdapter(
                         post.likesCount = post.likesCount?.plus(1)
                         binding.likesCount.text = post.likesCount.toString()
                     }
-                    Glide.with(binding.root.context).load(R.drawable.btn_heart_fill).into(binding.likeImage)
+                    Glide.with(binding.root.context).load(R.drawable.btn_heart_fill)
+                        .into(binding.likeImage)
                     binding.likeImage.apply {
                         scaleX = 0.7f
                         scaleY = 0.7f
@@ -310,22 +314,43 @@ class PostsAdapter(
             }
             binding.followButtonImage.setOnClickListener {
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
-                if (post.is_follow!=1){
-                    actionListener?.onPostAction(post, PostClickAction.POST_FOLLOW, adapterPosition, binding.sideOptions)
-                }else{
-                    actionListener?.onPostAction(post, PostClickAction.POST_UNFOLLOW, adapterPosition, binding.sideOptions)
+                if (post.is_follow != 1) {
+                    actionListener?.onPostAction(
+                        post,
+                        PostClickAction.POST_FOLLOW,
+                        adapterPosition,
+                        binding.sideOptions
+                    )
+                } else {
+                    actionListener?.onPostAction(
+                        post,
+                        PostClickAction.POST_UNFOLLOW,
+                        adapterPosition,
+                        binding.sideOptions
+                    )
                 }
             }
             // Options menu / three dots / side options
             binding.sideOptions.setOnClickListener {    // ← assuming @+id/sideOptions exists
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
-                actionListener?.onPostAction(post, PostClickAction.OPTIONS_MENU, adapterPosition, binding.sideOptions)
+                actionListener?.onPostAction(
+                    post,
+                    PostClickAction.OPTIONS_MENU,
+                    adapterPosition,
+                    binding.sideOptions
+                )
             }
             binding.giftImage.setOnClickListener {
                 val post = postsList.getOrNull(adapterPosition) ?: return@setOnClickListener
-                actionListener?.onPostAction(post, PostClickAction.GIFT, adapterPosition, binding.sideOptions)
+                actionListener?.onPostAction(
+                    post,
+                    PostClickAction.GIFT,
+                    adapterPosition,
+                    binding.sideOptions
+                )
             }
         }
+
         fun bind(post: Post) {
             with(binding) {
                 post.creatorDetail?.let {
@@ -333,28 +358,30 @@ class PostsAdapter(
                     userLocation.text = "${it.city}, ${it.country}"
                     verifiedNameTick.isVisible = it.is_creator == 1
                 }
-                var user = Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.username
-                if (post.creatorDetail?.username==user){
+                val user = Preferences.getCustomModelPreference<LoginResponse>(
+                    root.context,
+                    LOGIN_DATA
+                )?.payload?.username
+                if (post.creatorDetail?.username == user) {
                     followButtonLayout.isVisible = false
-                }else {
-                    if (post?.is_follow!=1){
+                } else {
+                    if (post.is_follow != 1) {
                         followButtonLayout.isVisible = true
                         followButtonImage.setImageResource(R.drawable.follow_button_reel)
-                    }else{
+                    } else {
                         followButtonImage.setImageResource(R.drawable.following_button_reel)
                         followButtonLayout.isVisible = true
                     }
                 }
-                if (post.creatorDetail?.username==user){
+                if (post.creatorDetail?.username == user) {
                     giftImage.isVisible = false
-                }else{
+                } else {
                     giftImage.isVisible = true
                 }
-                Log.e("TAG", "IS FOLLOW: "+ post?.is_follow)
+                Log.e("TAG", "IS FOLLOW: " + post.is_follow)
                 when (post.creatorDetail?.user_live_status) {
                     "1" -> onlineStatusImage.setImageResource(R.drawable.online_status_green)
                     "2", "3" -> onlineStatusImage.setImageResource(R.drawable.offline_status_red)
-//                        "3" -> onlineStatusImage.setImageResource(R.drawable.busy_status)
                 }
                 Glide.with(root.context).load(post.creatorDetail?.profile_image)
                     .placeholder(R.drawable.profile_placeholder)
@@ -364,41 +391,23 @@ class PostsAdapter(
                 postImage.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
                 postImage.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
                 postImage.requestLayout()
-                //Glide.with(root.context).clear(postImage)
                 Glide.with(root.context).load(post.asset_url).into(postImage)
-                val story = storiesList?.find { story -> story.user_id == post.user_id }
-                //Log.e("TTTTT", "SSSSS>>> "+story)
+                val story = storiesList.find { story -> story.user_id == post.user_id }
                 userImageCardView.background =
-                    if(post.creatorDetail?.isStoryUploaded == 1){
-                        /*val padding = 6.toPx(root.context)
-                        binding.userImageCardView.setPadding(
-                            padding,
-                            padding,
-                            padding,
-                            padding
-                        )
-                        val sizeInDp = 27
-                        val scale = root.context.resources.displayMetrics.density
-                        val sizeInPx = (sizeInDp * scale).toInt()
-                        val params = binding.innerCard.layoutParams
-                        params.width = sizeInPx
-                        params.height = sizeInPx
-                        binding.innerCard.layoutParams = params */
+                    if (post.creatorDetail?.isStoryUploaded == 1) {
                         if (story != null && story.is_seen == 0) {
                             root.context.resources.getDrawable(R.drawable.gredient_circle, null)
                         } else {
-                            root.context.resources.getDrawable(R.drawable.gredient_circle_black, null)
+                            root.context.resources.getDrawable(
+                                R.drawable.gredient_circle_black,
+                                null
+                            )
                         }
-                    }else{
-                        /*binding.userImageCardView.setPadding(0, 0, 0, 0)
-                        val sizeInDp = 39
-                        val scale = root.context.resources.displayMetrics.density
-                        val sizeInPx = (sizeInDp * scale).toInt()
-                        val params = binding.innerCard.layoutParams
-                        params.width = sizeInPx
-                        params.height = sizeInPx
-                        binding.innerCard.layoutParams = params */
-                        root.context.resources.getDrawable(R.drawable.gredient_circle_transparent, null)
+                    } else {
+                        root.context.resources.getDrawable(
+                            R.drawable.gredient_circle_transparent,
+                            null
+                        )
                     }
                 likesCount.text = RTVariable.formatCount(post.likesCount ?: 0)
                 commentsCount.text = RTVariable.formatCount(post.commentsCount ?: 0)
@@ -419,8 +428,12 @@ class PostsAdapter(
                     binding.captionCollapsed.post {
                         val layout = binding.captionCollapsed.layout
                         if (layout != null) {
-                            val isTruncated = layout.lineCount > 1 || (layout.lineCount == 1 && layout.getEllipsisCount(0) > 0)
-                            binding.moreLessText.visibility = if (isTruncated) View.VISIBLE else View.GONE
+                            val isTruncated =
+                                layout.lineCount > 1 || (layout.lineCount == 1 && layout.getEllipsisCount(
+                                    0
+                                ) > 0)
+                            binding.moreLessText.visibility =
+                                if (isTruncated) View.VISIBLE else View.GONE
                         }
                     }
                     binding.moreLessText.setOnClickListener {
@@ -448,6 +461,7 @@ class PostsAdapter(
                                 binding.captionCollapsed.visibility = View.VISIBLE
                                 binding.moreLessText.visibility = View.VISIBLE
                             }
+
                             override fun updateDrawState(ds: TextPaint) {
                                 super.updateDrawState(ds)
                                 ds.isUnderlineText = false
@@ -476,6 +490,7 @@ class PostsAdapter(
                 }
             }
         }
+
         fun updateStoryUI(post: Post) {
             val context = binding.root.context
 
@@ -495,7 +510,6 @@ class PostsAdapter(
     }
 
     class CustomTypefaceSpan(private val typeface: Typeface) : MetricAffectingSpan() {
-
         override fun updateDrawState(tp: TextPaint) {
             apply(tp)
         }
@@ -509,94 +523,4 @@ class PostsAdapter(
             paint.flags = paint.flags or Paint.SUBPIXEL_TEXT_FLAG
         }
     }
-
-    private fun setDescriptionText(fullCaption: String?, captionTextView: TextView, moreLessTextView: TextView) {
-        if (fullCaption.isNullOrBlank()) {
-            captionTextView.text = ""
-            moreLessTextView.visibility = View.GONE
-            return
-        }
-
-        captionTextView.text = fullCaption
-        captionTextView.maxLines = 1
-        captionTextView.ellipsize = TextUtils.TruncateAt.END
-        moreLessTextView.visibility = View.GONE
-
-        captionTextView.post {
-            val layout = captionTextView.layout ?: return@post
-
-            val isTruncated = layout.lineCount > 1 ||
-                    (layout.lineCount == 1 && layout.getEllipsisCount(0) > 0)
-
-            if (isTruncated) {
-                moreLessTextView.visibility = View.VISIBLE
-                moreLessTextView.text = "More"
-
-                moreLessTextView.setOnClickListener {
-                    if (moreLessTextView.text == "More") {
-                        captionTextView.maxLines = Int.MAX_VALUE
-                        captionTextView.ellipsize = null
-                        moreLessTextView.text = "Less"
-                    } else {
-                        captionTextView.maxLines = 1
-                        captionTextView.ellipsize = TextUtils.TruncateAt.END
-                        moreLessTextView.text = "More"
-                    }
-                }
-            }
-//            captionTextView.post {
-//                // If the text is not truncated, hide the "More" button
-//                if (captionTextView.layout != null) {
-//                    val isTruncated = captionTextView.layout.getEllipsisCount(captionTextView.lineCount - 1) > 0
-//                    moreLessTextView.visibility = if (isTruncated) View.VISIBLE else View.GONE
-//                }
-//            }
-        }
-    }
-
-//    private fun setDescriptionText(
-//        fullText: String,
-//        firstLine: TextView,
-//        remaining: TextView,
-//        moreLess: TextView
-//    ) {
-//        firstLine.text = fullText
-//        firstLine.maxLines = 1
-//        firstLine.ellipsize = TextUtils.TruncateAt.END
-//        remaining.visibility = View.GONE
-//        moreLess.visibility = View.GONE
-//        firstLine.post {
-//            val layout = firstLine.layout ?: return@post
-//            if (layout.getEllipsisCount(0) > 0) {
-//                val ellipsisStart = layout.getEllipsisStart(0)
-//                val safeCut = fullText.lastIndexOf(' ', ellipsisStart)
-//                if (safeCut <= 0) return@post
-//                val firstCollapsed = fullText.substring(0, safeCut).trim()
-//                val firstLineEnd = layout.getLineEnd(0)
-//                val firstFull = fullText.substring(0, firstLineEnd).trim()
-//                val lastWord = firstFull.substring(firstCollapsed.length).trim()
-//                val remainingText = (lastWord + " " + fullText.substring(firstLineEnd)).trim()
-//                firstLine.text = firstCollapsed
-//                moreLess.visibility = View.VISIBLE
-//                moreLess.text = "More"
-//                moreLess.setOnClickListener {
-//                    if (moreLess.text == "More") {
-//                        firstLine.text = firstCollapsed
-//                        firstLine.ellipsize = null
-//                        firstLine.maxLines = 1
-//                        remaining.text = remainingText
-//                        remaining.visibility = View.VISIBLE
-//                        firstLine.ellipsize = TextUtils.TruncateAt.END
-//                        moreLess.text = "Less"
-//                    } else {
-//                        firstLine.text = firstCollapsed
-//                        firstLine.ellipsize = TextUtils.TruncateAt.END
-//                        firstLine.maxLines = 1
-//                        remaining.visibility = View.GONE
-//                        moreLess.text = "More"
-//                    }
-//                }
-//            }
-//        }
-//    }
 }

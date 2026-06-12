@@ -32,6 +32,8 @@ import com.app.hihlo.model.get_profile.GetProfileResponse
 import com.app.hihlo.model.get_recent_chat.response.GetRecentChatResponse
 import com.app.hihlo.model.get_reel_comments.response.ReelCommentsResponse
 import com.app.hihlo.model.home.response.HomeResponse
+import com.app.hihlo.model.home.response.SetRemoveCoverRequest
+import com.app.hihlo.model.home.response.SetRemoveCoverResponse
 import com.app.hihlo.model.interest_list.response.InterestListResponse
 import com.app.hihlo.model.notification.response.GetNotificationListResponse
 import com.app.hihlo.model.post_comments.request.PostCommentsRequest
@@ -82,6 +84,12 @@ interface ApiService {
         @Query("pageSize") limit: String? = null,
         @Query("genderId") genderId: String? = null,
     ): HomeResponse
+
+    @POST("set-cover-photo")
+    suspend fun setRemoveCoverApi(
+        @Header("Authorization") token: String,
+        @Body setRemoveCoverRequest: SetRemoveCoverRequest,
+    ): SetRemoveCoverResponse
 
     @GET("get-all-status-temp")
     suspend fun getStatusData(
