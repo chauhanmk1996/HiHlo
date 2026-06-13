@@ -38,6 +38,7 @@ import java.nio.ByteBuffer
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
+import androidx.core.net.toUri
 
 class ImageVideoConverter : AppCompatActivity() {
 
@@ -99,7 +100,7 @@ class ImageVideoConverter : AppCompatActivity() {
         mediaContainer.isDrawingCacheEnabled = true
         overlayContainer.isDrawingCacheEnabled = true
         val uri = intent.getStringExtra("uri") ?: ""
-        originalVideoUri = Uri.parse(uri)
+        originalVideoUri = uri.toUri()
         isVideoMedia = intent.getBooleanExtra("isVideo", false)
         setupRotationTooltip()
         if (isVideoMedia) {

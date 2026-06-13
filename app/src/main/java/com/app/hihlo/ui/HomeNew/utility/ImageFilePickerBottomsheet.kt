@@ -63,27 +63,45 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
     private val converterLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
+
             val resultUri = UCrop.getOutput(result.data!!)
+
             if (resultUri != null) {
+
                 val extras = result.data?.extras
+
                 val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
                 val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
+
                 var ratio = 0
+
                 if (width > 0 && height > 0) {
-                    val w = width.toFloat()
-                    val h = height.toFloat()
+
+                    val actualRatio = width.toFloat() / height.toFloat()
+
                     ratio = when {
-                        isCloseTo(w/h, 1f)    -> 2
-                        isCloseTo(w/h, 9f/16f) -> 1
-                        isCloseTo(w/h, 16f/9f) -> 3
+                        isCloseTo(actualRatio, 1f) -> 1     // 1:1
+                        isCloseTo(actualRatio, 3f / 4f) -> 2 // 3:4
                         else -> 0
                     }
                 }
-                listener?.onMediaSelected(resultUri.toString(), "image", ratio)
+
+                listener?.onMediaSelected(
+                    resultUri.toString(),
+                    "image",
+                    ratio
+                )
+
             } else {
-                Toast.makeText(requireContext(), "Failed to crop image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to crop image",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+
             dismiss()
         }
     }
@@ -325,7 +343,6 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
             holder.txtDuration.isVisible = false
 
             holder.itemView.setOnClickListener {
-                Log.d("MEDIA_DATA", "uri = ${item.uri}")
                 val options = UCrop.Options().apply {
                     setFreeStyleCropEnabled(false)
 
@@ -333,8 +350,7 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
                     setAspectRatioOptions(
                         0, // default selection index
                         AspectRatio("1:1", 1f, 1f),
-                        AspectRatio("9:16", 9f, 16f),
-                        AspectRatio("16:9", 16f, 9f)
+                        AspectRatio("3:4", 3f, 4f)
                     )
                 }
 

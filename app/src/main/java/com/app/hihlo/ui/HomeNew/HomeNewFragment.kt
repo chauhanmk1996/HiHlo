@@ -79,6 +79,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.getValue
+import androidx.core.net.toUri
 
 class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     private var isMediaUploaded: Int = -1
@@ -1493,7 +1494,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                         val bottomSheet = ImageFilePickerBottomsheet()
                         bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
-                            val resultUri = Uri.parse(uri)
+                            val resultUri = uri.toUri()
                             if (resultUri.scheme == null || resultUri.path == null) {
                                 Toast.makeText(
                                     requireContext(),
