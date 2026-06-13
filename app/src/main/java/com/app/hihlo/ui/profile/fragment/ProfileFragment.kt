@@ -169,7 +169,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         caption: String,
         posts: Posts,
         click: Int,
-        reelPosition: Int
+        reelPosition: Int,
     ) {
         when (click) {
             0 -> {
@@ -621,10 +621,17 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             context = requireContext(),
             anchorView = binding.addReel,
             onOption1Click = {
-                if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(),LOGIN_DATA)?.payload?.isCreator == 1) {
+                if (Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.isCreator == 1
+                ) {
                     if (RTVariable.STORY_UPLOAD_LIMIT <= 0) {
-                        Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You can upload maximum 4 stories in 24 hours")
-                    }else{
+                        Utils.showCustom_Snackbar(
+                            requireActivity().findViewById(android.R.id.content),
+                            "You can upload maximum 4 stories in 24 hours"
+                        )
+                    } else {
                         RTVariable.SELECT_OPTION = true
                         //checkGalleryPermissionAndPick2()
                         val bottomSheet = FilePickerBottomsheet()
@@ -646,11 +653,18 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         )
                     }
                 } else {
-                    Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    Utils.showCustom_Snackbar(
+                        requireActivity().findViewById(android.R.id.content),
+                        "You are not a creator"
+                    )
                 }
             },
             onOption2Click = {
-                if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
+                if (Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.isCreator == 1
+                ) {
                     //selectedBottomSheetType = "post"
 //                        openUploadBottomSheet("post")
                     //RTVariable.SELECT_OPTION = false
@@ -662,7 +676,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     bottomSheet.setOnMediaSelectedListener { uri, type, ratio ->
                         val resultUri = Uri.parse(uri)
                         if (resultUri.scheme == null || resultUri.path == null) {
-                            Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Invalid image", Toast.LENGTH_SHORT)
+                                .show()
                             return@setOnMediaSelectedListener
                         }
                         UserPreference.seletedUri = resultUri
@@ -673,12 +688,19 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         findNavController().navigate(R.id.action_profileFragment_to_addReelFragment)
                     }
                     bottomSheet.show(parentFragmentManager, "ImageFilePickerBottomSheet")
-                }else{
-                    Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                } else {
+                    Utils.showCustom_Snackbar(
+                        requireActivity().findViewById(android.R.id.content),
+                        "You are not a creator"
+                    )
                 }
             },
             onOption3Click = {
-                if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
+                if (Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.isCreator == 1
+                ) {
                     RTVariable.SELECT_OPTION = false
                     selectedBottomSheetType = "reel"
 
@@ -692,7 +714,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     }
                     bottomSheet.show(parentFragmentManager, "VideoFilePickerBottomSheet")
                 } else {
-                    Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You are not a creator")
+                    Utils.showCustom_Snackbar(
+                        requireActivity().findViewById(android.R.id.content),
+                        "You are not a creator"
+                    )
                 }
             },
             option1Text = "Upload Status",
@@ -701,103 +726,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             option4Text = "Cancel",
             option1ImageRes = R.drawable.btn_status_icon,
             option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-            option3ImageRes = R.drawable.icon_over_video,
+            option3ImageRes = R.drawable.reel_icon_unselected,
             option4ImageRes = R.drawable.ic_cancel_red
         ).show()
-//        bottomSheetFragment = UploadMediaBottomSheet.newInstance(check).apply {
-//            onGallerySelected = {
-//                dismiss()
-//                when(it){
-//                    0->{
-//                        selectedBottomSheetType = "post"
-////                        openUploadBottomSheet("post")
-//                        checkGalleryPermissionAndPick("I")
-//                    }
-//                    1->{
-//                        if(Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator ==1){
-//                            selectedBottomSheetType = "reel"
-////                            openUploadBottomSheet("reel")
-//                            checkGalleryPermissionAndPick("V")
-//                        }else{
-//                            Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
-//                        }
-//
-//                    }
-//                }
-//            }
-//            onUploadTypeSelected = {
-//                dismiss()
-//                when(it){
-//                    0->{
-//                        checkGalleryPermissionAndPick("I")
-//                    }
-//                    1->{
-//                        checkGalleryPermissionAndPick("V")
-//                    }
-//                }
-//            }
-//        }
-//        bottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
-//        val popup = UploadMediaBottomSheet(requireContext(), check, binding.root).apply {
-//            onGallerySelected = {
-//                dismiss()
-//                when (it) {
-//                    0 -> {
-//                        selectedBottomSheetType = "post"
-//                        checkGalleryPermissionAndPick("I")
-//                    }
-//                    1 -> {
-//                        if (Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.isCreator == 1) {
-//                            selectedBottomSheetType = "reel"
-//                            checkGalleryPermissionAndPick("V")
-//                        } else {
-//                            Toast.makeText(requireContext(), "You are not a creator", Toast.LENGTH_SHORT).show()
-//                        }
-//                    }
-//                }
-//            }
-//            onUploadTypeSelected = {
-//                dismiss()
-//                when (it) {
-//                    0 -> {
-//                        checkGalleryPermissionAndPick("I")
-//                    }
-//                    1 -> {
-//                        checkGalleryPermissionAndPick("V")
-//                    }
-//                }
-//            }
-//        }
-//        popup.show()
     }
-
-    /*    private fun checkGalleryPermissionAndPick(mediaType: String) {
-            selectedMediaType = mediaType
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val permissions = arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO
-                )
-                requestMultiplePermissionsLauncher.launch(permissions)
-            } else {
-                val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-                if (ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED) {
-                    launchMediaPicker()
-                } else {
-                    requestSinglePermissionLauncher.launch(permission)
-                }
-            }
-        }
-        private fun launchMediaPicker() {
-            val mediaType = when (selectedMediaType) {
-                "I" -> ActivityResultContracts.PickVisualMedia.ImageOnly
-                "V" -> ActivityResultContracts.PickVisualMedia.VideoOnly
-                else -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
-            }
-
-            mediaPickerLauncher.launch(PickVisualMediaRequest(mediaType))
-        }*/
-
 
     private val requestSinglePermissionLauncher2 = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -983,7 +915,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         objectKey: String,
         accessKey: String,
         secretKey: String,
-        assetType: String
+        assetType: String,
     ) {
         // Initialize S3 client
         val s3Client = initializeS3Client(accessKey, secretKey)
@@ -1014,7 +946,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                             requireContext(),
                             LOGIN_DATA
                         )?.payload?.authToken,
-                        AddStoryRequest(assetUrl = mediaUrl, assetType = assetType, caption = caption)
+                        AddStoryRequest(
+                            assetUrl = mediaUrl,
+                            assetType = assetType,
+                            caption = caption
+                        )
                     )
                     //viewModel.hitAddStoryDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, AddStoryRequest(assetUrl = mediaUrl, assetType = assetType))
                 } else if (state == TransferState.FAILED) {

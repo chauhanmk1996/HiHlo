@@ -51,7 +51,7 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
 
     override fun getTheme(): Int = R.style.FilePickerTheme
 
-    fun interface OnVideoPickedListener{
+    fun interface OnVideoPickedListener {
         fun onVideoPicked(uri: Uri, ratio: Int) // ratio can be ignored or default
     }
 
@@ -317,16 +317,13 @@ class VideoFilePickerBottomsheet : BottomSheetDialogFragment() {
             holder.itemView.setOnClickListener {
                 val uri = item.uri
                 UserPreference.seletedUri = Uri.EMPTY
-                // 3. Launch TrimVideoActivity with the selected video
                 val intent = Intent(requireActivity(), TrimVideoActivity::class.java)
                 intent.putExtra("videoUrl", uri.toString())
-                trimVideoLauncher.launch(intent)   // <-- use launcher, NOT startActivity
-                // do NOT dismiss here – dismiss is called after result
+                trimVideoLauncher.launch(intent)
             }
         }
     }
 
-    // ─── Format duration ────────────────────────────────────────────
     private fun formatDuration(durationMs: Long): String {
         val totalSeconds = durationMs / 1000
         val minutes = totalSeconds / 60

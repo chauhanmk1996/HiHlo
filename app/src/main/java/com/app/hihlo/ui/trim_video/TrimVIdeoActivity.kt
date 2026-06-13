@@ -80,8 +80,8 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
             })
             setDestinationPath(path.absolutePath)
             setVideoInformationVisibility(true)
-            setMaxDuration(if (from == "home") 15 else 60)
-            setMinDuration(0)
+            setMaxDuration(if (from == "home") 15000 else 60000)
+            setMinDuration(3000)
         }
 
         binding.backButton.setOnClickListener {
@@ -103,16 +103,6 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        releaseTrimmerPlayer()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        releaseTrimmerPlayer()
-    }
-
     private fun releaseTrimmerPlayer() {
         try {
             val field = binding.videoTrimmer.javaClass.getDeclaredField("mPlayer")
@@ -127,5 +117,15 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        releaseTrimmerPlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        releaseTrimmerPlayer()
     }
 }

@@ -4,7 +4,6 @@ import com.redevrx.video_trimmer.view.RangeSeekBarView
 import com.redevrx.video_trimmer.view.Thumb
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Typeface
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Environment
@@ -15,7 +14,6 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
@@ -42,9 +40,7 @@ import com.redevrx.video_trimmer.databinding.TrimmerViewLayoutBinding
 import com.redevrx.video_trimmer.event.OnProgressVideoEvent
 import com.redevrx.video_trimmer.event.OnRangeSeekBarEvent
 import com.redevrx.video_trimmer.event.OnVideoEditedEvent
-import com.redevrx.video_trimmer.utils.BackgroundExecutor
 import com.redevrx.video_trimmer.utils.TrimVideoUtils
-import com.redevrx.video_trimmer.utils.UiThreadExecutor
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Locale
@@ -64,20 +60,14 @@ class CustomVideoEditor @JvmOverloads constructor(
     private lateinit var mPlayer: ExoPlayer
     private lateinit var mSrc: Uri
     private var mFinalPath: String? = null
-
     private var mMaxDuration: Int = -1
     private var mMinDuration: Int = -1
     private var mListeners: ArrayList<OnProgressVideoEvent> = ArrayList()
-
     private var mOnVideoEditedListener: OnVideoEditedEvent? = null
-//    private var mOnVideoListener: OnVideoEvent? = null
-
     private lateinit var binding: TrimmerViewLayoutBinding
-
     private var mDuration: Long = 0L
     private var mTimeVideo = 0L
     private var mStartPosition = 0L
-
     private var mEndPosition = 0L
     private var mResetSeekBar = false
     private val mMessageHandler = MessageHandler(this)
@@ -85,7 +75,6 @@ class CustomVideoEditor @JvmOverloads constructor(
     private var originalVideoHeight: Int = 0
     private var videoPlayerWidth: Int = 0
     private var videoPlayerHeight: Int = 0
-    private var bitRate: Int = 2
     private var isVideoPrepared = false
     private var videoPlayerCurrentPosition = 0L
     private var destinationPath: String
@@ -103,7 +92,6 @@ class CustomVideoEditor @JvmOverloads constructor(
             }
             return mFinalPath ?: ""
         }
-
         set(value) {
             mFinalPath = value
         }
@@ -123,6 +111,7 @@ class CustomVideoEditor @JvmOverloads constructor(
         binding.iconVideoPlay.setOnClickListener {
             onClickVideoPlayPause()
         }
+
         val gestureDetector =
             GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
@@ -130,6 +119,7 @@ class CustomVideoEditor @JvmOverloads constructor(
                     return true
                 }
             })
+
         binding.layoutSurfaceView.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
@@ -144,6 +134,7 @@ class CustomVideoEditor @JvmOverloads constructor(
                 updateVideoProgress(time.toLong())
             }
         })
+
         binding.handlerTop.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 onPlayerIndicatorSeekChanged(progress, fromUser)
@@ -163,7 +154,7 @@ class CustomVideoEditor @JvmOverloads constructor(
             }
 
             override fun onSeek(rangeSeekBarView: RangeSeekBarView, index: Int, value: Float) {
-                binding.handlerTop.visibility = View.GONE
+                binding.handlerTop.visibility = GONE
                 onSeekThumbs(index, value)
             }
 
@@ -174,10 +165,6 @@ class CustomVideoEditor @JvmOverloads constructor(
                 onStopSeekThumbs()
             }
         })
-//
-//        if (mPlayer != null && mPlayer.isPlaying) {
-//            binding.handlerTop.visibility = View.VISIBLE
-//        }
     }
 
     private fun onPlayerIndicatorSeekChanged(progress: Int, fromUser: Boolean) {
@@ -191,14 +178,14 @@ class CustomVideoEditor @JvmOverloads constructor(
     private fun onPlayerIndicatorSeekStart() {
         mMessageHandler.removeMessages(SHOW_PROGRESS)
         mPlayer.pause()
-        binding.iconVideoPlay.visibility = View.VISIBLE
+        binding.iconVideoPlay.visibility = VISIBLE
         notifyProgressUpdate(false)
     }
 
     private fun onPlayerIndicatorSeekStop(seekBar: SeekBar) {
         mMessageHandler.removeMessages(SHOW_PROGRESS)
         mPlayer.pause()
-        binding.iconVideoPlay.visibility = View.VISIBLE
+        binding.iconVideoPlay.visibility = VISIBLE
 
         val duration = (mDuration * seekBar.progress / 1000L).toInt()
         mPlayer.seekTo(duration.toLong())
@@ -216,31 +203,24 @@ class CustomVideoEditor @JvmOverloads constructor(
         binding.timeLineView.layoutParams = lp
     }
 
-
     private fun onClickVideoPlayPause() {
         if (mPlayer.isPlaying) {
-            binding.iconVideoPlay.visibility = View.VISIBLE
+            binding.iconVideoPlay.visibility = VISIBLE
             mMessageHandler.removeMessages(SHOW_PROGRESS)
             mPlayer.pause()
         } else {
-            binding.iconVideoPlay.visibility = View.GONE
+            binding.iconVideoPlay.visibility = GONE
             if (mResetSeekBar) {
                 mResetSeekBar = false
                 mPlayer.seekTo(mStartPosition)
-                binding.handlerTop.visibility = View.VISIBLE
+                binding.handlerTop.visibility = VISIBLE
                 setProgressBarPosition(0)
             }
             mResetSeekBar = false
-            binding.handlerTop.visibility = View.VISIBLE
+            binding.handlerTop.visibility = VISIBLE
             mMessageHandler.sendEmptyMessage(SHOW_PROGRESS)
             mPlayer.play()
         }
-    }
-
-    fun onCancelClicked() {
-        mPlayer.stop()
-//        binding.videoLoader.stopPlayback()
-//        mOnVideoEditedListener?.cancelAction()
     }
 
     private fun onVideoPrepared(mp: ExoPlayer) {
@@ -265,13 +245,19 @@ class CustomVideoEditor @JvmOverloads constructor(
         videoPlayerHeight = lp.height
         binding.videoLoader.layoutParams = lp
 
-        binding.iconVideoPlay.visibility = View.VISIBLE
+        binding.iconVideoPlay.visibility = VISIBLE
         mDuration = mPlayer.duration
-//        mDuration = binding.videoLoader.duration.toFloat()
+
+        /*binding.timeLineView.post {
+            val screenWidth = resources.displayMetrics.widthPixels
+            val extraWidth = ((mDuration / 1000) * 100).toInt()
+            val finalWidth = screenWidth + extraWidth
+            binding.timeLineView.layoutParams.width = finalWidth
+            binding.timeLineView.requestLayout()
+        }*/
+
         setSeekBarPosition()
         setTimeFrames()
-//        mOnVideoListener?.onVideoPrepared()
-
     }
 
     private fun setSeekBarPosition() {
@@ -318,7 +304,6 @@ class CustomVideoEditor @JvmOverloads constructor(
             Thumb.LEFT -> {
                 mStartPosition = ((mDuration * value / 100L).toLong())
                 mPlayer.seekTo(mStartPosition)
-//                binding.videoLoader.seekTo(mStartPosition.toInt())
             }
 
             Thumb.RIGHT -> {
@@ -332,18 +317,12 @@ class CustomVideoEditor @JvmOverloads constructor(
     private fun onStopSeekThumbs() {
         mMessageHandler.removeMessages(SHOW_PROGRESS)
         mPlayer.pause()
-//        binding.videoLoader.pause()
-        binding.iconVideoPlay.visibility = View.VISIBLE
+        binding.iconVideoPlay.visibility = VISIBLE
     }
-
-//    private fun onVideoCompleted() {
-//        mPlayer.seekTo(mStartPosition)
-////        binding.videoLoader.seekTo(mStartPosition.toInt())
-//    }
 
     private fun notifyProgressUpdate(all: Boolean) {
         if (mDuration == 0L) return
-        val position = mPlayer.currentPosition//binding.videoLoader.currentPosition
+        val position = mPlayer.currentPosition
         if (all) {
             for (item in mListeners) {
                 item.updateProgress(position.toFloat(), mDuration, (position * 100 / mDuration))
@@ -359,13 +338,12 @@ class CustomVideoEditor @JvmOverloads constructor(
 
     private fun updateVideoProgress(time: Long) {
         if (time <= mStartPosition && time <= mEndPosition) binding.handlerTop.visibility =
-            View.GONE
-        else binding.handlerTop.visibility = View.VISIBLE
+            GONE
+        else binding.handlerTop.visibility = VISIBLE
         if (time >= mEndPosition) {
             mMessageHandler.removeMessages(SHOW_PROGRESS)
             mPlayer.pause()
-//            binding.videoLoader.pause()
-            binding.iconVideoPlay.visibility = View.VISIBLE
+            binding.iconVideoPlay.visibility = VISIBLE
             mResetSeekBar = true
             return
         }
@@ -377,11 +355,8 @@ class CustomVideoEditor @JvmOverloads constructor(
         layout.setBackgroundColor(color)
     }
 
-    fun setFrameColor(@ColorInt color: Int) = with(binding) {
-        frameColor.setBackgroundColor(color)
-    }
-
     private var transformer: Transformer? = null
+
     @SuppressLint("UnsafeOptInUsageError")
     fun saveVideo() {
         val txtTime = binding.textTimeSelection.text.toString()
@@ -423,7 +398,7 @@ class CustomVideoEditor @JvmOverloads constructor(
 
                 override fun onCompleted(
                     composition: Composition,
-                    exportResult: ExportResult
+                    exportResult: ExportResult,
                 ) {
                     logD("VideoTrim:: Export completed")
                     mOnVideoEditedListener
@@ -483,18 +458,11 @@ class CustomVideoEditor @JvmOverloads constructor(
 
         val minutes = parts[0].toInt()
         val seconds = parts[1].trim().split(" ")[0].toInt() // Extract seconds
-
-        // Calculate total milliseconds
         return ((minutes * 60 + seconds) * 1000).toLong()
     }
 
-    fun setBitrate(bitRate: Int): CustomVideoEditor {
-        this.bitRate = bitRate
-        return this
-    }
-
     fun setVideoInformationVisibility(visible: Boolean): CustomVideoEditor {
-        binding.timeFrame.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.timeFrame.visibility = if (visible) VISIBLE else GONE
         return this
     }
 
@@ -503,23 +471,13 @@ class CustomVideoEditor @JvmOverloads constructor(
         return this
     }
 
-//    fun setOnVideoListener(onVideoListener: OnVideoEvent): CustomVideoEditor {
-//        mOnVideoListener = onVideoListener
-//        return this
-//    }
-
-    fun destroy() {
-        BackgroundExecutor.cancelAll("", true)
-        UiThreadExecutor.cancelAll("")
-    }
-
     fun setMaxDuration(maxDuration: Int): CustomVideoEditor {
-        mMaxDuration = maxDuration * 1000
+        mMaxDuration = maxDuration
         return this
     }
 
     fun setMinDuration(minDuration: Int): CustomVideoEditor {
-        mMinDuration = minDuration * 1000
+        mMinDuration = minDuration
         return this
     }
 
@@ -528,16 +486,10 @@ class CustomVideoEditor @JvmOverloads constructor(
         return this
     }
 
-
     @SuppressLint("UnsafeOptInUsageError")
     fun setVideoURI(videoURI: Uri): CustomVideoEditor {
         mSrc = videoURI
-
-        /**
-         * setup video player
-         */
-        mPlayer = ExoPlayer.Builder(context)
-            .build()
+        mPlayer = ExoPlayer.Builder(context).build()
 
         val dataSourceFactory = DefaultDataSource.Factory(context)
         val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -551,7 +503,6 @@ class CustomVideoEditor @JvmOverloads constructor(
             it.player = mPlayer
             it.useController = false
         }
-
 
         mPlayer.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
@@ -567,38 +518,29 @@ class CustomVideoEditor @JvmOverloads constructor(
                     binding.videoLoader.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                     mPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
                 }
-
                 onVideoPrepared(mPlayer)
-
             }
 
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
-                    // Video has ended, seek back to the start
                     mResetSeekBar = true
                     mPlayer.seekTo(mStartPosition)
-                    binding.handlerTop.visibility = View.VISIBLE
+                    binding.handlerTop.visibility = VISIBLE
                     setProgressBarPosition(0)
-                    // You might want to start playing the video again here if needed
-                    // mPlayer.play()
                 }
             }
         })
 
         binding.videoLoader.requestFocus()
         binding.timeLineView.setVideo(mSrc)
+
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(context, mSrc)
-        val metaDateWidth =
-            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                ?.toInt() ?: 0
-        val metaDataHeight =
-            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                ?.toInt() ?: 0
+        val metaDateWidth = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
+        val metaDataHeight = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
 
         //If the rotation is 90 or 270 the width and height will be transposed.
-        when (mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
-            ?.toInt()) {
+        when (mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toInt()) {
             90, 270 -> {
                 originalVideoWidth = metaDataHeight
                 originalVideoHeight = metaDateWidth
@@ -613,34 +555,15 @@ class CustomVideoEditor @JvmOverloads constructor(
         return this
     }
 
-//    private fun setupCropper(width: Int, height: Int) {
-//        binding.cropFrame.setFixedAspectRatio(false)
-//        binding.cropFrame.layoutParams = binding.cropFrame.layoutParams?.let {
-//            it.width = width
-//            it.height = height
-//            it
-//        }
-//        binding.cropFrame.setImageBitmap(
-//            context.getDrawable(android.R.color.transparent)
-//                ?.let { drawableToBitmap(it, width, height) })
-//    }
-
-    fun setTextTimeSelectionTypeface(tf: Typeface?): CustomVideoEditor {
-        if (tf != null) binding.textTimeSelection.typeface = tf
-        return this
-    }
-
     fun onResume() {
         mPlayer.seekTo(videoPlayerCurrentPosition)
         if (binding.videoLoader.player?.isPlaying == true) {
-            binding.handlerTop.visibility = View.VISIBLE
+            binding.handlerTop.visibility = VISIBLE
         }
-//        binding.videoLoader.seekTo(videoPlayerCurrentPosition)
     }
 
     fun onPause() {
         videoPlayerCurrentPosition = mPlayer.currentPosition
-//        videoPlayerCurrentPosition = binding.videoLoader.currentPosition
     }
 
     private class MessageHandler(view: CustomVideoEditor) : Handler(Looper.getMainLooper()) {
@@ -653,11 +576,6 @@ class CustomVideoEditor @JvmOverloads constructor(
     }
 
     companion object {
-        //        private const val MIN_TIME_FRAME = 1000
         private const val SHOW_PROGRESS = 2
-//        private const val MIN_BITRATE = 1500000.0
-
     }
 }
-
-private fun Double.bitToMb() = this / 1000000

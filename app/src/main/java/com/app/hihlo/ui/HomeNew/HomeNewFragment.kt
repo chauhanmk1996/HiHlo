@@ -68,7 +68,6 @@ import com.app.hihlo.utils.Utils
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
-import com.app.hihlo.utils.toUpperString
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.yalantis.ucrop.UCrop
@@ -747,7 +746,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 option1Text = "Set Cover",
                 option2Text = "Delete",
                 option3Text = "Cancel",
-                option1ImageRes = R.drawable.filled_star,
+                option1ImageRes = R.drawable.white_star,
                 option2ImageRes = R.drawable.delete_icon,
                 option3ImageRes = R.drawable.ic_cancel_red
             )
@@ -1548,7 +1547,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                 option1ImageRes = R.drawable.btn_status_icon, // Add your own move to request icon
                 option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
-                option3ImageRes = R.drawable.icon_over_video,
+                option3ImageRes = R.drawable.reel_icon_unselected
 
                 ).show()
         }

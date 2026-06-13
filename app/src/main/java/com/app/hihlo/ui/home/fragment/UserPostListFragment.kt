@@ -950,7 +950,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 option1Text = "Set Cover",
                 option2Text = "Delete",
                 option3Text = "Cancel",
-                option1ImageRes = R.drawable.filled_star,
+                option1ImageRes = R.drawable.white_star,
                 option2ImageRes = R.drawable.delete_icon,
                 option3ImageRes = R.drawable.ic_cancel_red
             )

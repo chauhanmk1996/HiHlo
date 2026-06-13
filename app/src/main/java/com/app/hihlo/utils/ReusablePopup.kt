@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Color
 import android.text.Html
-import android.util.Log
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -30,7 +29,7 @@ class ReusablePopup(
     private val option2ImageRes: Int? = null,
     private val option3ImageRes: Int? = null,
     private val option4ImageRes: Int? = null,
-    private val alignEnd: Boolean? = false
+    private val alignEnd: Boolean? = false,
 ) {
     private var popupWindow: PopupWindow? = null
 
@@ -59,35 +58,37 @@ class ReusablePopup(
 
         // Option 3
         if (onOption3Click != null && option3Text != null) {
-            binding.tvOption3?.apply {
+            binding.tvOption3.apply {
                 visibility = View.VISIBLE
                 text = Html.fromHtml(option3Text, Html.FROM_HTML_MODE_LEGACY)
                 option3ImageRes?.let { binding.ivOption3.setImageResource(it) }
-                binding.ivOption3.visibility = if (option3ImageRes != null) View.VISIBLE else View.GONE
+                binding.ivOption3.visibility =
+                    if (option3ImageRes != null) View.VISIBLE else View.GONE
                 setOnClickListener {
                     onOption3Click.invoke()
                     popupWindow?.dismiss()
                 }
             }
         } else {
-            binding.tvOption3?.visibility = View.GONE
+            binding.tvOption3.visibility = View.GONE
             binding.ivOption3.visibility = View.GONE
         }
 
         // Option 4
         if (onOption4Click != null && option4Text != null) {
-            binding.tvOption4?.apply {
+            binding.tvOption4.apply {
                 visibility = View.VISIBLE
                 text = Html.fromHtml(option4Text, Html.FROM_HTML_MODE_LEGACY)
                 option4ImageRes?.let { binding.ivOption4.setImageResource(it) }
-                binding.ivOption4.visibility = if (option4ImageRes != null) View.VISIBLE else View.GONE
+                binding.ivOption4.visibility =
+                    if (option4ImageRes != null) View.VISIBLE else View.GONE
                 setOnClickListener {
                     onOption4Click.invoke()
                     popupWindow?.dismiss()
                 }
             }
         } else {
-            binding.tvOption4?.visibility = View.GONE
+            binding.tvOption4.visibility = View.GONE
             binding.ivOption4.visibility = View.GONE
         }
 
