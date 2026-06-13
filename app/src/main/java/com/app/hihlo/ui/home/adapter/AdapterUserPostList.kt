@@ -78,11 +78,8 @@ class AdapterUserPostList(
                     likesCount.text = RTVariable.formatCount(homePosts[position].likesCount ?: 0)
                     commentsCount.text = RTVariable.formatCount(homePosts[position].commentsCount ?: 0)
                     userLocation.text = "${homePosts[position].creatorDetail?.city}, ${homePosts[position].creatorDetail?.country}"
-                    if (homePosts[position].user_id.toString() == Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.userId.toString()) {
-                        onlineStatusImage.isVisible = false
-                    } else {
-                        onlineStatusImage.isVisible = true
-                    }
+                    onlineStatusImage.isVisible =
+                        homePosts[position].user_id.toString() != Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.userId.toString()
                     if (homePosts[position]?.is_follow!=1){
                         followButtonLayout.isVisible = true
                         followButtonImage.setImageResource(R.drawable.follow_button_reel)
@@ -157,6 +154,7 @@ class AdapterUserPostList(
                         }
                     }
                 }
+
                 else -> {
                     Log.e("POSTDATA", "POSTDATA>>> "+profilePosts.data[position])
                     verifiedNameTick.isVisible = false
@@ -174,11 +172,8 @@ class AdapterUserPostList(
                     likesCount.text = RTVariable.formatCount(profilePosts.data[position].likesCount ?: 0)
                     commentsCount.text = RTVariable.formatCount(profilePosts.data[position].commentsCount ?: 0)
                     userLocation.text = "${profilePosts.data[position].userCity}, ${profilePosts.data[position].userCountry}"
-                    if (profilePosts.data[position].user_id.toString() == Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.userId.toString()) {
-                        onlineStatusImage.isVisible = false
-                    } else {
-                        onlineStatusImage.isVisible = true
-                    }
+                    onlineStatusImage.isVisible =
+                        profilePosts.data[position].user_id.toString() != Preferences.getCustomModelPreference<LoginResponse>(root.context, LOGIN_DATA)?.payload?.userId.toString()
                     if (profilePosts.data[position].isLiked == 1) {
                         Glide.with(root.context).load(R.drawable.btn_heart_fill).into(likeImage)
                     } else {
@@ -209,24 +204,7 @@ class AdapterUserPostList(
                     }else{
                         giftImage.isVisible = true
                     }
-//                    else if (homePosts[position]?.is_follow!=1){
-//                        followButtonLayout.isVisible = true
-//                        followButtonImage.setImageResource(R.drawable.follow_button_reel)
-//                    }else{
-//                        followButtonImage.setImageResource(R.drawable.following_button_reel)
-//                        followButtonLayout.isVisible = true
-//                    }
-//                    if (!profilePosts.data[position].caption.isNullOrEmpty()) {
-//                        setDescriptionText(
-//                            profilePosts.data[position].caption ?: "",
-//                            captionFirstLine,
-//                            captionRemaining,
-//                            moreLessText
-//                        )
-//                    } else {
-////                        caption.text = ""
-//                        moreLessText.visibility = View.GONE
-//                    }
+
                     if (!profilePosts.data[position].caption.isNullOrEmpty()) {
                         //val fullText = "Effective post captions for English content should be concise, engaging, and directly related to the visual, often using a \"hook\" to grab attention within the first sentence. Popular styles include short, punchy phrases, or more detailed, storytelling paragraphs that provide context and value.".trim()
                         val fullText = profilePosts.data[position].caption
@@ -500,11 +478,13 @@ class AdapterUserPostList(
     private val my_storiesList: MutableList<MyStory> = mutableListOf()
     private val storiesList: MutableList<Story> = mutableListOf()
 
-    fun getMyStoriesList(): List<MyStory> = my_storiesList.toList()
-    fun getStoriesList(): List<Story> = storiesList.toList()
-
     fun updateFollow(position: Int){
         notifyItemRangeChanged(0, itemCount)
+    }
+
+    fun updateCover(position: Int, isCover: String) {
+        profilePosts.data[position].is_cover = isCover
+        notifyItemChanged(position)
     }
 
     fun update_comment_count(count: Int, position: Int){
@@ -525,136 +505,6 @@ class AdapterUserPostList(
         notifyItemRangeChanged(0, itemCount)
     }
 
-    private fun setDescriptionText(
-        fullText: String,
-        firstLine: TextView,
-        remaining: TextView,
-        moreLess: TextView
-    ) {
-        // Initial collapsed state
-        firstLine.text = fullText
-        firstLine.maxLines = 1
-        firstLine.ellipsize = TextUtils.TruncateAt.END
-
-        remaining.visibility = View.GONE
-        moreLess.visibility = View.GONE
-
-        firstLine.post {
-            val layout = firstLine.layout ?: return@post
-
-            if (layout.getEllipsisCount(0) > 0) {
-                // Find the last visible character before ellipsis
-                val ellipsisStart = layout.getEllipsisStart(0)
-                val safeCut = fullText.lastIndexOf(' ', ellipsisStart)
-                if (safeCut <= 0) return@post
-
-                // Collapsed text: first line without last word
-                val firstCollapsed = fullText.substring(0, safeCut).trim()
-
-                // Full first line (before ellipsis) to compute the last word
-                val firstLineEnd = layout.getLineEnd(0)
-                val firstFull = fullText.substring(0, firstLineEnd).trim()
-
-                // Last word of first line (to move to remaining)
-                val lastWord = firstFull.substring(firstCollapsed.length).trim()
-
-                // Remaining text: last word + rest of text
-                val remainingText = (lastWord + " " + fullText.substring(firstLineEnd)).trim()
-
-                // Set collapsed text
-                firstLine.text = firstCollapsed
-                moreLess.visibility = View.VISIBLE
-                moreLess.text = "More"
-
-                moreLess.setOnClickListener {
-                    if (moreLess.text == "More") {
-                        // EXPAND
-                        firstLine.text = firstCollapsed
-                        firstLine.ellipsize = null
-                        firstLine.maxLines = 1
-
-                        remaining.text = remainingText
-                        remaining.visibility = View.VISIBLE
-
-                        moreLess.text = "Less"
-                    } else {
-                        // COLLAPSE
-                        firstLine.text = firstCollapsed
-                        firstLine.ellipsize = TextUtils.TruncateAt.END
-                        firstLine.maxLines = 1
-
-                        remaining.visibility = View.GONE
-                        moreLess.text = "More"
-                    }
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-   /* private fun setDescriptionText(
-        fullCaption: String,
-        captionTextView: TextView,
-        moreLessTextView: TextView
-    ) {
-        // Set initial state: show full text to measure, hide More/Less button
-        captionTextView.text = fullCaption
-        captionTextView.maxLines = 1 // Initially limit to one line
-        moreLessTextView.visibility = View.GONE
-
-        // Post to ensure layout is available
-        captionTextView.post {
-            val layout = captionTextView.layout
-            if (layout != null) {
-                // Check if text exceeds one line
-                val isTruncated = layout.lineCount > 1 ||
-                        (layout.lineCount == 1 && layout.getEllipsisCount(0) > 0)
-
-                if (isTruncated) {
-                    // Text exceeds one line, show "More" button
-                    moreLessTextView.visibility = View.VISIBLE
-                    moreLessTextView.text = "More"
-
-                    // Ensure initial display is one line with ellipsis
-                    captionTextView.maxLines = 1
-                    captionTextView.ellipsize = android.text.TextUtils.TruncateAt.END
-
-                    moreLessTextView.setOnClickListener {
-                        if (moreLessTextView.text == "More") {
-                            // Show full text
-                            captionTextView.maxLines = Integer.MAX_VALUE
-                            captionTextView.ellipsize = null
-                            captionTextView.text = fullCaption
-                            moreLessTextView.text = "Less"
-                        } else {
-                            // Revert to one line with ellipsis
-                            captionTextView.maxLines = 1
-                            captionTextView.ellipsize = android.text.TextUtils.TruncateAt.END
-                            captionTextView.text = fullCaption
-                            moreLessTextView.text = "More"
-                        }
-                    }
-                } else {
-                    // Text fits in one line, no need for "More" button
-                    captionTextView.maxLines = 1
-                    captionTextView.ellipsize = null
-                    captionTextView.text = fullCaption
-                    moreLessTextView.visibility = View.GONE
-                }
-            }
-        }
-    }*/
-
     override fun getItemCount(): Int = if (from == "home") homePosts.size else profilePosts.data.size
 
     fun updateCommentCount(position: Int) {
@@ -666,6 +516,5 @@ class AdapterUserPostList(
         notifyItemChanged(position, "commentCount") // use payload for partial update
     }
 
-    inner class ViewHolder(val binding: AdapterUserPostsBinding) : RecyclerView.ViewHolder(binding.root)
-
+    class ViewHolder(val binding: AdapterUserPostsBinding) : RecyclerView.ViewHolder(binding.root)
 }

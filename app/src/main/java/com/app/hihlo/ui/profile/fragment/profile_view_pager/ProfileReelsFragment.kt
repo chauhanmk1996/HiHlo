@@ -10,8 +10,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.app.hihlo.databinding.AdapterShowMediaViewPagerBinding
 import com.app.hihlo.model.get_profile.Data
 import com.app.hihlo.model.get_profile.Posts
@@ -45,43 +43,42 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
     private lateinit var userId: String
     private val viewModel: ProfilePostViewModel by viewModels()
     private var isLoading = true
-    private var currentPage=1
-    private lateinit var adapter:AdapterProfileMedia
+    private var currentPage = 1
+    private lateinit var adapter: AdapterProfileMedia
 
     companion object {
-        fun newInstance(reels: Posts, isMyProfile: String, userId: String) = ProfileReelsFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable("reels_data", reels)
-                putString("isMyProfile", isMyProfile)
-                putString("userId", userId)
+        fun newInstance(reels: Posts, isMyProfile: String, userId: String) =
+            ProfileReelsFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable("reels_data", reels)
+                    putString("isMyProfile", isMyProfile)
+                    putString("userId", userId)
+                }
             }
-        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = AdapterShowMediaViewPagerBinding.inflate(inflater, container, false)
         reels = requireArguments().getParcelable("reels_data")!!
         isMyProfile = requireArguments().getString("isMyProfile")!!
         userId = requireArguments().getString("userId")!!
 
-        Log.i("TAG", "onCreateView pf: "+userId)
-        Log.i("TAG", "onCreateView pf: "+isMyProfile)
-        if (reels.pagination.total==0){
-            binding.noPostsFoundPlaceholder.isVisible=true
-            binding.noPostsFoundPlaceholderText.text = if (isMyProfile=="1") "Create your First Play" else "No Reel"
-        }else{
-            binding.noPostsFoundPlaceholder.isVisible=false
+        if (reels.pagination.total == 0) {
+            binding.noPostsFoundPlaceholder.isVisible = true
+            binding.noPostsFoundPlaceholderText.text =
+                if (isMyProfile == "1") "Create your First Play" else "No Reel"
+        } else {
+            binding.noPostsFoundPlaceholder.isVisible = false
         }
+
         adapter = AdapterProfileMedia(reels) { position ->
             UserDataManager.setReelsPosition(binding.root.context, position)
             getSelectedPost(position)
         }
         binding.showMediaRecycler.adapter = adapter
-
-//        setPagination()
         return binding.root
     }
 
@@ -89,40 +86,38 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
         super.onViewCreated(view, savedInstanceState)
         setObserver()
     }
-    private fun setPagination() {
-        binding.showMediaRecycler.addOnScrollListener(object :
-            RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager?
-                Log.i("TAG", "onScrolled: "+layoutManager?.findLastVisibleItemPosition())
-                if (layoutManager?.findLastVisibleItemPosition() == adapter.itemCount - 3) {
-                    if (isLoading) {
-                        currentPage++
-                        if (isMyProfile=="1"){
-                            hitMyProfileApi(currentPage)
-                        }else{
-                            hitOtherUserApi(currentPage)
-                        }
-                    }
-                    isLoading = false
-                }
-            }
-        })
-    }
+
     private fun hitMyProfileApi(page: Int) {
-        viewModel.hitProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, page.toString(), "14")
+        viewModel.hitProfileDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, page.toString(), "14"
+        )
     }
+
     private fun hitOtherUserApi(page: Int) {
-        viewModel.hitOtherUserProfileDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, userId, page.toString(), "14")
+        viewModel.hitOtherUserProfileDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, userId, page.toString(), "14"
+        )
     }
-    private fun getSelectedPost(reelPosition: Int){
+
+    private fun getSelectedPost(reelPosition: Int) {
         RTVariable.IS_PROFILE_POST_LIST = true
-        UserPreference.navigatedToMyProfile=true
-        Log.i("TAG", "getSelectedPost: "+reels.data.toReelList().toMutableList())
-        findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToReelsFragment(
-            Payload(pagination = Pagination(), reels = reels.data.toReelList().toMutableList()), "profile", reelPosition.toString()))
+        UserPreference.navigatedToMyProfile = true
+        findNavController().navigate(
+            ProfileFragmentDirections.actionProfileFragmentToReelsFragment(
+                Payload(pagination = Pagination(), reels = reels.data.toReelList().toMutableList()),
+                "profile",
+                reelPosition.toString()
+            )
+        )
 
     }
+
     fun List<Data>.toReelList(): List<Reel> {
         return this.map { data ->
             Reel(
@@ -151,74 +146,84 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
             )
         }
     }
+
     private fun setObserver() {
         viewModel.getProfileLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
 
-                            if (it.data.payload.reels.data.isNotEmpty()){
-                                isLoading=true
+                            if (it.data.payload.reels.data.isNotEmpty()) {
+                                isLoading = true
                                 if (currentPage == 1) {
-                                    if (it.data.payload.reels.data.isNotEmpty()){
+                                    if (it.data.payload.reels.data.isNotEmpty()) {
                                         adapter.clearList()
                                         adapter.updateList(it.data.payload.reels)
-                                    }else{
+                                    } else {
                                         adapter.clearList()
                                     }
                                 } else {
                                     adapter.updateList(it.data.payload.reels)
                                 }
                             }
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
                 }
             }
         }
+
         viewModel.getOtherUserProfileLiveData().observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reels success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            if (it.data.payload.reels.data.isNotEmpty()){
-                                isLoading=true
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            if (it.data.payload.reels.data.isNotEmpty()) {
+                                isLoading = true
                             }
                             if (currentPage == 1) {
-                                if (it.data.payload.reels.data.isNotEmpty()){
+                                if (it.data.payload.reels.data.isNotEmpty()) {
                                     adapter.clearList()
                                     adapter.updateList(it.data.payload.reels)
-                                }else{
+                                } else {
                                     adapter.clearList()
                                 }
                             } else {
                                 adapter.updateList(it.data.payload.reels)
                             }
-                        }else{
-                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
                         }
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                     ProcessDialog.showDialog(requireContext(), true)
                 }
+
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
                     ProcessDialog.dismissDialog(true)
@@ -231,12 +236,13 @@ class ProfileReelsFragment : Fragment(), PaginatingFragment {
         super.onDestroyView()
         _binding = null
     }
+
     override fun onParentScrolledToBottom() {
         if (isLoading) {
             currentPage++
-            if (isMyProfile=="1"){
+            if (isMyProfile == "1") {
                 hitMyProfileApi(currentPage)
-            }else{
+            } else {
                 hitOtherUserApi(currentPage)
             }
         }

@@ -63,40 +63,45 @@ import kotlin.getValue
 class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     private val viewModel: UserPostListViewModel by viewModels()
     private val viewModel2: UserPostListViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by activityViewModels()
     var isCommentPosted = false
     lateinit var commentsBottomSheetFragment: CommentReelBottomSheet
-    val args:UserPostListFragmentArgs by navArgs()
+    val args: UserPostListFragmentArgs by navArgs()
     var homePosts: MutableList<Post> = mutableListOf()
     var profilePosts: Posts = Posts()
-    var from: String=""
-    var position: Int=0
-    var positionToComment: Int=0
+    var from: String = ""
+    var position: Int = 0
+    var positionToComment: Int = 0
     var postId = ""
-    var adapter: AdapterUserPostList?=null
+    var adapter: AdapterUserPostList? = null
     private val viewModel4: ReelsViewModel by viewModels()
     private val viewModel5: HomeViewModel by viewModels()
-    var totalAvailableCoins: Int?=null
+    var totalAvailableCoins: Int? = null
     private var isLoadMore = false
     private var myStoryData: MyStory = MyStory()
     private var allStory: List<Story>? = null
     private var currentVisiblePosition = 0
     private val viewModel6: StatusViewModel by activityViewModels()
     private lateinit var statusListGlobal: List<StoryUser>
+    private var coverPostPosition: Int = 0
+    private var coverPostId: Int = 0
+    private var coverPostIsCover: String = ""
+
     override fun initView(savedInstanceState: Bundle?) {
         homePosts = args.homePosts.toMutableList()
         from = args.from
         position = args.position.toInt()
         profilePosts = args.profilePosts
-        Log.e("TAG", "initView: ${Gson().toJson(profilePosts)}")
         setAdapter()
         setUI()
     }
 
     private fun setUI() {
-        when(from){
-            "home"->{
+        when (from) {
+            "home" -> {
                 binding.headerLayout.isVisible = false
             }
+
             else -> {
                 binding.headerLayout.isVisible = true
             }
@@ -104,21 +109,14 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     }
 
     private fun setAdapter() {
-        Log.e("TAG", "initView: ${::getSelectedPost}")
-        Log.e("TAG", "initViewPost: ${homePosts}")
-        Log.e("TAG", "initViewPost: ${profilePosts}")
-        Log.e("TAG", "initViewFrom: ${from}")
-        Log.e("TAG", "initViewFrom: ${profilePosts}")
         adapter = AdapterUserPostList(homePosts, profilePosts, from, ::getSelectedPost)
         binding.postListRecycler.adapter = adapter
         lifecycleScope.launch {
-            if(!UserDataManager.isUserInnerPostIsResume(requireContext())){
+            if (!UserDataManager.isUserInnerPostIsResume(requireContext())) {
                 binding.postListRecycler.scrollToPosition(position)
-                //ProcessDialog.showDialog(requireContext(), true)
                 delay(1300)
                 binding.postListRecycler.scrollToPosition(position)
                 delay(700)
-                //ProcessDialog.dismissDialog(true)
                 binding.postListRecycler.scrollToPosition(position)
             }
         }
@@ -134,22 +132,24 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     delay(1000)
-                    if(RTVariable.COMMENT_DELETED){
+                    if (RTVariable.COMMENT_DELETED) {
                         RTVariable.COMMENT_DELETED = false
-                        adapter?.update_comment_count(RTVariable.COMMENT_COUNT, RTVariable.POST_POSITION)
-                        //viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10")
+                        adapter?.update_comment_count(
+                            RTVariable.COMMENT_COUNT,
+                            RTVariable.POST_POSITION
+                        )
                     }
-                    if(RTVariable.IS_STATUS_VIEWER_ACTIVATED){
+
+                    if (RTVariable.IS_STATUS_VIEWER_ACTIVATED) {
                         RTVariable.IS_STATUS_VIEWER_ACTIVATED = false
-                        //viewModel5.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
                         getRefreshStory(1, 0)
                         getRefreshMainStory(0)
                     }
                 }
             }
         }
-        binding.postListRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
+        binding.postListRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
 
@@ -174,11 +174,14 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         })
     }
 
-    private fun getRefreshStory(page: Int, gender_id: Int){
+    private fun getRefreshStory(page: Int, gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getHomeData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     page.toString(),
                     10.toString(),
                     gender_id.toString()
@@ -187,27 +190,38 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     viewModel5.stories = response.payload.stories
                     adapter?.updateStories(viewModel5.stories)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getRefreshMainStory(gender_id: Int){
+    private fun getRefreshMainStory(gender_id: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.getStatusData(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     gender_id.toString()
                 )
                 if (response.status == 1 && response.code == 200) {
                     statusListGlobal = response.payload
                     RTVariable.statusListGlobal = statusListGlobal
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
@@ -223,17 +237,14 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
 
     override fun onResume() {
         super.onResume()
-        Log.e("DATAPOS", "DATAPOS>>> "+UserDataManager.get_postCommentPosition(requireContext()))
-        if(UserDataManager.isUserInnerPostIsResume(requireContext())){
+        if (UserDataManager.isUserInnerPostIsResume(requireContext())) {
             UserDataManager.setUserInnerPostIsResume(requireContext(), false)
             scrollToRecyclerPosition(UserDataManager.get_postCommentPosition(requireContext()))
         }
-        if(!RTVariable.IS_PROFILE_POST_LIST){
+        if (!RTVariable.IS_PROFILE_POST_LIST) {
             RTVariable.IS_PROFILE_POST_LIST = false
-            if(UserDataManager.get_postCommentShow(requireContext())){
+            if (UserDataManager.get_postCommentShow(requireContext())) {
                 UserDataManager.postCommentIsShow(requireContext(), false)
-                //openCommentsBottomSheet(viewModel2.commentPayloadCache ?: Payload())
-                //retainCommentBoxData(requireContext(), viewModel.posr_id, "1", "10")
                 val cached = CommentPrefs.get2Payload(requireContext())
 
                 if (cached != null) {
@@ -260,9 +271,24 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     }
 
     private fun hitServiceListApi() {
-        viewModel5.hitHomeDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "1", "10", "0")
-        viewModel4.hitCoinDetailsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken)
-        viewModel6.hitStatusDataApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, "0")
+        viewModel5.hitHomeDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "1", "10", "0"
+        )
+        viewModel4.hitCoinDetailsApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken
+        )
+        viewModel6.hitStatusDataApi(
+            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.authToken, "0"
+        )
     }
 
     private fun onClick() {
@@ -277,8 +303,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
                     Log.e("TAG", "Home success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             myStoryData = it.data.payload.my_story ?: MyStory()
                             allStory = it.data.payload.stories
                             viewModel5.myStory = it.data.payload.my_story ?: MyStory()
@@ -287,12 +313,17 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                             viewModel5.profileImage = it.data.payload.myProfile.profileImage
                             Log.e("TAG", "Home success: ${myStoryData}")
                             Log.e("TAG", "Home success: ${allStory}")
-                            adapter?.addStory(listOf(it.data.payload.my_story ?: MyStory()), it.data.payload.stories)
+                            adapter?.addStory(
+                                listOf(it.data.payload.my_story ?: MyStory()),
+                                it.data.payload.stories
+                            )
                         }
                     }
                 }
+
                 Status.LOADING -> {
                 }
+
                 Status.ERROR -> {
                 }
             }
@@ -317,15 +348,21 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel post comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             isCommentPosted = true
                             adapter?.updateCommentCount(positionToComment)
-                            viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
+                            viewModel.hitGetReelCommentsApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, postId, "1", "10"
+                            ) // Initial call with page 1, limit 10
                         }
                     }
                     ProcessDialog.dismissDialog(true)
                 }
+
                 Status.LOADING -> {
                 }
 
@@ -339,10 +376,15 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Reel reply to comment success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
-                            isCommentPosted=true
-                            viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            isCommentPosted = true
+                            viewModel.hitGetReelCommentsApi(
+                                "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                    requireContext(),
+                                    LOGIN_DATA
+                                )?.payload?.authToken, postId, "1", "10"
+                            ) // Initial call with page 1, limit 10
                         }
                     }
                 }
@@ -446,8 +488,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "delete post success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        if (it.data.code == 200){
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
                             findNavController().popBackStack()
                         }
                     }
@@ -466,7 +508,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "coins details success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         totalAvailableCoins = it.data.payload.coins
                     }
                 }
@@ -484,15 +526,17 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "sent coins user success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
-                        showCustomDialogWithBinding(requireContext(), "Send Successfully!",
+                    if (it.data?.status == 1) {
+                        showCustomDialogWithBinding(
+                            requireContext(), "Send Successfully!",
                             onYes = {},
                             onNo = {},
                             showButtons = false,
                             autoDismissInMillis = 1000
                         )
-                    }else{
-                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
 
@@ -509,7 +553,7 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.e("TAG", "Status success: ${Gson().toJson(it)}")
-                    if (it.data?.status==1){
+                    if (it.data?.status == 1) {
                         if (it.data.code == 200) {
                             statusListGlobal = it.data.payload
                             RTVariable.statusListGlobal = statusListGlobal
@@ -525,7 +569,43 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                 }
             }
         }
+
+        homeViewModel.setRemoveCoverApi().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            val loginUserId = Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.userId.toString()
+
+                            // Remove previous cover
+                            val oldCoverIndex = profilePosts.data.indexOfFirst { post ->
+                                post.user_id.toString() == loginUserId && post.is_cover == "TRUE"
+                            }
+
+                            if (oldCoverIndex != -1) {
+                                profilePosts.data[oldCoverIndex].is_cover = "FALSE"
+                                adapter?.updateCover(oldCoverIndex, "FALSE")
+                            }
+
+                            // Set new cover
+                            profilePosts.data[coverPostPosition].is_cover = coverPostIsCover
+                            adapter?.updateCover(coverPostPosition, coverPostIsCover)
+                        }
+                    }
+                }
+
+                Status.LOADING -> {
+                }
+
+                Status.ERROR -> {
+                }
+            }
+        }
     }
+
     private fun openCommentsBottomSheet(payload: Payload) {
         commentsBottomSheetFragment = CommentReelBottomSheet().apply {
             arguments = Bundle().apply {
@@ -535,97 +615,160 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
             }
             onCommentAction = { result ->
                 isCommentPosted = true // Set flag before post
-                viewModel.hitPostCommentApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, postId)
+                viewModel.hitPostCommentApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, result, postId
+                )
             }
             onReplyAction = { result ->
                 isCommentPosted = true // Assuming same flag for reply, adjust if separate
-                viewModel.hitReplyToCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, result, postId)
+                viewModel.hitReplyToCommentsApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, result, postId
+                )
             }
             onLoadMore = { page, limit ->
                 isLoadMore = true // Set flag before load more API call
-                viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, page.toString(), limit.toString())
+                viewModel.hitGetReelCommentsApi(
+                    "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken, postId, page.toString(), limit.toString()
+                )
             }
         }
 
-        commentsBottomSheetFragment.show(requireActivity().supportFragmentManager, "RoundedBottomSheet")
+        commentsBottomSheetFragment.show(
+            requireActivity().supportFragmentManager,
+            "RoundedBottomSheet"
+        )
     }
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_user_post_list
-
     }
-    private fun getSelectedPost(post: Post, data:Data, click: Int, position: Int, view:View, clickView: View){
+
+    private fun getSelectedPost(
+        post: Post,
+        data: Data,
+        click: Int,
+        position: Int,
+        view: View,
+        clickView: View,
+    ) {
         positionToComment = position
-        Log.e("TAG", "sharePost: $post")
-        Log.e("TAG", "sharePost: $data")
-        Log.e("TAG", "sharePost: $click")
-        when(click){
-            0->{
-                openSideOptionsPopup(post, data, view)
+
+        when (click) {
+            0 -> {
+                openSideOptionsPopup(position, data, view)
             }
-            1->{
-                when(from){
-                    "home"->{
-                        findNavController().navigate(UserPostListFragmentDirections.actionUserPostListFragmentToProfileFragment("0", post.user_id.toString()))
+
+            1 -> {
+                when (from) {
+                    "home" -> {
+                        findNavController().navigate(
+                            UserPostListFragmentDirections.actionUserPostListFragmentToProfileFragment(
+                                "0",
+                                post.user_id.toString()
+                            )
+                        )
                     }
+
                     else -> {
                         findNavController().popBackStack()
 
                     }
                 }
             }
-            2->{
-                when(from){
-                    "home"->{
-                        viewModel.hitLikeReelApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString())
+
+            2 -> {
+                when (from) {
+                    "home" -> {
+                        viewModel.hitLikeReelApi(
+                            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.authToken, post.id.toString()
+                        )
                     }
+
                     else -> {
-                        viewModel.hitLikeReelApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, data.id.toString())
+                        viewModel.hitLikeReelApi(
+                            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.authToken, data.id.toString()
+                        )
                     }
                 }
             }
-            3->{
-                when(from){
-                    "home"->{
+
+            3 -> {
+                when (from) {
+                    "home" -> {
                         this.postId = post.id.toString()
-                        viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
-//                        viewModel.hitGetReelCommentsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, post.id.toString())
+                        viewModel.hitGetReelCommentsApi(
+                            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.authToken, postId, "1", "10"
+                        )
                     }
+
                     else -> {
                         this.postId = data.id.toString()
                         viewModel5.posr_id = post.id.toString()
                         viewModel5.scroll_position = position
                         RTVariable.P_PID = post.id.toString()
                         UserDataManager.postCommentExpandState(requireContext(), false)
-                        UserDataManager.postCommentSP(requireContext(), viewModel5.currentPage, position, postId.toString())
-                        viewModel.hitGetReelCommentsApi("Bearer " + Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, postId, "1", "10") // Initial call with page 1, limit 10
-//                        viewModel.hitGetReelCommentsApi("Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken, data.id.toString())
+                        UserDataManager.postCommentSP(
+                            requireContext(),
+                            viewModel5.currentPage,
+                            position,
+                            postId
+                        )
+                        viewModel.hitGetReelCommentsApi(
+                            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                                requireContext(),
+                                LOGIN_DATA
+                            )?.payload?.authToken, postId, "1", "10"
+                        )
                     }
                 }
             }
-            4->{
-                when(from){
-                    "home"->{
+
+            4 -> {
+                when (from) {
+                    "home" -> {
                         sharePost(post.asset_url.toString())
                     }
+
                     else -> {
                         sharePost(data.asset_url.toString())
                     }
                 }
             }
-            5->{
+
+            5 -> {
                 //Toast.makeText(requireActivity(), "A ${data.user_id}", Toast.LENGTH_LONG).show()
                 getSendFollow(data.user_id.toString(), position)
             }
-            6->{
+
+            6 -> {
                 //Toast.makeText(requireActivity(), "B ${data.user_id}", Toast.LENGTH_LONG).show()
                 getSendUnFollow(data.user_id.toString(), position)
             }
-            7->{
+
+            7 -> {
                 //Toast.makeText(requireActivity(), "B ${data.id}", Toast.LENGTH_LONG).show()
                 data.user_id?.let { openCoinsBottomSheet(it, it, data.creator_username.toString()) }
             }
-            8->{
+
+            8 -> {
                 if (statusListGlobal.isEmpty()) {
                     return
                 }
@@ -651,12 +794,15 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         }
     }
 
-    private fun getSendFollow(user_id: String, position: Int){
+    private fun getSendFollow(user_id: String, position: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.followUser(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
-                    FollowRequest(following_id = user_id.toString())
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
+                    FollowRequest(following_id = user_id)
 
                 )
                 if (response.status == 1 && response.code == 200) {
@@ -668,18 +814,25 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     RTVariable.USER_IS_FOLLOWING = true
                     adapter?.updateFollow(position)
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
 
-    private fun getSendUnFollow(user_id: String, position: Int){
+    private fun getSendUnFollow(user_id: String, position: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = RetrofitBuilder.apiService.unfollowUser(
-                    token = "Bearer "+ Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken,
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken,
                     FollowRequest(unfollowId = user_id)
 
                 )
@@ -692,9 +845,13 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     adapter?.updateFollow(position)
                     RTVariable.USER_IS_FOLLOWING = false
                 } else {
-                    Toast.makeText(requireContext(), response.message ?: "Failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message ?: "Failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
             }
         }
     }
@@ -723,7 +880,8 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     imageFile
                 )
 
-                val appLink = "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
+                val appLink =
+                    "https://play.google.com/store/apps/details?id=${requireContext().packageName}"
 
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
@@ -742,51 +900,80 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         }
     }
 
-    private fun openSideOptionsPopup(post: Post, data: Data, view:View) {
-        Log.i("TAG", "openSideOptionsPopup: "+from)
-        Log.i("TAG", "openSideOptionsPopup: "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString())
-        Log.i("TAG", "openSideOptionsPopup: "+post.user_id)
-        Log.i("TAG", "openSideOptionsPopup: "+data.user_id)
-        when(from){
-            "home"->{
-                if (post.user_id.toString()==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){
-                    profileOptions(view, post.id.toString(), post.user_id.toString())
-                }else{
-                    homeOptions(view, post.user_id.toString())
-                }
-            }
-            else -> {
-                if (data.user_id.toString()==Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.userId.toString()){
-                    profileOptions(view, data.id.toString(), data.user_id.toString())
-                }else{
-                    homeOptions(view, data.user_id.toString())
-                }
+    private fun openSideOptionsPopup(pos: Int, data: Data, view: View) {
+        Log.i(
+            "TAG",
+            "openSideOptionsPopup: " + Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.userId.toString()
+        )
 
-            }
+        val loginUserId =
+            Preferences.getCustomModelPreference<LoginResponse>(
+                requireContext(),
+                LOGIN_DATA
+            )?.payload?.userId.toString()
+        val postId = data.id
+        val isCover: String = if (data.is_cover == "TRUE") {
+            "FALSE"
+        } else {
+            "TRUE"
+        }
+        if (data.user_id.toString() == loginUserId) {
+            coverPostPosition = pos
+            coverPostId = postId ?: 0
+            coverPostIsCover = isCover
+            profileOptions(view, postId.toString(), isCover)
+        } else {
+            homeOptions(view, data.user_id.toString())
         }
     }
 
-    private fun profileOptions(
-        view:View,
-        postId: String,
-        userId: String
-    ) {
-        val popup = ReusablePopup(
-            context = requireContext(),
-            anchorView = view,
-            onOption1Click = {
-                openDeletePostConfirmationDialog(postId)
-            },
-            onOption2Click = {},
-            option1Text = "Delete",
-            option2Text = "Cancel",
-            option1ImageRes = R.drawable.delete_icon, // Add your own move to request icon
-            option2ImageRes = R.drawable.ic_cancel_red
-        )
-        popup.show()
+    private fun profileOptions(view: View, postId: String, isCover: String) {
+        if (isCover == "TRUE") {
+            val popup = ReusablePopup(
+                context = requireContext(),
+                anchorView = view,
+                onOption1Click = {
+                    val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken
+                    homeViewModel.setRemoveCoverApi(token, postId, isCover)
+                },
+                onOption2Click = {
+                    openDeletePostConfirmationDialog(postId)
+                },
+                onOption3Click = {
+                },
+                option1Text = "Set Cover",
+                option2Text = "Delete",
+                option3Text = "Cancel",
+                option1ImageRes = R.drawable.filled_star,
+                option2ImageRes = R.drawable.delete_icon,
+                option3ImageRes = R.drawable.ic_cancel_red
+            )
+            popup.show()
+        }else{
+            val popup = ReusablePopup(
+                context = requireContext(),
+                anchorView = view,
+                onOption1Click = {
+                    openDeletePostConfirmationDialog(postId)
+                },
+                onOption2Click = {
+                },
+                option1Text = "Delete",
+                option2Text = "Cancel",
+                option1ImageRes = R.drawable.delete_icon,
+                option2ImageRes = R.drawable.ic_cancel_red
+            )
+            popup.show()
+        }
     }
 
-    private fun homeOptions(view:View, userId: String) {
+    private fun homeOptions(view: View, userId: String) {
         val popup = ReusablePopup(
             context = requireContext(),
             anchorView = view,
@@ -801,7 +988,10 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     bottomSheetFragment.dismiss()
                     findNavController().popBackStack()
                 }
-                bottomSheetFragment.show(requireActivity().supportFragmentManager, "BlockBottomSheet")
+                bottomSheetFragment.show(
+                    requireActivity().supportFragmentManager,
+                    "BlockBottomSheet"
+                )
             },
             onOption2Click = {
                 val bottomSheetFragment = BlockFlagBottomSheet()
@@ -814,7 +1004,10 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
                     bottomSheetFragment.dismiss()
                     findNavController().popBackStack()
                 }
-                bottomSheetFragment.show(requireActivity().supportFragmentManager, "FlagBottomSheet")
+                bottomSheetFragment.show(
+                    requireActivity().supportFragmentManager,
+                    "FlagBottomSheet"
+                )
 
             },
             option1Text = "Block",
@@ -826,12 +1019,17 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
     }
 
     fun openDeletePostConfirmationDialog(postId: String) {
-        showCustomDialogWithBinding(requireContext(), "Are you sure you want to delete this post?",
+        showCustomDialogWithBinding(
+            requireContext(), "Are you sure you want to delete this post?",
             onYes = {
-                viewModel.hitDeletePostDataApi(token = "Bearer "+Preferences.getCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA)?.payload?.authToken.toString(), postId = postId)
+                viewModel.hitDeletePostDataApi(
+                    token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken.toString(), postId = postId
+                )
             },
             onNo = {
-                //dismiss()
             }
         )
     }
@@ -845,20 +1043,30 @@ class UserPostListFragment : BaseFragment<FragmentUserPostListBinding>() {
         }
         bottomSheetFragment.show(requireActivity().supportFragmentManager, "")
     }
-    fun openSendCoinsDialog(data: RechargePackageListResponse.Payload, reelId: Int, creatorId: Int, name: String) {
-        showCustomDialogWithBinding(requireContext(), "Do you want to send ${data.coins} coins to ${name}",
+
+    fun openSendCoinsDialog(
+        data: RechargePackageListResponse.Payload,
+        reelId: Int,
+        creatorId: Int,
+        name: String,
+    ) {
+        showCustomDialogWithBinding(
+            requireContext(), "Do you want to send ${data.coins} coins to ${name}",
             onYes = {
                 viewModel4.hitSendGiftApi(
                     "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                         HiHloApplication.appContext, LOGIN_DATA
                     )?.payload?.authToken,
-                    SendGiftRequest(coins = data.coins.toString(), recipientId = creatorId.toString(), type = "reel", reelId = reelId.toString())
+                    SendGiftRequest(
+                        coins = data.coins.toString(),
+                        recipientId = creatorId.toString(),
+                        type = "reel",
+                        reelId = reelId.toString()
+                    )
                 )
             },
             onNo = {
-
             }
         )
     }
-
 }

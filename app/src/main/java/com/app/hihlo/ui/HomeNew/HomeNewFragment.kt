@@ -727,34 +727,46 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     private fun profileOptions(view: View, postId: String, isCover: String) {
-        val firstOption: String = if (isCover == "TRUE") {
-            "Set Cover"
-        } else {
-            "Remove Cover"
+        if (isCover == "TRUE") {
+            val popup = ReusablePopup(
+                context = requireContext(),
+                anchorView = view,
+                onOption1Click = {
+                    val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+                        requireContext(),
+                        LOGIN_DATA
+                    )?.payload?.authToken
+                    viewModel.setRemoveCoverApi(token, postId, isCover)
+                },
+                onOption2Click = {
+                    openDeletePostConfirmationDialog(postId)
+                },
+                onOption3Click = {
+                },
+                option1Text = "Set Cover",
+                option2Text = "Delete",
+                option3Text = "Cancel",
+                option1ImageRes = R.drawable.filled_star,
+                option2ImageRes = R.drawable.delete_icon,
+                option3ImageRes = R.drawable.ic_cancel_red
+            )
+            popup.show()
+        }else{
+            val popup = ReusablePopup(
+                context = requireContext(),
+                anchorView = view,
+                onOption1Click = {
+                    openDeletePostConfirmationDialog(postId)
+                },
+                onOption2Click = {
+                },
+                option1Text = "Delete",
+                option2Text = "Cancel",
+                option1ImageRes = R.drawable.delete_icon,
+                option2ImageRes = R.drawable.ic_cancel_red
+            )
+            popup.show()
         }
-        val popup = ReusablePopup(
-            context = requireContext(),
-            anchorView = view,
-            onOption1Click = {
-                val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                    requireContext(),
-                    LOGIN_DATA
-                )?.payload?.authToken
-                viewModel.setRemoveCoverApi(token, postId, isCover)
-            },
-            onOption2Click = {
-                openDeletePostConfirmationDialog(postId)
-            },
-            onOption3Click = {
-            },
-            option1Text = firstOption,
-            option2Text = "Delete",
-            option3Text = "Cancel",
-            option1ImageRes = R.drawable.filled_star,
-            option2ImageRes = R.drawable.delete_icon,
-            option3ImageRes = R.drawable.ic_cancel_red
-        )
-        popup.show()
     }
 
     fun openDeletePostConfirmationDialog(postId: String) {

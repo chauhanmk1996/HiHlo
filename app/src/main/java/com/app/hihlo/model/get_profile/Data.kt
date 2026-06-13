@@ -23,5 +23,6 @@ data class Data(
     val userCountry: String?=null,
     val user_id: Int?=null,
     val creator_id: Int?=null,
-    val is_story_uploaded:  Int? = null
+    val is_story_uploaded:  Int? = null,
+    var is_cover:  String? = null
 ): Parcelable
