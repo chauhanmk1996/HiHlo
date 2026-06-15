@@ -252,19 +252,51 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
     }
 
     fun scrollToRecyclerPosition(position: Int) {
+
+        val binding = _binding ?: return
+
         binding.rvPost.post {
-            val layoutManager = binding.rvPost.layoutManager as? LinearLayoutManager
-                ?: return@post
+
+            val safeBinding = _binding ?: return@post
+
+            val layoutManager =
+                safeBinding.rvPost.layoutManager as? LinearLayoutManager
+                    ?: return@post
+
             layoutManager.scrollToPositionWithOffset(position, 0)
-            binding.rvPost.post {
-                val viewHolder = binding.rvPost.findViewHolderForAdapterPosition(position)
+
+            safeBinding.rvPost.post {
+
+                val latestBinding = _binding ?: return@post
+
+                val viewHolder =
+                    latestBinding.rvPost.findViewHolderForAdapterPosition(position)
+
                 val itemView = viewHolder?.itemView ?: return@post
-                val y = itemView.y + binding.rvPost.y
-                binding.nestedScrollView.scrollTo(0, viewModel.scrollY)
-                UserDataManager.setGetBackToHome(requireContext(), false)
-                binding.nestedScrollView.post {
-                    binding.nestedScrollView.smoothScrollTo(0, viewModel.scrollY)
-                    UserDataManager.setGetBackToHome(requireContext(), false)
+
+                latestBinding.nestedScrollView.scrollTo(
+                    0,
+                    viewModel.scrollY
+                )
+
+                UserDataManager.setGetBackToHome(
+                    requireContext(),
+                    false
+                )
+
+                latestBinding.nestedScrollView.post {
+
+                    val finalBinding = _binding ?: return@post
+
+                    finalBinding.nestedScrollView.smoothScrollTo(
+                        0,
+                        viewModel.scrollY
+                    )
+
+                    UserDataManager.setGetBackToHome(
+                        requireContext(),
+                        false
+                    )
                 }
             }
         }
@@ -751,7 +783,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 option3ImageRes = R.drawable.ic_cancel_red
             )
             popup.show()
-        }else{
+        } else {
             val popup = ReusablePopup(
                 context = requireContext(),
                 anchorView = view,
@@ -1443,24 +1475,14 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                             if (canUploadStory) {
                                 RTVariable.SELECT_OPTION = true
+
                                 val bottomSheet = FilePickerBottomsheet()
-                                bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
-                                    // uri and type are already returned as strings, no Intent parsing needed
-                                    val mediaType = type          // "image" or "video"
-                                    val contentUri = Uri.parse(uri)
-                                    RTVariable.HEADLINE_CAPTION = headline
-                                    Handler(Looper.getMainLooper()).post {
-                                        // Ensure your fragment/activity is still attached if needed
-                                        val file = getCacheFileFromContentUri(contentUri)
-                                        val typeCode = if (mediaType == "video") "V" else "I"
-                                        file?.let { uploadImage(it, typeCode) }
+                                bottomSheet.setOnMediaSelectedListener { statusUploaded ->
+                                    if (statusUploaded == "true"){
+                                        hitServiceListApi(viewModel.currentPage, selectedGender)
                                     }
                                 }
-                                bottomSheet.show(
-                                    parentFragmentManager,   // or childFragmentManager, depending on where you are
-                                    "FilePickerBottomSheet"
-                                )
-
+                                bottomSheet.show(parentFragmentManager, "FilePickerBottomSheet")
                             } else {
 
                                 Utils.showCustom_Snackbar(
@@ -1469,11 +1491,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                                 )
                             }
                         }
-//                        if (RTVariable.STORY_UPLOAD_LIMIT <= 0) {
-//                            Utils.showCustom_Snackbar(requireActivity().findViewById(android.R.id.content), "You can upload maximum 4 stories in 24 hours")
-//                        }else{
-//
-//                        }
                     } else {
                         Utils.showCustom_Snackbar(
                             requireActivity().findViewById(android.R.id.content),
@@ -1549,7 +1566,7 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                 option2ImageRes = R.drawable.profile_gallery_icon, // Add your own move to request icon
                 option3ImageRes = R.drawable.reel_icon_unselected
 
-                ).show()
+            ).show()
         }
     }
 
@@ -1666,8 +1683,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                             }
                         }
 
-                        Log.d("ProfileFragment", "Cropped ratio int: $selectedRatio")
-
                         UserPreference.seletedUri = resultUri
                         UserPreference.selectedMediaToUpload = selectedBottomSheetType
                         UserPreference.selectedCropRatio = selectedRatio
@@ -1695,6 +1710,24 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         return AmazonS3Client(credentials)
     }
 
+    private fun uploadImage(imageFile: File, assetType: String) {
+        val s3Data = Preferences.getCustomModelPreference<LoginResponse>(
+            requireContext(),
+            LOGIN_DATA
+        )?.payload?.S3Details
+        val bucketName = s3Data?.BUCKET_NAME
+        val objectKey = "${System.currentTimeMillis()}"
+        uploadImageToS3(
+            requireContext(),
+            imageFile,
+            bucketName ?: "",
+            objectKey,
+            s3Data?.ACCESS_KEY ?: "",
+            s3Data?.SECRET_KEY ?: "",
+            assetType
+        )
+    }
+
     fun uploadImageToS3(
         context: Context,
         file: File,
@@ -1714,20 +1747,21 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
             context
         )
         val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
-        ProcessDialog.showDialog(requireContext(), true)
+        showProgressPercentage(true)
         uploadObserver.setTransferListener(object : TransferListener {
             override fun onStateChanged(id: Int, state: TransferState) {
                 if (state == TransferState.COMPLETED) {
-                    ProcessDialog.dismissDialog(true)
+                    showProgressPercentage(false)
                     val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(
                         requireContext(),
                         LOGIN_DATA
                     )?.payload?.AWS_CDN_URL
+
                     val slash = "/"
                     val mediaUrl = "$urlCdn$slash$objectKey"
-                    println("Image URL: $mediaUrl")
                     val caption = RTVariable.HEADLINE_CAPTION
                     RTVariable.HEADLINE_CAPTION = ""
+
                     viewModel.hitAddStoryDataApi(
                         "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
                             requireContext(),
@@ -1740,38 +1774,21 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
                         )
                     )
                 } else if (state == TransferState.FAILED) {
-                    println("Upload failed")
+                    showProgressPercentage(false)
                 }
             }
 
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
                 val percentDone = (bytesCurrent.toFloat() / bytesTotal.toFloat() * 100).toInt()
-                println("Progress: $percentDone%")
+                if (progressPercentageDialog != null) {
+                    progressPercentageDialog?.uploadPercentageChange(percentDone)
+                }
             }
 
             override fun onError(id: Int, ex: Exception) {
-                ProcessDialog.dismissDialog(true)
-                ex.printStackTrace()
+                showProgressPercentage(false)
             }
         })
-    }
-
-    private fun uploadImage(imageFile: File, assetType: String) {
-        var s3Data = Preferences.getCustomModelPreference<LoginResponse>(
-            requireContext(),
-            LOGIN_DATA
-        )?.payload?.S3Details
-        val bucketName = s3Data?.BUCKET_NAME
-        val objectKey = "${System.currentTimeMillis()}"
-        uploadImageToS3(
-            requireContext(),
-            imageFile,
-            bucketName ?: "",
-            objectKey,
-            s3Data?.ACCESS_KEY ?: "",
-            s3Data?.SECRET_KEY ?: "",
-            assetType
-        )
     }
 
 }

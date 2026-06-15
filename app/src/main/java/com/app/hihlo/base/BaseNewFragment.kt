@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.app.hihlo.BR
 import com.app.hihlo.R
 import com.app.hihlo.utils.ProgressDialog
+import com.app.hihlo.utils.ProgressPercentageDialog
 import com.app.hihlo.utils.SharedPreferenceUtil
 
 abstract class BaseNewFragment<T : ViewDataBinding, V : BaseViewModel>(
@@ -25,6 +26,7 @@ abstract class BaseNewFragment<T : ViewDataBinding, V : BaseViewModel>(
     private var mActivity: BaseNewActivity<T, V>? = null
     private lateinit var mViewDataBinding: T
     private var progressDialog: ProgressDialog? = null
+    private var progressPercentageDialog: ProgressPercentageDialog? = null
 
     abstract fun onInitDataBinding(viewBinding: T)
 
@@ -71,9 +73,21 @@ abstract class BaseNewFragment<T : ViewDataBinding, V : BaseViewModel>(
         }
     }
 
+    fun showProgressPercentage(visible: Boolean) {
+        if (visible) {
+            progressPercentageDialog?.dismiss()
+            progressPercentageDialog = ProgressPercentageDialog(requireContext())
+            progressPercentageDialog?.setCancelable(false)
+            progressPercentageDialog?.show()
+        } else {
+            progressPercentageDialog?.dismiss()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         showProgress(false)
+        showProgressPercentage(false)
     }
 
     open fun getBaseActivity(): BaseNewActivity<T, V>? {

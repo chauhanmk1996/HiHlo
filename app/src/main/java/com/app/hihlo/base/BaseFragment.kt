@@ -11,17 +11,23 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.app.hihlo.R
+import com.app.hihlo.utils.ProgressDialog
+import com.app.hihlo.utils.ProgressPercentageDialog
 
 abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
     var _binding: DB? = null
     protected val binding get() = _binding!!
+    private var progressDialog: ProgressDialog? = null
+    var progressPercentageDialog: ProgressPercentageDialog? = null
+
+
     open fun getLayoutId(): Int {
         return 0
     }
 
     override fun onCreateView(
         inflater: android.view.LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         _binding = DataBindingUtil.inflate(inflater, getLayoutId(), container, false)
         binding.lifecycleOwner = viewLifecycleOwner
@@ -29,6 +35,7 @@ abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
 
         return binding.root
     }
+
     abstract fun initView(savedInstanceState: Bundle?)
 
     override fun onResume() {
@@ -41,6 +48,7 @@ abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
         (activity as? BaseActivity<*>)?.isColorLight(backgroundColor)
             ?.let { (activity as? BaseActivity<*>)?.updateStatusBarIcons(it) }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -61,4 +69,31 @@ abstract class BaseFragment<DB : ViewDataBinding> : Fragment() {
         }
     }
 
+    fun showProgress(visible: Boolean) {
+        if (visible) {
+            progressDialog?.dismiss()
+            progressDialog = ProgressDialog(requireContext())
+            progressDialog?.setCancelable(false)
+            progressDialog?.show()
+        } else {
+            progressDialog?.dismiss()
+        }
+    }
+
+    fun showProgressPercentage(visible: Boolean) {
+        if (visible) {
+            progressPercentageDialog?.dismiss()
+            progressPercentageDialog = ProgressPercentageDialog(requireContext(),)
+            progressPercentageDialog?.setCancelable(false)
+            progressPercentageDialog?.show()
+        } else {
+            progressPercentageDialog?.dismiss()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        showProgress(false)
+        showProgressPercentage(false)
+    }
 }

@@ -123,6 +123,7 @@
     <string name="choose_your_interest">Choose your interest</string>
     <string name="bio">Bio</string>
     <string name="it_s_like_what_i_have">It’s like what i have..</string>
+    <string name="upload_status">Upload Status</string>
 
 
     <string-array name="City">

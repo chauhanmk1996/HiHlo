@@ -33,4 +33,6 @@ object UserPreference {
     var CHAT_PUSH_NOTIFICATION_ID: String?=null
     var IS_CALLING_SCREEN_OPENED = false
 
+    var uploadStatusFile: File? = null
+
 }

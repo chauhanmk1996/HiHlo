@@ -10,8 +10,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.util.TypedValue
@@ -54,7 +52,7 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
      * Callback interface to return the selected media URI and type.
      */
     fun interface OnMediaSelectedListener {
-        fun onMediaSelected(uri: String, type: String, headline_caption: String)
+        fun onMediaSelected(statusUploaded: String)
     }
 
     fun setOnMediaSelectedListener(listener: OnMediaSelectedListener) {
@@ -66,11 +64,8 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            val returnedUri = result.data?.getStringExtra("uri") ?: ""
-            val returnedType = result.data?.getStringExtra("type") ?: ""
-            val headline_caption = result.data?.getStringExtra("headline_caption") ?: ""
-            Log.d("RETURNED_DATA", "uri = $returnedUri, type = $returnedType")
-            listener?.onMediaSelected(returnedUri, returnedType, headline_caption)
+            val statusUploaded = result.data?.getStringExtra("statusUploaded") ?: ""
+            listener?.onMediaSelected(statusUploaded)
             dismiss()
         }
     }
