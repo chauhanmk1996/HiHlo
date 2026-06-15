@@ -30,10 +30,10 @@ import com.app.hihlo.ui.home.activity.HomeActivity
 import com.app.hihlo.ui.reels.view_model.AddReelViewModel
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.MediaUtils
+import com.app.hihlo.utils.ProgressPercentageDialog
 import com.app.hihlo.utils.RTVariable
 import com.app.hihlo.utils.getString
 import com.app.hihlo.utils.logD
-import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
@@ -43,6 +43,7 @@ class AddReelFragment : Fragment() {
     private val viewModel: AddReelViewModel by viewModels()
     private lateinit var binding: FragmentAddReelBinding
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    var progressPercentageDialog: ProgressPercentageDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -145,16 +146,13 @@ class AddReelFragment : Fragment() {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
                             .show()
                     }
-                    ProcessDialog.dismissDialog(true)
                 }
 
                 Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
                 }
 
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
                 }
             }
         }
@@ -179,16 +177,13 @@ class AddReelFragment : Fragment() {
                         Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
                             .show()
                     }
-                    ProcessDialog.dismissDialog(true)
                 }
 
                 Status.LOADING -> {
-                    ProcessDialog.showDialog(requireContext(), true)
                 }
 
                 Status.ERROR -> {
                     Log.e("TAG", "Login Failed: ${it.message}")
-                    ProcessDialog.dismissDialog(true)
                 }
             }
         }
@@ -243,6 +238,22 @@ class AddReelFragment : Fragment() {
         }
     }
 
+    fun showProgressPercentage(visible: Boolean) {
+        if (visible) {
+            progressPercentageDialog?.dismiss()
+            progressPercentageDialog = ProgressPercentageDialog(requireContext(),)
+            progressPercentageDialog?.setCancelable(false)
+            progressPercentageDialog?.show()
+        } else {
+            progressPercentageDialog?.dismiss()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        showProgressPercentage(false)
+    }
+
     fun initializeS3Client(accessKey: String, secretKey: String): AmazonS3Client {
         val credentials = BasicAWSCredentials(accessKey, secretKey)
 
@@ -279,14 +290,12 @@ class AddReelFragment : Fragment() {
 
         // Start the upload
         val uploadObserver = transferUtility.upload(bucketName, objectKey, file)
-        ProcessDialog.showDialog(requireContext(), true)
+        showProgressPercentage(true)
         // Listen to upload events
         uploadObserver.setTransferListener(object : TransferListener {
             override fun onStateChanged(id: Int, state: TransferState) {
                 if (state == TransferState.COMPLETED) {
-                    ProcessDialog.dismissDialog(true)
-                    // Upload completed successfully
-//                    val mediaUrl = "https://$bucketName.s3.amazonaws.com/$objectKey"
+                    showProgressPercentage(false)
                     val urlCdn = Preferences.getCustomModelPreference<LoginResponse>(
                         requireContext(),
                         LOGIN_DATA
@@ -332,15 +341,15 @@ class AddReelFragment : Fragment() {
             }
 
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
-                if (bytesTotal > 0) {
-                    val percentDone = (bytesCurrent.toFloat() / bytesTotal * 100).toInt()
-                    Log.d("UploadProgress", "Uploaded: $percentDone%")
+                val percentDone = (bytesCurrent.toFloat() / bytesTotal.toFloat() * 100).toInt()
+                if (progressPercentageDialog != null) {
+                    progressPercentageDialog?.uploadPercentageChange(percentDone)
                 }
             }
 
 
             override fun onError(id: Int, ex: Exception) {
-                ProcessDialog.dismissDialog(true)
+                showProgressPercentage(false)
                 ex.printStackTrace()
             }
         })

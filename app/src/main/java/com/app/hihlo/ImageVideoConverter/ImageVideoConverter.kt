@@ -1201,7 +1201,7 @@ class ImageVideoConverter : AppCompatActivity() {
         if (visible) {
             videoConvertingPercentageDialog?.dismiss()
             videoConvertingPercentageDialog =
-                VideoConvertingPercentageDialog(this, originalVideoDurationMs)
+                VideoConvertingPercentageDialog(this, originalVideoDurationMs,true)
             videoConvertingPercentageDialog?.setCancelable(false)
             videoConvertingPercentageDialog?.show()
         } else {

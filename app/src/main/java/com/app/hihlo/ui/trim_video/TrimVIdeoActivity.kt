@@ -17,7 +17,6 @@ import com.app.hihlo.base.BaseActivity
 import com.app.hihlo.databinding.ActivityTrimVideoBinding
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.EXTRA_CROPPED_URI
-import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.redevrx.video_trimmer.event.OnVideoEditedEvent
 
 class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
@@ -59,7 +58,6 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
             setVideoURI(videoUri)
             setOnTrimVideoListener(object : OnVideoEditedEvent {
                 override fun getResult(uri: Uri) {
-                    ProcessDialog.dismissDialog(true)
                     UserPreference.seletedUri = uri
                     val resultIntent = Intent().apply {
                         putExtra(EXTRA_CROPPED_URI, uri.toString())
@@ -69,7 +67,6 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
                 }
 
                 override fun onError(message: String) {
-                    ProcessDialog.dismissDialog(true)
                     Toast.makeText(this@TrimVideoActivity, "Some error occurred! Please try again.", Toast.LENGTH_SHORT).show()
                     Log.e("VideoCroppingActivity", "Error during trimming: $message")
                 }
@@ -89,7 +86,6 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         }
 
         binding.btnDone.setOnClickListener {
-            ProcessDialog.showDialog(this, true)
             binding.videoTrimmer.saveVideo()
         }
     }

@@ -7,7 +7,7 @@ import com.app.hihlo.base.BaseDialog
 import com.app.hihlo.R
 import com.app.hihlo.databinding.PopUpVideoConvertingPercentageBinding
 
-class VideoConvertingPercentageDialog(context: Context, videoDuration: Long) :
+class VideoConvertingPercentageDialog(context: Context, videoDuration: Long,private val isStatus: Boolean) :
     BaseDialog<PopUpVideoConvertingPercentageBinding>(
         context,
         R.layout.pop_up_video_converting_percentage
@@ -38,8 +38,14 @@ class VideoConvertingPercentageDialog(context: Context, videoDuration: Long) :
     }
 
     override fun initViews(viewBinding: PopUpVideoConvertingPercentageBinding) {
-        startTime = System.currentTimeMillis()
-        handler.post(progressRunnable)
+        if (isStatus) {
+            startTime = System.currentTimeMillis()
+            handler.post(progressRunnable)
+        }
+    }
+
+    fun updateProgress(progress: Int) {
+        binding.tvConvertingPercentage.text = "Converting : $progress%"
     }
 
     override fun dismiss() {

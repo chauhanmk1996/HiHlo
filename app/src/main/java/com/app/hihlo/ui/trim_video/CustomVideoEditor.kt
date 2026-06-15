@@ -47,7 +47,9 @@ import java.util.Locale
 import java.util.UUID
 import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
+import com.app.hihlo.utils.VideoConvertingPercentageDialog
 import com.app.hihlo.utils.logD
 
 @UnstableApi
@@ -77,6 +79,26 @@ class CustomVideoEditor @JvmOverloads constructor(
     private var videoPlayerHeight: Int = 0
     private var isVideoPrepared = false
     private var videoPlayerCurrentPosition = 0L
+    private var videoConvertingPercentageDialog: VideoConvertingPercentageDialog? = null
+    private val progressHolder = ProgressHolder()
+    private val progressHandler = Handler(Looper.getMainLooper())
+    private val progressRunnable =
+        object : Runnable {
+            override fun run() {
+                val progressState = transformer?.getProgress(progressHolder)
+                if (progressState == Transformer.PROGRESS_STATE_AVAILABLE) {
+                    val progress = progressHolder.progress
+                    videoConvertingPercentageDialog?.updateProgress(progress)
+                }
+
+                progressHandler.postDelayed(
+                    this,
+                    300
+                )
+            }
+        }
+
+
     private var destinationPath: String
         get() {
             if (mFinalPath == null) {
@@ -401,8 +423,11 @@ class CustomVideoEditor @JvmOverloads constructor(
                     exportResult: ExportResult,
                 ) {
                     logD("VideoTrim:: Export completed")
-                    mOnVideoEditedListener
-                        ?.getResult(outputFile.toUri())
+                    progressHandler.removeCallbacks(
+                        progressRunnable
+                    )
+                    showVideoConvertingPercentage(false)
+                    mOnVideoEditedListener?.getResult(outputFile.toUri())
                 }
 
                 override fun onError(
@@ -411,11 +436,8 @@ class CustomVideoEditor @JvmOverloads constructor(
                     exportException: ExportException,
                 ) {
                     logD("VideoTrim:: Export failed")
-                    mOnVideoEditedListener
-                        ?.onError(
-                            exportException.localizedMessage
-                                ?: "Video export failed"
-                        )
+                    showVideoConvertingPercentage(false)
+                    mOnVideoEditedListener?.onError(exportException.localizedMessage ?: "Video export failed")
                 }
             })
             .build()
@@ -442,6 +464,10 @@ class CustomVideoEditor @JvmOverloads constructor(
             )
         ).build()
         logD("VideoTrim:: Trimming from $startMilliseconds ms to $endMilliseconds ms")
+
+        showVideoConvertingPercentage(true)
+        progressHandler.post(progressRunnable)
+
         transformer?.start(composition, outputPath)
     }
 
@@ -536,11 +562,16 @@ class CustomVideoEditor @JvmOverloads constructor(
 
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(context, mSrc)
-        val metaDateWidth = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
-        val metaDataHeight = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
+        val metaDateWidth =
+            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                ?.toInt() ?: 0
+        val metaDataHeight =
+            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                ?.toInt() ?: 0
 
         //If the rotation is 90 or 270 the width and height will be transposed.
-        when (mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toInt()) {
+        when (mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+            ?.toInt()) {
             90, 270 -> {
                 originalVideoWidth = metaDataHeight
                 originalVideoHeight = metaDateWidth
@@ -572,6 +603,17 @@ class CustomVideoEditor @JvmOverloads constructor(
             val view = mView.get() ?: return
             view.notifyProgressUpdate(true)
             if (view.binding.videoLoader.player?.isPlaying == true) sendEmptyMessageDelayed(0, 10)
+        }
+    }
+
+    private fun showVideoConvertingPercentage(visible: Boolean) {
+        if (visible) {
+            videoConvertingPercentageDialog?.dismiss()
+            videoConvertingPercentageDialog = VideoConvertingPercentageDialog(context, 0,false)
+            videoConvertingPercentageDialog?.setCancelable(false)
+            videoConvertingPercentageDialog?.show()
+        } else {
+            videoConvertingPercentageDialog?.dismiss()
         }
     }
 
