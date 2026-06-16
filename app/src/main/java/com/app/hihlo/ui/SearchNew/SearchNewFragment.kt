@@ -626,7 +626,9 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         selectedGender = 0
                         viewModel.filterById = gender.id
                         viewModel.filterByName = gender.gender_name
-                        //Toast.makeText(requireContext(), "Selected: ${gender.gender_name} || ${selectedGender}", Toast.LENGTH_SHORT).show()
+                        creatorList.clear()
+                        creatorAdapter.clearList()
+                        viewModel.currentPage = 1
                         hitServiceListApi(viewModel.currentPage, selectedGender)
                     } else {
                         onGenderSelected(gender)
@@ -642,6 +644,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private fun onGenderSelected(gender: Gender) {
         binding.allButton.text = gender.gender_name
         selectedGender = gender.id
+        viewModel.currentPage = 1
         creatorList.clear()
         creatorAdapter.clearList()
         viewModel.currentPage = 1

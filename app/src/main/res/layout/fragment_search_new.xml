@@ -170,9 +170,9 @@
                         android:id="@+id/creatorsRecycler"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
                         android:layout_marginTop="0dp"
                         android:nestedScrollingEnabled="false"
+                        android:paddingHorizontal="8dp"
                         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                         app:spanCount="2"
                         tools:listitem="@layout/list_item_creator" />
