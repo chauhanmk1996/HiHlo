@@ -1601,40 +1601,6 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         }
     }
 
-    private fun getCacheFileFromContentUri(contentUri: Uri): File? {
-        return try {
-            val cursor = requireContext().contentResolver.query(contentUri, null, null, null, null)
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val dataColumn = it.getColumnIndex(MediaStore.MediaColumns.DATA)
-                    if (dataColumn != -1) {
-                        val filePath = it.getString(dataColumn)
-                        return File(filePath)
-                    }
-                }
-            }
-            val cacheDir = requireContext().cacheDir
-            // Fallback: copy to a temporary file (if DATA column not available)
-            val tempFile = File(
-                cacheDir,
-                "temp_${System.currentTimeMillis()}.${
-                    contentUri.lastPathSegment?.substringAfterLast(
-                        '.'
-                    ) ?: "file"
-                }"
-            )
-            requireContext().contentResolver.openInputStream(contentUri)?.use { input ->
-                tempFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-            tempFile
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (RTVariable.SELECT_OPTION) {

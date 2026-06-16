@@ -16,11 +16,12 @@ import com.app.hihlo.model.home.response.MyStory
 import com.app.hihlo.model.home.response.Post
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.get_reel_comments.response.Payload
+import com.app.hihlo.model.home.response.GetCreatorListResponse
 import com.app.hihlo.model.home.response.SetRemoveCoverRequest
 import com.app.hihlo.model.home.response.SetRemoveCoverResponse
 import com.app.hihlo.network_call.repository.ApiRepository
 
-class HomeViewModel:ViewModel() {
+class HomeViewModel : ViewModel() {
 
     var isHomeDataLoaded = false
 
@@ -41,6 +42,7 @@ class HomeViewModel:ViewModel() {
     var filterById: Int = 0
     var filterByName: String = ""
     private val homeLiveDate = SingleLiveEvent<Resources<HomeResponse>>()
+    private val getCreatorListResponse = SingleLiveEvent<Resources<GetCreatorListResponse>>()
     private val genderListLiveData = SingleLiveEvent<Resources<GenderListResponse>>()
     private val addStoryLiveDate = SingleLiveEvent<Resources<AddStoryResponse>>()
     private val setRemoveCoverResponse = SingleLiveEvent<Resources<SetRemoveCoverResponse>>()
@@ -59,7 +61,7 @@ class HomeViewModel:ViewModel() {
                         )
                     )
                 } catch (ex: Exception) {
-                    genderListLiveData.postValue(Resources.error(ex.localizedMessage?:"", null))
+                    genderListLiveData.postValue(Resources.error(ex.localizedMessage ?: "", null))
 
                 }
             }
@@ -81,12 +83,13 @@ class HomeViewModel:ViewModel() {
                 try {
                     homeLiveDate.postValue(
                         Resources.success(
-                            ApiRepository().getHomeDataApi(token, page, limit, genderId
+                            ApiRepository().getHomeDataApi(
+                                token, page, limit, genderId
                             )
                         )
                     )
                 } catch (ex: Exception) {
-                    homeLiveDate.postValue(Resources.error(ex.localizedMessage?:"", null))
+                    homeLiveDate.postValue(Resources.error(ex.localizedMessage ?: "", null))
 
                 }
             }
@@ -96,11 +99,44 @@ class HomeViewModel:ViewModel() {
         }
     }
 
+    fun getCreatorList(): LiveData<Resources<GetCreatorListResponse>> {
+        return getCreatorListResponse
+    }
+
+    fun getCreatorList(token: String, page: Int, genderId: Int?, search: String?) {
+        try {
+            getCreatorListResponse.postValue(Resources.loading(null))
+            viewModelScope.launch {
+                try {
+                    getCreatorListResponse.postValue(
+                        Resources.success(
+                            ApiRepository().getCreatorList(
+                                token,
+                                page,
+                                genderId,
+                                search
+                            )
+                        )
+                    )
+                } catch (ex: Exception) {
+                    getCreatorListResponse.postValue(
+                        Resources.error(
+                            ex.localizedMessage ?: "",
+                            null
+                        )
+                    )
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
     fun addStoryLiveData(): LiveData<Resources<AddStoryResponse>> {
         return addStoryLiveDate
     }
 
-    fun hitAddStoryDataApi(token: String, request:AddStoryRequest) {
+    fun hitAddStoryDataApi(token: String, request: AddStoryRequest) {
 
         try {
             addStoryLiveDate.postValue(Resources.loading(null))
@@ -108,12 +144,13 @@ class HomeViewModel:ViewModel() {
                 try {
                     addStoryLiveDate.postValue(
                         Resources.success(
-                            ApiRepository().addStoryApi(token, request
+                            ApiRepository().addStoryApi(
+                                token, request
                             )
                         )
                     )
                 } catch (ex: Exception) {
-                    addStoryLiveDate.postValue(Resources.error(ex.localizedMessage?:"", null))
+                    addStoryLiveDate.postValue(Resources.error(ex.localizedMessage ?: "", null))
 
                 }
             }
@@ -132,9 +169,22 @@ class HomeViewModel:ViewModel() {
             setRemoveCoverResponse.postValue(Resources.loading(null))
             viewModelScope.launch {
                 try {
-                    setRemoveCoverResponse.postValue(Resources.success(ApiRepository().setRemoveCoverApi(token, postId, isCover)))
+                    setRemoveCoverResponse.postValue(
+                        Resources.success(
+                            ApiRepository().setRemoveCoverApi(
+                                token,
+                                postId,
+                                isCover
+                            )
+                        )
+                    )
                 } catch (ex: Exception) {
-                    setRemoveCoverResponse.postValue(Resources.error(ex.localizedMessage?:"", null))
+                    setRemoveCoverResponse.postValue(
+                        Resources.error(
+                            ex.localizedMessage ?: "",
+                            null
+                        )
+                    )
                 }
             }
 

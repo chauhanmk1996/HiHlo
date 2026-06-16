@@ -42,6 +42,14 @@ class ApiRepository {
         if (genderId.isEmpty()) null else genderId,
     )
 
+    suspend fun getCreatorList(token: String, page: Int, genderId: Int?, search: String?) =
+        service.getCreatorList(
+            token = token,
+            page = page,
+            genderId = genderId,
+            search = search
+        )
+
     suspend fun setRemoveCoverApi(token: String, postId: String, isCover: String) =
         service.setRemoveCoverApi(
             token = token,
@@ -318,5 +326,4 @@ class ApiRepository {
     ) = service.replyToPostComment(token = token, request, postId)
 
     suspend fun likePostApi(token: String, reelId: String) = service.likePost(token, reelId)
-
 }

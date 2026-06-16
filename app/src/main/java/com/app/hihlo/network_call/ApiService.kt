@@ -31,6 +31,7 @@ import com.app.hihlo.model.get_notification_setting.response.GetNotificationSett
 import com.app.hihlo.model.get_profile.GetProfileResponse
 import com.app.hihlo.model.get_recent_chat.response.GetRecentChatResponse
 import com.app.hihlo.model.get_reel_comments.response.ReelCommentsResponse
+import com.app.hihlo.model.home.response.GetCreatorListResponse
 import com.app.hihlo.model.home.response.HomeResponse
 import com.app.hihlo.model.home.response.SetRemoveCoverRequest
 import com.app.hihlo.model.home.response.SetRemoveCoverResponse
@@ -84,6 +85,15 @@ interface ApiService {
         @Query("pageSize") limit: String? = null,
         @Query("genderId") genderId: String? = null,
     ): HomeResponse
+
+    @GET("getNewCreatorsList")
+    suspend fun getCreatorList(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") limit: Int = 10,
+        @Query("search") search: String? = null,
+        @Query("genderId") genderId: Int? = null,
+    ): GetCreatorListResponse
 
     @POST("set-cover-photo")
     suspend fun setRemoveCoverApi(

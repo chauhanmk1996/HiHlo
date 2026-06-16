@@ -1,15 +1,11 @@
 package com.app.hihlo.ui.SearchNew
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,14 +19,9 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.collection.mutableIntListOf
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -38,9 +29,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
@@ -53,34 +41,23 @@ import com.app.hihlo.databinding.FragmentSearchNewBinding
 import com.app.hihlo.model.add_story.request.AddStoryRequest
 import com.app.hihlo.model.follow.request.FollowRequest
 import com.app.hihlo.model.gender_list.Gender
-import com.app.hihlo.model.get_profile.Posts
 import com.app.hihlo.model.home.response.MyStory
-import com.app.hihlo.model.home.response.Post
 import com.app.hihlo.model.home.response.Story
 import com.app.hihlo.model.home.response.UserDetails
 import com.app.hihlo.ui.signUpToHome.LoginResponse
 import com.app.hihlo.model.search_user_list.response.SearchUserListResponse
 import com.app.hihlo.network_call.RetrofitBuilder
-import com.app.hihlo.preferences.FCM_TOKEN
 import com.app.hihlo.preferences.LOGIN_DATA
 import com.app.hihlo.preferences.Preferences
 import com.app.hihlo.preferences.UserPreference
 import com.app.hihlo.preferences.UserPreference.selectedGender
 import com.app.hihlo.ui.home.activity.HomeActivity
-import com.app.hihlo.ui.home.adapter.AdapterHomeCreators
-import com.app.hihlo.ui.home.adapter.AdapterHomeGenders
-import com.app.hihlo.ui.home.adapter.AdapterStoriesRecycler
-import com.app.hihlo.ui.home.fragment.HomeFragmentDirections
 import com.app.hihlo.ui.home.view_model.HomeViewModel
 import com.app.hihlo.ui.profile.fragment.ProfileFragment.Companion.REQUEST_CODE_CROP_VIDEO
 import com.app.hihlo.ui.search.adapter.SearchAdapter
-import com.app.hihlo.ui.search.fragment.SearchFragmentDirections
 import com.app.hihlo.ui.search.view_model.SearchViewModel
-import com.app.hihlo.ui.trim_video.TrimVideoActivity
-import com.app.hihlo.utils.CommonUtils.dpToPx
 import com.app.hihlo.utils.MediaUtils
 import com.app.hihlo.utils.RTVariable
-import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.common.ScrollDirectionListener
 import com.app.hihlo.utils.network_utils.ProcessDialog
@@ -91,47 +68,42 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.getValue
-
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import androidx.lifecycle.lifecycleScope
+import com.app.hihlo.model.home.response.Creator
 import com.app.hihlo.model.story_response.StoryUser
 import com.app.hihlo.ui.HomeNew.StatusModel.StatusViewModel
 import com.app.hihlo.ui.HomeNew.activity.PlayStatusActivity
-import com.app.hihlo.ui.HomeNew.adapter.StatusAdapter
-import com.app.hihlo.ui.HomeNew.model.StatusItem
+import com.app.hihlo.ui.home.adapter.CreatorAdapter
 import com.app.hihlo.utils.getLength
 import com.app.hihlo.utils.getString
-import kotlin.getValue
+import com.app.hihlo.utils.logD
 
 class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
+    private var creatorList: ArrayList<Creator> = ArrayList()
+    private lateinit var creatorAdapter: CreatorAdapter
+
+    lateinit var searchAdapter: SearchAdapter
+    private var isSearchStarted = false
+
+    private var genderList: List<Gender>? = null
+
     private var myStoryData: MyStory = MyStory()
     private var isMediaUploaded: Int = -1
-    private lateinit var adapterHomePosts: AdapterHomeCreators
+
     private val viewModel: HomeViewModel by viewModels()
     private var isLoading = false
     private var currentPage = 1
     private var isRefreshedFromMenu = false
-    private var creatorsList: MutableList<Post> = mutableListOf()
     private var isHomeDataLoaded = false
     private var allStory: List<Story>? = null
     private var scrollChangedListener: ViewTreeObserver.OnScrollChangedListener? = null
     private var scrollChangedListener2: ViewTreeObserver.OnScrollChangedListener? = null
     private val viewModel2: SearchViewModel by viewModels()
-    lateinit var search_adapter: SearchAdapter
-    private var isSearchStarted = false
-    private var userList: MutableList<SearchUserListResponse.Payload.User> = mutableListOf()
     private var scrollListener: ScrollDirectionListener? = null
     private var scrollListener2: ScrollDirectionListener? = null
-
-    private var genderList: List<Gender>? = null
-    var FIRSTVisiblePosition = -1
-    var offsetY = 0
     var makeRefresh: Boolean = false
     private var searchJob: Job? = null
-
     private val viewModel6: StatusViewModel by activityViewModels()
     private lateinit var statusListGlobal: List<StoryUser>
 
@@ -141,24 +113,19 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         super.onViewCreated(view, savedInstanceState)
         setObserver()
         onClick()
+
         binding.swipeRefresh.setOnRefreshListener {
             binding.searchRecycler.visibility = View.GONE
             binding.creatorsRecycler.visibility = View.VISIBLE
             isSearchStarted = false
             refreshData()
         }
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            "home_click",
-            viewLifecycleOwner
-        ) { _, _ ->
-            Log.i("TAG", "onViewCreated: homeIconTap")
-        }
 
         keyboardListener()
         setObserver()
         setPagination()
         setPagination2()
-        setupScrollListener()
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -181,10 +148,13 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 }
             }
         }
+
         binding.swipeRefresh.isEnabled = false
+
         scrollChangedListener?.let {
             binding.nestedScrollView.viewTreeObserver.addOnScrollChangedListener(it)
         }
+
         scrollChangedListener2?.let {
             binding.nestedScrollView2.viewTreeObserver.addOnScrollChangedListener(it)
         }
@@ -193,24 +163,24 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }, 100)
         showSearchBar()
         lastScrollY = 0
+
         requireActivity().supportFragmentManager.setFragmentResultListener(
             "self",
             viewLifecycleOwner
         ) { _, _ ->
             Log.i("TAG", "onViewCreated: searchIconTap")
             makeRefresh = true
+
             binding.nestedScrollView.post {
                 binding.nestedScrollView.smoothScrollTo(0, 0)
-                //refreshData2()
                 binding.searchEdittext.setText("")
-                search_adapter.clearList()
+                searchAdapter.clearList()
                 isSearchStarted = false
                 binding.nestedScrollView2.visibility = View.GONE
                 binding.nestedScrollView.visibility = View.VISIBLE
                 binding.searchRecycler.visibility = View.GONE
                 binding.creatorsRecycler.visibility = View.VISIBLE
                 binding.allButtonContainer.isVisible = true
-                //binding.homeFilterGenderRecycler.isVisible=false
                 binding.crossButton.isVisible = false
                 binding.backBtn.isVisible = false
                 RTVariable.SEARCH_TEXT = ""
@@ -246,7 +216,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 )
                 if (response.status == 1 && response.code == 200) {
                     viewModel.stories = response.payload.stories
-                    search_adapter.updateStories(viewModel.stories)
+                    searchAdapter.updateStories(viewModel.stories)
                 } else {
                     Toast.makeText(
                         requireContext(),
@@ -298,36 +268,19 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.creatorsRecycler.layoutManager = layoutManager
-        adapterHomePosts = AdapterHomeCreators(mutableListOf()) { post, click, position ->
-            when (click) {
-                0 -> {
-                    creatorsList.toTypedArray().forEachIndexed { index, creator ->
-                        Log.e("TAG", "Home success: [$index] = $creator")
-                    }
-                    Log.e("TAG", "Home success: ${Posts()} || ${position.toString()}")
-                    //findNavController().navigate(SearchNewFragmentDirections.actionSearchNewFragmentToUserPostListFragment(homePosts = creatorsList.toTypedArray(), profilePosts = Posts(), from = "home", position = position.toString()))
-                    findNavController().navigate(
-                        SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment(
-                            "0",
-                            post.user_id.toString()
-                        )
-                    )
-                }
 
-                1 -> {
-                    (requireActivity() as HomeActivity).hideNavigationView()
-                    findNavController().navigate(
-                        SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment(
-                            "0",
-                            post.user_id.toString()
-                        )
-                    )
-                }
-            }
+        creatorAdapter = CreatorAdapter { userId ->
+            (requireActivity() as HomeActivity).hideNavigationView()
+            findNavController().navigate(
+                SearchNewFragmentDirections.actionSearchNewFragmentToProfileFragment(
+                    "0",
+                    userId.toString()
+                )
+            )
         }
-        binding.creatorsRecycler.adapter = adapterHomePosts
+        binding.creatorsRecycler.adapter = creatorAdapter
 
-        search_adapter = SearchAdapter(mutableListOf()) { position, click, clickedView ->
+        searchAdapter = SearchAdapter(mutableListOf()) { position, click, clickedView ->
             when (click) {
                 0 -> {
                     val bundle = Bundle().apply {
@@ -414,26 +367,20 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             }
 
         }
-        binding.searchRecycler.adapter = search_adapter
+        binding.searchRecycler.adapter = searchAdapter
 
-        RTVariable.postsCache.clear()
+
         viewModel.currentPage = 1
         hitSearchUserApi()
         hitServiceListApi(viewModel.currentPage, selectedGender)
 
         if (RTVariable.IS_SEARCH_MAIN_LOADED) {
-            Log.e("IS_SEARCHING", "IS_SEARCHING>>> " + RTVariable.IS_USER_SEARCH_STARTED)
-            Log.e(
-                "IS_SEARCH_MAIN_LOADED",
-                "IS_SEARCH_MAIN_LOADED>>> I " + RTVariable.postsCache.toMutableList()
-            )
             binding.swipeRefresh.isEnabled = false
             binding.allButtonContainer.isVisible = true
-            //binding.homeFilterGenderRecycler.isVisible=false
             binding.crossButton.isVisible = false
             binding.backBtn.isVisible = false
-            adapterHomePosts.clearList()
-            adapterHomePosts.updateList(RTVariable.postsCache.toMutableList())
+            creatorList.clear()
+            creatorAdapter.clearList()
             isLoading = true
             viewModel.currentPage = RTVariable.SEARCH_MAIN_CURRENT_PAGE
             binding.nestedScrollView2.visibility = View.GONE
@@ -444,11 +391,10 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             if (RTVariable.IS_USER_SEARCH_STARTED) {
                 binding.searchEdittext.setText(RTVariable.SEARCH_TEXT)
                 binding.allButtonContainer.isVisible = false
-                //binding.homeFilterGenderRecycler.isVisible=false
                 binding.crossButton.isVisible = true
                 binding.backBtn.isVisible = true
-                search_adapter.clearList()
-                search_adapter.updateList(RTVariable.users_List)
+                searchAdapter.clearList()
+                searchAdapter.updateList(RTVariable.users_List)
                 binding.nestedScrollView2.visibility = View.VISIBLE
                 binding.nestedScrollView.visibility = View.GONE
                 binding.searchRecycler.visibility = View.VISIBLE
@@ -473,8 +419,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     RTVariable.SEARCH_TEXT = ""
                     RTVariable.IS_USER_SEARCH_STARTED = false
                     binding.creatorsRecycler.visibility = View.VISIBLE
-                    search_adapter.clearList()
-                    search_adapter.updateList(mutableListOf())
+                    searchAdapter.clearList()
+                    searchAdapter.updateList(mutableListOf())
                 } else {
                     isSearchStarted = true
                     RTVariable.SEARCH_TEXT = query
@@ -485,10 +431,9 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                     binding.searchRecycler.visibility = View.VISIBLE
                     binding.creatorsRecycler.visibility = View.GONE
                     binding.allButtonContainer.isVisible = false
-                    //binding.homeFilterGenderRecycler.isVisible=false
                     RTVariable.users_List.clear()
-                    search_adapter.clearList()
-                    search_adapter.updateList(mutableListOf())
+                    searchAdapter.clearList()
+                    searchAdapter.updateList(mutableListOf())
                     hitSearchUserApi()
                 }
             }
@@ -557,7 +502,9 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     private fun refreshData() {
         Handler(Looper.getMainLooper()).postDelayed({
-            RTVariable.postsCache.clear()
+            creatorList.clear()
+            creatorAdapter.clearList()
+
             viewModel.currentPage = 1
             selectedGender = 0
             binding.allButton.text = "All"
@@ -568,7 +515,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             binding.nestedScrollView.visibility = View.VISIBLE
             binding.searchRecycler.visibility = View.GONE
             binding.creatorsRecycler.visibility = View.VISIBLE
-            //binding.homeFilterGenderRecycler.isVisible=false
         }, 1000)
     }
 
@@ -613,16 +559,12 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
         }
         binding.crossButton.setOnClickListener {
             binding.searchEdittext.setText("")
-            //search_adapter.clearList()
             isSearchStarted = false
-            //binding.searchRecycler.visibility = View.GONE
-            //binding.creatorsRecycler.visibility = View.VISIBLE
-            //binding.allButtonContainer.isVisible = true
-            //binding.homeFilterGenderRecycler.isVisible=false
         }
+
         binding.backBtn.setOnClickListener {
             binding.searchEdittext.setText("")
-            search_adapter.clearList()
+            searchAdapter.clearList()
             isSearchStarted = false
             binding.nestedScrollView2.visibility = View.GONE
             binding.nestedScrollView.visibility = View.VISIBLE
@@ -698,7 +640,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     private fun onGenderSelected(gender: Gender) {
         binding.allButton.text = gender.gender_name
         selectedGender = gender.id
-        RTVariable.postsCache.clear()
+        creatorList.clear()
+        creatorAdapter.clearList()
         viewModel.currentPage = 1
         viewModel.filterById = gender.id
         viewModel.filterByName = gender.gender_name
@@ -710,41 +653,38 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     private fun setPagination() {
         scrollChangedListener = ViewTreeObserver.OnScrollChangedListener {
-            val scrollView = binding?.nestedScrollView ?: return@OnScrollChangedListener
+            val scrollView = binding.nestedScrollView ?: return@OnScrollChangedListener
             val contentView = scrollView.getChildAt(scrollView.childCount - 1)
             val scrollY = scrollView.scrollY
             val scrollViewHeight = scrollView.height
             val contentBottom = contentView.bottom
             val diff = contentBottom - (scrollY + scrollViewHeight)
-            Log.d("SCROLL_MANUAL", "scrollY: $scrollY, contentBottom: $contentBottom, diff: $diff")
+
             UserDataManager.postSearchCreatorScrollY(binding.root.context, scrollY)
-            if (diff <= 300 && diff != 0) { // `300` is a buffer to pre-load before actual bottom
+
+            val condition = diff <= 300 && diff != 0
+            logD("ScrollChangedListener:: Difference = $diff, Condition = $condition")
+            if (diff <= 300 && diff != 0) {
                 if (isLoading) {
                     viewModel.currentPage++
+                    isLoading = false
                     hitServiceListApi(viewModel.currentPage, selectedGender)
+                    logD("ScrollChangedListener:: Page = ${viewModel.currentPage}, Api Hit")
                 }
-                isLoading = false
                 if (isBottomBarVisible) {
-                    //scrollListener?.hideBottomElements()
-                    //hideSearchBar()
                     isBottomBarVisible = false
                 }
             }
+
             when {
-                scrollY > lastScrollY + 10 -> {     // scrolling down + small threshold to avoid jitter
+                scrollY > lastScrollY + 10 -> {
                     if (isBottomBarVisible) {
-                        //scrollListener?.hideBottomElements()
-                        //hideSearchBar()
-                        //binding.homeFilterGenderRecycler.isVisible=false
                         isBottomBarVisible = false
                     }
                 }
 
-                scrollY < lastScrollY - 10 -> {     // scrolling up
+                scrollY < lastScrollY - 10 -> {
                     if (!isBottomBarVisible) {
-                        //scrollListener?.showBottomElements()
-                        //showSearchBar()
-                        //binding.homeFilterGenderRecycler.isVisible=false
                         isBottomBarVisible = true
                     }
                 }
@@ -756,7 +696,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     private fun setPagination2() {
         scrollChangedListener2 = ViewTreeObserver.OnScrollChangedListener {
-            val scrollView = binding?.nestedScrollView2 ?: return@OnScrollChangedListener
+            val scrollView = binding.nestedScrollView2 ?: return@OnScrollChangedListener
             val contentView = scrollView.getChildAt(scrollView.childCount - 1)
             val scrollY = scrollView.scrollY
             val scrollViewHeight = scrollView.height
@@ -770,28 +710,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
             val pos = UserDataManager.get_SearchUserScrollY(binding.root.context)
             Log.d("SCROLL_STATE", "scrollY 2nd Nested >>> " + pos)
         }
-
-    }
-
-    private val scrollThreshold = 5
-    private fun setupScrollListener() {
-        binding.nestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
-            val delta = scrollY - lastScrollY
-            when {
-                // Scrolling DOWN
-                delta > scrollThreshold -> {
-                    //hideSearchBar()
-                    //binding.homeFilterGenderRecycler.isVisible=false
-                }
-
-                delta < -scrollThreshold -> {
-                    //showSearchBar()
-                    //binding.homeFilterGenderRecycler.isVisible=false
-                }
-            }
-
-            lastScrollY = scrollY
-        })
     }
 
     private val animationDuration = 180L
@@ -834,7 +752,6 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                 binding.nestedScrollView.scrollTo(0, scrollY)
             }
         }
-        //hitServiceListApi(viewModel.currentPage, selectedGender)
     }
 
     override fun onPause() {
@@ -867,27 +784,14 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
     }
 
     private fun hitServiceListApi(page: Int, genderId: Int? = null) {
-        Log.e(
-            "TAG",
-            "Home success: ${
-                Preferences.getCustomModelPreference<LoginResponse>(
-                    requireContext(),
-                    LOGIN_DATA
-                )?.payload?.authToken
-            }"
-        )
-        viewModel.hitHomeDataApi(
-            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                requireContext(),
-                LOGIN_DATA
-            )?.payload?.authToken, page.toString(), "10", genderId.toString()
-        )
-        viewModel6.hitStatusDataApi(
-            "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
-                requireContext(),
-                LOGIN_DATA
-            )?.payload?.authToken, "0"
-        )
+        val token = "Bearer " + Preferences.getCustomModelPreference<LoginResponse>(
+            requireContext(),
+            LOGIN_DATA
+        )?.payload?.authToken
+
+        viewModel.hitHomeDataApi(token, page.toString(), "10", genderId.toString())
+        viewModel6.hitStatusDataApi(token, "0")
+        viewModel.getCreatorList(token, page, genderId, binding.searchEdittext.getString())
     }
 
     private fun setObserver() {
@@ -905,33 +809,7 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                             Log.e("TAG", "setObserver: $allStory")
                             if (it.data.payload.posts.isNotEmpty()) {
                                 isLoading = true
-                                if (viewModel.currentPage == 1) {
-                                    RTVariable.postsCache.clear()
-                                }
-
-                                it.data.payload.posts.let { list ->
-                                    val uniqueUsersPostList =
-                                        list.groupBy { it.user_id }.map { (_, posts) ->
-                                            // First try to get cover post
-                                            posts.find { it.is_cover == "TRUE" }
-
-                                            // If no cover post exists, take first post
-                                                ?: posts.first()
-                                        }
-                                    RTVariable.postsCache.addAll(uniqueUsersPostList)
-                                }
-
-                                if (viewModel.currentPage == 1) {
-                                    if (RTVariable.postsCache.size > 0) {
-                                        adapterHomePosts.clearList()
-                                        adapterHomePosts.updateList(RTVariable.postsCache.toMutableList())
-                                    } else {
-                                        adapterHomePosts.clearList()
-                                    }
-                                } else {
-                                    adapterHomePosts.updateList(RTVariable.postsCache.toMutableList())
-                                }
-                                search_adapter.addStory(
+                                searchAdapter.addStory(
                                     listOf(
                                         it.data.payload.my_story ?: MyStory()
                                     ), it.data.payload.stories
@@ -967,6 +845,50 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         ProcessDialog.dismissDialog(true)
                     }
                     //binding.progressBar.isVisible=false
+                }
+            }
+        }
+
+        viewModel.getCreatorList().observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    Log.e("TAG", "Home success: ${Gson().toJson(it)}")
+                    if (it.data?.status == 1) {
+                        if (it.data.code == 200) {
+                            it.data.payload?.let { list ->
+                                if (list.isNotEmpty()) {
+                                    isLoading = true
+                                }
+                                creatorList.addAll(list)
+                                creatorAdapter.addList(list)
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), it.data.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "${it.data?.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    if (!makeRefresh) {
+                        ProcessDialog.dismissDialog(true)
+                    }
+                }
+
+                Status.LOADING -> {
+                    if (viewModel.currentPage == 1) {
+                        if (!makeRefresh) {
+                            ProcessDialog.showDialog(requireContext(), true)
+                        }
+                    }
+                }
+
+                Status.ERROR -> {
+                    Log.e("TAG", "Login Failed: ${it.message}")
+                    if (!makeRefresh) {
+                        ProcessDialog.dismissDialog(true)
+                    }
                 }
             }
         }
@@ -1047,8 +969,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
                         if (it.data.code == 200) {
                             //userList = it.data.payload.users.toMutableList()
                             RTVariable.users_List.addAll(it.data.payload.users.toMutableList())
-                            search_adapter.clearList()
-                            search_adapter.updateList(RTVariable.users_List)
+                            searchAdapter.clearList()
+                            searchAdapter.updateList(RTVariable.users_List)
                             if (isSearchStarted) {
                                 binding.searchRecycler.visibility = View.VISIBLE
                                 binding.creatorsRecycler.visibility = View.GONE
