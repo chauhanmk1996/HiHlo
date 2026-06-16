@@ -731,7 +731,7 @@ class PlayStatusActivity : AppCompatActivity() {
                 val wrapper =
                     binding.storyProgressContainer.getChildAt(currentStoryIndex) as? FrameLayout
                 val fill = wrapper?.tag as? View
-                fill?.let {fil->
+                fill?.let { fil ->
                     val totalWidth = wrapper.width
                     val fillWidth = (totalWidth * progressFraction).toInt()
                     (fil.layoutParams as FrameLayout.LayoutParams).width = fillWidth
@@ -935,11 +935,40 @@ class PlayStatusActivity : AppCompatActivity() {
                 )
                 if (response.status == 1) {
                     RTVariable.IS_STATUS_DELETED = true
-                    finish()
+                    val currentUser = getCurrentUser()
+                    if (currentStoryIndex in currentUser.stories.indices) {
+                        currentUser.stories.removeAt(currentStoryIndex)
+
+                        // agar user ki sari stories delete ho gayi
+                        if (currentUser.stories.isEmpty()) {
+                            userStoryList.removeAt(currentUserIndex)
+
+                            // agar sare users khatam
+                            if (userStoryList.isEmpty()) {
+                                finish()
+                            }
+
+                            // last user delete hua ho to previous valid index
+                            if (currentUserIndex >= userStoryList.size) {
+                                currentUserIndex = userStoryList.lastIndex
+                            }
+                            currentStoryIndex = 0
+                        }
+                        setStory()
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private fun setStory() {
+        val user = getCurrentUser()
+        if (currentStoryIndex >= user.stories.size) {
+            moveToNextUser()
+        } else {
+            playCurrentStory()
         }
     }
 

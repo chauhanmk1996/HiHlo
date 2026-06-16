@@ -66,7 +66,6 @@ import com.app.hihlo.utils.ReusablePopup
 import com.app.hihlo.utils.UserDataManager
 import com.app.hihlo.utils.Utils
 import com.app.hihlo.utils.common.ScrollDirectionListener
-import com.app.hihlo.utils.network_utils.ProcessDialog
 import com.app.hihlo.utils.network_utils.Status
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
@@ -1475,11 +1474,15 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
 
                             if (canUploadStory) {
                                 RTVariable.SELECT_OPTION = true
-
                                 val bottomSheet = FilePickerBottomsheet()
-                                bottomSheet.setOnMediaSelectedListener { statusUploaded ->
-                                    if (statusUploaded == "true"){
-                                        hitServiceListApi(viewModel.currentPage, selectedGender)
+                                bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
+                                    val mediaType = type
+                                    val contentUri = Uri.parse(uri)
+                                    RTVariable.HEADLINE_CAPTION = headline
+                                    Handler(Looper.getMainLooper()).post {
+                                        val file = getCacheFileFromContentUri(contentUri)
+                                        val typeCode = if (mediaType == "video") "V" else "I"
+                                        file?.let { uploadImage(it, typeCode) }
                                     }
                                 }
                                 bottomSheet.show(parentFragmentManager, "FilePickerBottomSheet")
@@ -1598,6 +1601,40 @@ class HomeNewFragment : BaseFragment<FragmentHomeNewBinding>() {
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+
+    private fun getCacheFileFromContentUri(contentUri: Uri): File? {
+        return try {
+            val cursor = requireContext().contentResolver.query(contentUri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val dataColumn = it.getColumnIndex(MediaStore.MediaColumns.DATA)
+                    if (dataColumn != -1) {
+                        val filePath = it.getString(dataColumn)
+                        return File(filePath)
+                    }
+                }
+            }
+            val cacheDir = requireContext().cacheDir
+            // Fallback: copy to a temporary file (if DATA column not available)
+            val tempFile = File(
+                cacheDir,
+                "temp_${System.currentTimeMillis()}.${
+                    contentUri.lastPathSegment?.substringAfterLast(
+                        '.'
+                    ) ?: "file"
+                }"
+            )
+            requireContext().contentResolver.openInputStream(contentUri)?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            tempFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 

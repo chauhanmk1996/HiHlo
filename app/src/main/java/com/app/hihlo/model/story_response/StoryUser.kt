@@ -4,5 +4,5 @@ data class StoryUser(
     val user_id: Int,
     val isStoriesUploaded: Boolean,
     val userDetail: UserDetail,
-    val stories: List<Story>
+    var stories: ArrayList<Story>
 )

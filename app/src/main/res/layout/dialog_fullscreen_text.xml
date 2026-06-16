@@ -1,71 +1,62 @@
 <!-- dialog_fullscreen_text.xml -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main_root"
-    android:background="#20000000"
-    android:fitsSystemWindows="true"
-    android:paddingTop="10dp">
+    android:background="#20000000">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="28dp"
+        android:elevation="10dp"
+        android:padding="10dp"
+        android:src="@drawable/back_button_pink"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnDone"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/btn_status_bk"
+        android:backgroundTint="#008000"
+        android:fontFamily="@font/manrope_semibold"
+        android:text="Done"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/etFullscreenText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_centerInParent="true"
+        android:background="@drawable/status_edittext_bg"
+        android:fontFamily="@font/manrope_regular"
+        android:gravity="center"
+        android:hint="Type something..."
+        android:includeFontPadding="false"
+        android:inputType="textCapSentences|textMultiLine"
+        android:lineSpacingExtra="0dp"
+        android:minHeight="0dp"
+        android:paddingStart="48px"
+        android:paddingTop="24px"
+        android:paddingEnd="48px"
+        android:paddingBottom="24px"
+        android:textColor="@android:color/white"
+        android:textColorHint="#88FFFFFF"
+        android:textSize="25sp"
+        android:theme="@style/AppTheme.Cursor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/btnClose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:padding="20dp"
-            android:src="@drawable/back_button_pink" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/tvDoneDialog"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="16dp"
-            android:background="@drawable/btn_status_bk"
-            android:backgroundTint="#008000"
-            android:text="Done"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="15sp"
-            android:fontFamily="@font/manrope_semibold" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/etFullscreenText"
-            android:theme="@style/AppTheme.Cursor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:background="@drawable/status_edittext_bg"
-            android:gravity="center"
-            android:hint="Type something..."
-            android:includeFontPadding="false"
-            android:lineSpacingExtra="0dp"
-            android:inputType="textCapSentences|textMultiLine"
-            android:minHeight="0dp"
-            android:paddingStart="48px"
-            android:paddingTop="24px"
-            android:paddingEnd="48px"
-            android:paddingBottom="24px"
-            android:textColor="@android:color/white"
-            android:textColorHint="#88FFFFFF"
-            android:textSize="25sp"
-            android:fontFamily="@font/manrope_regular"
-            tools:ignore="PxUsage" />
-
-    </RelativeLayout>
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

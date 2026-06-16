@@ -111,6 +111,8 @@ class SearchNewFragment : BaseFragment<FragmentSearchNewBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        isLoading = true
+        viewModel.currentPage = 1
         setObserver()
         onClick()
 

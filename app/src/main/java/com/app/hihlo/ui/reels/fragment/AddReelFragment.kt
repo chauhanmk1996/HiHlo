@@ -99,12 +99,14 @@ class AddReelFragment : Fragment() {
                             .start()
                     }
                 }, 100)
+                binding.btnOk.visibility = View.VISIBLE
             } else {
                 logD("AddReelFragment:: TranslationY = 0f")
                 binding.clCaptain.animate()
                     .translationY(0f)
                     .setDuration(150)
                     .start()
+                binding.btnOk.visibility = View.GONE
             }
         }
     }

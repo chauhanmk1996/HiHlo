@@ -139,6 +139,12 @@ class UploadStatusFragment : BaseFragment<FragmentUploadStatusBinding>() {
                 (context as UploadStatusActivity).finish()
             }
 
+            binding.btnDone.setOnClickListener {
+                UserPreference.uploadStatusFile?.let { file ->
+                    uploadImage(file, UserPreference.selectedMediaType)
+                }
+            }
+
             binding.uploadButton.setOnClickListener {
                 UserPreference.uploadStatusFile?.let { file ->
                     uploadImage(file, UserPreference.selectedMediaType)

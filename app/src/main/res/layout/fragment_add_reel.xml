@@ -39,6 +39,23 @@
                 app:layout_constraintStart_toEndOf="@+id/backButton"
                 app:layout_constraintTop_toTopOf="@+id/backButton" />
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnOk"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/btn_status_bk"
+                android:backgroundTint="#008000"
+                android:fontFamily="@font/manrope_semibold"
+                android:text="Ok"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/backButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/backButton" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -93,15 +110,15 @@
                     android:background="@drawable/background_7dp_corner_no_stroke"
                     android:backgroundTint="#282828"
                     android:fontFamily="@font/manrope_regular"
+                    android:gravity="top"
                     android:hint="Write a caption here........"
                     android:imeOptions="actionDone"
                     android:inputType="textMultiLine"
-                    android:textAlignment="viewStart"
-                    android:gravity="top"
                     android:minHeight="48dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="12dp"
                     android:scrollbars="vertical"
+                    android:textAlignment="viewStart"
                     android:textColor="@color/white"
                     android:textColorHint="#BFBBBB"
                     android:textSize="15sp"

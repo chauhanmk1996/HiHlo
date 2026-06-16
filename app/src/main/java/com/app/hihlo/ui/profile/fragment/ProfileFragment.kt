@@ -11,6 +11,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -89,7 +91,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.getValue
-
 
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     private lateinit var bottomSheetFragment: UploadMediaBottomSheet
@@ -630,13 +631,24 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         )
                     } else {
                         RTVariable.SELECT_OPTION = true
+                        //checkGalleryPermissionAndPick2()
                         val bottomSheet = FilePickerBottomsheet()
-                        bottomSheet.setOnMediaSelectedListener { statusUploaded ->
-                            if (statusUploaded == "true"){
-                                RTVariable.IS_STORY_UPDATED_FROM_PROFILE = true
+                        bottomSheet.setOnMediaSelectedListener { uri, type, headline ->
+                            // uri and type are already returned as strings, no Intent parsing needed
+                            val mediaType = type          // "image" or "video"
+                            val contentUri = Uri.parse(uri)
+                            RTVariable.HEADLINE_CAPTION = headline
+                            Handler(Looper.getMainLooper()).post {
+                                // Ensure your fragment/activity is still attached if needed
+                                val file = getCacheFileFromContentUri(contentUri)
+                                val typeCode = if (mediaType == "video") "V" else "I"
+                                file?.let { uploadImage(it, typeCode) }
                             }
                         }
-                        bottomSheet.show(parentFragmentManager, "FilePickerBottomSheet")
+                        bottomSheet.show(
+                            parentFragmentManager,   // or childFragmentManager, depending on where you are
+                            "FilePickerBottomSheet"
+                        )
                     }
                 } else {
                     Utils.showCustom_Snackbar(

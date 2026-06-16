@@ -52,7 +52,7 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
      * Callback interface to return the selected media URI and type.
      */
     fun interface OnMediaSelectedListener {
-        fun onMediaSelected(statusUploaded: String)
+        fun onMediaSelected(uri: String, type: String, headline_caption: String)
     }
 
     fun setOnMediaSelectedListener(listener: OnMediaSelectedListener) {
@@ -64,8 +64,11 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            val statusUploaded = result.data?.getStringExtra("statusUploaded") ?: ""
-            listener?.onMediaSelected(statusUploaded)
+            val returnedUri = result.data?.getStringExtra("uri") ?: ""
+            val returnedType = result.data?.getStringExtra("type") ?: ""
+            val headline_caption = result.data?.getStringExtra("headline_caption") ?: ""
+            Log.d("RETURNED_DATA", "uri = $returnedUri, type = $returnedType")
+            listener?.onMediaSelected(returnedUri, returnedType, headline_caption)
             dismiss()
         }
     }
@@ -373,12 +376,6 @@ class FilePickerBottomsheet : BottomSheetDialogFragment() {
             }
 
             holder.itemView.setOnClickListener {
-                Log.d("MEDIA_DATA", "uri = ${item.uri}")
-                Log.d("MEDIA_DATA", "actual_path = ${item.actualPath}")
-                Log.d("MEDIA_DATA", "media_type = ${item.mediaType}")
-                Log.d("MEDIA_DATA", "file_size = ${item.fileSize}")
-                Log.d("MEDIA_DATA", "duration = ${item.duration}")
-
                 val isVideo = item.mediaType == "video"
                 val intent = Intent(requireContext(), ImageVideoConverter::class.java).apply {
                     putExtra("uri", item.uri.toString())
