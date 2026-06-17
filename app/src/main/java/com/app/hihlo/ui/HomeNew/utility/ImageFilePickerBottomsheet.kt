@@ -64,22 +64,14 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
     ) { result ->
 
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
-
             val resultUri = UCrop.getOutput(result.data!!)
-
             if (resultUri != null) {
-
                 val extras = result.data?.extras
-
                 val width = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_WIDTH, -1) ?: -1
                 val height = extras?.getInt(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, -1) ?: -1
-
                 var ratio = 0
-
                 if (width > 0 && height > 0) {
-
                     val actualRatio = width.toFloat() / height.toFloat()
-
                     ratio = when {
                         isCloseTo(actualRatio, 1f) -> 1     // 1:1
                         isCloseTo(actualRatio, 3f / 4f) -> 2 // 3:4

@@ -525,7 +525,6 @@ class ImageVideoConverter : AppCompatActivity() {
             navigationBarColor = "#000000".toColorInt()
         }
 
-        val mainRoot = dialogView.findViewById<ConstraintLayout>(R.id.main_root)
         val ivBack = dialogView.findViewById<AppCompatImageView>(R.id.ivBack)
         val btnOk = dialogView.findViewById<AppCompatButton>(R.id.btnOk)
         val ivImage = dialogView.findViewById<AppCompatImageView>(R.id.ivImage)
@@ -594,10 +593,6 @@ class ImageVideoConverter : AppCompatActivity() {
             }
         }
 
-        mainRoot.setOnClickListener {
-            hideKeyboard(etCaption)
-            captionDialog.dismiss()
-        }
         captionDialog.show()
     }
 
