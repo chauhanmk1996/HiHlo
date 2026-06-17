@@ -47,9 +47,8 @@ import java.util.Locale
 import java.util.UUID
 import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
-import com.app.hihlo.utils.VideoConvertingPercentageDialog
+import com.app.hihlo.utils.ProgressDialog
 import com.app.hihlo.utils.logD
 
 @UnstableApi
@@ -79,11 +78,11 @@ class CustomVideoEditor @JvmOverloads constructor(
     private var videoPlayerHeight: Int = 0
     private var isVideoPrepared = false
     private var videoPlayerCurrentPosition = 0L
-    private var videoConvertingPercentageDialog: VideoConvertingPercentageDialog? = null
+    private var progressDialog: ProgressDialog?= null
+    /*private var videoConvertingPercentageDialog: VideoConvertingPercentageDialog? = null
     private val progressHolder = ProgressHolder()
     private val progressHandler = Handler(Looper.getMainLooper())
-    private val progressRunnable =
-        object : Runnable {
+    private val progressRunnable = object : Runnable {
             override fun run() {
                 val progressState = transformer?.getProgress(progressHolder)
                 if (progressState == Transformer.PROGRESS_STATE_AVAILABLE) {
@@ -96,7 +95,7 @@ class CustomVideoEditor @JvmOverloads constructor(
                     300
                 )
             }
-        }
+        }*/
 
 
     private var destinationPath: String
@@ -422,11 +421,7 @@ class CustomVideoEditor @JvmOverloads constructor(
                     composition: Composition,
                     exportResult: ExportResult,
                 ) {
-                    logD("VideoTrim:: Export completed")
-                    progressHandler.removeCallbacks(
-                        progressRunnable
-                    )
-                    showVideoConvertingPercentage(false)
+                    showProgressDialog(false)
                     mOnVideoEditedListener?.getResult(outputFile.toUri())
                 }
 
@@ -436,8 +431,10 @@ class CustomVideoEditor @JvmOverloads constructor(
                     exportException: ExportException,
                 ) {
                     logD("VideoTrim:: Export failed")
-                    showVideoConvertingPercentage(false)
-                    mOnVideoEditedListener?.onError(exportException.localizedMessage ?: "Video export failed")
+                    showProgressDialog(false)
+                    mOnVideoEditedListener?.onError(
+                        exportException.localizedMessage ?: "Video export failed"
+                    )
                 }
             })
             .build()
@@ -464,10 +461,7 @@ class CustomVideoEditor @JvmOverloads constructor(
             )
         ).build()
         logD("VideoTrim:: Trimming from $startMilliseconds ms to $endMilliseconds ms")
-
-        showVideoConvertingPercentage(true)
-        progressHandler.post(progressRunnable)
-
+        showProgressDialog(true)
         transformer?.start(composition, outputPath)
     }
 
@@ -518,7 +512,8 @@ class CustomVideoEditor @JvmOverloads constructor(
         mPlayer = ExoPlayer.Builder(context).build()
 
         val dataSourceFactory = DefaultDataSource.Factory(context)
-        val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(videoURI))
+        val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(videoURI))
 
         mPlayer.setMediaSource(videoSource)
         mPlayer.prepare()
@@ -605,14 +600,14 @@ class CustomVideoEditor @JvmOverloads constructor(
         }
     }
 
-    private fun showVideoConvertingPercentage(visible: Boolean) {
+    private fun showProgressDialog(visible: Boolean) {
         if (visible) {
-            videoConvertingPercentageDialog?.dismiss()
-            videoConvertingPercentageDialog = VideoConvertingPercentageDialog(context, 0,false)
-            videoConvertingPercentageDialog?.setCancelable(false)
-            videoConvertingPercentageDialog?.show()
+            progressDialog?.dismiss()
+            progressDialog = ProgressDialog(context)
+            progressDialog?.setCancelable(false)
+            progressDialog?.show()
         } else {
-            videoConvertingPercentageDialog?.dismiss()
+            progressDialog?.dismiss()
         }
     }
 
