@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Rect
 import androidx.core.graphics.createBitmap
 import android.media.*
 import android.net.Uri
@@ -20,6 +22,7 @@ import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -42,12 +45,16 @@ import kotlin.math.hypot
 import androidx.core.net.toUri
 import com.app.hihlo.utils.CommonUtils
 import com.app.hihlo.utils.VideoConvertingPercentageDialog
+import androidx.core.graphics.toColorInt
+import com.app.hihlo.utils.getString
+import com.app.hihlo.utils.logD
 
 class ImageVideoConverter : AppCompatActivity() {
 
     // Views
     private lateinit var mediaContainer: FrameLayout
-    private lateinit var bottomLayout: ConstraintLayout
+
+    //private lateinit var bottomLayout: ConstraintLayout
     private lateinit var overlayContainer: FrameLayout
     private lateinit var photoEditorView: PhotoEditorView
     private lateinit var playerView: PlayerView
@@ -56,7 +63,8 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var btnDone: Button
     private lateinit var btnOk: Button
     private lateinit var btnNext: Button
-    private lateinit var etInput2: EditText
+
+    //private lateinit var etInput2: EditText
     private lateinit var tvShare: TextView
     private lateinit var ivBack: ImageView
     private lateinit var videoTrimmerView: VideoTrimmerView
@@ -82,7 +90,6 @@ class ImageVideoConverter : AppCompatActivity() {
     }
 
     private var currentStep = MediaStep.TEXT_OVERLAY
-
     private val progressHandler = Handler(Looper.getMainLooper())
     private val autoHideHandler = Handler(Looper.getMainLooper())
     private val autoHideRunnable = Runnable { hidePlayPauseButton() }
@@ -90,6 +97,7 @@ class ImageVideoConverter : AppCompatActivity() {
     private var wasPlayingBeforeBackground = false
     private var wasMutedBeforeBackground = false
     private var currentLineCount = 1
+
     //private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var recordingTriggered = false
     private var isEditingEnabled = true
@@ -117,29 +125,6 @@ class ImageVideoConverter : AppCompatActivity() {
         setupListeners()
         setupEditor()
         setupBackPress()
-        etInput2.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                headlineCaption = s.toString()
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
-
-
-        window.decorView.viewTreeObserver.addOnGlobalLayoutListener {
-            val rect = android.graphics.Rect()
-            window.decorView.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = window.decorView.height
-            val keyboardHeight = screenHeight - rect.bottom
-            if (keyboardHeight > screenHeight * 0.15) {
-                bottomLayout.translationY = -(keyboardHeight - 220).toFloat()
-                btnOk.visibility = View.VISIBLE
-            } else {
-                bottomLayout.translationY = 0f
-                btnOk.visibility = View.GONE
-            }
-        }
     }
 
     private fun initViews() {
@@ -152,7 +137,7 @@ class ImageVideoConverter : AppCompatActivity() {
         btnDone = findViewById(R.id.btnDone)
         btnOk = findViewById(R.id.btnOk)
         btnNext = findViewById(R.id.btnNext)
-        etInput2 = findViewById(R.id.etInput2)
+        //etInput2 = findViewById(R.id.etInput2)
         tvShare = findViewById(R.id.tvShare)
         ivBack = findViewById(R.id.ivBack)
         videoTrimmerView = findViewById(R.id.videoTrimmerView)
@@ -163,7 +148,7 @@ class ImageVideoConverter : AppCompatActivity() {
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         )
-        bottomLayout = findViewById(R.id.bottomLayout)
+        //bottomLayout = findViewById(R.id.bottomLayout)
         bgView = findViewById(R.id.bgView)
     }
 
@@ -186,7 +171,7 @@ class ImageVideoConverter : AppCompatActivity() {
 
     private fun setupListeners() {
         btnNext.setOnClickListener {
-            when (currentStep)  {
+            when (currentStep) {
                 MediaStep.TRIM -> {
                     trimStartMs = videoTrimmerView.getTrimStartMs()
                     trimEndMs = videoTrimmerView.getTrimEndMs()
@@ -200,7 +185,7 @@ class ImageVideoConverter : AppCompatActivity() {
         }
 
         btnDone.setOnClickListener {
-            headlineCaption = etInput2.text.toString().trim()
+            //headlineCaption = etInput2.text.toString().trim()
             if (isVideoMedia) {
                 if (!isRecording && !recordingTriggered) startRecordingWithTrimRange()
             } else {
@@ -230,9 +215,9 @@ class ImageVideoConverter : AppCompatActivity() {
     private fun setupBackPress() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                when {
-                    currentStep == MediaStep.HEADLINE -> goToStep(MediaStep.TEXT_OVERLAY)
-                    currentStep == MediaStep.TEXT_OVERLAY && isVideoMedia -> goToStep(MediaStep.TRIM)
+                when (currentStep) {
+                    MediaStep.HEADLINE -> goToStep(MediaStep.TEXT_OVERLAY)
+                    MediaStep.TEXT_OVERLAY if isVideoMedia -> goToStep(MediaStep.TRIM)
                     else -> finish()
                 }
             }
@@ -244,7 +229,7 @@ class ImageVideoConverter : AppCompatActivity() {
         when (step) {
             MediaStep.TRIM -> {
                 videoTrimmerView.visibility = View.VISIBLE
-                etInput2.visibility = View.GONE
+                //etInput2.visibility = View.GONE
                 btnOk.visibility = View.GONE
                 tvShare.visibility = View.GONE
                 btnNext.isVisible = true
@@ -260,7 +245,7 @@ class ImageVideoConverter : AppCompatActivity() {
 
             MediaStep.TEXT_OVERLAY -> {
                 videoTrimmerView.visibility = View.GONE
-                etInput2.visibility = View.GONE
+                //etInput2.visibility = View.GONE
                 btnOk.visibility = View.GONE
                 tvShare.visibility = View.GONE
                 btnNext.isVisible = true
@@ -275,36 +260,19 @@ class ImageVideoConverter : AppCompatActivity() {
             }
 
             MediaStep.HEADLINE -> {
-                videoTrimmerView.visibility = View.GONE
-                etInput2.visibility = View.VISIBLE
+                currentStep = MediaStep.TEXT_OVERLAY
+                player?.pause()
+                showFullscreenCaptionDialog()
+
+                /*videoTrimmerView.visibility = View.GONE
                 tvShare.visibility = View.VISIBLE
                 btnNext.isVisible = false
                 btnDone.isVisible = false
                 btnText.isVisible = false
-                if (etInput2.text.toString() != headlineCaption) {
-                    etInput2.setText(headlineCaption)
-                    etInput2.setSelection(etInput2.text.length)
-                }
-                etInput2.requestFocus()
-                setupEtInput2HeightListener()
-                isEditingEnabled = false
+                isEditingEnabled = false*/
             }
         }
         showPlayPauseButton()
-    }
-
-    private fun setupEtInput2HeightListener() {
-        /*etInput2.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
-        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val newLineCount = etInput2.lineCount
-            if (newLineCount != currentLineCount && currentStep == MediaStep.HEADLINE) {
-                currentLineCount = newLineCount.coerceIn(1, 3)
-                val extraMarginDp = (currentLineCount - 1) * 25
-                val newMarginDp = 280 + extraMarginDp
-                updateMuteButtonMargin(newMarginDp)
-            }
-        }
-        etInput2.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)*/
     }
 
     /*private fun updateMuteButtonMargin(newMarginDp: Int) {
@@ -422,7 +390,7 @@ class ImageVideoConverter : AppCompatActivity() {
         }
 
         tvShare.setOnClickListener {
-            headlineCaption = etInput2.text.toString().trim()
+            //headlineCaption = etInput2.text.toString().trim()
             if (isVideoMedia) {
                 if (!isRecording && !recordingTriggered) startRecordingWithTrimRange()
             } else {
@@ -440,10 +408,8 @@ class ImageVideoConverter : AppCompatActivity() {
         window?.apply {
             setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             setBackgroundDrawableResource(android.R.color.transparent)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                statusBarColor = Color.parseColor("#000000")
-                navigationBarColor = Color.parseColor("#000000")
-            }
+            statusBarColor = Color.parseColor("#000000")
+            navigationBarColor = Color.parseColor("#000000")
         }
         val mainRoot = dialogView.findViewById<ConstraintLayout>(R.id.main_root)
         val etText = dialogView.findViewById<EditText>(R.id.etFullscreenText)
@@ -452,9 +418,7 @@ class ImageVideoConverter : AppCompatActivity() {
         etText.gravity = Gravity.START or Gravity.CENTER_VERTICAL
         etText.setPadding(40, 0, 40, 0)
         etText.setTextColor(Color.WHITE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            etText.textCursorDrawable = null
-        }
+        etText.textCursorDrawable = null
         etText.setSelection(0)
         etText.background = ContextCompat.getDrawable(this, R.drawable.status_edittext_bg)
         etText.setTextColor(Color.WHITE)
@@ -545,6 +509,100 @@ class ImageVideoConverter : AppCompatActivity() {
             dialog.dismiss()
         }
         dialog.show()
+    }
+
+    private var captionDialog: Dialog? = null
+    private fun showFullscreenCaptionDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.pop_up_full_screen_caption, null)
+        val captionDialog = Dialog(this, R.style.FullWidthDialog2).apply {
+            setContentView(dialogView)
+        }
+        val window = captionDialog.window
+        window?.apply {
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            setBackgroundDrawableResource(android.R.color.transparent)
+            statusBarColor = "#000000".toColorInt()
+            navigationBarColor = "#000000".toColorInt()
+        }
+
+        val mainRoot = dialogView.findViewById<ConstraintLayout>(R.id.main_root)
+        val ivBack = dialogView.findViewById<AppCompatImageView>(R.id.ivBack)
+        val btnOk = dialogView.findViewById<AppCompatButton>(R.id.btnOk)
+        val ivImage = dialogView.findViewById<AppCompatImageView>(R.id.ivImage)
+        val clCaption = dialogView.findViewById<ConstraintLayout>(R.id.clCaption)
+        val etCaption = dialogView.findViewById<AppCompatEditText>(R.id.etCaption)
+        val btnUpload = dialogView.findViewById<AppCompatButton>(R.id.btnUpload)
+
+        originalVideoUri?.let {uri->
+            Glide.with(this).load(uri).into(ivImage)
+        }
+
+        dialogView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            dialogView.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = dialogView.rootView.height
+            val keyboardHeight = screenHeight - rect.bottom
+            val isKeyboardVisible = keyboardHeight > screenHeight * 0.15
+
+            if (isKeyboardVisible) {
+                clCaption.postDelayed({
+                    val location = IntArray(2)
+                    clCaption.getLocationOnScreen(location)
+                    val captionBottom = location[1] + clCaption.height
+                    logD("AddReelFragment:: CaptionBottom = $captionBottom")
+                    val keyboardTop = rect.bottom
+                    logD("AddReelFragment:: KeyboardTop = $keyboardTop")
+                    val overlap = captionBottom - keyboardTop
+                    logD("AddReelFragment:: Overlap = $overlap")
+                    if (overlap > 0) {
+                        val translationY = -(overlap + dpToPx(20)).toFloat()
+                        logD("AddReelFragment:: TranslationY = $translationY")
+                        clCaption.animate()
+                            .translationY(translationY)
+                            .setDuration(150)
+                            .start()
+                    }
+                }, 100)
+                btnOk.visibility = View.VISIBLE
+            } else {
+                logD("AddReelFragment:: TranslationY = 0f")
+                clCaption.animate()
+                    .translationY(0f)
+                    .setDuration(150)
+                    .start()
+                btnOk.visibility = View.GONE
+            }
+        }
+
+        ivBack.setOnClickListener {
+            hideKeyboard(etCaption)
+            captionDialog.dismiss()
+        }
+
+        btnOk.setOnClickListener {
+            headlineCaption = etCaption.getString()
+            hideKeyboard(etCaption)
+        }
+
+        btnUpload.setOnClickListener {
+            headlineCaption = etCaption.getString()
+            hideKeyboard(etCaption)
+            if (isVideoMedia) {
+                if (!isRecording && !recordingTriggered) startRecordingWithTrimRange()
+            } else {
+                saveFinalImage()
+            }
+        }
+
+        mainRoot.setOnClickListener {
+            hideKeyboard(etCaption)
+            captionDialog.dismiss()
+        }
+        captionDialog.show()
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
     private fun applyRoundedSpansToEditText(editText: EditText) {
@@ -647,6 +705,7 @@ class ImageVideoConverter : AppCompatActivity() {
         var downX = 0f
         var downY = 0f
         var longClickTriggered = false
+
         view.setOnTouchListener { v, event ->
             if (!isEditingEnabled) {
                 longPressHandler.removeCallbacksAndMessages(null)
@@ -1113,6 +1172,7 @@ class ImageVideoConverter : AppCompatActivity() {
             putExtra("type", mediaType)
             putExtra("headline_caption", headlineCaption)
         })
+        captionDialog?.dismiss()
         finish()
     }
 

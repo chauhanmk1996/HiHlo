@@ -518,8 +518,7 @@ class CustomVideoEditor @JvmOverloads constructor(
         mPlayer = ExoPlayer.Builder(context).build()
 
         val dataSourceFactory = DefaultDataSource.Factory(context)
-        val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(videoURI))
+        val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(videoURI))
 
         mPlayer.setMediaSource(videoSource)
         mPlayer.prepare()

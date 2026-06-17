@@ -56,6 +56,7 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
         binding.videoTrimmer.apply {
             setVideoBackgroundColor(ContextCompat.getColor(this@TrimVideoActivity,R.color.black ))
             setVideoURI(videoUri)
+
             setOnTrimVideoListener(object : OnVideoEditedEvent {
                 override fun getResult(uri: Uri) {
                     UserPreference.seletedUri = uri
@@ -75,6 +76,7 @@ class TrimVideoActivity : BaseActivity<ActivityTrimVideoBinding>() {
                     Log.d("VideoCroppingActivity", "Trimming progress: $percentage%")
                 }
             })
+
             setDestinationPath(path.absolutePath)
             setVideoInformationVisibility(true)
             setMaxDuration(if (from == "home") 15000 else 60000)

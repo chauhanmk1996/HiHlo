@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
@@ -156,7 +157,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="220dp"
+        android:layout_marginBottom="268dp"
         android:background="@drawable/circle_background"
         android:contentDescription="Mute/Unmute"
         android:padding="10dp"
@@ -165,33 +166,52 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!--<androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
+        android:background="@drawable/background_7dp_corner_no_stroke"
+        android:backgroundTint="#282828"
         app:layout_constraintBottom_toTopOf="@+id/tvShare">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/manrope_medium"
+            android:text="@string/caption"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@+id/etInput2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/etInput2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#80000000"
-            android:elevation="4dp"
+            android:background="@null"
             android:fontFamily="@font/manrope_regular"
-            android:hint="Write Caption..."
+            android:gravity="top|start"
+            android:hint="Write a caption here........"
+            android:imeOptions="actionDone"
             android:inputType="textMultiLine"
-            android:maxLines="7"
+            android:maxHeight="@dimen/dp_148"
             android:minHeight="48dp"
-            android:paddingHorizontal="20dp"
-            android:paddingVertical="10dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:scrollbars="vertical"
+            android:textAlignment="viewStart"
             android:textColor="@color/white"
-            android:textColorHint="#AAAAAA"
+            android:textColorHint="#BFBBBB"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            tools:text="India" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>-->
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvShare"

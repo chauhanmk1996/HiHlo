@@ -74,8 +74,7 @@ class AddReelFragment : Fragment() {
 
             val rect = Rect()
             activity?.window?.decorView?.getWindowVisibleDisplayFrame(rect)
-            val screenHeight =
-                activity?.window?.decorView?.height ?: return@addOnGlobalLayoutListener
+            val screenHeight = activity?.window?.decorView?.height ?: return@addOnGlobalLayoutListener
             val keyboardHeight = screenHeight - rect.bottom
             val isKeyboardVisible = keyboardHeight > screenHeight * 0.15
 
