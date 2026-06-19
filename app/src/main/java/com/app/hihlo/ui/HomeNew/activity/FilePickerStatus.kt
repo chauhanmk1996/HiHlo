@@ -20,7 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.app.hihlo.ImageVideoConverter.ImageVideoConverter
+import com.app.hihlo.imageVideoConverter.ImageVideoConverter
 import com.app.hihlo.R
 import com.app.hihlo.databinding.FilePickerForStatusBinding
 import com.app.hihlo.ui.HomeNew.model.MediaModel

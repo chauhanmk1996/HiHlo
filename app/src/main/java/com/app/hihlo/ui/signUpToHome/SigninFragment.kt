@@ -67,11 +67,7 @@ class SigninFragment :
             if (it?.peekContent() != null) {
                 it.peekContent().payload?.let { data ->
                     Preferences.setStringPreference(requireContext(), IS_LOGIN, "2")
-                    Preferences.setCustomModelPreference<LoginResponse>(
-                        requireContext(),
-                        LOGIN_DATA,
-                        it.peekContent()
-                    )
+                    Preferences.setCustomModelPreference<LoginResponse>(requireContext(), LOGIN_DATA, it.peekContent())
                     CommonUtils.hideKeyboard(requireActivity())
                     updateUserOnFirebase(it.peekContent().payload)
 

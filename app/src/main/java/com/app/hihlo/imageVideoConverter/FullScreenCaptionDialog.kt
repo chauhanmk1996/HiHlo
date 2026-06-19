@@ -1,4 +1,4 @@
-package com.app.hihlo.ImageVideoConverter
+package com.app.hihlo.imageVideoConverter
 
 import android.content.Context
 import android.graphics.Rect

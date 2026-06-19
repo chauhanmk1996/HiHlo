@@ -128,7 +128,7 @@
             android:windowSoftInputMode="stateHidden|adjustResize"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".ImageVideoConverter.ImageVideoConverter"
+            android:name=".imageVideoConverter.ImageVideoConverter"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.TransparentStory"

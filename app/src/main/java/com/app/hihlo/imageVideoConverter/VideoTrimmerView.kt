@@ -1,4 +1,4 @@
-package com.app.hihlo.ImageVideoConverter
+package com.app.hihlo.imageVideoConverter
 
 import android.annotation.SuppressLint
 import android.content.Context

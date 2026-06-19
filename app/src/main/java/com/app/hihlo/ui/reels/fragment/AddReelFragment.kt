@@ -74,7 +74,8 @@ class AddReelFragment : Fragment() {
 
             val rect = Rect()
             activity?.window?.decorView?.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = activity?.window?.decorView?.height ?: return@addOnGlobalLayoutListener
+            val screenHeight =
+                activity?.window?.decorView?.height ?: return@addOnGlobalLayoutListener
             val keyboardHeight = screenHeight - rect.bottom
             val isKeyboardVisible = keyboardHeight > screenHeight * 0.15
 
@@ -197,6 +198,10 @@ class AddReelFragment : Fragment() {
                 findNavController().popBackStack()
             }
 
+            btnOk.setOnClickListener {
+                CommonUtils.hideKeyboard(requireActivity())
+            }
+
             binding.uploadButton.setOnClickListener {
                 if (caption.getString().isEmpty()) {
                     Toast.makeText(requireContext(), "Please enter a caption", Toast.LENGTH_SHORT)
@@ -242,7 +247,7 @@ class AddReelFragment : Fragment() {
     fun showProgressPercentage(visible: Boolean) {
         if (visible) {
             progressPercentageDialog?.dismiss()
-            progressPercentageDialog = ProgressPercentageDialog(requireContext(),)
+            progressPercentageDialog = ProgressPercentageDialog(requireContext())
             progressPercentageDialog?.setCancelable(false)
             progressPercentageDialog?.show()
         } else {

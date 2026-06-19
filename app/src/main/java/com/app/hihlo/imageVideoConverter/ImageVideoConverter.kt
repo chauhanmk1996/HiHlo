@@ -1,4 +1,4 @@
-package com.app.hihlo.ImageVideoConverter
+package com.app.hihlo.imageVideoConverter
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -71,7 +71,6 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var rotationTooltip: TextView
     private lateinit var rotationClose: TextView
     private var selectedView: View? = null
-    private lateinit var bgView: View
     private var player: ExoPlayer? = null
     private var isVideoMedia = false
     private var editingTextView: TextView? = null
@@ -145,7 +144,6 @@ class ImageVideoConverter : AppCompatActivity() {
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         )
-        bgView = findViewById(R.id.bgView)
     }
 
     private fun setupRotationTooltip() {
@@ -346,7 +344,7 @@ class ImageVideoConverter : AppCompatActivity() {
                     p.seekTo(trimStartMs)
                     p.play()
                 }
-                val startTime = formatTime(player?.currentPosition?:0)
+                val startTime = formatTime(player?.currentPosition ?: 0)
                 val endTime = formatTime(trimEndMs)
                 tvTime.text = "${startTime}sec - ${endTime}sec"
 

@@ -42,7 +42,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.services.s3.AmazonS3Client
-import com.app.hihlo.ImageVideoConverter.ImageVideoConverter
+import com.app.hihlo.imageVideoConverter.ImageVideoConverter
 import com.app.hihlo.R
 import com.app.hihlo.base.BaseFragment
 import com.app.hihlo.databinding.FragmentProfileBinding
