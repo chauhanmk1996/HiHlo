@@ -58,6 +58,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:shadowColor="@color/black"
+        android:text="00:00 sec - 00:00 sec"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        android:textSize="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/videoTrimmerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.app.hihlo.ImageVideoConverter.VideoTrimmerView
         android:id="@+id/videoTrimmerView"
         android:layout_width="match_parent"

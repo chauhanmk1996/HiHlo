@@ -65,6 +65,7 @@ class ImageVideoConverter : AppCompatActivity() {
     private lateinit var tvShare: TextView
     private lateinit var ivBack: ImageView
     private lateinit var videoTrimmerView: VideoTrimmerView
+    private lateinit var tvTime: TextView
     private lateinit var btnPlayPause: ImageView
     private lateinit var btnMuteUnmute: ImageView
     private lateinit var rotationTooltip: TextView
@@ -136,6 +137,7 @@ class ImageVideoConverter : AppCompatActivity() {
         tvShare = findViewById(R.id.tvShare)
         ivBack = findViewById(R.id.ivBack)
         videoTrimmerView = findViewById(R.id.videoTrimmerView)
+        tvTime = findViewById(R.id.tvTime)
         btnPlayPause = findViewById(R.id.btnPlayPause)
         btnMuteUnmute = findViewById(R.id.btnMuteUnmute)
         mediaContainer.addView(
@@ -248,6 +250,7 @@ class ImageVideoConverter : AppCompatActivity() {
         when (step) {
             MediaStep.TRIM -> {
                 videoTrimmerView.visibility = View.VISIBLE
+                tvTime.visibility = View.VISIBLE
                 //etInput2.visibility = View.GONE
                 btnOk.visibility = View.GONE
                 tvShare.visibility = View.GONE
@@ -316,6 +319,7 @@ class ImageVideoConverter : AppCompatActivity() {
             trimEndMs = end
             player?.pause()
             player?.seekTo(start)
+            progressHandler.removeCallbacksAndMessages(null)
             startProgressLoop()
         }
 
@@ -342,7 +346,12 @@ class ImageVideoConverter : AppCompatActivity() {
                     p.seekTo(trimStartMs)
                     p.play()
                 }
-                progressHandler.postDelayed(this, 16)
+                val startTime = formatTime(player?.currentPosition?:0)
+                val endTime = formatTime(trimEndMs)
+                tvTime.text = "${startTime}sec - ${endTime}sec"
+
+                logD("Progress Time: ${startTime}sec - ${endTime}sec")
+                progressHandler.postDelayed(this, 10)
             }
         })
     }
@@ -366,6 +375,7 @@ class ImageVideoConverter : AppCompatActivity() {
         playerView.visibility = View.GONE
         videoTextureView.visibility = View.GONE
         videoTrimmerView.visibility = View.GONE
+        tvTime.visibility = View.GONE
         Glide.with(this).load(uri).centerInside().into(photoEditorView.source)
         attachGesturesToView(photoEditorView, isText = false)
     }
@@ -1220,6 +1230,19 @@ class ImageVideoConverter : AppCompatActivity() {
             videoConvertingPercentageDialog?.show()
         } else {
             videoConvertingPercentageDialog?.dismiss()
+        }
+    }
+
+    private fun formatTime(ms: Long): String {
+        val totalSeconds = ms / 1000
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+
+        return if (hours > 0) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
         }
     }
 }
