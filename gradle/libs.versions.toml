@@ -29,7 +29,7 @@ fragment-ktx = "1.8.9"
 permission = "1.8.1"
 navigationFragmentKtx = "2.9.0"
 navigationUiKtx = "2.9.0"
-video-trimmer = "1.0.2"
+#video-trimmer = "1.0.2"
 media3Datasource = "1.6.1"
 fullSdk = "4.5.0"
 amazon-aws = "2.72.0"
@@ -92,7 +92,7 @@ android-permission = { module = "com.guolindev.permissionx:permissionx", version
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 
-video-trimmer = { module = "com.github.redevrx:android_video_trimmer", version.ref = "video-trimmer" }
+#video-trimmer = { module = "com.github.redevrx:android_video_trimmer", version.ref = "video-trimmer" }
 androidx-media3-datasource = { group = "androidx.media3", name = "media3-datasource", version.ref = "media3Datasource" }
 
 full-sdk = { module = "io.agora.rtc:full-sdk", version.ref = "fullSdk" }

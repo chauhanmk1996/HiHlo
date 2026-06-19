@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "HiHloApp"
 include(":app")
+include(":video-trimmer")

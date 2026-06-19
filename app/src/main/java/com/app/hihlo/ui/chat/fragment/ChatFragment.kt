@@ -1139,7 +1139,7 @@ class ChatFragment : BaseFragment<FragmentChatBinding>(), MessageAdapter.AudioPl
     }
 
     private fun setChatboxForOpeningPredefinedChat() {
-        TODO("Not yet implemented")
+
     }
     private fun setChatEditTextConstraints() {
         val params = binding.chatEdittext.layoutParams as ConstraintLayout.LayoutParams

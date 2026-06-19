@@ -134,7 +134,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
 
     //Vide Trimmer
-    implementation(libs.video.trimmer)
+    implementation(project(":video-trimmer"))
 
     //DataSource
     implementation(libs.androidx.media3.datasource)

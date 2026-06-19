@@ -33,7 +33,7 @@ class VideoTrimmerView @JvmOverloads constructor(
     private val textPadding = 12f * density
     private val meterHeight = 34f * density
     private val minDurationMs = 1000L
-    private val frameCount = 12
+    private val frameCount = 15
     private var videoDurationMs = 0L
     private var startMs = 0L
     private var endMs = 0L

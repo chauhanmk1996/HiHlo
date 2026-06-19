@@ -302,6 +302,7 @@ class ImageVideoConverter : AppCompatActivity() {
         player?.prepare()
         player?.play()
         originalVideoDurationMs = getVideoDuration(uri)
+
         videoTrimmerView.setVideoUri(uri.toUri(), originalVideoDurationMs)
         trimStartMs = 0L
         trimEndMs = originalVideoDurationMs
