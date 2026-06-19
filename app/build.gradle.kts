@@ -153,7 +153,8 @@ dependencies {
     implementation(libs.play.services.auth)
 
     //Crop
-    implementation(libs.ucrop)
+    implementation(project(":ucrop"))
+    //implementation(libs.ucrop)
 
     //SeekBar
     implementation(libs.waveform.seekbar)

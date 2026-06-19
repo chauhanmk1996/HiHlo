@@ -35,7 +35,7 @@ fullSdk = "4.5.0"
 amazon-aws = "2.72.0"
 media3 = "1.3.1"
 playServicesAuth = "21.3.0"
-ucrop = "2.2.10"
+#ucrop = "2.2.10"
 waveformSeekBar = "5.0.2"
 razorpay = "1.6.40"
 scrollpicker = "1.7.5"
@@ -106,7 +106,7 @@ media3-transformer = { module = "androidx.media3:media3-transformer", version.re
 
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
-ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
+#ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 
 waveform-seekbar = { module = "com.github.massoudss:waveformSeekBar", version.ref = "waveformSeekBar" }
 

@@ -3,7 +3,6 @@ package com.app.hihlo.ui.HomeNew.utility
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentUris
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -12,7 +11,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -36,7 +34,6 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.yalantis.ucrop.UCrop
-import com.yalantis.ucrop.model.AspectRatio
 import java.io.File
 
 class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
@@ -105,7 +102,7 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FilePickerForStatusBinding.inflate(inflater, container, false)
         return binding.root
@@ -240,7 +237,7 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -334,24 +331,10 @@ class ImageFilePickerBottomsheet : BottomSheetDialogFragment() {
             holder.txtDuration.isVisible = false
 
             holder.itemView.setOnClickListener {
-                val options = UCrop.Options().apply {
-                    setFreeStyleCropEnabled(false)
-
-                    // Supply only the ratios you want (exclude "Original")
-                    setAspectRatioOptions(
-                        0, // default selection index
-                        AspectRatio("1:1", 1f, 1f),
-                        AspectRatio("3:4", 3f, 4f)
-                    )
-                }
-
                 val destinationUri = Uri.fromFile(
                     File(requireActivity().cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
                 )
-
-                val uCropIntent = UCrop.of(item.uri, destinationUri)
-                    .withOptions(options)
-                    .getIntent(requireContext())
+                val uCropIntent = UCrop.of(item.uri, destinationUri).getIntent(requireContext())
                 converterLauncher.launch(uCropIntent)
             }
         }
