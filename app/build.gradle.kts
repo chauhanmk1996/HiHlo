@@ -154,7 +154,6 @@ dependencies {
 
     //Crop
     implementation(project(":ucrop"))
-    //implementation(libs.ucrop)
 
     //SeekBar
     implementation(libs.waveform.seekbar)

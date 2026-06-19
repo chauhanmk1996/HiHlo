@@ -7,103 +7,111 @@
     </data>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
         android:id="@+id/topLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+
         <androidx.appcompat.widget.AppCompatTextView
-            android:visibility="gone"
             android:id="@+id/date"
-            android:layout_centerHorizontal="true"
-            android:gravity="center_horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="15sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/_13sdp"
             android:fontFamily="@font/manrope_semibold"
+            android:gravity="center_horizontal"
+            android:text=""
             android:textColor="@color/white_40"
-            android:layout_marginBottom="@dimen/_13sdp"/>
+            android:textSize="15sp"
+            android:visibility="gone" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:paddingEnd="10dp"
-            android:paddingBottom="5dp"
+            android:id="@+id/innerLayout"
+            android:layout_width="@dimen/_180sdp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/date"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:id="@+id/innerLayout"
-            android:layout_below="@id/date"
             android:layout_marginBottom="5dp"
             android:background="@drawable/background_10dp_corner_round"
-            android:layout_width="@dimen/_180sdp"
-            android:layout_height="wrap_content">
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp">
+
             <LinearLayout
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 android:id="@+id/audioLayout"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:paddingEnd="6dp"
-                android:paddingStart="12dp"
                 android:orientation="horizontal"
-                android:layout_height="wrap_content">
+                android:paddingStart="12dp"
+                android:paddingEnd="6dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/playIcon"
-                    android:padding="10dp"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:background="@drawable/play_audio_chat"/>
+                    android:background="@drawable/play_audio_chat"
+                    android:padding="10dp" />
+
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/pause"
-                    android:visibility="gone"
-                    android:padding="10dp"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:background="@drawable/pause_audio_chat"/>
+                    android:background="@drawable/pause_audio_chat"
+                    android:padding="10dp"
+                    android:visibility="gone" />
+
                 <SeekBar
                     android:id="@+id/idSeekBar"
                     android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:thumbTint="@color/theme"
-                    android:outlineSpotShadowColor="@color/theme"
-                    android:outlineAmbientShadowColor="@color/theme"
-                    android:shadowColor="@color/theme"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
                     android:backgroundTint="@color/theme"
-                    android:layout_height="wrap_content"/>
+                    android:outlineAmbientShadowColor="@color/theme"
+                    android:outlineSpotShadowColor="@color/theme"
+                    android:shadowColor="@color/theme"
+                    android:thumbTint="@color/theme" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/playerTime"
-                    android:layout_gravity="center_vertical"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="00:00"
-                    android:textSize="@dimen/_10sdp"
+                    android:layout_gravity="center_vertical"
                     android:fontFamily="@font/manrope_regular"
-                    android:textColor="@color/theme"/>
+                    android:text="00:00"
+                    android:textColor="@color/theme"
+                    android:textSize="@dimen/_10sdp" />
 
             </LinearLayout>
+
             <androidx.appcompat.widget.AppCompatTextView
-                app:layout_constraintEnd_toStartOf="@+id/statusIcon"
-                app:layout_constraintTop_toTopOf="@+id/statusIcon"
-                app:layout_constraintBottom_toBottomOf="@+id/statusIcon"
-                android:layout_marginStart="10dp"
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/_6sdp"
-                android:textSize="9sp"
-                android:includeFontPadding="false"
-                android:textColor="@color/white"
+                android:layout_marginStart="10dp"
                 android:fontFamily="@font/manrope_regular"
-                android:text="09:34 PM"/>
+                android:includeFontPadding="false"
+                android:paddingHorizontal="@dimen/_6sdp"
+                android:text="09:34 PM"
+                android:textColor="@color/white"
+                android:textSize="9sp"
+                app:layout_constraintBottom_toBottomOf="@+id/statusIcon"
+                app:layout_constraintEnd_toStartOf="@+id/statusIcon"
+                app:layout_constraintTop_toTopOf="@+id/statusIcon" />
+
             <androidx.appcompat.widget.AppCompatImageView
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/audioLayout"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:visibility="visible"
-                android:layout_marginStart="5dp"
                 android:id="@+id/statusIcon"
                 android:layout_width="11dp"
                 android:layout_height="11dp"
-                android:src="@drawable/send" />
+                android:layout_marginStart="5dp"
+                android:src="@drawable/send"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/audioLayout" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
