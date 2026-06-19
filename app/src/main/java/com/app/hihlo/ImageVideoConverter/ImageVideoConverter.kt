@@ -307,13 +307,18 @@ class ImageVideoConverter : AppCompatActivity() {
         trimStartMs = 0L
         trimEndMs = originalVideoDurationMs
 
-        videoTrimmerView.setOnTrimChangedListener { start, end ->
-            trimStartMs = start
-            trimEndMs = end
-        }
         videoTrimmerView.setOnScrubChangedListener { ms ->
             player?.seekTo(ms)
         }
+
+        videoTrimmerView.setOnTrimChangedListener { start, end ->
+            trimStartMs = start
+            trimEndMs = end
+            player?.pause()
+            player?.seekTo(start)
+            startProgressLoop()
+        }
+
         player?.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 runOnUiThread {

@@ -33,6 +33,7 @@ class VideoTrimmerView @JvmOverloads constructor(
     private val textPadding = 12f * density
     private val meterHeight = 34f * density
     private val minDurationMs = 1000L
+    private val maxTrimDurationMs = 60000L
     private val frameCount = 15
     private var videoDurationMs = 0L
     private var startMs = 0L
@@ -89,13 +90,14 @@ class VideoTrimmerView @JvmOverloads constructor(
     fun setVideoUri(uri: Uri, durationMs: Long) {
         videoDurationMs = durationMs
         startMs = 0L
-        endMs = durationMs
+        endMs = minOf(durationMs, maxTrimDurationMs)
         meterText = "00:00"
         post {
             leftX = 0f
-            rightX = width.toFloat()
-            progressX = 0f
+            rightX = (endMs.toFloat() / videoDurationMs) * width
+            progressX = leftX
             invalidate()
+            trimListener?.invoke(startMs, endMs)
             generateFrames(uri)
         }
     }
@@ -323,6 +325,11 @@ class VideoTrimmerView @JvmOverloads constructor(
         val minGap = minGapPx()
         leftX = x.coerceIn(0f, rightX - minGap)
         startMs = ((leftX / width) * videoDurationMs).toLong()
+        val maxAllowed = allowedTrimDuration()
+        if (endMs - startMs > maxAllowed) {
+            endMs = startMs + maxAllowed
+            rightX = (endMs.toFloat() / videoDurationMs) * width
+        }
         if (progressX < leftX) progressX = leftX
         meterText = formatMs(endMs - startMs)
         trimListener?.invoke(startMs, endMs)
@@ -332,6 +339,11 @@ class VideoTrimmerView @JvmOverloads constructor(
         val minGap = minGapPx()
         rightX = x.coerceIn(leftX + minGap, width.toFloat())
         endMs = ((rightX / width) * videoDurationMs).toLong()
+        val maxAllowed = allowedTrimDuration()
+        if (endMs - startMs > maxAllowed) {
+            startMs = endMs - maxAllowed
+            leftX = (startMs.toFloat() / videoDurationMs) * width
+        }
         if (progressX > rightX) progressX = rightX
         meterText = formatMs(endMs - startMs)
         trimListener?.invoke(startMs, endMs)
@@ -401,5 +413,9 @@ class VideoTrimmerView @JvmOverloads constructor(
             if (!it.isRecycled) it.recycle()
         }
         thumbnails.clear()
+    }
+
+    private fun allowedTrimDuration(): Long {
+        return minOf(videoDurationMs, maxTrimDurationMs)
     }
 }
